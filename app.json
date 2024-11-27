@@ -15,7 +15,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wagnersk.myfitflow"
+      "bundleIdentifier": "com.myfitflowwellness"
     },
     "android": {
       "adaptiveIcon": {
