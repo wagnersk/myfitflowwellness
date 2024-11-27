@@ -30,7 +30,9 @@ export const BioInfoName = styled.Text`
   font-size: ${RFValue(16)}px;
 `
 
-export const BioInfo = styled.View``
+export const BioInfo = styled.View`
+  padding-top: 24px;
+`
 
 export const BioInfoLetter = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};

@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components/native'
 import { ListBorderSeparatorComponent } from './styles'
 
 import Animated from 'react-native-reanimated'
-import { IFormattedCardExerciseData, IWorkoutsData } from '@hooks/authTypes'
+import { IFormattedCardExerciseData } from '@hooks/authTypes'
 
 interface DataProps {
   data: IFormattedCardExerciseData[]
@@ -24,10 +24,9 @@ export function WorkoutCardList({ data, handleNextStep }: DataProps) {
   return (
     <Animated.FlatList
       style={{
-        position: 'absolute',
         width,
         height: '100%',
-        marginTop: 80,
+        marginTop: 40,
         paddingRight: 32,
         paddingLeft: 32,
         borderRadius: 12,

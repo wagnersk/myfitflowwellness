@@ -135,21 +135,20 @@ export function UserWorkoutList() {
               />
             )
           )}
-          <View>
-            <BlurViewWrapper intensity={70} tint="light">
-              <CTAButton
-                onPress={handleNextScreen}
-                changeColor={true}
-                title="Começar Treino"
-                style={{
-                  width: '100%',
-                  marginTop: 12,
-                  marginBottom: 32,
-                  paddingLeft: 32,
-                  paddingRight: 32,
-                }}
-              />
-            </BlurViewWrapper>
+          <View
+            style={{
+              width: '100%',
+              marginTop: 12,
+              marginBottom: 32,
+              paddingLeft: 32,
+              paddingRight: 32,
+            }}
+          >
+            <CTAButton
+              onPress={handleNextScreen}
+              changeColor={true}
+              title="Começar Treino"
+            />
           </View>
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>

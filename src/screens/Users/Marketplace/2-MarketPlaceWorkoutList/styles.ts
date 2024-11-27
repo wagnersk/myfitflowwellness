@@ -22,6 +22,7 @@ export const BioInfoWrapper = styled.View`
 export const BioInfo = styled.View`
   justify-content: center;
   align-items: center;
+  padding-top: 24px;
 `
 
 export const BioInfoLetter = styled.Text`

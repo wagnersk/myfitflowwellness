@@ -26,7 +26,7 @@ export const BioInfo = styled.View`
   justify-content: center;
   align-items: center;
   gap: 4px;
-  padding-top: 8px;
+  padding-top: 24px;
 `
 
 export const BioInfoLetter = styled.Text`

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "myfitflowwellness",
+    "name": "MyFitFlow",
     "slug": "myfitflowwellness",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.wagnersk.myfitflow"
+      "package": "com.myfitflowwellness"
     },
     "web": {
       "favicon": "./assets/favicon.png"

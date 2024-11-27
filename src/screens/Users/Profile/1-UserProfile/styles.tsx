@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
 
@@ -16,7 +15,7 @@ export const BodyImageWrapper = styled.View`
 export const ImageBackgroundContainer = styled.View`
   justify-content: space-between;
   align-items: center;
-  padding: 32px;
+  padding: 48px 32px 32px 32px;
   flex: 1;
 `
 

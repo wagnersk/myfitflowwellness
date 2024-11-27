@@ -5,8 +5,8 @@ import {
   Keyboard,
   TextInputProps,
   Platform,
-  GestureResponderEvent,
 } from 'react-native'
+import { StatusBar } from 'expo-status-bar'
 
 import {
   Container,

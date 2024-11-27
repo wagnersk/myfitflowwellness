@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import { ActivityIndicator, BackHandler } from 'react-native'
+import { BackHandler } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useRoute, useFocusEffect } from '@react-navigation/native'
 
@@ -43,7 +43,7 @@ import { getGenderIcon } from '@utils/getGenderIcon'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
 
 export function MarketPlaceWorkoutDetail() {
-  const { user } = useAuth()
+  const { user, isWaitingApiResponse } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
   const route = useRoute()
@@ -138,8 +138,6 @@ export function MarketPlaceWorkoutDetail() {
       )
     }
   }
-  console.log(`translateMuscleGroupInfo`)
-  console.log(translateMuscleGroupInfo)
   function loadMuscleGroupInfoValues() {
     if (dataParam.data) {
       if (!translateMuscleGroupInfo) return
@@ -287,6 +285,8 @@ export function MarketPlaceWorkoutDetail() {
           style={{ paddingLeft: 32, paddingRight: 32 }}
         >
           <CTAButton
+            enabled={!isWaitingApiResponse}
+            loading={isWaitingApiResponse}
             style={{
               marginBottom: 52,
               width: '100%',
@@ -297,8 +297,6 @@ export function MarketPlaceWorkoutDetail() {
             /* bigSize={true} */
             changeColor
             title="Quero esse treino"
-            loading={false}
-            enabled={true}
           />
         </BlurViewWrapper>
       </BodyBottomWrapper>

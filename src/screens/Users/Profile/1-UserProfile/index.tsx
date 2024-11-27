@@ -5,7 +5,6 @@ import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 import { SettingsButton } from '@components/Buttons/SettingsButton'
 import { Photo } from '@components/Photo'
-import Whatsapp from '@assets/Whatsapp.svg'
 
 import backgroundImg from '../../../../../assets/back.png'
 import { useAuth } from '@hooks/auth'
@@ -30,6 +29,7 @@ import {
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
 import { IEquipamentsFilters } from '@hooks/authTypes'
+import { diffInAge } from '@utils/diffInAge'
 
 export interface IptBrUs {
   'pt-br': string
@@ -42,15 +42,9 @@ export function UserProfile() {
   const selectedLanguage = user?.selectedLanguage
 
   function handleNextStep() {
+    Alert.alert('Atenção', 'Funcionalidade desabilitada temporariamente')
+    return
     navigation.navigate('userSelectEditHomeProfile')
-  }
-
-  function diffInAge(data?: string) {
-    if (!data) return
-    const [dia, mes, ano] = data.split('/').map(Number)
-    const nascimento = new Date(ano, mes - 1, dia) // Meses em JavaScript começam do 0
-    const idadeCalculada = differenceInYears(new Date(), nascimento)
-    return idadeCalculada
   }
 
   const userAge = diffInAge(user?.birthdate)
