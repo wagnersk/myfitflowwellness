@@ -1,0 +1,271 @@
+import React, { useCallback, useEffect } from 'react'
+import { Alert, BackHandler, Dimensions } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
+import { useRoute, useFocusEffect } from '@react-navigation/native'
+
+import { useNavigation } from '@react-navigation/core'
+import { setStatusBarStyle } from 'expo-status-bar'
+
+import { BackCircleButton } from '@components/Buttons/BackCircleButton'
+import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
+import { CTAButton } from '@components/Buttons/CTAButton'
+
+import { Image } from 'expo-image'
+
+import {
+  Container,
+  BackButtonWrapper,
+  BodyImageContainer,
+  PhotoImageWrapper,
+  BodyInfo,
+  InfoDescriptionWrapper,
+  TitleWrapper,
+  BodyBottomWrapper,
+  BlurViewWrapper,
+  SubTitle,
+  Wrapper,
+  Title,
+  TitleWorkout,
+} from './styles'
+import { useAuth } from '@hooks/auth'
+import { IMarketPlacePersonalsDetailNavigation } from '@src/@types/navigation'
+import { IPersonal } from '@hooks/authTypes'
+
+export function MarketPlacePersonalsDetail() {
+  const navigation = useNavigation()
+  const route = useRoute()
+
+  const dataParam = route.params as IMarketPlacePersonalsDetailNavigation
+  const {
+    createNewContractWithPersonalUpdateUserClientId,
+    cancelNewContractWithPersonalUpdateUserClientId,
+    isWaitingApiResponse,
+    contract,
+    user,
+  } = useAuth()
+
+  function handleGoBack() {
+    navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
+    navigation.goBack()
+  }
+  /*   dataParam.data.personalTrainerContractId ===
+              user?.personalTrainerContractId */
+
+  async function handleChoose(data: IPersonal) {
+    contract?.submissionPending
+      ? await checkIfAlreadyHavePendingRequest()
+      : await choose()
+
+    async function checkIfAlreadyHavePendingRequest() {
+      if (!user) return
+      const { clientId, personalTrainerContractId } = user
+      if (!clientId) return
+      if (!personalTrainerContractId) return
+
+      Alert.alert(
+        'Atenção',
+        'Voce já possui um convite em aberto para outro personal trainer, deseja cancelar o outro personal?',
+        [
+          {
+            text: 'Cancelar',
+            onPress: () => {},
+          },
+          {
+            text: 'Confirmar',
+            onPress: async () =>
+              await cancelNewContractWithPersonalUpdateUserClientId(
+                personalTrainerContractId,
+                clientId,
+              ).then(async () => {
+                // const loadPersonalTrainerClientContract: (contractId: string, clientId: string) => Promise<void>
+                // hook que busca dados aqui do contract
+              }),
+          },
+        ],
+      )
+    }
+
+    async function choose() {
+      const { personalTrainerContractId } = data
+
+      Alert.alert(
+        'Confirmar Envio de Convite',
+        'Deseja realmente enviar o convite para este personal trainer?',
+        [
+          {
+            text: 'Cancelar',
+            onPress: () => {},
+          },
+          {
+            text: 'Confirmar',
+            onPress: async () =>
+              await createNewContractWithPersonalUpdateUserClientId(
+                personalTrainerContractId,
+                dataParam.data,
+              ).then(async () => {
+                navigation.navigate('marketPlacePersonalsList')
+
+                // hook que busca dados aqui do contract
+              }),
+          },
+        ],
+      )
+    }
+  }
+
+  async function handleCancelRequest() {
+    console.log(`handleCancelRequest`)
+    return
+    if (!user) return
+    const { clientId, personalTrainerContractId } = user
+    if (!clientId) return
+    if (!personalTrainerContractId) return
+    console.log(`checkIfAlreadyHavePendingRequest`)
+    console.log(`personalTrainerContractId`)
+    console.log(personalTrainerContractId)
+    console.log(`clientId`)
+    console.log(clientId)
+    Alert.alert(
+      'Confirmar Cancelamento de Convite',
+      'Tem certeza de que deseja cancelar o convite enviado para este personal trainer?',
+      [
+        {
+          text: 'Não',
+          onPress: () => {},
+        },
+        {
+          text: 'Confirmar',
+          onPress: async () =>
+            await cancelNewContractWithPersonalUpdateUserClientId(
+              personalTrainerContractId,
+              clientId,
+            ).then(async () => {
+              // const loadPersonalTrainerClientContract: (contractId: string, clientId: string) => Promise<void>
+              navigation.navigate('marketPlacePersonalsList')
+
+              // hook que busca dados aqui do contract
+            }),
+        },
+      ],
+    )
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      return true
+    })
+  }, [])
+  /* 
+      if(personalTrainerContractId,clientId){
+        await loadPersonalTrainerClientContract(personalTrainerContractId,clientId)
+      }
+      */
+  //
+  const { height } = Dimensions.get('window')
+
+  useFocusEffect(
+    useCallback(() => {
+      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
+      setStatusBarStyle('dark')
+    }, []),
+  )
+
+  const formattedKeywords = dataParam.data.keywords.reduce(
+    (acc, item, index) => {
+      return acc + (index > 0 ? ', ' : '') + item
+    },
+    '',
+  )
+
+  const buttonTextMessage =
+    contract?.submissionPending &&
+    dataParam.data.personalTrainerContractId === user?.personalTrainerContractId
+      ? 'Cancelar convite'
+      : 'Enviar convite'
+
+  return (
+    <Container>
+      <ScrollView>
+        <BodyImageContainer>
+          <BodyImageBackground />
+          <PhotoImageWrapper>
+            <Image
+              source={{
+                uri: dataParam.data.photo,
+              }}
+              alt=""
+              contentFit="cover"
+              style={{
+                width: '100%',
+                height: height / 2.4,
+                borderRadius: 8,
+                backgroundColor: `gray`,
+              }}
+              cachePolicy={'memory-disk'}
+            />
+
+            <BackButtonWrapper>
+              <BackCircleButton onPress={handleGoBack} changeColor />
+            </BackButtonWrapper>
+          </PhotoImageWrapper>
+
+          <BodyInfo>
+            <Wrapper>
+              <TitleWrapper>
+                <TitleWorkout>
+                  {dataParam.data.name}, {dataParam.data.age}
+                </TitleWorkout>
+              </TitleWrapper>
+
+              <TitleWrapper>
+                <Title>Personal Trainer</Title>
+              </TitleWrapper>
+            </Wrapper>
+            <InfoDescriptionWrapper>
+              <Title>
+                ESPECIALISTA: <SubTitle>{formattedKeywords}</SubTitle>
+              </Title>
+            </InfoDescriptionWrapper>
+            <InfoDescriptionWrapper>
+              <SubTitle>{dataParam.data.about}</SubTitle>
+            </InfoDescriptionWrapper>
+          </BodyInfo>
+        </BodyImageContainer>
+      </ScrollView>
+
+      <BodyBottomWrapper>
+        <BlurViewWrapper
+          intensity={30}
+          tint="light"
+          style={{ paddingLeft: 32, paddingRight: 32 }}
+        >
+          <CTAButton
+            style={{
+              marginBottom: 52,
+              width: '100%',
+              opacity:
+                contract?.submissionPending &&
+                dataParam.data.personalTrainerContractId ===
+                  user?.personalTrainerContractId
+                  ? 0.7
+                  : 1,
+            }}
+            onPress={() => {
+              contract?.submissionPending &&
+              dataParam.data.personalTrainerContractId ===
+                user?.personalTrainerContractId
+                ? handleCancelRequest()
+                : handleChoose(dataParam.data)
+            }}
+            /* bigSize={true} */
+            changeColor
+            title={buttonTextMessage}
+            loading={false}
+            enabled={true}
+            disabled={isWaitingApiResponse}
+          />
+        </BlurViewWrapper>
+      </BodyBottomWrapper>
+    </Container>
+  )
+}

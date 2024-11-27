@@ -1,0 +1,2630 @@
+/* eslint-disable camelcase */
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { Alert } from 'react-native'
+
+import { firebaseApp, auth } from '../../firebase-config'
+
+import { format } from 'date-fns'
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+import {
+  collection,
+  doc,
+  updateDoc,
+  setDoc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  query,
+  getFirestore,
+  addDoc,
+  deleteDoc,
+  Timestamp,
+} from 'firebase/firestore'
+
+import {
+  sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth'
+
+import {
+  ICachedWorkoutsWithLastUpdatedTimestamp,
+  AuthContextData,
+  AuthProviderProps,
+  ICachedExerciseHistoryData,
+  IFormattedCardExerciseData,
+  IGraphicsValues,
+  IWorkoutInfo,
+  IWorkoutsData,
+  SignInProps,
+  IStatisticsItens,
+  IUserWorkoutsLog,
+  ICachedVideoTable,
+  IWeightDoneLog,
+  IWorkoutCardLogData,
+  IWorkoutLog,
+  ICachedNotesTable,
+  IPersonal,
+  IContract,
+  IUserFormProps,
+  IGoalSelectData,
+  IMuscleSelectData,
+  IUserGoal,
+  IUserSessionsByWeek,
+  IUserTimeBySession,
+  IUserMuscleFocus,
+  IFrequencybyweekSelectData,
+  ITimeBySessionSelectData,
+  ICachedExerciseList,
+  IFreeSelectData,
+  IPulleySelectData,
+  IMachineSelectData,
+  IMyfitflowWorkoutInUse,
+} from './authTypes'
+
+import {
+  IFreeSelectItem,
+  IMachineSelectItem,
+  IPulleySelectItem,
+} from './selectOptionsDataFirebaseTypes'
+import {
+  IWorkoutCategory,
+  IWorkoutExercisesFirebase,
+} from '@src/@types/navigation'
+import { IBenchDataSelect, IFreeSelect } from './selectOptionsTypes'
+
+const db = getFirestore(firebaseApp)
+
+const USER_SIGNIN_COLLECTION = '@myfitflow:signin'
+
+export const AuthContext = createContext({} as AuthContextData)
+
+function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<SignInProps | null>(null)
+  const [contract, setContract] = useState<IContract | null>(null)
+  const [personalsList, setPersonalsList] = useState<IPersonal[] | null>(null)
+  const [workouts, setWorkouts] =
+    useState<ICachedWorkoutsWithLastUpdatedTimestamp | null>(null)
+  const [workoutsCategories, setWorkoutsCategories] = useState<
+    IWorkoutCategory[] | null
+  >([])
+
+  const [myWorkout, setMyWorkout] = useState<IMyfitflowWorkoutInUse | null>(
+    null,
+  )
+  const [myWorkoutDataArray, setMyWorkoutArray] = useState<IWorkoutInfo | null>(
+    null,
+  )
+
+  const [graphicsValues, setGraphicsValues] = useState<
+    IGraphicsValues[] | null
+  >(null)
+
+  const [statisticsItens, setStatisticsItens] = useState<
+    IStatisticsItens[] | null
+  >(null)
+  const [personalData, setPersonalData] = useState<IPersonal | null>(null)
+  const [cachedVideoTable, setCachedVideoTable] = useState<
+    ICachedVideoTable[] | null
+  >(null)
+  const [cachedNotesTable, setCachedNotesTable] = useState<
+    ICachedNotesTable[] | null
+  >(null)
+
+  const [cachedUserWorkoutsLog, setCachedUserWorkoutsLog] =
+    useState<IUserWorkoutsLog | null>(null)
+
+  const [cachedExerciseHistoryData, setCachedExerciseHistoryData] =
+    useState<ICachedExerciseHistoryData | null>(null)
+
+  const [weightProgression, setWeightProgression] = useState<
+    ICachedExerciseHistoryData[] | null
+  >(null)
+
+  const [cachedWorkoutsExercises, setCachedWorkoutsExercises] =
+    useState<ICachedExerciseList | null>(null)
+
+  const [isLogging, setIsLogging] = useState(false)
+  const [isWaitingApiResponse, setIsWaitingApiResponse] = useState(false)
+  const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
+    useState(false)
+
+  async function firebaseSignUp(
+    email: string,
+    password: string,
+    name: string,
+    birthdate: string,
+    whatsappNumber: string,
+    selectedLanguage: 'pt-br' | 'us',
+  ) {
+    setIsWaitingApiResponse(true)
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (account) => {
+        const usersRef = collection(db, 'users')
+        const updatedTime = serverTimestamp()
+
+        const muscleFocus = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          muscleSelectedData: [
+            {
+              'pt-br': `equilibrado`,
+              us: `balanced`,
+            },
+          ],
+        }
+
+        const freeData: IFreeSelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            barSelectData: [
+              {
+                bar_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            benchSelectData: [
+              {
+                bench_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            otherSelectData: [
+              {
+                other_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            weightSelectData: [
+              {
+                weight_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        const pulleyData: IPulleySelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            pulleyHandlerSelectData: [
+              {
+                pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            pulleySelectData: [
+              {
+                pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        const machineData: IMachineSelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            machineSelectData: [
+              {
+                machine_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        await setDoc(doc(usersRef, account.user.uid), {
+          anabol: null,
+          birthdate,
+          clientId: null,
+          createdAt: updatedTime,
+          email,
+          freeData,
+          goal: null,
+          gym: null,
+          id: account.user.uid,
+          isNewUser: true,
+          machineData,
+          muscleFocus,
+          name,
+          name_insensitive: name.toLocaleLowerCase().trim(),
+          personalPlanActive: false,
+          photoBase64: '',
+          premiumPlanActive: false,
+          pulleyData,
+          restrictions: null,
+          selectedLanguage,
+          sessionsByWeek: null,
+          submissionPending: false,
+          timeBySession: null,
+          updatedAt: updatedTime,
+          whatsappNumber,
+          whenStartedAtGym: '',
+          personalTrainerContractId: null,
+          personalTrainerId: null,
+        })
+          .then(() => {
+            Alert.alert('Conta criada com sucesso!')
+            firebaseSignIn(email, password)
+          })
+          .catch((error) => {
+            console.log(error.code)
+          })
+      })
+      .catch((error) => {
+        setIsWaitingApiResponse(false)
+
+        if (error.code === 'auth/email-already-in-use') {
+          return Alert.alert(
+            'E-mail não disponível',
+            'Escolha outro e-mail para cadastrar!',
+          )
+        }
+
+        if (error.code === 'auth/invalid-email') {
+          return Alert.alert('E-mail inválido!')
+        }
+
+        if (error.code === 'auth/weak-password') {
+          return Alert.alert('A senha deve no mínimo 6 dígitos.')
+        }
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+      })
+  }
+
+  async function firebaseSignIn(email: string, password: string) {
+    setIsLogging(true)
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(async (account) => {
+        const userDocRef = doc(db, 'users', account.user.uid)
+        const docSnap = await getDoc(userDocRef)
+
+        if (docSnap.exists()) {
+          const {
+            anabol,
+            birthdate,
+            clientId,
+            createdAt,
+            email,
+            freeData,
+            goal,
+            gym,
+            id,
+            isNewUser,
+            machineData,
+            muscleFocus,
+            name,
+            name_insensitive,
+            personalPlanActive,
+            photoBase64,
+            premiumPlanActive,
+
+            pulleyData,
+            restrictions,
+            selectedLanguage,
+
+            sessionsByWeek,
+            submissionPending,
+            timeBySession,
+            updatedAt,
+            whatsappNumber,
+            whenStartedAtGym,
+
+            personalTrainerContractId,
+            personalTrainerId,
+          } = docSnap.data() as SignInProps
+
+          const userData: SignInProps = {
+            anabol,
+            birthdate,
+            clientId,
+            createdAt,
+            email,
+            freeData,
+            goal,
+            gym,
+            id,
+            isNewUser,
+            machineData,
+            muscleFocus,
+            name,
+            name_insensitive,
+            personalPlanActive,
+            photoBase64,
+            premiumPlanActive,
+
+            pulleyData,
+            restrictions,
+            selectedLanguage,
+
+            sessionsByWeek,
+            submissionPending,
+            timeBySession,
+            updatedAt,
+            whatsappNumber,
+            whenStartedAtGym,
+
+            personalTrainerContractId,
+            personalTrainerId,
+          }
+
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(userData),
+          )
+          setUser(userData)
+
+          // carrega os dados e salva em cache o que acabou de pegar do servidor
+          // é a mesma funcao de quando eu logo e puxa o user do cache
+          loadLoginInitialCachedWorkoutsData(id)
+          setIsLogging(false)
+        } else {
+          Alert.alert(
+            'Login realizado',
+            ' Porém não foi possível buscar os dados de perfil do usuário',
+          )
+        }
+      })
+      .catch((error) => {
+        const { code } = error
+        setIsLogging(false)
+
+        if (code === 'auth/too-many-requests') {
+          return Alert.alert(
+            'Login',
+            'Você excedeu o limite de tentativas de autenticação. Por favor, aguarde um tempo antes de tentar novamente.',
+          )
+        }
+        if (code === 'auth/user-not-found' || code === 'auth/wrong-password') {
+          return Alert.alert('Login', 'E-email e/ou senha inválida.')
+        } else {
+          return Alert.alert('Login', 'Não foi possível realizar o login.')
+        }
+      })
+  }
+
+  async function firebaseSignOut() {
+    await signOut(auth)
+    /*         await AsyncStorage.removeItem(USER_SIGNIN_COLLECTION);
+          await AsyncStorage.removeItem(WORKOUTSINFO_COLLECTION); */
+    // saber o q isso ta excluindo se falta algo aqui
+    AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
+
+    setUser(null)
+    setMyWorkout(null)
+    setMyWorkoutArray(null)
+    setCachedUserWorkoutsLog(null)
+    setCachedExerciseHistoryData(null)
+    setWeightProgression(null)
+    setGraphicsValues(null)
+    setStatisticsItens(null)
+  }
+
+  async function firebaseForgotPassword(email: string) {
+    if (!email) {
+      return Alert.alert('Redefinir senha', 'Informe o e-mail.')
+    }
+
+    sendPasswordResetEmail(auth, email)
+      .then(() =>
+        Alert.alert(
+          'Redefinir senha',
+          'Enviamos um link no seu e-mail para redefinir sua senha.',
+        ),
+      )
+      .catch(() =>
+        Alert.alert(
+          'Redefinir senha',
+          'Não foi possível enviar o e-mail para redefinir a senha.',
+        ),
+      )
+  }
+
+  async function updateUserForm(data: IUserFormProps) {
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const {
+      photoBase64,
+      name,
+      birthdate,
+      whatsappNumber,
+      gym,
+      anabol,
+      whenStartedAtGym,
+      restrictions,
+    } = data
+
+    if (!user) return
+    const { id } = user
+
+    // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
+    const updatedAt = serverTimestamp()
+
+    await updateDoc(doc(userRef, id), {
+      anabol,
+      birthdate,
+      gym,
+      name,
+      photoBase64,
+      restrictions,
+      whatsappNumber,
+      whenStartedAtGym,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user) {
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          anabol,
+          birthdate,
+          gym,
+          name,
+          photoBase64,
+          restrictions,
+          whatsappNumber,
+          whenStartedAtGym,
+          updatedAt,
+        }
+
+        if (updatedUser) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function updateUserGoalPreffer(userGoal: IUserGoal) {
+    if (!user) return
+    const { createdAt, goalSelectedData, updatedAt } = userGoal
+    let fgoal: IUserGoal = {}
+    if (user.goal) {
+      fgoal = {
+        goalSelectedData,
+        updatedAt,
+      }
+    }
+
+    if (!user.goal) {
+      fgoal = {
+        goalSelectedData,
+        updatedAt,
+        createdAt,
+      }
+    }
+
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const { id } = user
+
+    await updateDoc(doc(userRef, id), {
+      goal: fgoal,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user || !updatedAt) {
+          return
+        }
+
+        const updatedUser = { ...user, goal: { ...fgoal }, updatedAt }
+        if (fgoal) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function updateUserGoalFocusMusclePreffer(
+    mucleFocus: IUserMuscleFocus,
+  ) {
+    if (!user) return
+    const { createdAt, muscleSelectedData, updatedAt } = mucleFocus
+    let fmuscleFocus: IUserMuscleFocus = {}
+    if (user.goal) {
+      fmuscleFocus = {
+        muscleSelectedData,
+        updatedAt,
+      }
+    }
+
+    if (!user.goal) {
+      fmuscleFocus = {
+        muscleSelectedData,
+        updatedAt,
+        createdAt,
+      }
+    }
+
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const { id } = user
+
+    await updateDoc(doc(userRef, id), {
+      muscleFocus: fmuscleFocus,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user || !updatedAt) {
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          muscleFocus: { ...fmuscleFocus },
+          updatedAt,
+        }
+        if (fmuscleFocus) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function updateUserFrequencyByWeekPreffer(
+    userSessionsByWeek: IUserSessionsByWeek,
+  ) {
+    if (!user) return
+    const {
+      createdAt,
+      sessionsByWeekSelectedData,
+      sessionsByWeekNumber,
+      updatedAt,
+    } = userSessionsByWeek
+
+    let fbyweek: IUserSessionsByWeek = {}
+    if (user.sessionsByWeek) {
+      fbyweek = {
+        sessionsByWeekSelectedData,
+        sessionsByWeekNumber,
+        updatedAt,
+      }
+    }
+
+    if (!user.sessionsByWeek) {
+      fbyweek = {
+        sessionsByWeekSelectedData,
+        sessionsByWeekNumber,
+        updatedAt,
+        createdAt,
+      }
+    }
+
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const { id } = user
+
+    await updateDoc(doc(userRef, id), {
+      sessionsByWeek: fbyweek,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user || !updatedAt) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          sessionsByWeek: { ...fbyweek },
+          updatedAt,
+        }
+        if (fbyweek) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function updateUserTimeBySessionPreffer(
+    userTimeBySession: IUserTimeBySession,
+  ) {
+    if (!user) return
+    const {
+      createdAt,
+      timeBySessionByWeekRangeNumber,
+      timeBySessionSelectedData,
+      updatedAt,
+    } = userTimeBySession
+
+    let fbysession: IUserTimeBySession = {}
+    if (user.sessionsByWeek) {
+      fbysession = {
+        timeBySessionByWeekRangeNumber,
+        timeBySessionSelectedData,
+        updatedAt,
+      }
+    }
+
+    if (!user.sessionsByWeek) {
+      fbysession = {
+        timeBySessionByWeekRangeNumber,
+        timeBySessionSelectedData,
+        updatedAt,
+        createdAt,
+      }
+    }
+
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const { id } = user
+
+    await updateDoc(doc(userRef, id), {
+      timeBySession: fbysession,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user || !updatedAt) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          timeBySession: { ...fbysession },
+          updatedAt,
+        }
+        if (fbysession) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function fetchMuscleOptionData() {
+    const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
+
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IMuscleSelectData
+
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function fetchGoalOptionData() {
+    const muscleSelectDataRef = doc(db, 'selectOptionsData', `goal`)
+
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IGoalSelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function fetchFrequencyByWeekOptionData() {
+    const muscleSelectDataRef = doc(db, 'selectOptionsData', `frequencybyweek`)
+    /** OG  workoutId
+ LOG  2B4bjSpS8ulI67l2qjMA */
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IFrequencybyweekSelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function fetchTimeBySessionOptionData() {
+    const muscleSelectDataRef = doc(db, 'selectOptionsData', `timebysession`)
+
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as ITimeBySessionSelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function fetchFreeOptionData() {
+    const freeSelectDataRef = doc(db, 'selectOptionsData', `free`)
+
+    const docSnapshot = await getDoc(freeSelectDataRef)
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IFreeSelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function updateUserFreePreffer(data: IFreeSelectItem) {
+    if (!user) return
+
+    const servertimestamp = serverTimestamp()
+
+    let freeData: IFreeSelectData = {}
+
+    if (user.pulleyData) {
+      freeData = {
+        data,
+        updatedAt: servertimestamp,
+      }
+    }
+
+    if (!user.pulleyData) {
+      freeData = {
+        data,
+        updatedAt: servertimestamp,
+        createdAt: servertimestamp,
+      }
+    }
+    if (!freeData) return
+
+    const userRef = collection(db, 'users')
+    const { id } = user
+
+    setIsWaitingApiResponse(true)
+
+    await updateDoc(doc(userRef, id), {
+      freeData,
+      updatedAt: servertimestamp,
+    })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
+      })
+      .then(async () => {
+        if (!user) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          freeData,
+          updatedAt: servertimestamp,
+        }
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(updatedUser),
+        ).then(() => {
+          setUser(updatedUser)
+        })
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function fetchPulleyOptionData() {
+    const pulleySelectDataRef = doc(db, 'selectOptionsData', `pulley`)
+
+    const docSnapshot = await getDoc(pulleySelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IPulleySelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function updateUserPulleyPreffer(data: IPulleySelectItem) {
+    if (!user) return
+
+    const servertimestamp = serverTimestamp()
+
+    let pulleyData: IPulleySelectData = {}
+
+    if (user.pulleyData) {
+      pulleyData = {
+        data,
+        updatedAt: servertimestamp,
+      }
+    }
+
+    if (!user.pulleyData) {
+      pulleyData = {
+        data,
+        updatedAt: servertimestamp,
+        createdAt: servertimestamp,
+      }
+    }
+    if (!pulleyData) return
+
+    const userRef = collection(db, 'users')
+    const { id } = user
+
+    setIsWaitingApiResponse(true)
+
+    await updateDoc(doc(userRef, id), {
+      pulleyData,
+      updatedAt: servertimestamp,
+    })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
+      })
+      .then(async () => {
+        if (!user) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          pulleyData,
+          updatedAt: servertimestamp,
+        }
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(updatedUser),
+        ).then(() => {
+          setUser(updatedUser)
+        })
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function fetchMachineOptionData() {
+    if (!user) return null
+    try {
+      const paginatedCategoriesRef = doc(db, 'selectOptionsData', 'machine')
+
+      const docSnapshot = await getDoc(paginatedCategoriesRef)
+      if (docSnapshot.exists()) {
+        //  const _machineData = docSnapshot.data() as IMachineSelectItem[]
+        const _machineData = docSnapshot.data() as IMachineSelectData
+        return _machineData
+      } else {
+        console.log('Nenhum contrato encontrado.')
+        return null
+      }
+    } catch (error) {
+      console.error('Error fetching machineData:', error)
+      throw error
+    }
+  }
+
+  async function updateUserMachinePreffer(data: IMachineSelectItem) {
+    if (!user) return
+
+    const servertimestamp = serverTimestamp()
+
+    let machineData: IMachineSelectData = {}
+
+    if (user.machineData) {
+      machineData = {
+        data,
+        updatedAt: servertimestamp,
+      }
+    }
+
+    if (!machineData) return
+
+    const userRef = collection(db, 'users')
+    const { id } = user
+
+    setIsWaitingApiResponse(true)
+
+    await updateDoc(doc(userRef, id), {
+      machineData,
+      updatedAt: servertimestamp,
+    })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
+      })
+      .then(async () => {
+        if (!user) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          machineData,
+          updatedAt: servertimestamp,
+        }
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(updatedUser),
+        ).then(() => {
+          setUser(updatedUser)
+        })
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Dados alterados com sucesso!')
+      })
+  }
+
+  async function fetchCachedWorkoutsExercises() {
+    const q = query(collection(db, 'cachedWorkoutsExercises'))
+
+    const querySnapshot = await getDocs(q)
+    let cachedWorkoutsExercises: ICachedExerciseList = {} as ICachedExerciseList
+
+    querySnapshot.forEach((doc) => {
+      // const data = { [doc.id]: doc.data() }
+      const itemData = doc.data() as ICachedExerciseList
+
+      cachedWorkoutsExercises = {
+        ...cachedWorkoutsExercises,
+        [doc.id]: { ...itemData },
+      }
+    })
+    setCachedWorkoutsExercises(cachedWorkoutsExercises)
+    // fazer um fetch aqui passando qual eu quero , no caso vai receber 2 parametros
+    // o grupo muscular e o tipo , free, pulley ou machine
+  }
+
+  async function createNewContractWithPersonalUpdateUserClientId(
+    personalTrainerContractId: string,
+    personalTrainerData: IPersonal,
+  ) {
+    setIsWaitingApiResponse(true)
+    console.log(`personalTrainerContractId`)
+    console.log(personalTrainerContractId)
+    console.log(`personalTrainerData`)
+    console.log(personalTrainerData)
+    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
+    const contractDoc = collection(
+      db,
+      'personalTrainerContracts',
+      personalTrainerContractId,
+      'clients',
+    )
+
+    const formattedProfileUpdatedAt = format(new Date(), 'dd/MM/yyyy')
+    const updatedAt = serverTimestamp()
+    const userId = user?.id
+    if (!userId) return
+
+    const newContract = {
+      createdAt: updatedAt,
+      updatedAt,
+      submissionPending: true,
+      submissionApproved: false,
+      userId,
+      userName: user.name,
+      birthdate: user.birthdate,
+    }
+
+    await addDoc(contractDoc, newContract)
+      .then(async (clientData) => {
+        setContract(newContract)
+
+        const userDoc = doc(db, 'users', userId)
+        const clientId = clientData.id
+
+        const dataToUpdateUser = {
+          clientId,
+          personalTrainerContractId,
+          personalTrainerId: personalTrainerData.id,
+          profileUpdatedAt: updatedAt,
+          formattedProfileUpdatedAt,
+          personalPlanActive: false,
+        }
+        await updateDoc(userDoc, dataToUpdateUser)
+
+        const updatedUser = {
+          ...user,
+          ...dataToUpdateUser,
+        }
+
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(updatedUser),
+        ).then(() => {
+          setUser(updatedUser)
+          setIsWaitingApiResponse(false)
+        })
+      })
+      .catch((error) => {
+        console.log(error.code)
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert('Convite enviado com sucesso!')
+      })
+  }
+
+  async function cancelNewContractWithPersonalUpdateUserClientId(
+    personalTrainerContractId: string,
+    clientId: string,
+  ) {
+    setIsWaitingApiResponse(true)
+    console.log(`cancelNewContractWithPersonalUpdateUserClientId`)
+    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
+    const contractDoc = doc(
+      db,
+      'personalTrainerContracts',
+      personalTrainerContractId,
+      'clients',
+      clientId,
+    )
+
+    const formattedProfileUpdatedAt = format(new Date(), 'dd/MM/yyyy')
+    const updatedAt = serverTimestamp()
+    const userId = user?.id
+    if (!userId) return
+
+    await deleteDoc(contractDoc)
+      .then(async () => {
+        setContract(null)
+        const userDoc = doc(db, 'users', userId)
+
+        const dataToUpdateUser = {
+          clientId: null,
+          personalTrainerContractId: null,
+          profileUpdatedAt: updatedAt,
+          formattedProfileUpdatedAt,
+        }
+        await updateDoc(userDoc, dataToUpdateUser)
+
+        const updatedUser = {
+          ...user,
+          ...dataToUpdateUser,
+        }
+
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(updatedUser),
+        ).then(() => {
+          setUser(updatedUser)
+          setIsWaitingApiResponse(false)
+        })
+      })
+      .catch((error) => {
+        console.log(error.code)
+      })
+      .finally(() => {
+        // setIsWaitingApiResponse(false)
+        Alert.alert('Convite cancelado.')
+        setIsWaitingApiResponse(false)
+      })
+  }
+
+  async function loadPersonalTrainerClientContract(
+    personalTrainerContractId: string,
+    clientId: string,
+  ) {
+    //    setIsWaitingApiResponse(true)
+
+    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
+    console.log(personalTrainerContractId)
+    console.log(clientId)
+    try {
+      const contractDoc = doc(
+        db,
+        'personalTrainerContracts',
+        personalTrainerContractId,
+        'clients',
+        clientId,
+      )
+      const docSnapshot = await getDoc(contractDoc)
+
+      if (docSnapshot.exists()) {
+        const _contractData = docSnapshot.data() as IContract
+
+        let updatedState: IContract | null = _contractData
+        if (
+          _contractData?.submissionPending === false &&
+          _contractData?.submissionApproved === false
+        ) {
+          console.log(`limpando ...`)
+
+          await cancelNewContractWithPersonalUpdateUserClientId(
+            personalTrainerContractId,
+            clientId,
+          )
+
+          updatedState = null
+        }
+        setContract(updatedState)
+        return updatedState
+      } else {
+        console.log('Nenhum contrato encontrado.')
+        return null
+      }
+    } catch (error) {
+      console.error('Erro ao buscar contrato:', error)
+      // Retorna um array vazio em caso de erro
+      return null
+    }
+  }
+
+  async function loadPersonalTrainerData() {
+    if (!user) return null
+    const personalTrainerId = user.personalTrainerId
+    if (!personalTrainerId) return null
+    //    setIsWaitingApiResponse(true)
+    try {
+      const contractDoc = doc(db, 'personaltrainer', personalTrainerId)
+      const docSnapshot = await getDoc(contractDoc)
+      if (docSnapshot.exists()) {
+        const _personaData = docSnapshot.data() as IPersonal
+
+        setPersonalData(_personaData)
+        return _personaData
+      } else {
+        console.log('Nenhum contrato encontrado.')
+        return null
+      }
+    } catch (error) {
+      console.error('Erro ao buscar contrato:', error)
+      // Retorna um array vazio em caso de erro
+      return null
+    }
+  }
+
+  async function savePersonalTrainerData(data: IPersonal) {
+    if (!user) return
+
+    const storagePersonalDataKey = `@myfitflow:userlocaldata-personaldata-${user.id}`
+
+    if (data) {
+      await AsyncStorage.setItem(
+        storagePersonalDataKey,
+        JSON.stringify(data),
+      ).then(() => {
+        setPersonalData(data)
+      })
+    }
+  }
+
+  async function loadPersonalTrainerCachedData() {
+    if (!user) return null
+
+    const storagePersonalDataKey = `@myfitflow:userlocaldata-personaldata-${user.id}`
+
+    const userLocalPersonalData = await AsyncStorage.getItem(
+      storagePersonalDataKey,
+    )
+
+    if (userLocalPersonalData) {
+      const cachedUserLocalPersonalData = JSON.parse(
+        userLocalPersonalData,
+      ) as IPersonal
+
+      if (cachedUserLocalPersonalData) {
+        setPersonalData(cachedUserLocalPersonalData)
+        return cachedUserLocalPersonalData
+      } else return null
+    } else return null
+  }
+
+  async function saveStatisticsItens(data: IStatisticsItens[] | null) {
+    if (!data) {
+      return console.log(`recebendo data null`)
+    }
+    if (!user) {
+      return
+    }
+
+    const storageGraphicDataDateKey = `@myfitflow:userlocaldata-staticItem-${user.id}`
+
+    if (data) {
+      await AsyncStorage.setItem(
+        storageGraphicDataDateKey,
+        JSON.stringify(data),
+      ).then(() => {
+        setStatisticsItens(data)
+      })
+    }
+  }
+
+  async function loadStatisticsItens(userId: string) {
+    const storageGraphicDataDateKey = `@myfitflow:userlocaldata-staticItem-${userId}`
+
+    const userLocalGraphicItens = await AsyncStorage.getItem(
+      storageGraphicDataDateKey,
+    )
+
+    if (userLocalGraphicItens) {
+      const cachedUserLocalGraphicsItens = JSON.parse(userLocalGraphicItens)
+      if (cachedUserLocalGraphicsItens) {
+        setStatisticsItens(cachedUserLocalGraphicsItens)
+        return cachedUserLocalGraphicsItens
+      }
+    } else return null
+  }
+
+  async function saveWeightProgression(
+    data: ICachedExerciseHistoryData[] | null,
+  ) {
+    if (!data) {
+      return console.log(`recebendo data null`)
+    }
+    console.log(
+      `falta enviar esses dados para o servidor caso o usuario seja mentorado por personal OU pagar conta premium`,
+    )
+    /* 
+    
+    falta enviar esses dados para o servidor caso o usuario seja mentorado por personal OU pagar conta premium
+    
+    */
+
+    // const getGraphicName = data.data.
+    if (!user) {
+      return
+    }
+    const storageWeightProgressionDateKey = `@myfitflow:userlocaldata-weightprogression-${user.id}`
+
+    if (data) {
+      await AsyncStorage.setItem(
+        storageWeightProgressionDateKey,
+        JSON.stringify(data),
+      ).then(() => {
+        setWeightProgression(data)
+      })
+    }
+  }
+
+  async function loadWeightProgression(userId: string) {
+    const storageWeightProgressionDateKey = `@myfitflow:userlocaldata-weightprogression-${userId}`
+
+    const userLocalWeightProgressionDateKey = await AsyncStorage.getItem(
+      storageWeightProgressionDateKey,
+    )
+
+    if (userLocalWeightProgressionDateKey) {
+      const cachedUserLocalWeightProgressionDateKey = JSON.parse(
+        userLocalWeightProgressionDateKey,
+      )
+
+      if (cachedUserLocalWeightProgressionDateKey) {
+        setWeightProgression(cachedUserLocalWeightProgressionDateKey)
+
+        return cachedUserLocalWeightProgressionDateKey
+      }
+    }
+  }
+
+  async function saveGraphicsValues(data: IGraphicsValues[] | null) {
+    if (!data) {
+      return console.log(`recebendo data null`)
+    }
+
+    // const getGraphicName = data.data.
+    if (!user) {
+      return
+    }
+    const storageGraphicsValuesDateKey = `@myfitflow:userlocaldata-graphicsValues-${user.id}`
+
+    if (data) {
+      await AsyncStorage.setItem(
+        storageGraphicsValuesDateKey,
+        JSON.stringify(data),
+      ).then(() => {
+        setGraphicsValues(data)
+      })
+    }
+  }
+
+  async function loadGraphicsValues(userId: string) {
+    const storageGraphicsValuesDateKey = `@myfitflow:userlocaldata-graphicsValues-${userId}`
+
+    const userLocalGraphicsValues = await AsyncStorage.getItem(
+      storageGraphicsValuesDateKey,
+    )
+
+    if (userLocalGraphicsValues) {
+      const cachedUserLocalGraphicsValues = JSON.parse(userLocalGraphicsValues)
+
+      if (cachedUserLocalGraphicsValues) {
+        setGraphicsValues(cachedUserLocalGraphicsValues)
+
+        return cachedUserLocalGraphicsValues
+      }
+    }
+  }
+
+  async function updateCachedExerciseHistoryData(
+    data: ICachedExerciseHistoryData,
+  ) {
+    if (!user?.id) {
+      if (!data) return
+      console.error('Dados necessários não estão disponíveis.')
+      return
+    }
+    // cachedexercises
+    const storageExercisesHistoricDateKey = `@myfitflow:userlocaldata-exerciseshistoric-${user.id}`
+
+    await AsyncStorage.setItem(
+      storageExercisesHistoricDateKey,
+      JSON.stringify(data),
+    )
+
+    setCachedExerciseHistoryData(data)
+  }
+  // oreciso receber o workoutId para identificar ocache
+
+  async function updateCachedUserWorkoutsLog(
+    newExercise: IWeightDoneLog,
+    workoutId: string,
+    lastCompletedTimestamp: number,
+    lastCompletedFormattedDay: string,
+    lastCompletedFormattedDate: string,
+    cardIndex: number,
+  ): Promise<IWeightDoneLog | null> {
+    if (!user?.id) {
+      console.error('Dados necessários não estão disponíveis.')
+      return null
+    }
+
+    const userId = user.id
+    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+
+    const _cachedUserWorkoutLog = cachedUserWorkoutsLog
+      ? await createCachedUserWorkoutLog()
+      : await createUserWorkoutLog()
+
+    return _cachedUserWorkoutLog || null
+
+    async function createCachedUserWorkoutLog() {
+      if (!cachedUserWorkoutsLog) return null
+      const copyCachedUserWorkoutsLog = { ...cachedUserWorkoutsLog }
+
+      console.log('createCachedUserWorkoutLog()')
+      console.log(copyCachedUserWorkoutsLog)
+
+      console.log('cachedUserWorkoutsLog')
+      console.log(cachedUserWorkoutsLog)
+
+      const userWorkoutLog = await updateUserWorkoutsLog(
+        copyCachedUserWorkoutsLog.workoutsLog,
+      )
+
+      return userWorkoutLog
+
+      async function updateUserWorkoutsLog(workoutLog: IWorkoutLog[]) {
+        console.log('updateUserWorkoutsLog()')
+        console.log(workoutLog)
+        if (!workoutLog) return
+        const logIndex = workoutLog.findIndex((v) => v.workoutId === workoutId)
+        const isNewWorkoutLog = logIndex === -1
+
+        const userWorkoutLog = isNewWorkoutLog
+          ? await createNewWorkoutLog()
+          : await updateWorkoutLog()
+
+        return userWorkoutLog
+
+        async function updateWorkoutLog() {
+          console.log('updateWorkoutLog()')
+
+          const workoutLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
+            logIndex
+          ].workoutCardsLogData.findIndex((v) => v.cardIndex === cardIndex)
+
+          const isNewCard = workoutLogIndex === -1
+
+          const _weightDoneLog = isNewCard
+            ? await createNewCard()
+            : await updateCard()
+
+          return _weightDoneLog
+
+          async function createNewCard() {
+            console.log('createNewCard()')
+
+            copyCachedUserWorkoutsLog.workoutsLog[
+              logIndex
+            ].workoutCardsLogData.push({
+              weightDoneLogs: [newExercise],
+              lastCompletedFormattedDate,
+              lastCompletedFormattedDay,
+              lastCompletedTimestamp,
+              totalSessionsCompleted: 1,
+              cardIndex,
+            })
+
+            await AsyncStorage.setItem(
+              storageCachedExercisesWeightDoneLogDataKey,
+              JSON.stringify(copyCachedUserWorkoutsLog),
+            )
+            setCachedUserWorkoutsLog(copyCachedUserWorkoutsLog)
+            return newExercise as IWeightDoneLog
+          }
+
+          async function updateCard() {
+            console.log('updateCard()')
+
+            const {
+              completed,
+              weight,
+              exerciseId,
+              exerciseIndex,
+              completedTimestamp,
+            } = newExercise
+
+            const weightDoneLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
+              logIndex
+            ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.findIndex(
+              (v) => v.exerciseIndex === exerciseIndex,
+            )
+
+            const isNewWeightDoneLog = weightDoneLogIndex === -1
+
+            const _weightDoneLog = isNewWeightDoneLog
+              ? await createNewWeightDoneLog()
+              : await updateWeightDoneLog()
+
+            return _weightDoneLog
+
+            async function updateWeightDoneLog() {
+              const length =
+                copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                  .workoutCardsLogData.length
+
+              let nextWorkoutIndex = 0
+              nextWorkoutIndex = cardIndex - 1 >= length ? 0 : cardIndex + 1
+
+              const newUpdatedWeightDone: IWeightDoneLog = {
+                exerciseIndex,
+                completed,
+                weight,
+                exerciseId,
+                completedTimestamp,
+              }
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex].lastCompletedTimestamp =
+                lastCompletedTimestamp
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex].lastCompletedFormattedDay =
+                lastCompletedFormattedDay
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[
+                workoutLogIndex
+              ].lastCompletedFormattedDate = lastCompletedFormattedDate
+              // acho q ta bugando nessa linha
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex].weightDoneLogs[
+                weightDoneLogIndex
+              ] = newUpdatedWeightDone
+
+              console.log(
+                ` logIndex$ ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
+              )
+              console.log(`adicionando isso -> `)
+              console.log(JSON.stringify(newUpdatedWeightDone))
+
+              console.log(
+                `aqui ja foi add entao tem q ser igual ao de cima -> `,
+              )
+              console.log(
+                JSON.stringify(
+                  copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                    .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
+                    weightDoneLogIndex
+                  ],
+                ),
+              )
+
+              /*     const totalSessionsCompleted =
+                (copyCachedUserWorkoutsLog.workoutsLog[
+                  logIndex
+                ].workoutCardsLogData[workoutLogIndex].totalSessionsCompleted =
+                  copyCachedUserWorkoutsLog.workoutsLog[
+                    logIndex
+                  ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
+                    (count, obj) => {
+                      // Se o completed for true, adiciona 1 ao contador, senão adiciona 0
+                      return count + (obj.completed === true ? 1 : 0)
+                    },
+                    0,
+                  )) */
+              const totalSessionsCompleted =
+                copyCachedUserWorkoutsLog.workoutsLog[
+                  logIndex
+                ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
+                  (count, obj) => {
+                    return count + (obj.completed === true ? 1 : 0)
+                  },
+                  0,
+                )
+              console.log(`totalSessionsCompleted atualizado`)
+              console.log(totalSessionsCompleted)
+
+              const workoutCardLogData: IWorkoutCardLogData = {
+                lastCompletedFormattedDate:
+                  copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                    .workoutCardsLogData[workoutLogIndex]
+                    .lastCompletedFormattedDate,
+                cardIndex,
+                lastCompletedFormattedDay,
+                lastCompletedTimestamp,
+                totalSessionsCompleted,
+                weightDoneLogs: [
+                  ...copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                    .workoutCardsLogData[workoutLogIndex].weightDoneLogs,
+                ],
+              }
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex] = workoutCardLogData
+
+              copyCachedUserWorkoutsLog.workoutsLog[logIndex].nextWorkoutIndex =
+                nextWorkoutIndex
+
+              console.log(
+                `logIndex ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
+              )
+
+              if (
+                copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                  .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
+                  weightDoneLogIndex
+                ]
+              ) {
+                console.log(
+                  JSON.stringify(
+                    copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                      .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
+                      weightDoneLogIndex
+                    ],
+                  ),
+                )
+                console.log(`Salvando... copyCachedUserWorkoutsLog`)
+              }
+
+              await AsyncStorage.setItem(
+                storageCachedExercisesWeightDoneLogDataKey,
+                JSON.stringify(copyCachedUserWorkoutsLog),
+              )
+              console.log(JSON.stringify(copyCachedUserWorkoutsLog))
+              console.log(`Salvo com sucesso... copyCachedUserWorkoutsLog`)
+
+              setCachedUserWorkoutsLog(copyCachedUserWorkoutsLog)
+              return newExercise as IWeightDoneLog
+            }
+
+            async function createNewWeightDoneLog() {
+              console.log('createNewWeightDoneLog()')
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.push(
+                newExercise,
+              )
+              console.log(`createNewWeightDoneLog()`)
+              const totalSessionsCompleted =
+                (copyCachedUserWorkoutsLog.workoutsLog[
+                  logIndex
+                ].workoutCardsLogData[workoutLogIndex].totalSessionsCompleted =
+                  copyCachedUserWorkoutsLog.workoutsLog[
+                    logIndex
+                  ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
+                    (count, obj) => {
+                      // Se o completed for true, adiciona 1 ao contador, senão adiciona 0
+                      return count + (obj.completed === true ? 1 : 0)
+                    },
+                    0,
+                  ))
+
+              copyCachedUserWorkoutsLog.workoutsLog[
+                logIndex
+              ].workoutCardsLogData[workoutLogIndex].totalSessionsCompleted =
+                totalSessionsCompleted
+
+              await AsyncStorage.setItem(
+                storageCachedExercisesWeightDoneLogDataKey,
+                JSON.stringify(copyCachedUserWorkoutsLog),
+              )
+
+              setCachedUserWorkoutsLog(copyCachedUserWorkoutsLog)
+              return newExercise as IWeightDoneLog
+            }
+          }
+        }
+
+        async function createNewWorkoutLog() {
+          console.log('createNewWorkoutLog()')
+
+          const newWorkoutCardLogData: IWorkoutCardLogData = {
+            cardIndex, // posicao card
+            lastCompletedTimestamp, // mudar isso para algo mais descritivo com o real valor
+            totalSessionsCompleted: 1, // mudar isso para algo mais descritivo com o real valor
+            weightDoneLogs: [newExercise],
+            lastCompletedFormattedDay,
+            lastCompletedFormattedDate,
+          }
+
+          // cachedUserWorkoutsLog?.workoutsLog[1]
+
+          copyCachedUserWorkoutsLog.workoutsLog.push({
+            workoutCardsLogData: [newWorkoutCardLogData],
+            nextWorkoutIndex: 0,
+            workoutId,
+          })
+
+          const userWorkoutLog: IUserWorkoutsLog = {
+            workoutsLog: copyCachedUserWorkoutsLog.workoutsLog,
+          }
+          await AsyncStorage.setItem(
+            storageCachedExercisesWeightDoneLogDataKey,
+            JSON.stringify(userWorkoutLog),
+          )
+          setCachedUserWorkoutsLog(userWorkoutLog)
+          return newExercise as IWeightDoneLog
+        }
+      }
+    }
+
+    async function createUserWorkoutLog() {
+      const workoutLogSession: IWorkoutCardLogData = {
+        cardIndex,
+        lastCompletedTimestamp,
+        totalSessionsCompleted: 1,
+        weightDoneLogs: [newExercise],
+        lastCompletedFormattedDay,
+        lastCompletedFormattedDate,
+      }
+
+      const newUserWorkoutLog: IUserWorkoutsLog = {
+        workoutsLog: [
+          {
+            workoutCardsLogData: [workoutLogSession],
+            nextWorkoutIndex: 0,
+            workoutId,
+          },
+        ],
+      }
+
+      await AsyncStorage.setItem(
+        storageCachedExercisesWeightDoneLogDataKey,
+        JSON.stringify(newUserWorkoutLog),
+      )
+
+      setCachedUserWorkoutsLog(newUserWorkoutLog)
+      return newExercise as IWeightDoneLog
+    }
+  }
+
+  // fazer se inspirando no notes
+
+  // setCachedUserWorkoutsLog
+  async function updateCachedVideoTable(
+    cachedLocalPathVideo: string,
+    _exerciseId: string,
+  ) {
+    if (!user) return null
+    const userId = user.id
+
+    const storageCachedVideoTableKey = `@myfitflow:userlocal-cachedvideotable-${userId}`
+
+    if (cachedVideoTable) {
+      const copyCachedVideoTable = [...cachedVideoTable]
+      const cachedVideo = copyCachedVideoTable.findIndex(
+        (es) => es.workoutExerciseId === _exerciseId,
+      )
+      const isNewVideo = cachedVideo === -1
+
+      if (!isNewVideo) {
+        copyCachedVideoTable[cachedVideo] = {
+          ...copyCachedVideoTable[cachedVideo],
+          updatedAt: new Date().getTime(),
+          cachedLocalPathVideo,
+        }
+
+        await AsyncStorage.setItem(
+          storageCachedVideoTableKey,
+          JSON.stringify(copyCachedVideoTable),
+        )
+        return copyCachedVideoTable
+      }
+
+      if (isNewVideo) {
+        copyCachedVideoTable.push({
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+          workoutExerciseId: _exerciseId,
+          cachedLocalPathVideo,
+        })
+
+        await AsyncStorage.setItem(
+          storageCachedVideoTableKey,
+          JSON.stringify(copyCachedVideoTable),
+        )
+        return copyCachedVideoTable
+      }
+    }
+
+    if (!cachedVideoTable) {
+      const initialVideoTable = []
+      initialVideoTable.push({
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        workoutExerciseId: _exerciseId,
+        cachedLocalPathVideo,
+      })
+      await AsyncStorage.setItem(
+        storageCachedVideoTableKey,
+        JSON.stringify(initialVideoTable),
+      )
+
+      return initialVideoTable
+    }
+    return null
+  }
+
+  async function loadCachedVideoTable(userId: string) {
+    const storageCachedVideoTableKey = `@myfitflow:userlocal-cachedvideotable-${userId}`
+    try {
+      const storedCachedVideoTableString = await AsyncStorage.getItem(
+        storageCachedVideoTableKey,
+      )
+
+      if (storedCachedVideoTableString) {
+        const cachedVideoTableData = JSON.parse(storedCachedVideoTableString)
+        console.log(storedCachedVideoTableString)
+
+        setCachedVideoTable(cachedVideoTableData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+
+  async function updateCachedNotesTable(
+    notes: string,
+    _exerciseId: string,
+    _cardIndex: number,
+    _exerciseIndex: number,
+  ) {
+    if (!user) return null
+    const userId = user.id
+
+    const storageCachedNotesTableKey = `@myfitflow:userlocal-cachednotestable-${userId}`
+
+    if (cachedNotesTable) {
+      const copyCachedNotesTable = [...cachedNotesTable]
+
+      const cachedNotesIndex = copyCachedNotesTable.findIndex(
+        (es) =>
+          es.workoutExerciseId === _exerciseId &&
+          es.cardIndex === _cardIndex &&
+          es.exerciseIndex === _exerciseIndex,
+      )
+
+      const isNewNote = cachedNotesIndex === -1
+
+      if (!isNewNote) {
+        copyCachedNotesTable[cachedNotesIndex] = {
+          ...copyCachedNotesTable[cachedNotesIndex],
+          updatedAt: new Date().getTime(),
+          notes,
+        }
+
+        setCachedNotesTable(copyCachedNotesTable)
+        await AsyncStorage.setItem(
+          storageCachedNotesTableKey,
+          JSON.stringify(copyCachedNotesTable),
+        )
+        return copyCachedNotesTable
+      }
+
+      if (isNewNote) {
+        copyCachedNotesTable.push({
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+
+          workoutExerciseId: _exerciseId,
+          cardIndex: _cardIndex,
+          exerciseIndex: _exerciseIndex,
+          notes,
+        })
+
+        setCachedNotesTable(copyCachedNotesTable)
+        await AsyncStorage.setItem(
+          storageCachedNotesTableKey,
+          JSON.stringify(copyCachedNotesTable),
+        )
+        return copyCachedNotesTable
+      }
+    }
+
+    if (!cachedNotesTable) {
+      const initialVideoTable = []
+      initialVideoTable.push({
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+        workoutExerciseId: _exerciseId,
+        cardIndex: _cardIndex,
+        exerciseIndex: _exerciseIndex,
+        notes,
+      })
+
+      await AsyncStorage.setItem(
+        storageCachedNotesTableKey,
+        JSON.stringify(initialVideoTable),
+      )
+      setCachedNotesTable(initialVideoTable)
+
+      return initialVideoTable
+    }
+    return null
+  }
+
+  async function loadCachedNotesTable(userId: string) {
+    const storageCachedNotesTableKey = `@myfitflow:userlocal-cachednotestable-${userId}`
+
+    try {
+      const storedCachedNotesTableString = await AsyncStorage.getItem(
+        storageCachedNotesTableKey,
+      )
+
+      if (storedCachedNotesTableString) {
+        const cachedNotesTableData = JSON.parse(storedCachedNotesTableString)
+        setCachedNotesTable(cachedNotesTableData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+
+  async function loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises(
+    _workouts: IMyfitflowWorkoutInUse,
+  ): Promise<boolean> {
+    const { workoutId, workoutCategoryId } = _workouts
+    const userId = user?.id
+    if (!workoutId || !userId || !workoutCategoryId) {
+      console.error('Dados necessários para carregar treino estão ausentes.')
+      return false
+    }
+
+    setIsWaitingApiResponse(true)
+    await resetStateCache()
+
+    const workoutExercisesRef = doc(
+      db,
+      'workoutsCategories',
+      workoutCategoryId,
+      'workouts',
+      workoutId,
+      'workoutsData',
+      'workoutsDataArray',
+    )
+    /** OG  workoutId
+ LOG  2B4bjSpS8ulI67l2qjMA */
+    const docSnapshot = await getDoc(workoutExercisesRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IWorkoutInfo
+
+      const allWorkoutsExercisesVideoInfo =
+        await handleFetchExercisesInfo(initialData)
+      if (!allWorkoutsExercisesVideoInfo) return false
+      const formattedExerciseData = initialData.workoutsData.map(
+        (_workoutsData) => {
+          const formattedExerciseData = _workoutsData.cardExerciseData
+            .map((_exerciseDataFromArrayInsideWorkoutData) => {
+              const myExerciseFileToAdd = allWorkoutsExercisesVideoInfo.find(
+                (fin) =>
+                  fin.exerciseId ===
+                  _exerciseDataFromArrayInsideWorkoutData.workoutExerciseId,
+              )
+              if (!myExerciseFileToAdd) return null
+
+              // atualizando o meu dataArray com o q vem do firebase exercicios como video
+
+              const returnData = {
+                ..._exerciseDataFromArrayInsideWorkoutData,
+
+                workoutExerciseName_insensitive:
+                  myExerciseFileToAdd.exerciseName_insensitive,
+                workoutExerciseInfo: myExerciseFileToAdd.exerciseInfo,
+
+                workoutExerciseVideoMIME: myExerciseFileToAdd.exerciseVideoMIME,
+                workoutExerciseVideoFileName:
+                  myExerciseFileToAdd.exerciseVideoFileName,
+                workoutExerciseVideoUrl: myExerciseFileToAdd.exerciseVideoUrl,
+
+                workoutExerciseThumbnailMIME:
+                  myExerciseFileToAdd.exerciseThumbnailMIME,
+                workoutExerciseThumbnailFileName:
+                  myExerciseFileToAdd.exerciseThumbnailFileName,
+                workoutExerciseThumbnailUrl:
+                  myExerciseFileToAdd.exerciseThumbnailUrl,
+
+                workoutExerciseVideoSize: myExerciseFileToAdd.exerciseVideoSize,
+
+                workoutExerciseMode: myExerciseFileToAdd.exerciseMode,
+                workoutExerciseFilters: myExerciseFileToAdd.exerciseFilters,
+
+                workoutExerciseMuscleGroup:
+                  myExerciseFileToAdd.exerciseMuscleGroup,
+
+                workoutExerciseId: myExerciseFileToAdd.exerciseId,
+              }
+              return returnData
+            })
+            .filter((va) => va !== null)
+
+          /* TODO
+            tirar o enabled true  ou false do form inicial do personal pra tirar isso daqui dps */
+          return {
+            index: _workoutsData.index,
+            cardExerciseLabel: _workoutsData.cardExerciseLabel,
+            cardExerciseData: formattedExerciseData,
+            cardExerciseUniquesMuscles:
+              _workoutsData.cardExerciseUniquesMuscles,
+          }
+        },
+      )
+
+      const formattedWorkoutsDataArray: IWorkoutInfo = {
+        workoutId,
+        workoutSequence: initialData.workoutSequence,
+        workoutsData: formattedExerciseData,
+      }
+
+      await saveExerciseDataInCache(userId, formattedWorkoutsDataArray)
+      await saveMyWorkoutInCache(userId, _workouts)
+
+      setIsWaitingApiResponse(false)
+      Alert.alert(`Seu treino adicionado foi com sucesso!`)
+
+      return true
+    } else {
+      Alert.alert('Opa', 'Esse treino ainda não está pronto.')
+
+      return false
+    }
+
+    async function resetStateCache() {
+      setCachedUserWorkoutsLog(null)
+      setCachedExerciseHistoryData(null)
+    }
+
+    async function handleFetchExercisesInfo(data: IWorkoutInfo) {
+      const { workoutsData } = data
+
+      const formattedArrayOfunicIds =
+        getUnicWorkoutIdToGetExerciseVideoInfo(workoutsData) // preciso do id de todos pra buscar os dados
+
+      if (!formattedArrayOfunicIds) return
+
+      const response = await loadAllWorkoutsExercisesVideoInfo(
+        formattedArrayOfunicIds,
+      )
+
+      return response
+
+      function getUnicWorkoutIdToGetExerciseVideoInfo(
+        data: IWorkoutsData[] | undefined,
+      ): string[] {
+        if (data === undefined) return []
+        // ta retornando nada
+        const allWorkoutIds = data.flatMap((v) =>
+          v.cardExerciseData.flatMap((va) => va.workoutExerciseId),
+        )
+        // Filtra os IDs indefinidos antes de criar o Set
+        const filteredIds = allWorkoutIds.filter(
+          (id): id is string => id !== undefined,
+        )
+
+        const uniqueIds = new Set(filteredIds)
+        const unicIdsArray = [...uniqueIds]
+        return unicIdsArray
+      }
+
+      async function loadAllWorkoutsExercisesVideoInfo(
+        data: string[],
+      ): Promise<IWorkoutExercisesFirebase[] | void> {
+        if (!user?.id) return []
+        const promises = data.map((docId) => {
+          const docRef = doc(db, 'workoutsExercises', docId)
+          return getDoc(docRef)
+        })
+
+        const extractedData = await Promise.all(promises)
+          .then((results) => {
+            const extractedData = results
+              .map((docSnapshot) => {
+                if (docSnapshot.exists()) {
+                  return {
+                    exerciseId: docSnapshot.id,
+                    ...docSnapshot.data(),
+                  } as IWorkoutExercisesFirebase
+                } else {
+                  return null
+                }
+              })
+              .filter((doc): doc is IWorkoutExercisesFirebase => doc !== null)
+            return extractedData
+          })
+          .catch((error) => {
+            console.error('Erro ao buscar documentos:', error)
+          })
+
+        return extractedData
+      }
+    }
+
+    async function saveExerciseDataInCache(
+      userId: string,
+      exercisesData: IWorkoutInfo,
+    ) {
+      const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
+
+      await AsyncStorage.setItem(
+        workoutExercisesKey,
+        JSON.stringify(exercisesData),
+      )
+
+      setMyWorkoutArray(exercisesData)
+    }
+
+    async function saveMyWorkoutInCache(
+      userId: string,
+      workoutData: IMyfitflowWorkoutInUse,
+    ) {
+      const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+      // salvando data de inicio do treino
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(workoutData))
+
+      setMyWorkout(workoutData)
+    }
+  }
+
+  async function premiumUserUpdateProfileUpdatedAt(workoutId: string) {
+    if (!workoutId || !user || !user.id) {
+      return
+    }
+
+    // setIsWaitingApiResponse(true)
+
+    try {
+      const userId = user.id
+      const userRef = collection(db, 'users')
+      const formattedProfileUpdatedAt = format(new Date(), 'dd/MM/yyyy')
+      const profileUpdatedAt = serverTimestamp()
+
+      await updateDoc(doc(userRef, userId), {
+        workoutId,
+        profileUpdatedAt,
+        formattedProfileUpdatedAt,
+      }).then(() => {
+        AsyncStorage.setItem(USER_SIGNIN_COLLECTION, JSON.stringify(user))
+        setUser(user)
+
+        Alert.alert('Alerta', 'Treino adicionado com sucesso!')
+      })
+    } catch (err) {
+      console.log(err)
+      Alert.alert('Opa', 'Esse treino ainda  não está pronto ')
+    } finally {
+      // setIsWaitingApiResponse(false)
+    }
+  }
+
+  async function loadPersonalsList() {
+    setIsWaitingApiResponse(true)
+
+    const userColcRef = collection(db, 'personaltrainer')
+
+    const q = query(userColcRef)
+    await getDocs(q)
+      .then(async (response) => {
+        const data = response.docs.map((doc) => {
+          return {
+            id: doc.id,
+            ...doc.data(),
+          }
+        }) as IPersonal[]
+
+        setPersonalsList(data)
+        setIsWaitingApiResponse(false)
+      })
+      .catch((error) => console.log(error))
+  }
+
+  async function loadWorkouts(workoutCategoryId: string) {
+    setIsWaitingApiResponse(true)
+
+    const userColcRef = collection(
+      db,
+      'workoutsCategories',
+      workoutCategoryId,
+      'workouts',
+    )
+
+    const q = query(userColcRef)
+    const formattedData = await getDocs(q)
+      .then(async (response) => {
+        const data = response.docs.map((doc) => {
+          return {
+            workoutId: doc.id,
+            ...doc.data(),
+          }
+        }) as IMyfitflowWorkoutInUse[]
+
+        const lUpdated = new Date()
+        const lUpdatedTimestamp = Timestamp.fromDate(lUpdated)
+
+        const formattedData: ICachedWorkoutsWithLastUpdatedTimestamp = {
+          // cachedLastWorkoutUpdatedAt:lUpdatedTimestamp,
+          data,
+          lastUpdatedAt: lUpdated.getTime(),
+        }
+
+        return formattedData
+      })
+      .catch((error) => console.log(error))
+
+    if (formattedData) {
+      setWorkouts(formattedData)
+      setIsWaitingApiResponse(false)
+      return formattedData
+    } else {
+      setIsWaitingApiResponse(false)
+      return null
+    }
+  }
+
+  async function saveWorkouts(
+    workoutCategoryId: string,
+    cachedWorkoutsWithUpdatedAt: ICachedWorkoutsWithLastUpdatedTimestamp,
+  ) {
+    if (!user) return
+    const userId = user.id
+
+    const USERLOCAL_CACHED_WORKOUTS = `@myfitflow:cachedworkouts-${workoutCategoryId}-${userId}`
+    await AsyncStorage.setItem(
+      USERLOCAL_CACHED_WORKOUTS,
+      JSON.stringify(cachedWorkoutsWithUpdatedAt),
+    )
+  }
+
+  async function loadCachedWorkouts(workoutCategoryId: string) {
+    if (!user) return null
+    const userId = user.id
+
+    const USERLOCAL_CACHED_WORKOUTS = `@myfitflow:cachedworkouts-${workoutCategoryId}-${userId}`
+
+    const cachedWorkoutsData = await AsyncStorage.getItem(
+      USERLOCAL_CACHED_WORKOUTS,
+    )
+
+    if (cachedWorkoutsData) {
+      const cachedWorkouts = JSON.parse(
+        cachedWorkoutsData,
+      ) as ICachedWorkoutsWithLastUpdatedTimestamp
+
+      setWorkouts(cachedWorkouts)
+      return cachedWorkouts
+    } else {
+      return null
+    }
+  }
+
+  async function loadWorkoutsCategories() {
+    setIsWaitingApiResponse(true)
+
+    const userColcRef = collection(db, 'workoutsCategories')
+    const q = query(userColcRef)
+    await getDocs(q)
+      .then(async (response) => {
+        const data = response.docs.map((doc) => {
+          return {
+            workoutCategoryId: doc.id,
+            ...doc.data(),
+          }
+        }) as IWorkoutCategory[]
+
+        setWorkoutsCategories(data)
+
+        setIsWaitingApiResponse(false)
+      })
+      .catch((error) => console.log(`error`, error))
+  }
+
+  async function loadCachedExerciseHistoryData(userId: string) {
+    const storageExercisesHistoricDateKey = `@myfitflow:userlocaldata-exerciseshistoric-${userId}`
+
+    try {
+      const storedHistoryString = await AsyncStorage.getItem(
+        storageExercisesHistoricDateKey,
+      )
+
+      if (storedHistoryString) {
+        const historyData = JSON.parse(
+          storedHistoryString,
+        ) as ICachedExerciseHistoryData
+        /*    console.log('historyData')
+        console.log(JSON.stringify(historyData)) */
+
+        setCachedExerciseHistoryData(historyData) // Atualiza o estado com os dados carregados
+      } else {
+        console.log('Nenhum histórico de exercício encontrado.')
+        setCachedExerciseHistoryData(null) // Configura o estado como um objeto vazio se não houver dados
+      }
+    } catch (error) {
+      console.error('Erro ao carregar o histórico de exercícios:', error)
+    }
+  }
+
+  async function loadExerciseCachedWeightDoneLog(userId: string) {
+    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+
+    try {
+      const storedWeightDoneLogString = await AsyncStorage.getItem(
+        storageCachedExercisesWeightDoneLogDataKey,
+      )
+      if (storedWeightDoneLogString) {
+        const summaryInfoData = JSON.parse(storedWeightDoneLogString)
+        /*        console.log(`rendering ${summaryInfoData}`)
+        console.log(JSON.stringify(summaryInfoData)) */
+        setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+
+  async function loadMyWorkoutAndMyWorkoutExercises(userId: string) {
+    const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
+    const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+    const userLocalDataWorkoutExercises =
+      await AsyncStorage.getItem(workoutExercisesKey)
+
+    if (userLocalDataWorkoutExercises) {
+      const cachedUserLocalDataWorkoutExercises = JSON.parse(
+        userLocalDataWorkoutExercises,
+      ) as IWorkoutInfo
+      /*       console.log(`cachedUserLocalDataWorkoutExercises`)
+      console.log(JSON.stringify(cachedUserLocalDataWorkoutExercises)) */
+
+      setMyWorkoutArray(cachedUserLocalDataWorkoutExercises)
+    }
+
+    const userLocalDataWorkout = await AsyncStorage.getItem(workoutKey)
+
+    if (userLocalDataWorkout) {
+      const cachedUserLocalDataWorkouts = JSON.parse(
+        userLocalDataWorkout,
+      ) as IMyfitflowWorkoutInUse
+
+      setMyWorkout(cachedUserLocalDataWorkouts)
+    }
+  }
+
+  async function loadGraphicsAndStatistics(userId: string) {
+    async function fetchCache() {
+      const defaultInitialData = [
+        {
+          createdAt: 1716500348227,
+          updatedAt: 1716500348227,
+          index: 0,
+          statisticName: 'Peso',
+          statisticValue: '0',
+          statisticGoal: '0',
+          statisticMeasure: 'kg',
+          isOpen: false,
+          isVisible: true,
+        },
+        {
+          createdAt: 1716500348227,
+          updatedAt: 1716500348227,
+          index: 1,
+          statisticName: 'Gordura Corporal',
+          statisticValue: '0',
+          statisticGoal: '0',
+          statisticMeasure: '%',
+          isOpen: false,
+          isVisible: true,
+        },
+        {
+          createdAt: 1716500348227,
+          updatedAt: 1716500348227,
+          index: 2,
+          statisticName: 'Cintura',
+          statisticValue: '0',
+          statisticGoal: '0',
+          statisticMeasure: 'cm',
+          isOpen: false,
+          isVisible: true,
+        },
+      ]
+      const responseGraphicsValues = await loadGraphicsValues(userId)
+      const responseStatisticsItens = await loadStatisticsItens(userId)
+      const responseWeightProgresion = await loadWeightProgression(userId)
+
+      if (responseWeightProgresion) {
+        setWeightProgression(responseWeightProgresion)
+      }
+
+      if (responseGraphicsValues) {
+        setGraphicsValues(responseGraphicsValues)
+      }
+
+      if (responseStatisticsItens) {
+        setStatisticsItens(responseStatisticsItens)
+      }
+
+      if (responseStatisticsItens === null) {
+        setStatisticsItens(defaultInitialData)
+      }
+    }
+    fetchCache()
+  }
+
+  async function loadUserStorageData() {
+    setIsLoadingUserStorageData(true)
+    console.log('Loading user storage data...')
+
+    try {
+      const storedUser = await AsyncStorage.getItem(USER_SIGNIN_COLLECTION)
+
+      if (storedUser === null) {
+        setIsLoadingUserStorageData(false)
+        return
+      }
+
+      const cachedUserData = JSON.parse(storedUser) as SignInProps
+
+      await updateUserState(cachedUserData)
+      //  await loadWorkoutData(cachedUserData)
+      await loadLoginInitialCachedWorkoutsData(cachedUserData.id)
+      console.log('loadLoginInitialCachedWorkoutsData')
+      // await checkForUpdates(cachedUserData)
+      setIsLoadingUserStorageData(false)
+    } catch (error) {
+      console.error('Error loading user storage data:', error)
+      setIsLoadingUserStorageData(false)
+    }
+
+    async function updateUserState(userData: SignInProps) {
+      if (!userData) return
+      setUser(userData)
+    }
+
+    // armazena em cache meu usuario logado
+
+    /* async function checkForUpdates(userData: SignInProps) {
+      const state = await NetInfo.fetch()
+      if (!state.isConnected) return
+
+      const userDocRef = doc(db, 'users', userData.id)
+      const docSnap = await getDoc(userDocRef)
+
+      if (!docSnap.exists()) {
+        Alert.alert(
+          'Login realizado',
+          'Não foi possível buscar os dados de perfil do usuário',
+        )
+        return
+      }
+
+      const newUserData = docSnap.data() as SignInProps
+      const workoutNeedsUpdate =
+        JSON.stringify(newUserData.updatedAt) !==
+        JSON.stringify(userData.updatedAt)
+      const profileNeedsUpdate =
+        JSON.stringify(newUserData.profileUpdatedAt) !==
+        JSON.stringify(userData.profileUpdatedAt)
+
+      if (workoutNeedsUpdate || profileNeedsUpdate) {
+        await updateStoredUser(newUserData)
+        if (workoutNeedsUpdate) console.log(`workoutNeedsUpdate`)
+        loadLoginInitialCachedWorkoutsData(newUserData.id)
+      }
+
+      async function updateStoredUser(newUserData: SignInProps) {
+        await AsyncStorage.setItem(
+          USER_SIGNIN_COLLECTION,
+          JSON.stringify(newUserData),
+        )
+        setUser(newUserData)
+      }
+    } */
+  }
+
+  async function loadLoginInitialCachedWorkoutsData(userId: string) {
+    await loadExerciseCachedWeightDoneLog(userId) // precsa de workoutjId
+    await loadCachedExerciseHistoryData(userId)
+
+    await loadMyWorkoutAndMyWorkoutExercises(userId)
+
+    await loadGraphicsAndStatistics(userId)
+
+    await loadCachedVideoTable(userId)
+
+    await loadCachedNotesTable(userId)
+  }
+
+  useEffect(() => {
+    loadUserStorageData()
+  }, [])
+
+  return (
+    <AuthContext.Provider
+      value={{
+        firebaseSignUp,
+        firebaseSignIn,
+        firebaseSignOut,
+        firebaseForgotPassword,
+
+        // VERIFICAR AQUI PRA BAIXO E ANOTAR OS CACHES
+        loadLoginInitialCachedWorkoutsData,
+        loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
+        premiumUserUpdateProfileUpdatedAt,
+
+        loadPersonalsList,
+        personalsList,
+
+        loadWorkoutsCategories,
+        loadWorkouts,
+        saveWorkouts,
+        loadCachedWorkouts,
+
+        loadCachedExerciseHistoryData,
+        updateCachedExerciseHistoryData,
+
+        updateCachedUserWorkoutsLog,
+
+        loadCachedNotesTable,
+        updateCachedNotesTable,
+
+        loadCachedVideoTable,
+        updateCachedVideoTable,
+
+        personalData,
+        loadPersonalTrainerData,
+        savePersonalTrainerData,
+        loadPersonalTrainerCachedData,
+        loadPersonalTrainerClientContract,
+        createNewContractWithPersonalUpdateUserClientId,
+        cancelNewContractWithPersonalUpdateUserClientId,
+
+        updateUserForm,
+        updateUserGoalPreffer,
+        updateUserGoalFocusMusclePreffer,
+        updateUserFrequencyByWeekPreffer,
+        updateUserTimeBySessionPreffer,
+
+        fetchMuscleOptionData,
+        fetchFrequencyByWeekOptionData,
+        fetchGoalOptionData,
+        fetchTimeBySessionOptionData,
+
+        fetchPulleyOptionData,
+        updateUserPulleyPreffer,
+
+        fetchFreeOptionData,
+        updateUserFreePreffer,
+
+        fetchMachineOptionData,
+        updateUserMachinePreffer,
+
+        fetchCachedWorkoutsExercises,
+        cachedWorkoutsExercises,
+
+        saveGraphicsValues, // premium version
+        loadGraphicsValues,
+
+        loadWeightProgression,
+        saveWeightProgression,
+
+        saveStatisticsItens, // premium version
+        loadStatisticsItens,
+
+        user,
+
+        workoutsCategories,
+        workouts,
+        myWorkoutDataArray,
+        myWorkout,
+
+        isLogging,
+        isWaitingApiResponse,
+        isLoadingUserStorageData,
+
+        graphicsValues,
+        statisticsItens,
+
+        cachedExerciseHistoryData,
+        cachedUserWorkoutsLog,
+        weightProgression,
+
+        cachedNotesTable,
+        cachedVideoTable,
+        contract,
+        // loadCachedUserWorkoutsLog, /
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+function useAuth() {
+  const context = useContext(AuthContext)
+
+  return context
+}
+
+export { AuthProvider, useAuth }
