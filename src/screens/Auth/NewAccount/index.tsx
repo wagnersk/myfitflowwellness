@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform,
   BackHandler,
   Alert,
 } from 'react-native'
 
 import { useTheme } from 'styled-components'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useNavigation } from '@react-navigation/core'
 import { useAuth } from '@hooks/auth'
 
@@ -64,8 +63,6 @@ interface IUserForm {
 }
 export function NewAccount() {
   const { isWaitingApiResponse, firebaseSignUp, isLogging } = useAuth()
-  const [isComponentAVisible, setIsComponentAVisible] = useState(true)
-  const [isComponentBVisible, setIsComponentBVisible] = useState(true)
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
 
   const [userForm, setUserForm] = useState<IUserForm>({
@@ -267,143 +264,105 @@ export function NewAccount() {
     })
   }
 
-  function toggleComponentAVisibility() {
-    setIsComponentBVisible(false)
-  }
-
-  function toggleComponentBVisibility() {
-    setIsComponentAVisible(false)
-  }
   useEffect(() => {
-    const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-
     BackHandler.addEventListener('hardwareBackPress', () => {
       return true
     })
-
-    const keyboardDidHideListener = Keyboard.addListener(hideEvent, () => {
-      setIsComponentAVisible(true)
-      setIsComponentBVisible(true)
-    })
-
-    return () => {
-      keyboardDidHideListener.remove()
-    }
   }, [])
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <LinearGradientContainer colors={[]}>
-        <KeyboardAvoidingView
-          style={{ width: '100%' }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          enabled
-        >
+      <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
+        <KeyboardAwareScrollView style={{ width: '100%' }}>
           <Header>
             <MyFitFlowLogoComponent width={500} height={500} />
           </Header>
 
           <BodyTop>
-            {isComponentAVisible && (
-              <>
-                <UserNameInput
-                  handleChangeUserName={handleChangeUserName}
-                  value={userForm.name.value}
-                  errorBoolean={userForm.name.errorBoolean}
-                  onFocus={toggleComponentAVisibility}
-                  type="transparent"
-                  borderDesign="up"
-                  order="top"
-                  editable={!isLogging}
-                  topPosition={4}
-                />
-                <EmailInput
-                  handleChangeEmail={handleChangeEmail}
-                  value={userForm.email.value}
-                  errorBoolean={userForm.email.errorBoolean}
-                  onFocus={toggleComponentAVisibility}
-                  type="transparent"
-                  borderDesign="up"
-                  order="middle"
-                  editable={!isLogging}
-                  topPosition={2}
-                />
-                <PasswordInput
-                  handleChangePassword={handleChangePassword}
-                  value={userForm.password.value}
-                  errorBoolean={userForm.password.errorBoolean}
-                  onFocus={toggleComponentAVisibility}
-                  type="transparent"
-                  borderDesign="down"
-                  order="bottom"
-                  editable={!isLogging}
-                  topPosition={2}
-                />
-                <SpaceBetweenInput />
-              </>
-            )}
-            {isComponentBVisible && (
-              <>
-                <WhatsappInput
-                  handleChangeWhatsapp={handleChangeWhatsappNumber}
-                  value={userForm.whatsappNumber.value}
-                  errorBoolean={userForm.whatsappNumber.errorBoolean}
-                  onFocus={toggleComponentBVisibility}
-                  type="transparent"
-                  borderDesign="up"
-                  order="top"
-                  editable={!isLogging}
-                  topPosition={2}
-                />
+            <UserNameInput
+              handleChangeUserName={handleChangeUserName}
+              value={userForm.name.value}
+              errorBoolean={userForm.name.errorBoolean}
+              onFocus={() => {}}
+              type="transparent"
+              borderDesign="up"
+              order="top"
+              editable={!isLogging}
+              topPosition={4}
+            />
+            <EmailInput
+              handleChangeEmail={handleChangeEmail}
+              value={userForm.email.value}
+              errorBoolean={userForm.email.errorBoolean}
+              onFocus={() => {}}
+              type="transparent"
+              borderDesign="up"
+              order="middle"
+              editable={!isLogging}
+              topPosition={2}
+            />
+            <PasswordInput
+              handleChangePassword={handleChangePassword}
+              value={userForm.password.value}
+              errorBoolean={userForm.password.errorBoolean}
+              onFocus={() => {}}
+              type="transparent"
+              borderDesign="down"
+              order="bottom"
+              editable={!isLogging}
+              topPosition={2}
+            />
+            <SpaceBetweenInput />
+            <WhatsappInput
+              handleChangeWhatsapp={handleChangeWhatsappNumber}
+              value={userForm.whatsappNumber.value}
+              errorBoolean={userForm.whatsappNumber.errorBoolean}
+              onFocus={() => {}}
+              type="transparent"
+              borderDesign="up"
+              order="top"
+              editable={!isLogging}
+              topPosition={2}
+            />
 
-                <CalendarInput
-                  handleChangeBirthday={handleChangeBirthdate}
-                  value={userForm.birthdate.value}
-                  errorBoolean={userForm.birthdate.errorBoolean}
-                  onFocus={toggleComponentBVisibility}
-                  type="transparent"
-                  borderDesign="down"
-                  order="bottom"
-                  editable={!isLogging}
-                />
-              </>
-            )}
+            <CalendarInput
+              handleChangeBirthday={handleChangeBirthdate}
+              value={userForm.birthdate.value}
+              errorBoolean={userForm.birthdate.errorBoolean}
+              onFocus={() => {}}
+              type="transparent"
+              borderDesign="down"
+              order="bottom"
+              editable={!isLogging}
+            />
 
             <SpaceBetweenFormAndButton />
-            {isComponentBVisible && isComponentAVisible && (
-              <>
-                <ViewWithLineAndIcon />
 
-                <CTAButton
-                  onPress={handleSignUp}
-                  title="Cadastrar"
-                  loading={isWaitingApiResponse}
-                />
-              </>
-            )}
+            <ViewWithLineAndIcon />
+
+            <CTAButton
+              onPress={handleSignUp}
+              title="Cadastrar"
+              loading={isWaitingApiResponse}
+            />
           </BodyTop>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
 
-        {isComponentBVisible && isComponentAVisible && (
-          <>
-            <Footer>
-              <FooterWrapper onPress={handleGoBack}>
-                <IconContainer>
-                  <Back
-                    width={40}
-                    height={40}
-                    stroke={theme.COLORS.TEXT_LIGHT}
-                    style={{ top: 2 }}
-                    strokeWidth={2}
-                  />
-                </IconContainer>
-                <FooterText>Voltar para o login</FooterText>
+        <Footer>
+          <FooterWrapper onPress={handleGoBack}>
+            <IconContainer>
+              <Back
+                width={40}
+                height={40}
+                stroke={theme.COLORS.TEXT_LIGHT}
+                style={{ top: 2 }}
+                strokeWidth={2}
+              />
+            </IconContainer>
+            <FooterText>Voltar para o login</FooterText>
 
-                <IconContainer style={{ width: 48 }}></IconContainer>
-              </FooterWrapper>
-            </Footer>
-          </>
-        )}
+            <IconContainer style={{ width: 48 }}></IconContainer>
+          </FooterWrapper>
+        </Footer>
       </LinearGradientContainer>
     </TouchableWithoutFeedback>
   )

@@ -146,7 +146,7 @@ export function WorkoutBlueCardItem({
       style={styles.containerShadow}
       activeOpacity={0.7}
     >
-      <ContainerGradient colors={[]}>
+      <ContainerGradient colors={['#000000', '#FFFFFF']}>
         <WorkoutCircleOfLetterSequence>
           <GradientText>{getLetter}</GradientText>
         </WorkoutCircleOfLetterSequence>
@@ -163,7 +163,7 @@ export function WorkoutBlueCardItem({
                 .lastCompletedFormattedDay &&
               copyWorkoutsLog.workoutCardsLogData[cardIndex]
                 .lastCompletedFormattedDate &&
-              (sameDay ? (
+              (!sameDay ? (
                 <WorkoutCardDateWrapper>
                   <WorkoutCardDay>{'Hoje'}</WorkoutCardDay>
                   <WorkoutCardDateSeparator>
@@ -180,6 +180,10 @@ export function WorkoutBlueCardItem({
                         .lastCompletedFormattedDay
                     }
                   </WorkoutCardDay>
+                  {console.log(
+                    copyWorkoutsLog.workoutCardsLogData[cardIndex]
+                      .lastCompletedFormattedDay,
+                  )}
                   <WorkoutCardDateSeparator>
                     {copyWorkoutsLog.workoutCardsLogData[cardIndex]
                       .lastCompletedFormattedDay && '  -  '}

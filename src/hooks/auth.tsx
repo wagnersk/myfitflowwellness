@@ -1320,6 +1320,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (!user) {
       return
     }
+
     const storageWeightProgressionDateKey = `@myfitflow:userlocaldata-weightprogression-${user.id}`
 
     if (data) {
@@ -1342,13 +1343,13 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (userLocalWeightProgressionDateKey) {
       const cachedUserLocalWeightProgressionDateKey = JSON.parse(
         userLocalWeightProgressionDateKey,
-      )
+      ) as ICachedExerciseHistoryData[]
 
-      if (cachedUserLocalWeightProgressionDateKey) {
-        setWeightProgression(cachedUserLocalWeightProgressionDateKey)
+      if (!cachedUserLocalWeightProgressionDateKey) return
 
-        return cachedUserLocalWeightProgressionDateKey
-      }
+      setWeightProgression(cachedUserLocalWeightProgressionDateKey)
+
+      return cachedUserLocalWeightProgressionDateKey
     }
   }
 

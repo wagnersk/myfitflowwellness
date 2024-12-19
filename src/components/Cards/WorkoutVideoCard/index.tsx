@@ -6,6 +6,7 @@ import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
 
 import { format, fromUnixTime, isSameDay } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 import * as FileSystem from 'expo-file-system'
 
@@ -65,11 +66,13 @@ interface Props {
   workoutId: string
   isFocused: boolean
 }
+
 interface IModalStateWorkoutLogData extends IWeightDoneLog {
   isOpenModalUserNotes: boolean
   isOpenModalVideoPlayer: boolean
   workoutCardIndex: number
 }
+
 const { height } = Dimensions.get('window')
 
 function WorkoutVideoCardComponent({
@@ -272,23 +275,22 @@ function WorkoutVideoCardComponent({
   function handleDoneWorkout() {
     if (!workoutId) return
     saveFastCachedWorkoutData(workoutId)
-    console.log(`completedAtual = ${modalWeightState.completed}`)
     setModalWeightState((prevState) => ({
       ...prevState,
       completed: !prevState.completed,
     }))
 
-    // saveCachedHistoricDateWorkoutData()
+    saveCachedHistoricDateWorkoutData()
 
     // TODO > ver dps q weight tiver pronto
 
     async function saveFastCachedWorkoutData(_workoutId: string) {
       if (!item.workoutExerciseId) return console.log(`vish`)
 
-      const completedTimestamp = new Date().getTime()
-      const date = fromUnixTime(completedTimestamp)
-      const lastCompletedDay = format(date, 'EEEE')
-      const lastCompletedDate = format(date, 'MM/dd/yyyy')
+      const date = new Date()
+      const completedTimestamp = date.getTime()
+      const lastCompletedDay = format(date, 'EEEE', { locale: ptBR })
+      const lastCompletedDate = format(date, 'dd/MM/yyyy')
 
       const newExercise: IWeightDoneLog = {
         exerciseIndex,
@@ -309,7 +311,7 @@ function WorkoutVideoCardComponent({
         workoutCardIndex,
       )
       console.log(` retornando final `)
-      console.log(JSON.stringify(responseWeightDoneLogs))
+      console.log(JSON.stringify(newExercise))
 
       setModalWeightState((prev) => {
         return {
@@ -430,7 +432,7 @@ function WorkoutVideoCardComponent({
         }
         function createDataYearMonthDayData() {
           const _dataData: ICachedExerciseHistoryData = {
-            workoutId,
+            workoutId: workoutId || '',
             userId,
             createdAt: date.getTime(),
             updatedAt: date.getTime(),
@@ -542,6 +544,7 @@ function WorkoutVideoCardComponent({
           updateProgressionData(copyProgression)
         }
         function updateProgressionData(data: ICachedExerciseHistoryData[]) {
+          console.log(`saveWeightProgression@@@@@@@@@@`)
           setWeightProgressionData(data)
           saveWeightProgression(data)
         }
@@ -686,8 +689,6 @@ function WorkoutVideoCardComponent({
   }, [cachedNotesTable])
 
   useEffect(() => {
-    console.log(cachedVideoTable)
-
     if (!cachedVideoTable) {
       startDownload(
         item.workoutExerciseVideoUrl,
@@ -800,7 +801,7 @@ function WorkoutVideoCardComponent({
   }, [cachedVideoTable, cachedVideoTable?.length])
 
   return (
-    <ContainerGradient colors={[``]} isFocused={isFocused}>
+    <ContainerGradient colors={['#000000', '#FFFFFF']} isFocused={isFocused}>
       <WorkoutNameAndVideoWrapper>
         <WorkoutNameWrapper style={{ opacity: isFocused ? 1 : 0.4 }}>
           <WorkoutName>
@@ -990,20 +991,3 @@ export const WorkoutVideoCard = memo(
     return prevProps === nextProps
   },
 )
-const styles = StyleSheet.create({
-  // Estilo do fundo transparente (overlay)
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end', // Garante que o modal fique na parte inferior
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
-  },
-  // Estilo do modal que ocupa 50% da altura da tela e fica na parte inferior
-  modalContainer: {
-    width: '100%', // Ocupa toda a largura
-    height: height * 0.5, // 50% da altura da tela
-    backgroundColor: 'white', // Cor de fundo do modal
-    borderTopLeftRadius: 20, // Arredonda os cantos superiores
-    borderTopRightRadius: 20, // Arredonda os cantos superiores
-    padding: 24, // Ajuste do padding conforme necessário
-  },
-})

@@ -115,9 +115,11 @@ export type IUserTimeBySession = {
   updatedAt?: FieldValue
   createdAt?: FieldValue
 }
+
 export interface IGoalSelectItem {
   goal_insensitive: IptBrUs
 }
+
 export interface IGoalSelectData {
   data: IGoalSelectItem[]
 }
@@ -317,6 +319,7 @@ export interface IWorkoutExercisesFirebase {
 
   exerciseId: string | undefined
 }
+
 export interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
@@ -441,6 +444,7 @@ export interface ExerciseRecord {
   workoutExerciseWeight: number
   workoutExerciseDone: boolean
 }
+
 export interface IPersonal {
   about: string
   age: number
@@ -457,6 +461,7 @@ export interface IPersonal {
   updatedAt: { nanoseconds: number; seconds: number }
   whatsappNumber: string
 }
+
 export interface IContract {
   birthdate: string
   createdAt: FieldValue
@@ -474,6 +479,7 @@ export interface DayRecord {
 export interface MonthRecord {
   [month: string]: DayRecord
 }
+
 export interface YearRecord {
   [year: string]: MonthRecord
 }

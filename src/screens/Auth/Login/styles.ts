@@ -26,6 +26,9 @@ export const ForgotPasswordWrapper = styled.View`
   top: 8px;
   margin-bottom: 80px;
 `
+export const ButtonWithIcon = styled.View`
+  gap: 24px;
+`
 
 export const ForgotPasswordText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};

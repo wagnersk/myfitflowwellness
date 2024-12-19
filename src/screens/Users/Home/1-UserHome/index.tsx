@@ -3,16 +3,14 @@ import { BackHandler, ActivityIndicator, Alert } from 'react-native'
 import { useTheme } from 'styled-components'
 
 import { useAuth } from '@hooks/auth'
-import { useFocusEffect, useRoute } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
 import { setStatusBarStyle } from 'expo-status-bar'
 
-import { BackButton } from '@components/Buttons/BackButton'
 import { WorkoutBlueCardList } from '@components/Cards/WorkoutBlueCard/WorkoutBlueCardList'
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { differenceInDays, startOfDay } from 'date-fns'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
   Container,
@@ -29,27 +27,36 @@ import {
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
-import { IWorkoutsData, IUserWorkoutsLog, IContract } from '@hooks/authTypes'
+import { IWorkoutsData, IUserWorkoutsLog } from '@hooks/authTypes'
 
 export function UserHome() {
   const navigation = useNavigation()
-  const [myCachedUserWorkoutsLog, setMyCachedUserWorkoutsLog] =
-    useState<IUserWorkoutsLog>()
 
   const {
     user,
     isLoadingUserStorageData,
     myWorkout,
     myWorkoutDataArray,
-    cachedExerciseHistoryData,
+    loadWeightProgression,
+    weightProgression,
     cachedUserWorkoutsLog,
     firebaseSignOut,
     loadPersonalTrainerClientContract,
     loadPersonalTrainerData,
     savePersonalTrainerData,
   } = useAuth()
+  console.log(`weightProgression`)
 
-  const daysPassed = 1
+  const findWeightProgression = weightProgression?.find(
+    (v) => v.userId === user?.id,
+  )
+
+  const startDate = new Date(
+    findWeightProgression ? findWeightProgression.createdAt : '',
+  ) // Supondo que você tenha a data de início do treino no objeto `user`
+
+  const currentDate = new Date()
+  const daysPassed = differenceInDays(currentDate, startDate)
   const theme = useTheme()
   const firstName = user?.name?.split(' ')
 
@@ -99,6 +106,7 @@ export function UserHome() {
 
   useEffect(() => {
     startContract()
+    fetchWeightProgressionData()
 
     async function startContract() {
       if (!user) return
@@ -119,6 +127,17 @@ export function UserHome() {
         await startPersonalTrainerData()
       }
     }
+
+    async function fetchWeightProgressionData() {
+      if (!user) return
+
+      if (!weightProgression) {
+        await loadWeightProgression(user.id).catch((err) => {
+          console.log(err)
+        })
+      }
+    }
+
     async function startPersonalTrainerData() {
       await loadPersonalTrainerData()
         .catch((err) => {
@@ -130,13 +149,11 @@ export function UserHome() {
           await savePersonalTrainerData(_personalData)
         })
     }
-    if (cachedUserWorkoutsLog) {
-      setMyCachedUserWorkoutsLog(cachedUserWorkoutsLog)
-    }
+
     BackHandler.addEventListener('hardwareBackPress', () => {
       return true
     })
-  }, []) // Dependência: startDate
+  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -164,7 +181,7 @@ export function UserHome() {
             {myWorkout?.workoutPeriod.periodNumber && (
               <WarningWrapper>
                 <Warning>Dia </Warning>
-                <WarningGreetings>{daysPassed} </WarningGreetings>
+                <WarningGreetings>{daysPassed + 1} </WarningGreetings>
                 <Warning>de </Warning>
                 <WarningGreetings>
                   {myWorkout?.workoutPeriod.periodNumber * 7}

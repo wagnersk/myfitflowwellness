@@ -29,14 +29,15 @@ import {
   FooterWrapper,
   FooterText,
   LinearGradientContainer,
+  ButtonWithIcon,
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 export function Login() {
   const { firebaseSignIn, firebaseForgotPassword, isLogging } = useAuth()
 
-  const [isComponentVisible, setIsComponentVisible] = useState(true)
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
   const navigation = useNavigation()
   const theme = useTheme()
@@ -146,45 +147,25 @@ export function Login() {
     )
   }
 
-  function toggleComponentVisibility() {
-    setIsComponentVisible(false)
-  }
-
   useEffect(() => {
-    const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-
     BackHandler.addEventListener('hardwareBackPress', () => {
       return true
     })
-
-    const keyboardDidHideListener = Keyboard.addListener(hideEvent, () => {
-      setIsComponentVisible(true)
-    })
-
-    return () => {
-      keyboardDidHideListener.remove()
-    }
   }, [])
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <LinearGradientContainer colors={[]}>
-        <KeyboardAvoidingView
-          style={{ width: '100%' }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          enabled
-        >
+      <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
+        <KeyboardAwareScrollView style={{ width: '100%' }}>
           <Header>
             <MyFitFlowLogoComponent width={500} height={500} />
           </Header>
-
           <BodyTop>
             <EmailInput
               handleChangeEmail={handleChangeEmail}
               value={userForm.email.value}
               errorBoolean={userForm.email.errorBoolean}
-              onFocus={toggleComponentVisibility}
+              onFocus={() => {}}
               type="transparent"
               borderDesign="up"
               order="top"
@@ -195,56 +176,49 @@ export function Login() {
               handleChangePassword={handleChangePassword}
               value={userForm.password.value}
               errorBoolean={userForm.password.errorBoolean}
-              onFocus={toggleComponentVisibility}
+              onFocus={() => {}}
               type="transparent"
               borderDesign="down"
               order="bottom"
               editable={!isLogging}
             />
 
-            {isComponentVisible && (
-              <>
-                <ForgotPasswordWrapper>
-                  <ForgotPasswordButtonWrapper
-                    onPress={handleForgotPassword}
-                    enabled={!isLogging}
-                  >
-                    <ForgotPasswordText>esqueci minha senha</ForgotPasswordText>
-                  </ForgotPasswordButtonWrapper>
-                </ForgotPasswordWrapper>
+            <ForgotPasswordWrapper>
+              <ForgotPasswordButtonWrapper
+                onPress={handleForgotPassword}
+                disabled={!isLogging}
+              >
+                <ForgotPasswordText>esqueci minha senha</ForgotPasswordText>
+              </ForgotPasswordButtonWrapper>
+            </ForgotPasswordWrapper>
 
-                <CTAButton
-                  enabled={!isLogging}
-                  loading={isLogging}
-                  title="Entrar"
-                  onPress={handleSignIn}
-                />
-              </>
-            )}
+            <ButtonWithIcon>
+              <CTAButton
+                disabled={isLogging}
+                loading={isLogging}
+                title="Entrar"
+                onPress={handleSignIn}
+              />
+              <ViewWithLineAndIcon />
+            </ButtonWithIcon>
           </BodyTop>
-        </KeyboardAvoidingView>
-        {isComponentVisible && (
-          <>
-            <ViewWithLineAndIcon />
+        </KeyboardAwareScrollView>
+        <Footer>
+          <FooterWrapper onPress={handleSignUp} disabled={isLogging}>
+            <IconContainer style={{ width: 48 }}></IconContainer>
 
-            <Footer>
-              <FooterWrapper onPress={handleSignUp} enabled={!isLogging}>
-                <IconContainer style={{ width: 48 }}></IconContainer>
-
-                <FooterText>Criar uma conta</FooterText>
-                <IconContainer>
-                  <Forward
-                    width={40}
-                    height={40}
-                    stroke={theme.COLORS.TEXT_LIGHT}
-                    style={{ top: 2 }}
-                    strokeWidth={2}
-                  />
-                </IconContainer>
-              </FooterWrapper>
-            </Footer>
-          </>
-        )}
+            <FooterText>Criar uma conta</FooterText>
+            <IconContainer>
+              <Forward
+                width={40}
+                height={40}
+                stroke={theme.COLORS.TEXT_LIGHT}
+                style={{ top: 2 }}
+                strokeWidth={2}
+              />
+            </IconContainer>
+          </FooterWrapper>
+        </Footer>
       </LinearGradientContainer>
     </TouchableWithoutFeedback>
   )

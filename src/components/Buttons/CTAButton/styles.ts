@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components/native'
-import { TouchableHighlight } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { RFValue } from '@utils/RFValue'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ReactNode } from 'react'
@@ -9,7 +9,7 @@ interface Props {
   loading?: boolean
 }
 
-export const Container = styled(TouchableHighlight)<Props>`
+export const Container = styled(TouchableOpacity)<Props>`
   background-color: transparent;
   justify-content: center;
   align-items: center;
