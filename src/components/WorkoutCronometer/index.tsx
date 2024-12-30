@@ -53,7 +53,7 @@ export function WorkoutCronometer({
   return (
     <WorkoutCronometerWrapper>
       <WorkoutCronometerTimer style={{ left: width / 2.7 }}>
-        {minutes}:{seconds < 9 ? `0${seconds}` : seconds}
+        {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
       </WorkoutCronometerTimer>
 
       <WorkoutCronometerButtonStart

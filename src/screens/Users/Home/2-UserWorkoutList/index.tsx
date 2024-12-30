@@ -31,8 +31,7 @@ import {
   WorkoutDataWithSelectedWorkout,
 } from '@src/@types/navigation'
 import { getTrimmedName } from '@utils/getTrimmedName'
-import { ICardExerciseData } from '@hooks/authTypes'
-import { translateMuscleGroupInfo } from '@utils/translateMuscles'
+import { ICardExerciseData, IptBrUs } from '@hooks/authTypes'
 
 export function UserWorkoutList() {
   const { isWaitingApiResponse, user } = useAuth()
@@ -50,29 +49,13 @@ export function UserWorkoutList() {
   const letter = String.fromCharCode(65 + cardIndex)
   getFormattedNames(data.cardExerciseUniquesMuscles)
 
-  function getFormattedNames(muscles: string[]) {
-    const translattedMuscleGroupUStoPTBR = muscles.map((englishMuscle) => {
-      if (!translateMuscleGroupInfo) return ''
-      const findIt = translateMuscleGroupInfo.find(
-        (translatedUSandPTBRItem) =>
-          translatedUSandPTBRItem.us === englishMuscle,
-      )
-      if (!findIt) return ''
-      if (!user) return ''
+  function getFormattedNames(muscles: IptBrUs[]) {
+    const selectedLanguage = user?.selectedLanguage
+    if (selectedLanguage === undefined) return
 
-      const translated = findIt[user.selectedLanguage]
-
-      return translated
-    })
-
-    if (!translattedMuscleGroupUStoPTBR) return
-
-    muscleGroupsLabel = translattedMuscleGroupUStoPTBR.reduce(
-      (acc, item, index) => {
-        return acc + (index > 0 ? ', ' : '') + item
-      },
-      '',
-    )
+    muscleGroupsLabel = muscles.reduce((acc, item, index) => {
+      return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
+    }, '')
   }
 
   function handleNextScreen(selectedData?: ICardExerciseData) {
@@ -114,7 +97,7 @@ export function UserWorkoutList() {
           <BioInfo>
             <BioInfoLetter>{`Treino ${letter}`}</BioInfoLetter>
 
-            <BioInfoName>{getTrimmedName(30, muscleGroupsLabel)}</BioInfoName>
+            <BioInfoName>{getTrimmedName(26, muscleGroupsLabel)}</BioInfoName>
           </BioInfo>
         </BioInfoWrapper>
       </HeaderImageBackground>

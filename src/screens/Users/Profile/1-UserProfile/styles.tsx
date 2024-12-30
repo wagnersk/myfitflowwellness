@@ -92,5 +92,5 @@ export const Label = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 `

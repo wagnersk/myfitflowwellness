@@ -71,6 +71,11 @@ export const WorkoutRepetitionWrapper = styled.View`
   align-items: center;
   justify-content: center;
 `
+export const MuscleAndWeightWrapper = styled.View`
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+`
 
 export const WorkoutTipsTitleWrapper = styled.View`
   align-items: center;
@@ -105,8 +110,6 @@ export const WorkoutWeightAndButtonPlusLessWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  margin: 0 48px;
 `
 
 export const WorkoutButtonContainer = styled.View`
@@ -137,7 +140,6 @@ export const WorkoutWeightValueAndTextWrapper = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  flex: 1;
 `
 
 export const WorkoutWeightValueWrapper = styled.View`

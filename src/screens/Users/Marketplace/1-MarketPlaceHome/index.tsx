@@ -9,8 +9,6 @@ import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageB
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { WorkoutsCategoriesCardList } from '@components/Cards/WorkoutsCategoriesCard/WorkoutsCategoriesCardList'
 import { useAuth } from '@hooks/auth'
-import Whatsapp from '@assets/Whatsapp.svg'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
   Container,
@@ -31,11 +29,7 @@ import {
   CallButtonWrapper,
 } from './styles'
 import { FlatList } from 'react-native-gesture-handler'
-import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
-import {
-  ICachedWorkoutsWithLastUpdatedTimestamp,
-  IptBrUs,
-} from '@hooks/authTypes'
+import { ICachedWorkoutsWithLastUpdatedTimestamp } from '@hooks/authTypes'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { Photo } from '@components/Photo'
 import { WhatsappButton } from '@components/Buttons/WhatsappButton'
@@ -210,7 +204,7 @@ export function MarketPlaceHome() {
                 />
               )}
               keyExtractor={(item, i) => i.toString()}
-              numColumns={2} // Defina o número de colunas aqui
+              numColumns={3} // Defina o número de colunas aqui
               showsVerticalScrollIndicator={true}
               ItemSeparatorComponent={() => <View style={{ height: 32 }} />}
             />

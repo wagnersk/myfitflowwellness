@@ -34,7 +34,11 @@ export function WorkoutCardItem({ item, index, isEnd, ...rest }: Props) {
   const selectedLanguage = user?.selectedLanguage
   return (
     <Container index={index} isEnd={isEnd} activeOpacity={1} {...rest}>
-      <ContainerGradient colors={[]} index={index} isEnd={isEnd}>
+      <ContainerGradient
+        colors={['#000000', '#FFFFFF']}
+        index={index}
+        isEnd={isEnd}
+      >
         <ImageWrapper>
           {item.workoutExerciseThumbnailUrl && (
             <>
@@ -71,7 +75,7 @@ export function WorkoutCardItem({ item, index, isEnd, ...rest }: Props) {
             <WorkoutCardRepeatAndQuantity>
               {item &&
                 item.workoutExerciseSets &&
-                `${item && item.workoutExerciseSets && item && item.workoutExerciseSets?.length > 0 ? item && item.workoutExerciseSets : null} de ${item && item.workoutExerciseRepetition}`}
+                `${item && item.workoutExerciseSets && item && item.workoutExerciseSets?.length > 0 ? `${item && item.workoutExerciseRepetition} de ${item && item.workoutExerciseSets[0]}...` : null}`}
 
               {item &&
                 selectedLanguage &&

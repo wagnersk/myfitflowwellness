@@ -24,13 +24,13 @@ export interface ICardExerciseData {
   workoutExerciseName?: IptBrUs
   workoutExerciseName_insensitive?: IptBrUs
   workoutExerciseRepetition?: string
-  workoutExerciseSets?: string
+  workoutExerciseSets?: string[]
   workoutExerciseRestTime?: IptBrUs
   workoutExerciseRestTimeNumber?: number
   workoutExerciseTechniqueTitle?: IptBrUs
   workoutExerciseTechniqueDescription?: IptBrUs
   workoutExerciseTypes?: string
-  workoutExercisePrimaryMuscleGroup?: string
+  workoutExercisePrimaryMuscleGroup?: IptBrUs
   workoutExerciseFilters?: ICachedFiltersExercise
   createdAt?: ServerTimestamp
   updatedAt?: ServerTimestamp
@@ -62,7 +62,7 @@ interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
   cardExerciseData: IFormattedCardExerciseData[]
-  cardExerciseUniquesMuscles: string[]
+  cardExerciseUniquesMuscles: IptBrUs[]
 }
 export type WorkoutExercise = {
   isEnabled: boolean
@@ -70,10 +70,10 @@ export type WorkoutExercise = {
   workoutExerciseIndex: number
   workoutExercisesName: string
   workoutExercisesRepetition: string
-  workoutExercisesSets: string
+  workoutExercisesSets: string[]
   workoutExercisesRestTime: string
   workoutExercisesRestTimeNumber: number
-  workoutExerciseMuscleGroup: string
+  workoutExerciseMuscleGroup: IptBrUs
   workoutExerciseId?: string
   workoutExercisesName_insensitive: string
   workoutExercisesTechniqueTitle?: string
@@ -198,7 +198,7 @@ export type WorkoutsExercisesInfoProps = {
   createdAt?: ServerTimestamp
   updatedAt?: ServerTimestamp
 
-  workoutExerciseMuscleGroup: string
+  workoutExerciseMuscleGroup: IptBrUs
   exerciseName: string
   exerciseVideoFileName: string
   exerciseVideoThumbnailBase64: string

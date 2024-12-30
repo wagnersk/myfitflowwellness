@@ -265,13 +265,13 @@ export interface ICardExerciseData {
   workoutExerciseName?: IptBrUs
   workoutExerciseName_insensitive?: IptBrUs
   workoutExerciseRepetition?: string
-  workoutExerciseSets?: string
+  workoutExerciseSets?: string[]
   workoutExerciseRestTime?: IptBrUs
   workoutExerciseRestTimeNumber?: number
   workoutExerciseTechniqueTitle?: IptBrUs
   workoutExerciseTechniqueDescription?: IptBrUs
   workoutExerciseTypes?: string
-  workoutExercisePrimaryMuscleGroup?: string
+  workoutExercisePrimaryMuscleGroup?: IptBrUs
   workoutExerciseFilters?: ICachedFiltersExercise
   createdAt?: ServerTimestamp
   updatedAt?: ServerTimestamp
@@ -324,7 +324,7 @@ export interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
   cardExerciseData: IFormattedCardExerciseData[]
-  cardExerciseUniquesMuscles: string[]
+  cardExerciseUniquesMuscles: IptBrUs[]
 }
 
 export interface IWorkoutInfo {
@@ -362,7 +362,7 @@ export interface IMyfitflowWorkoutInUse {
   workoutPlanType?: string
 
   workoutsUniquesFilters: ILocalCardExerciseFilters
-  workoutsUniquesMuscles: string[]
+  workoutsUniquesMuscles: IptBrUs[]
   workoutsUniquesTypes: string[]
 
   workoutMuscleFocus: IptBrUs[]
@@ -499,7 +499,7 @@ export interface Exercise {
   workoutCardIndex: number // item para find
   workoutExerciseWeight: number // fator para montar grafico
   workoutExerciseRestTimeNumber: number // fator para montar grafico
-  workoutExerciseSets: string // fator para montar grafico
+  workoutExerciseSets: string[] // fator para montar grafico
   workoutExerciseRepetition: string
   workoutExerciseMuscleGroup: IptBrUs // fator para montar grafico
   workoutExerciseName_insensitive: IptBrUs // fator para montar grafico

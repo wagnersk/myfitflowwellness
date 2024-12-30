@@ -13,6 +13,8 @@ import {
   PhotoImageWrapper,
   PhotoPreLoadingImageBackground,
   WorkoutCategoryNameWrapper,
+  CircleCounterWrapper,
+  CircleCounter,
 } from './styles'
 import { useAuth } from '@hooks/auth'
 import { IWorkoutCategory } from '@src/@types/navigation'
@@ -29,8 +31,11 @@ export function WorkoutsCategoriesCardItem({
   const selectedLanguage = user?.selectedLanguage
   return (
     <Container>
+      <CircleCounterWrapper>
+        <CircleCounter>{data?.total}</CircleCounter>
+      </CircleCounterWrapper>
       <TouchableOpacity onPress={() => handleNextStep(data)}>
-        <ContainerGradient colors={[]}>
+        <ContainerGradient colors={['#000000', '#FFFFFF']}>
           <PhotoImageWrapper>
             <PhotoPreLoadingImageBackground />
             {data.workoutCategoryPhoto.workoutCategoryPhotoUrlDownload && (
@@ -42,7 +47,7 @@ export function WorkoutsCategoriesCardItem({
                 alt=""
                 contentFit="cover"
                 style={{
-                  width: 144,
+                  width: 110,
                   height: 104,
                   borderTopRightRadius: 8,
                   borderTopLeftRadius: 8,
@@ -63,9 +68,6 @@ export function WorkoutsCategoriesCardItem({
                       data.workoutCategoryName[selectedLanguage]}
                   </WorkoutCategoryName>
                 </WorkoutCategoryNameWrapper>
-                {/*     <WorkoutCategoryTotalWorkouts>
-                    {data?.workoutCategoryTotalWorkouts}
-                  </WorkoutCategoryTotalWorkouts> */}
               </InfoWrapper>
             </InfoAndButtonWrapper>
           </InfoAndButtonAndBottomLineWrapper>

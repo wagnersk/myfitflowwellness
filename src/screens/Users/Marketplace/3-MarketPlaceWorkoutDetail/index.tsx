@@ -41,6 +41,7 @@ import { WorkoutMuscleComponent } from '@components/WorkoutMuscleComponent'
 import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
+import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 
 export function MarketPlaceWorkoutDetail() {
   const { user, isWaitingApiResponse } = useAuth()
@@ -89,7 +90,10 @@ export function MarketPlaceWorkoutDetail() {
 
   loadEquipamentInfoValues()
   loadMuscleGroupInfoValues()
-
+  console.log(
+    `dataParam.data.workoutsUniquesMuscles`,
+    dataParam.data.workoutsUniquesMuscles,
+  )
   function loadEquipamentInfoValues() {
     const data = dataParam.data
     if (!user) return
@@ -141,25 +145,25 @@ export function MarketPlaceWorkoutDetail() {
   function loadMuscleGroupInfoValues() {
     if (dataParam.data) {
       if (!translateMuscleGroupInfo) return
-      const translattedMuscleGroupUStoPTBR =
-        dataParam.data.workoutsUniquesMuscles.map((englishMuscle) => {
-          if (!translateMuscleGroupInfo) return ''
-          const findIt = translateMuscleGroupInfo.find(
-            (translatedUSandPTBRItem) =>
-              translatedUSandPTBRItem.us === englishMuscle,
-          )
-          if (!findIt) return ''
-          if (!selectedLanguage) return ''
-          const translated = findIt[selectedLanguage]
 
-          return translated
-        })
+      const translattedMuscleGroupUStoPTBR =
+        dataParam.data.workoutsUniquesMuscles.map(
+          (muscleName: { 'pt-br': string; us: string }) => {
+            if (!translateMuscleGroupInfo) return { 'pt-br': '', us: '' }
+
+            return muscleName
+          },
+        )
 
       if (!translattedMuscleGroupUStoPTBR) return
-
+      if (selectedLanguage === undefined) return
       muscleGroupsLabel = translattedMuscleGroupUStoPTBR.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item
+        (acc: string, item: IptBrUs, index: number) => {
+          return (
+            acc +
+            (index > 0 ? ', ' : '') +
+            item[selectedLanguage as 'pt-br' | 'us']
+          )
         },
         '',
       )
@@ -194,9 +198,6 @@ export function MarketPlaceWorkoutDetail() {
             <LockIconWrapper>
               <Plan size={48} level={dataParam.data.workoutPlanType} />
             </LockIconWrapper>
-            {muscleGroupsLabel && (
-              <WorkoutMuscleComponent description={muscleGroupsLabel} />
-            )}
           </PhotoImageWrapper>
           <Wrapper>
             <TitleWrapper>
@@ -274,6 +275,9 @@ export function MarketPlaceWorkoutDetail() {
               otherLabel={otherLabel}
               weightLabel={weightLabel}
             />
+            {muscleGroupsLabel && (
+              <WorkoutMuscleComponent description={muscleGroupsLabel} />
+            )}
           </BodyInfo>
         </BodyImageContainer>
       </ScrollView>

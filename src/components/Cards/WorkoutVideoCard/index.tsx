@@ -1,11 +1,11 @@
 /* eslint-disable camelcase */
 import React, { useState, memo, useRef, useEffect } from 'react'
-import { View, Modal, StyleSheet, Dimensions } from 'react-native'
+import { View, Modal, Dimensions } from 'react-native'
 import { Image } from 'expo-image'
 
 import { useAuth } from '@hooks/auth'
 
-import { format, fromUnixTime, isSameDay } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import * as FileSystem from 'expo-file-system'
@@ -57,6 +57,7 @@ import {
   WorkoutUserNotes,
   WorkoutUserNotesNullViewToBalanceCSS,
   BlurViewWrapper,
+  MuscleAndWeightWrapper,
 } from './styles'
 
 interface Props {
@@ -544,7 +545,6 @@ function WorkoutVideoCardComponent({
           updateProgressionData(copyProgression)
         }
         function updateProgressionData(data: ICachedExerciseHistoryData[]) {
-          console.log(`saveWeightProgression@@@@@@@@@@`)
           setWeightProgressionData(data)
           saveWeightProgression(data)
         }
@@ -862,65 +862,70 @@ function WorkoutVideoCardComponent({
               <>
                 <WorkoutRepetitionValue>
                   <WorkoutRepetitionName> repetições </WorkoutRepetitionName>
-                  {item.workoutExerciseRepetition}
+                  <WorkoutRepetitionValue>
+                    {item.workoutExerciseRepetition}
+                  </WorkoutRepetitionValue>
                 </WorkoutRepetitionValue>
               </>
             )}
           </WorkoutRepetitionWrapper>
-
-          <WorkoutTipsTitleWrapper>
-            <WorkoutTipsTitle>
-              {item &&
-                selectedLanguage &&
-                item.workoutExerciseMuscleGroup &&
-                item.workoutExerciseMuscleGroup[selectedLanguage]}
-            </WorkoutTipsTitle>
-          </WorkoutTipsTitleWrapper>
-
+          <MuscleAndWeightWrapper>
+            <WorkoutTipsTitleWrapper>
+              <WorkoutTipsTitle>
+                {item &&
+                  selectedLanguage &&
+                  item.workoutExerciseMuscleGroup &&
+                  item.workoutExerciseMuscleGroup[selectedLanguage]}
+              </WorkoutTipsTitle>
+            </WorkoutTipsTitleWrapper>
+            {item.workoutExerciseRepetition && item.workoutExerciseSets && (
+              <WorkoutWeightAndButtonPlusLessWrapper>
+                <WorkoutButton
+                  onPress={handleLessWeight}
+                  style={{ opacity: isFocused ? 1 : 0.4 }}
+                >
+                  <Less width={28} height={28} stroke="#D92727" />
+                </WorkoutButton>
+                <WorkoutWeightValueAndTextWrapper
+                  style={{
+                    opacity: isFocused ? 1 : 0.4,
+                  }}
+                >
+                  <WorkoutWeightValue
+                    keyboardType="numeric"
+                    onChangeText={(x: string) => {
+                      setModalWeightState((prevState) => ({
+                        ...prevState,
+                        workoutExerciseWeight: Number(x),
+                      }))
+                    }}
+                    value={String(modalWeightState.weight)}
+                    caretHidden={true}
+                  />
+                  <WorkoutWeightText>kg</WorkoutWeightText>
+                </WorkoutWeightValueAndTextWrapper>
+                <WorkoutButton
+                  onPress={handlePlusWeight}
+                  style={{ opacity: isFocused ? 1 : 0.4 }}
+                >
+                  <More width={42} height={42} stroke="#1CAA44" />
+                </WorkoutButton>
+              </WorkoutWeightAndButtonPlusLessWrapper>
+            )}
+          </MuscleAndWeightWrapper>
           <WorkoutSerieWrapper>
             {item.workoutExerciseRepetition && item.workoutExerciseSets && (
               <>
                 <WorkoutSerieName>série</WorkoutSerieName>
-                <WorkoutSerieValue>
-                  {item.workoutExerciseSets}
-                </WorkoutSerieValue>
+
+                {item.workoutExerciseSets.map((v, i) => (
+                  <WorkoutSerieValue key={i}>{v}</WorkoutSerieValue>
+                ))}
               </>
             )}
           </WorkoutSerieWrapper>
         </WorkoutRepetitionAndSerieWrapper>
 
-        {item.workoutExerciseRepetition && item.workoutExerciseSets && (
-          <WorkoutWeightAndButtonPlusLessWrapper>
-            <WorkoutButton
-              onPress={handleLessWeight}
-              style={{ opacity: isFocused ? 1 : 0.4 }}
-            >
-              <Less width={28} height={28} stroke="#D92727" />
-            </WorkoutButton>
-            <WorkoutWeightValueAndTextWrapper
-              style={{ opacity: isFocused ? 1 : 0.4 }}
-            >
-              <WorkoutWeightValue
-                keyboardType="numeric"
-                onChangeText={(x: string) => {
-                  setModalWeightState((prevState) => ({
-                    ...prevState,
-                    workoutExerciseWeight: Number(x),
-                  }))
-                }}
-                value={String(modalWeightState.weight)}
-                caretHidden={true}
-              />
-              <WorkoutWeightText>kg</WorkoutWeightText>
-            </WorkoutWeightValueAndTextWrapper>
-            <WorkoutButton
-              onPress={handlePlusWeight}
-              style={{ opacity: isFocused ? 1 : 0.4 }}
-            >
-              <More width={42} height={42} stroke="#1CAA44" />
-            </WorkoutButton>
-          </WorkoutWeightAndButtonPlusLessWrapper>
-        )}
         <WorkoutUserNotesAndConfirmButtonWrapper>
           <WorkoutUserNotesButton
             onPress={openNotes}
@@ -929,7 +934,7 @@ function WorkoutVideoCardComponent({
           >
             <WorkoutUserNotes
               style={{ opacity: modalNotesState ? 1 : 0.4 }}
-              colors={[]}
+              colors={['#000000', '#FFFFFF']}
             >
               <ExclamationMark />
             </WorkoutUserNotes>

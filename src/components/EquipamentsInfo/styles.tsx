@@ -16,6 +16,7 @@ export const BorderWrapper = styled.View`
   border: 1px ${({ theme }) => theme.COLORS.BLUE_STROKE};
   flex-wrap: wrap;
   padding: 16px;
+  gap: 24px;
 `
 export const TitleWrapper = styled.View`
   position: absolute;

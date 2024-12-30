@@ -24,6 +24,7 @@ import {
 import { getTrimmedName } from '@utils/getTrimmedName'
 import { IWorkoutLog, IWorkoutsData } from '@hooks/authTypes'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
+import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 interface WorkoutsInfoProps extends TouchableOpacityProps {
   cardIndex: number
   handleNextStep: (data: IWorkoutsData, cardIndex: number) => void
@@ -83,29 +84,13 @@ export function WorkoutBlueCardItem({
 
   getFormattedNames(data.cardExerciseUniquesMuscles)
 
-  function getFormattedNames(muscles: string[]) {
-    const translattedMuscleGroupUStoPTBR = muscles.map((englishMuscle) => {
-      if (!translateMuscleGroupInfo) return ''
-      const findIt = translateMuscleGroupInfo.find(
-        (translatedUSandPTBRItem) =>
-          translatedUSandPTBRItem.us === englishMuscle,
-      )
-      if (!findIt) return ''
-      if (!user) return ''
+  function getFormattedNames(muscles: IptBrUs[]) {
+    const selectedLanguage = user?.selectedLanguage
+    if (selectedLanguage === undefined) return
 
-      const translated = findIt[user.selectedLanguage]
-
-      return translated
-    })
-
-    if (!translattedMuscleGroupUStoPTBR) return
-
-    muscleGroupsLabel = translattedMuscleGroupUStoPTBR.reduce(
-      (acc, item, index) => {
-        return acc + (index > 0 ? ', ' : '') + item
-      },
-      '',
-    )
+    muscleGroupsLabel = muscles.reduce((acc, item, index) => {
+      return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
+    }, '')
   }
 
   function checkIfIsSameDay() {
@@ -180,10 +165,7 @@ export function WorkoutBlueCardItem({
                         .lastCompletedFormattedDay
                     }
                   </WorkoutCardDay>
-                  {console.log(
-                    copyWorkoutsLog.workoutCardsLogData[cardIndex]
-                      .lastCompletedFormattedDay,
-                  )}
+
                   <WorkoutCardDateSeparator>
                     {copyWorkoutsLog.workoutCardsLogData[cardIndex]
                       .lastCompletedFormattedDay && '  -  '}

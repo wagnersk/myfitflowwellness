@@ -3,38 +3,37 @@ import { RFValue } from '@utils/RFValue'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export const Container = styled.View`
-  /*   width: 144px; */
+  position: relative;
 `
 
 export const InfoAndButtonAndBottomLineWrapper = styled.View`
-  flex-direction: column;
   padding: 8px;
-  width: 100%;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  width: 110px;
 `
 
 export const InfoAndButtonWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 `
 
 export const InfoWrapper = styled.View`
   justify-content: center;
+  align-items: center;
 `
 export const WorkoutCategoryNameWrapper = styled.View`
-  width: 126px;
-  height: 50px;
+  justify-content: center;
+  align-items: center;
 `
 
 export const WorkoutCategoryName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
+  font-size: ${RFValue(12)}px;
   margin-bottom: 8px;
-  font-size: 14px;
-  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 `
 
 export const WorkoutCategoryTotalWorkouts = styled.Text`
@@ -49,12 +48,11 @@ export const WorkoutCategoryTotalWorkouts = styled.Text`
 export const PhotoImageWrapper = styled.View`
   justify-content: center;
   align-items: center;
-  width: 140px;
+  width: 100%;
   height: 104px;
 `
 
 export const PhotoPreLoadingImageBackground = styled.View`
-  width: 144px;
   height: 104px;
 
   border-top-right-radius: 12px;
@@ -73,9 +71,31 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 
   border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
   border-radius: 8px;
 
   border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  width: 100%;
+`
+export const CircleCounterWrapper = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50px;
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 1;
+`
+
+// Estilo para o contador circular
+export const CircleCounter = styled.Text`
+  font-size: 14px;
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
 `
