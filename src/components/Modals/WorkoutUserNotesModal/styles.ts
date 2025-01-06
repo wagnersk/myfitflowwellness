@@ -29,9 +29,13 @@ export const Container = styled.View`
   padding: 16px;
   gap: 12px;
 `
-export const TipsNoteBodyWrapper = styled.View``
+export const TipsNoteBodyWrapper = styled.View`
+  gap: 12px;
+`
 
-export const TipsNoteWrapper = styled.View``
+export const TipsNoteWrapper = styled.View`
+  gap: 12px;
+`
 
 export const TipsTitleNoteWrapper = styled.View`
   width: 100%;
@@ -39,9 +43,16 @@ export const TipsTitleNoteWrapper = styled.View`
   align-items: center;
 `
 
-export const TipsTitleNote = styled.Text`
+export const Title = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(20)}px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const SubTitle = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(16)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
   justify-content: flex-start;
@@ -92,7 +103,7 @@ export const TipsButtonText = styled.Text`
 
 export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
   ({ theme }) => ({
-    colors: theme.COLORS.GRADIENT_BUTTON,
+    colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   }),

@@ -4,10 +4,12 @@ import {
   Keyboard,
   BackHandler,
   Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native'
 
 import { useTheme } from 'styled-components'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useNavigation } from '@react-navigation/core'
 import { useAuth } from '@hooks/auth'
 
@@ -272,80 +274,84 @@ export function NewAccount() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <KeyboardAwareScrollView style={{ width: '100%' }}>
-          <Header>
-            <MyFitFlowLogoComponent width={500} height={500} />
-          </Header>
+        <KeyboardAvoidingView
+          style={{ width: '100%', flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <Header>
+              <MyFitFlowLogoComponent width={500} height={500} />
+            </Header>
+            <BodyTop>
+              <UserNameInput
+                handleChangeUserName={handleChangeUserName}
+                value={userForm.name.value}
+                errorBoolean={userForm.name.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="up"
+                order="top"
+                editable={!isLogging}
+                topPosition={4}
+              />
+              <EmailInput
+                handleChangeEmail={handleChangeEmail}
+                value={userForm.email.value}
+                errorBoolean={userForm.email.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="up"
+                order="middle"
+                editable={!isLogging}
+                topPosition={2}
+              />
+              <PasswordInput
+                handleChangePassword={handleChangePassword}
+                value={userForm.password.value}
+                errorBoolean={userForm.password.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="down"
+                order="bottom"
+                editable={!isLogging}
+                topPosition={2}
+              />
+              <SpaceBetweenInput />
+              <WhatsappInput
+                handleChangeWhatsapp={handleChangeWhatsappNumber}
+                value={userForm.whatsappNumber.value}
+                errorBoolean={userForm.whatsappNumber.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="up"
+                order="top"
+                editable={!isLogging}
+                topPosition={2}
+              />
 
-          <BodyTop>
-            <UserNameInput
-              handleChangeUserName={handleChangeUserName}
-              value={userForm.name.value}
-              errorBoolean={userForm.name.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="up"
-              order="top"
-              editable={!isLogging}
-              topPosition={4}
-            />
-            <EmailInput
-              handleChangeEmail={handleChangeEmail}
-              value={userForm.email.value}
-              errorBoolean={userForm.email.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="up"
-              order="middle"
-              editable={!isLogging}
-              topPosition={2}
-            />
-            <PasswordInput
-              handleChangePassword={handleChangePassword}
-              value={userForm.password.value}
-              errorBoolean={userForm.password.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="down"
-              order="bottom"
-              editable={!isLogging}
-              topPosition={2}
-            />
-            <SpaceBetweenInput />
-            <WhatsappInput
-              handleChangeWhatsapp={handleChangeWhatsappNumber}
-              value={userForm.whatsappNumber.value}
-              errorBoolean={userForm.whatsappNumber.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="up"
-              order="top"
-              editable={!isLogging}
-              topPosition={2}
-            />
+              <CalendarInput
+                handleChangeBirthday={handleChangeBirthdate}
+                value={userForm.birthdate.value}
+                errorBoolean={userForm.birthdate.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="down"
+                order="bottom"
+                editable={!isLogging}
+              />
 
-            <CalendarInput
-              handleChangeBirthday={handleChangeBirthdate}
-              value={userForm.birthdate.value}
-              errorBoolean={userForm.birthdate.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="down"
-              order="bottom"
-              editable={!isLogging}
-            />
+              <SpaceBetweenFormAndButton />
 
-            <SpaceBetweenFormAndButton />
+              <ViewWithLineAndIcon />
 
-            <ViewWithLineAndIcon />
-
-            <CTAButton
-              onPress={handleSignUp}
-              title="Cadastrar"
-              loading={isWaitingApiResponse}
-            />
-          </BodyTop>
-        </KeyboardAwareScrollView>
+              <CTAButton
+                onPress={handleSignUp}
+                title="Cadastrar"
+                loading={isWaitingApiResponse}
+              />
+            </BodyTop>
+          </ScrollView>
+        </KeyboardAvoidingView>
 
         <Footer>
           <FooterWrapper onPress={handleGoBack}>

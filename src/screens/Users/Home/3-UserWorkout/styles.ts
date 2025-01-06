@@ -92,7 +92,7 @@ export const TipsWrapper = styled.View`
 export const TipsText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};
   color: ${({ theme }) => theme.COLORS.NEUTRA_BLACK_LOGO};
-  font-size: ${RFValue(14)}px;
+  font-size: ${RFValue(12)}px;
   opacity: 0.9;
 `
 

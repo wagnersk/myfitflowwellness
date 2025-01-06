@@ -4,6 +4,7 @@ import {
   FlatList,
   ViewToken,
   Platform,
+  ScrollView,
 } from 'react-native'
 
 import { useNavigation } from '@react-navigation/core'
@@ -138,24 +139,27 @@ export function UserWorkout() {
                 selectedLanguage && (
                   <IosBackgroundBlurViewTipsWrapper intensity={80} tint="light">
                     <ContentWrapper>
-                      <TipsTitleWrapper>
-                        <TipsTitle>
-                          {
-                            workoutCardInfo.workoutExerciseTechniqueTitle[
-                              selectedLanguage
-                            ]
-                          }
-                        </TipsTitle>
-                      </TipsTitleWrapper>
-                      <TipsTextWrapper>
-                        <TipsText>
-                          {
-                            workoutCardInfo.workoutExerciseTechniqueDescription[
-                              selectedLanguage
-                            ]
-                          }
-                        </TipsText>
-                      </TipsTextWrapper>
+                      <ScrollView>
+                        <TipsTitleWrapper>
+                          <TipsTitle>
+                            {
+                              workoutCardInfo.workoutExerciseTechniqueTitle[
+                                selectedLanguage
+                              ]
+                            }
+                          </TipsTitle>
+                        </TipsTitleWrapper>
+                        <TipsTextWrapper>
+                          <TipsText>
+                            {
+                              workoutCardInfo
+                                .workoutExerciseTechniqueDescription[
+                                selectedLanguage
+                              ]
+                            }
+                          </TipsText>
+                        </TipsTextWrapper>
+                      </ScrollView>
                     </ContentWrapper>
                   </IosBackgroundBlurViewTipsWrapper>
                 )

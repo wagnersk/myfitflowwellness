@@ -6,7 +6,6 @@ import {
   TextInputProps,
   Platform,
 } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
 
 import {
   Container,
@@ -19,9 +18,10 @@ import {
   TipsButton,
   TipsButtonText,
   TipsButtonLinearGradientSave,
-  OverLay,
   OverLayTop,
   OverLayBottom,
+  SubTitle,
+  Title,
 } from './styles'
 import { useAuth } from '@hooks/auth'
 
@@ -30,12 +30,13 @@ interface InputProps extends TextInputProps {
   handleUpdateNotes: (notes: string) => void
   notes: string
   workoutExerciseId?: string
+  exerciseName?: string
 }
 
 export function WorkoutUserNotesModal({
   closeModal,
   handleUpdateNotes,
-  workoutExerciseId,
+  exerciseName,
   notes,
   ...rest
 }: InputProps) {
@@ -77,36 +78,31 @@ export function WorkoutUserNotesModal({
       <OverLayBottom>
         <Container>
           <TipsNoteBodyWrapper>
-            <KeyboardAvoidingView
-              style={{ gap: 80 }}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              enabled
-            >
-              <TipsNoteWrapper>
-                <TipsTitleNoteWrapper>
-                  <TipsTitleNote>Anotações</TipsTitleNote>
-                </TipsTitleNoteWrapper>
+            <TipsNoteWrapper>
+              <TipsTitleNoteWrapper>
+                <Title>Anotações</Title>
+                <SubTitle>{exerciseName}</SubTitle>
+              </TipsTitleNoteWrapper>
 
-                <TipsInputNotes
-                  value={newNotes}
-                  onChangeText={changeNotes}
-                  textAlignVertical="top"
-                  multiline={true}
-                  isFocused={isFocused}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  {...rest}
-                />
-              </TipsNoteWrapper>
+              <TipsInputNotes
+                value={newNotes}
+                onChangeText={changeNotes}
+                textAlignVertical="top"
+                multiline={true}
+                isFocused={isFocused}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                {...rest}
+              />
+            </TipsNoteWrapper>
 
-              <TipsButtonWrapper>
-                <TipsButton onPress={updateNotes}>
-                  <TipsButtonLinearGradientSave colors={[``]}>
-                    <TipsButtonText>Salvar</TipsButtonText>
-                  </TipsButtonLinearGradientSave>
-                </TipsButton>
-              </TipsButtonWrapper>
-            </KeyboardAvoidingView>
+            <TipsButtonWrapper>
+              <TipsButton onPress={updateNotes}>
+                <TipsButtonLinearGradientSave colors={['#000000', '#FFFFFF']}>
+                  <TipsButtonText>Salvar</TipsButtonText>
+                </TipsButtonLinearGradientSave>
+              </TipsButton>
+            </TipsButtonWrapper>
           </TipsNoteBodyWrapper>
         </Container>
       </OverLayBottom>

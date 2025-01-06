@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import {
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
   BackHandler,
+  KeyboardAvoidingView,
+  ScrollView,
   Platform,
 } from 'react-native'
 
@@ -33,7 +34,6 @@ import {
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 export function Login() {
   const { firebaseSignIn, firebaseForgotPassword, isLogging } = useAuth()
@@ -156,53 +156,58 @@ export function Login() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <KeyboardAwareScrollView style={{ width: '100%' }}>
-          <Header>
-            <MyFitFlowLogoComponent width={500} height={500} />
-          </Header>
-          <BodyTop>
-            <EmailInput
-              handleChangeEmail={handleChangeEmail}
-              value={userForm.email.value}
-              errorBoolean={userForm.email.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="up"
-              order="top"
-              topPosition={2}
-              editable={!isLogging}
-            />
-            <PasswordInput
-              handleChangePassword={handleChangePassword}
-              value={userForm.password.value}
-              errorBoolean={userForm.password.errorBoolean}
-              onFocus={() => {}}
-              type="transparent"
-              borderDesign="down"
-              order="bottom"
-              editable={!isLogging}
-            />
-
-            <ForgotPasswordWrapper>
-              <ForgotPasswordButtonWrapper
-                onPress={handleForgotPassword}
-                disabled={!isLogging}
-              >
-                <ForgotPasswordText>esqueci minha senha</ForgotPasswordText>
-              </ForgotPasswordButtonWrapper>
-            </ForgotPasswordWrapper>
-
-            <ButtonWithIcon>
-              <CTAButton
-                disabled={isLogging}
-                loading={isLogging}
-                title="Entrar"
-                onPress={handleSignIn}
+        <KeyboardAvoidingView
+          style={{ width: '100%', flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <Header>
+              <MyFitFlowLogoComponent width={500} height={500} />
+            </Header>
+            <BodyTop>
+              <EmailInput
+                handleChangeEmail={handleChangeEmail}
+                value={userForm.email.value}
+                errorBoolean={userForm.email.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="up"
+                order="top"
+                topPosition={2}
+                editable={!isLogging}
               />
-              <ViewWithLineAndIcon />
-            </ButtonWithIcon>
-          </BodyTop>
-        </KeyboardAwareScrollView>
+              <PasswordInput
+                handleChangePassword={handleChangePassword}
+                value={userForm.password.value}
+                errorBoolean={userForm.password.errorBoolean}
+                onFocus={() => {}}
+                type="transparent"
+                borderDesign="down"
+                order="bottom"
+                editable={!isLogging}
+              />
+
+              <ForgotPasswordWrapper>
+                <ForgotPasswordButtonWrapper
+                  onPress={handleForgotPassword}
+                  disabled={!isLogging}
+                >
+                  <ForgotPasswordText>esqueci minha senha</ForgotPasswordText>
+                </ForgotPasswordButtonWrapper>
+              </ForgotPasswordWrapper>
+
+              <ButtonWithIcon>
+                <CTAButton
+                  disabled={isLogging}
+                  loading={isLogging}
+                  title="Entrar"
+                  onPress={handleSignIn}
+                />
+                <ViewWithLineAndIcon />
+              </ButtonWithIcon>
+            </BodyTop>
+          </ScrollView>
+        </KeyboardAvoidingView>
         <Footer>
           <FooterWrapper onPress={handleSignUp} disabled={isLogging}>
             <IconContainer style={{ width: 48 }}></IconContainer>

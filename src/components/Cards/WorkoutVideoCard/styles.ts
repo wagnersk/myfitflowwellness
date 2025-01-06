@@ -21,13 +21,59 @@ interface PropsToReduceHeight {
   isFocused: boolean
 }
 
+const cardHeight = Dimensions.get('window').height / 1.9 // 426
+const cardWidth = Dimensions.get('window').width * 0.8 - 20 // 294.40000000000003
+
+const bottomCardHeight = cardHeight * 0.5 // 170.4
+
+const confirmButtonHeight = 36 // 170.4
+const confirmButtonWidth = cardWidth / 1.4 // 170.4
+
+export const WorkoutSerieWrapper = styled.View`
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+`
+export const TableWrapper = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`
 export const WorkoutNameAndVideoWrapper = styled.View`
   align-items: center;
   justify-content: center;
 
   width: 100%;
-  height: 140px;
   flex: 1;
+`
+export const WorkoutInfoWrapper = styled.View`
+  padding: 4px 0;
+  width: 100%;
+  height: ${bottomCardHeight}px;
+  justify-content: space-between;
+`
+export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
+  colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
+  start: { x: 0, y: 1 },
+  end: { x: 1, y: 0 },
+}))<PropsToReduceHeight>`
+  flex: 1;
+  padding: 12px;
+  margin: 0 10px;
+
+  align-items: center;
+  border-radius: 16px;
+  height: ${cardHeight}px;
+  width: ${cardWidth}px;
+
+  ${({ isFocused }) =>
+    !isFocused &&
+    css`
+      height: ${cardHeight - 40}px;
+
+      margin-top: 20px;
+    `}
 `
 
 export const WorkoutNameWrapper = styled.View`
@@ -39,15 +85,8 @@ export const WorkoutNameWrapper = styled.View`
 export const WorkoutName = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(18)}px;
-  padding-bottom: 12px;
-`
-
-export const WorkoutInfoWrapper = styled.View`
-  padding: 4px 0;
-  width: 100%;
-  height: 160px;
-  justify-content: space-between;
+  font-size: ${RFValue(14)}px;
+  padding-bottom: 8px;
 `
 
 export const WorkoutRepetitionAndSerieAndWeightWrapper = styled.View`
@@ -62,54 +101,14 @@ export const WorkoutInfoAndWeightWrapper = styled.View`
 export const WorkoutRepetitionAndSerieWrapper = styled.View`
   flex-direction: row;
   width: 100%;
-  justify-content: space-between;
   align-items: flex-start;
 `
 
-export const WorkoutRepetitionWrapper = styled.View`
-  width: 80px;
-  align-items: center;
-  justify-content: center;
-`
-export const MuscleAndWeightWrapper = styled.View`
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-`
-
-export const WorkoutTipsTitleWrapper = styled.View`
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  padding: 0 8px;
-  border-radius: 4px;
-`
-
-export const WorkoutTipsTitle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(12)}px;
-`
-
-export const WorkoutRepetitionName = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
-  padding-bottom: 4px;
-`
-
-export const WorkoutRepetitionValue = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
-  word-break: normal;
-`
-
-export const WorkoutWeightAndButtonPlusLessWrapper = styled.View`
+export const ButtonsWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 16px;
 `
 
 export const WorkoutButtonContainer = styled.View`
@@ -120,8 +119,8 @@ export const WorkoutButtonContainer = styled.View`
 export const WorkoutButton = styled(TouchableOpacity)<Props>`
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
 `
 
 export const WorkoutButtonLess = styled.Text`
@@ -133,7 +132,6 @@ export const WorkoutButtonLess = styled.Text`
 export const WorkoutButtonMore = styled.Text`
   color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(38)}px;
 `
 
 export const WorkoutWeightValueAndTextWrapper = styled.View`
@@ -148,28 +146,16 @@ export const WorkoutWeightValueWrapper = styled.View`
   align-items: center;
 `
 
-export const WorkoutWeightValue = styled(TextInput)`
+export const WorkoutWeightValue = styled(TouchableOpacity)<Props>`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(34)}px;
+  font-size: ${RFValue(14)}px;
 `
 
 export const WorkoutWeightText = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(18)}px;
-`
-
-export const WorkoutSerieWrapper = styled.View`
-  align-items: center;
-  width: 80px;
-`
-
-export const WorkoutSerieName = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
-  padding-bottom: 4px;
+  font-size: ${RFValue(14)}px;
 `
 
 export const WorkoutSerieValue = styled.Text`
@@ -182,9 +168,10 @@ export const WorkoutButtonConfirm = styled(TouchableOpacity)<Props>`
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  height: 48px;
-  width: 136px;
-  border-radius: 16px;
+
+  height: ${confirmButtonHeight}px;
+  width: ${confirmButtonWidth}px;
+  border-radius: 12px;
 `
 
 export const BlurViewWrapper = styled(BlurView)`
@@ -192,24 +179,15 @@ export const BlurViewWrapper = styled(BlurView)`
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  height: 48px;
-  width: 136px;
-  border-radius: 16px;
+  height: ${confirmButtonHeight}px;
+  width: ${confirmButtonWidth}px;
+  border-radius: 12px;
 `
 
 export const WorkoutButtonText = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(16)}px;
-`
-
-export const Container = styled(TouchableOpacity)`
-  background-color: transparent;
-  justify-content: center;
-  align-items: center;
-  height: 44px;
-  border-radius: 12px;
-  border-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 `
 
 export const WorkoutUserNotesAndConfirmButtonWrapper = styled.View`
@@ -224,8 +202,8 @@ export const WorkoutUserNotesWrapper = styled.View`
 `
 
 export const WorkoutUserNotesButton = styled(TouchableOpacity)<Props>`
-  height: 48px;
-  width: 48px;
+  height: 36px;
+  width: 36px;
   align-items: center;
   justify-content: center;
 `
@@ -243,12 +221,6 @@ export const WorkoutUserNotesWrite = styled.Text`
   font-size: ${RFValue(14)}px;
 `
 
-export const WorkoutTextBoxWrapper = styled.View`
-  height: 72px;
-  margin: 0 24px;
-  padding: 4px;
-`
-
 export const WorkoutTextBoxTitle = styled.Text``
 
 export const WorkoutTextBoxLetterCountWrapper = styled.View`
@@ -257,40 +229,13 @@ export const WorkoutTextBoxLetterCountWrapper = styled.View`
 
 export const WorkoutTextBoxLetterCount = styled.Text``
 
-export const WorkoutUserNotesNullViewToBalanceCSS = styled.View`
-  height: 48px;
-  width: 48px;
-`
-
-export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
-  colors: theme.COLORS.GRADIENT_CARD,
-  start: { x: 0, y: 1 },
-  end: { x: 1, y: 0 },
-}))<PropsToReduceHeight>`
-  flex: 1;
-  padding: 12px;
-  margin: 0 10px;
-
-  align-items: center;
-  border-radius: 16px;
-  width: ${Dimensions.get('window').width * 0.8 - 20}px;
-  height: ${Dimensions.get('window').width * 1}px;
-
-  ${({ isFocused }) =>
-    !isFocused &&
-    css`
-      height: ${Dimensions.get('window').width * 0.9}px;
-
-      margin-top: 20px;
-    `}
-`
 export const WorkoutUserNotes = styled(LinearGradient).attrs(({ theme }) => ({
-  colors: theme.COLORS.GRADIENT_BUTTON,
+  colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
   start: { x: 0, y: 0 },
   end: { x: 1, y: 1 },
 }))`
-  height: 24px;
-  width: 24px;
+  height: 32px;
+  width: 32px;
   align-items: center;
   justify-content: center;
   border-radius: 4px;

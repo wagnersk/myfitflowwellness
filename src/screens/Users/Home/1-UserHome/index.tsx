@@ -51,12 +51,13 @@ export function UserHome() {
     (v) => v.userId === user?.id,
   )
 
-  const startDate = new Date(
-    findWeightProgression ? findWeightProgression.createdAt : '',
-  ) // Supondo que você tenha a data de início do treino no objeto `user`
+  let daysPassed = 1
 
-  const currentDate = new Date()
-  const daysPassed = differenceInDays(currentDate, startDate)
+  if (findWeightProgression && findWeightProgression.createdAt) {
+    const startDate = new Date(findWeightProgression.createdAt)
+    const currentDate = new Date()
+    daysPassed = differenceInDays(currentDate, startDate)
+  }
   const theme = useTheme()
   const firstName = user?.name?.split(' ')
 
@@ -181,7 +182,7 @@ export function UserHome() {
             {myWorkout?.workoutPeriod.periodNumber && (
               <WarningWrapper>
                 <Warning>Dia </Warning>
-                <WarningGreetings>{daysPassed + 1} </WarningGreetings>
+                <WarningGreetings>{daysPassed} </WarningGreetings>
                 <Warning>de </Warning>
                 <WarningGreetings>
                   {myWorkout?.workoutPeriod.periodNumber * 7}

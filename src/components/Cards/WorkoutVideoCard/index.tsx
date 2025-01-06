@@ -1,13 +1,12 @@
 /* eslint-disable camelcase */
+import { View, Modal } from 'react-native'
 import React, { useState, memo, useRef, useEffect } from 'react'
-import { View, Modal, Dimensions } from 'react-native'
-import { Image } from 'expo-image'
 
+import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
 
 import { format, isSameDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-
 import * as FileSystem from 'expo-file-system'
 
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
@@ -37,28 +36,22 @@ import {
   WorkoutVideoPlayerButton,
   WorkoutInfoWrapper,
   WorkoutRepetitionAndSerieWrapper,
-  WorkoutRepetitionWrapper,
-  WorkoutTipsTitleWrapper,
-  WorkoutTipsTitle,
-  WorkoutRepetitionName,
-  WorkoutRepetitionValue,
-  WorkoutWeightAndButtonPlusLessWrapper,
+  ButtonsWrapper,
   WorkoutButton,
   WorkoutWeightValueAndTextWrapper,
   WorkoutWeightValue,
   WorkoutWeightText,
   WorkoutSerieWrapper,
   WorkoutUserNotesButton,
-  WorkoutSerieName,
   WorkoutSerieValue,
   WorkoutButtonConfirm,
   WorkoutButtonText,
   WorkoutUserNotesAndConfirmButtonWrapper,
   WorkoutUserNotes,
-  WorkoutUserNotesNullViewToBalanceCSS,
   BlurViewWrapper,
-  MuscleAndWeightWrapper,
+  TableWrapper,
 } from './styles'
+import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
 
 interface Props {
   item: IFormattedCardExerciseData
@@ -71,10 +64,10 @@ interface Props {
 interface IModalStateWorkoutLogData extends IWeightDoneLog {
   isOpenModalUserNotes: boolean
   isOpenModalVideoPlayer: boolean
+  isOpenModalUserWeight: boolean
   workoutCardIndex: number
+  activeWeightIndex: number
 }
-
-const { height } = Dimensions.get('window')
 
 function WorkoutVideoCardComponent({
   item,
@@ -98,14 +91,20 @@ function WorkoutVideoCardComponent({
   } = useAuth()
 
   const selectedLanguage = user?.selectedLanguage
+
+  const getRepetitionNumber = Number(
+    item.workoutExerciseRepetition?.replace('x', ''),
+  )
+
   const defaultModalState: IModalStateWorkoutLogData = {
     isOpenModalUserNotes: false,
     isOpenModalVideoPlayer: false,
+    isOpenModalUserWeight: false,
 
     workoutCardIndex: 0,
     exerciseIndex: 0,
     exerciseId: `0`,
-    weight: 0,
+    weight: Array(getRepetitionNumber).fill(0), // Array de getRepetitionNumber posições preenchido com 0
     completed: false,
     completedTimestamp: 0,
   }
@@ -164,6 +163,7 @@ function WorkoutVideoCardComponent({
     useState<IModalStateWorkoutLogData>(myWeightDateDone)
 
   const [modalNotesState, setModalNotesState] = useState<string>('')
+
   const [modalVideoLocalPathState, setModalVideoLocalPathState] =
     useState<string>('')
 
@@ -257,12 +257,37 @@ function WorkoutVideoCardComponent({
     setModalNotesState(_notes)
   }
 
+  async function handleUpdateWeight(_weight: string) {
+    console.log(`chegando no peso:`, _weight)
+
+    setModalWeightState((prevState) => {
+      const newWeight = [...prevState.weight]
+
+      newWeight[modalWeightState.activeWeightIndex] = Number(_weight)
+
+      return {
+        ...prevState,
+        isOpenModalUserWeight: !prevState.isOpenModalUserWeight,
+        weight: newWeight,
+      }
+    })
+  }
+
+  // ok
   function openNotes() {
     // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    console.log(`asd`)
     setModalWeightState((prevState) => ({
       ...prevState,
       isOpenModalUserNotes: true,
+    }))
+  }
+  // ok
+  function openWeight(index: number) {
+    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      isOpenModalUserWeight: true,
+      activeWeightIndex: index,
     }))
   }
 
@@ -644,32 +669,55 @@ function WorkoutVideoCardComponent({
     }
   }
 
-  function handlePlusWeight() {
+  function handlePlusWeight(index: number) {
+    setModalWeightState((prevState) => {
+      const newWeight = [...prevState.weight]
+      newWeight[index] += 1
+      return {
+        ...prevState,
+        weight: newWeight,
+      }
+    })
+  }
+
+  function handleLessWeight(index: number) {
+    setModalWeightState((prevState) => {
+      const newWeight = [...prevState.weight]
+      if (newWeight[index] > 0) {
+        newWeight[index] -= 1
+      }
+      return {
+        ...prevState,
+        weight: newWeight,
+      }
+    })
+  }
+
+  function handleWeightChange(x: string, index: number) {
+    const copyWeight = modalWeightState.weight
+
+    copyWeight[index] = Number(x)
     setModalWeightState((prevState) => ({
       ...prevState,
-      weight: modalWeightState.weight + 1,
+      weight: copyWeight,
     }))
   }
 
-  function handleLessWeight() {
-    if (modalWeightState.weight === 0) {
-      return
-    }
-
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      weight: modalWeightState.weight - 1,
-    }))
-  }
-
-  function handleCloseModal() {
+  function handleCloseNotesModal() {
     setModalWeightState((prevState) => ({
       ...prevState,
       isOpenModalUserNotes: false,
     }))
   }
 
-  const openedTimeRef = useRef(new Date().getTime())
+  function handleCloseWeightModal() {
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      isOpenModalUserWeight: false,
+    }))
+  }
+
+  // const openedTimeRef = useRef(new Date().getTime())
 
   useEffect(() => {
     const myNote = cachedNotesTable?.find(
@@ -857,73 +905,35 @@ function WorkoutVideoCardComponent({
         <WorkoutRepetitionAndSerieWrapper
           style={{ opacity: isFocused ? 1 : 0.4 }}
         >
-          <WorkoutRepetitionWrapper>
-            {item.workoutExerciseRepetition && item.workoutExerciseSets && (
-              <>
-                <WorkoutRepetitionValue>
-                  <WorkoutRepetitionName> repetições </WorkoutRepetitionName>
-                  <WorkoutRepetitionValue>
-                    {item.workoutExerciseRepetition}
-                  </WorkoutRepetitionValue>
-                </WorkoutRepetitionValue>
-              </>
-            )}
-          </WorkoutRepetitionWrapper>
-          <MuscleAndWeightWrapper>
-            <WorkoutTipsTitleWrapper>
-              <WorkoutTipsTitle>
-                {item &&
-                  selectedLanguage &&
-                  item.workoutExerciseMuscleGroup &&
-                  item.workoutExerciseMuscleGroup[selectedLanguage]}
-              </WorkoutTipsTitle>
-            </WorkoutTipsTitleWrapper>
-            {item.workoutExerciseRepetition && item.workoutExerciseSets && (
-              <WorkoutWeightAndButtonPlusLessWrapper>
-                <WorkoutButton
-                  onPress={handleLessWeight}
-                  style={{ opacity: isFocused ? 1 : 0.4 }}
-                >
-                  <Less width={28} height={28} stroke="#D92727" />
-                </WorkoutButton>
-                <WorkoutWeightValueAndTextWrapper
-                  style={{
-                    opacity: isFocused ? 1 : 0.4,
-                  }}
-                >
-                  <WorkoutWeightValue
-                    keyboardType="numeric"
-                    onChangeText={(x: string) => {
-                      setModalWeightState((prevState) => ({
-                        ...prevState,
-                        workoutExerciseWeight: Number(x),
-                      }))
-                    }}
-                    value={String(modalWeightState.weight)}
-                    caretHidden={true}
-                  />
-                  <WorkoutWeightText>kg</WorkoutWeightText>
-                </WorkoutWeightValueAndTextWrapper>
-                <WorkoutButton
-                  onPress={handlePlusWeight}
-                  style={{ opacity: isFocused ? 1 : 0.4 }}
-                >
-                  <More width={42} height={42} stroke="#1CAA44" />
-                </WorkoutButton>
-              </WorkoutWeightAndButtonPlusLessWrapper>
-            )}
-          </MuscleAndWeightWrapper>
-          <WorkoutSerieWrapper>
-            {item.workoutExerciseRepetition && item.workoutExerciseSets && (
-              <>
-                <WorkoutSerieName>série</WorkoutSerieName>
-
-                {item.workoutExerciseSets.map((v, i) => (
-                  <WorkoutSerieValue key={i}>{v}</WorkoutSerieValue>
-                ))}
-              </>
-            )}
-          </WorkoutSerieWrapper>
+          <TableWrapper>
+            {item.workoutExerciseSets &&
+              item.workoutExerciseSets.map((v, i) => (
+                <WorkoutSerieWrapper key={i}>
+                  <WorkoutSerieValue>
+                    {i + 1}º serie: {v}
+                  </WorkoutSerieValue>
+                  <ButtonsWrapper>
+                    <WorkoutWeightValueAndTextWrapper>
+                      <WorkoutWeightValue
+                        onPress={() => {
+                          openWeight(i)
+                        }}
+                      >
+                        <WorkoutWeightText>
+                          {modalWeightState.weight[i]}kg
+                        </WorkoutWeightText>
+                      </WorkoutWeightValue>
+                    </WorkoutWeightValueAndTextWrapper>
+                    <WorkoutButton onPress={() => handleLessWeight(i)}>
+                      <Less width={36} height={36} stroke="#D92727" />
+                    </WorkoutButton>
+                    <WorkoutButton onPress={() => handlePlusWeight(i)}>
+                      <More width={36} height={36} stroke="#1CAA44" />
+                    </WorkoutButton>
+                  </ButtonsWrapper>
+                </WorkoutSerieWrapper>
+              ))}
+          </TableWrapper>
         </WorkoutRepetitionAndSerieWrapper>
 
         <WorkoutUserNotesAndConfirmButtonWrapper>
@@ -939,6 +949,7 @@ function WorkoutVideoCardComponent({
               <ExclamationMark />
             </WorkoutUserNotes>
           </WorkoutUserNotesButton>
+
           <WorkoutButtonConfirm
             onPress={handleDoneWorkout}
             workoutExerciseDone={modalWeightState.completed}
@@ -952,19 +963,38 @@ function WorkoutVideoCardComponent({
               }}
             >
               <WorkoutButtonText>
-                {modalWeightState.completed ? 'Salvo' : 'Concluir'}
+                {modalWeightState.completed ? 'Feito' : 'Fazer'}
               </WorkoutButtonText>
             </BlurViewWrapper>
           </WorkoutButtonConfirm>
-          <WorkoutUserNotesNullViewToBalanceCSS />
         </WorkoutUserNotesAndConfirmButtonWrapper>
       </WorkoutInfoWrapper>
+
+      {/* esse modal */}
+      <Modal
+        visible={modalWeightState.isOpenModalUserWeight}
+        animationType={`slide`}
+        transparent={true}
+        onRequestClose={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+          flex: 1,
+        }}
+      >
+        <WorkoutUserWeightModal
+          closeModal={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
+          handleUpdateWeight={handleUpdateWeight}
+          weight={modalWeightState.weight[modalWeightState.activeWeightIndex]}
+          weightIndex={modalWeightState.activeWeightIndex + 1}
+        />
+      </Modal>
 
       <Modal
         visible={modalWeightState.isOpenModalUserNotes}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={handleCloseModal} // Método para fechar o modal (iOS, Android)
+        onRequestClose={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -972,12 +1002,18 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserNotesModal
-          closeModal={handleCloseModal} // Método para fechar o modal (iOS, Android)
+          closeModal={handleCloseNotesModal} // Método para fechar o modal (iOS, Android)
           handleUpdateNotes={handleUpdateNotes}
           workoutExerciseId={item.workoutExerciseId}
           notes={modalNotesState}
+          exerciseName={
+            item.workoutExerciseName
+              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
+              : ''
+          }
         />
       </Modal>
+
       <Modal visible={modalWeightState.isOpenModalVideoPlayer}>
         {modalVideoLocalPathState && (
           <CachedVideoPlayerModal

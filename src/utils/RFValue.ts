@@ -10,8 +10,6 @@ export const RFValue = (fontSize: number): number => {
 
   // Calcular a escala com base na largura da tela
   const scale = SCREEN_WIDTH / baseWidth
-  console.log(`scale`)
-  console.log(scale)
   // Retorna o valor da fonte ajustado dinamicamente
   return PixelRatio.roundToNearestPixel(fontSize * scale)
 }

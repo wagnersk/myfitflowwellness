@@ -575,7 +575,7 @@ export type ICachedExerciseList = {
 export interface IWeightDoneLog {
   exerciseIndex: number
   exerciseId: string
-  weight: number
+  weight: number[]
   completed: boolean
   completedTimestamp: number
 }
