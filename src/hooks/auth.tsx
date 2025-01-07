@@ -1438,11 +1438,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       if (!cachedUserWorkoutsLog) return null
       const copyCachedUserWorkoutsLog = { ...cachedUserWorkoutsLog }
 
-      console.log('createCachedUserWorkoutLog()')
-      console.log(copyCachedUserWorkoutsLog)
-
-      console.log('cachedUserWorkoutsLog')
-      console.log(cachedUserWorkoutsLog)
+      console.log('JA EXISTE  , atualizando createCachedUserWorkoutLog()')
 
       const userWorkoutLog = await updateUserWorkoutsLog(
         copyCachedUserWorkoutsLog.workoutsLog,
@@ -1452,7 +1448,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       async function updateUserWorkoutsLog(workoutLog: IWorkoutLog[]) {
         console.log('updateUserWorkoutsLog()')
-        console.log(workoutLog)
         if (!workoutLog) return
         const logIndex = workoutLog.findIndex((v) => v.workoutId === workoutId)
         const isNewWorkoutLog = logIndex === -1
@@ -1501,8 +1496,6 @@ function AuthProvider({ children }: AuthProviderProps) {
           }
 
           async function updateCard() {
-            console.log('updateCard()')
-
             const {
               completed,
               weight,
@@ -1741,6 +1734,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         lastCompletedFormattedDay,
         lastCompletedFormattedDate,
       }
+      console.log('criando do 0 createUserWorkoutLog()')
 
       const newUserWorkoutLog: IUserWorkoutsLog = {
         workoutsLog: [
@@ -1751,6 +1745,8 @@ function AuthProvider({ children }: AuthProviderProps) {
           },
         ],
       }
+      console.log(`JSON.stringify(newUserWorkoutLog)`)
+      console.log(JSON.stringify(newUserWorkoutLog))
 
       await AsyncStorage.setItem(
         storageCachedExercisesWeightDoneLogDataKey,
@@ -2336,8 +2332,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
       if (storedWeightDoneLogString) {
         const summaryInfoData = JSON.parse(storedWeightDoneLogString)
-        /*        console.log(`rendering ${summaryInfoData}`)
-        console.log(JSON.stringify(summaryInfoData)) */
+        console.log(`rendering ${summaryInfoData}`)
+        console.log(JSON.stringify(summaryInfoData))
         setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
@@ -2450,7 +2446,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       await updateUserState(cachedUserData)
       //  await loadWorkoutData(cachedUserData)
       await loadLoginInitialCachedWorkoutsData(cachedUserData.id)
-      console.log('loadLoginInitialCachedWorkoutsData')
       // await checkForUpdates(cachedUserData)
       setIsLoadingUserStorageData(false)
     } catch (error) {

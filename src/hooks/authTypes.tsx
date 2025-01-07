@@ -497,7 +497,7 @@ export interface Exercise {
   workoutExerciseId: string // item para find
   workoutExerciseIndex: number // item para find
   workoutCardIndex: number // item para find
-  workoutExerciseWeight: number // fator para montar grafico
+  workoutExerciseWeight: number[] // fator para montar grafico
   workoutExerciseRestTimeNumber: number // fator para montar grafico
   workoutExerciseSets: string[] // fator para montar grafico
   workoutExerciseRepetition: string

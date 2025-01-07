@@ -3,14 +3,11 @@ import { View, StyleSheet, Button } from 'react-native'
 import { Video as ExpoVideo, ResizeMode } from 'expo-av'
 
 interface Props {
-  handleShowVideoPlayer: () => void
+  closeVideoPlayer: () => void
   localPath: string
 }
 
-export function CachedVideoPlayerModal({
-  localPath,
-  handleShowVideoPlayer,
-}: Props) {
+export function CachedVideoPlayerModal({ localPath, closeVideoPlayer }: Props) {
   const videoRef = useRef<ExpoVideo>(null)
   return (
     <View style={styles.container}>
@@ -31,7 +28,7 @@ export function CachedVideoPlayerModal({
         </View>
       )}
       <View style={styles.buttons}>
-        <Button title="Voltar" onPress={handleShowVideoPlayer} />
+        <Button title="Voltar" onPress={closeVideoPlayer} />
       </View>
     </View>
   )

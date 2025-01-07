@@ -27,6 +27,7 @@ interface InputProps extends TextInputProps {
   handleUpdateWeight: (weight: string) => void
   weight: number
   weightIndex: number
+  exerciseName?: string
 }
 
 export function WorkoutUserWeightModal({
@@ -34,6 +35,7 @@ export function WorkoutUserWeightModal({
   handleUpdateWeight,
   weight,
   weightIndex,
+  exerciseName,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false)
@@ -76,6 +78,7 @@ export function WorkoutUserWeightModal({
           <TipsNoteBodyWrapper>
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
+                <TipsTitleNote>{exerciseName}</TipsTitleNote>
                 <TipsTitleNote>Peso da {weightIndex}º série</TipsTitleNote>
               </TipsTitleNoteWrapper>
 

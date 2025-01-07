@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import { View, Modal } from 'react-native'
-import React, { useState, memo, useRef, useEffect } from 'react'
+import React, { useState, memo, useEffect, useMemo } from 'react'
+import { useTheme } from 'styled-components'
 
 import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
@@ -11,6 +12,7 @@ import * as FileSystem from 'expo-file-system'
 
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
 import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
+import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
 import More from '@assets/More.svg'
 import Less from '@assets/Less.svg'
 import ExclamationMark from '@assets/ExclamationMark.svg'
@@ -18,7 +20,6 @@ import PlayVideo from '@assets/PlayVideo.svg'
 
 import { getTrimmedName } from '@utils/getTrimmedName'
 
-import { useTheme } from 'styled-components'
 import {
   ICachedExerciseHistoryData,
   DayData,
@@ -51,7 +52,6 @@ import {
   BlurViewWrapper,
   TableWrapper,
 } from './styles'
-import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
 
 interface Props {
   item: IFormattedCardExerciseData
@@ -107,133 +107,65 @@ function WorkoutVideoCardComponent({
     weight: Array(getRepetitionNumber).fill(0), // Array de getRepetitionNumber posições preenchido com 0
     completed: false,
     completedTimestamp: 0,
+    activeWeightIndex: 0,
   }
 
-  let myWeightDateDone: IModalStateWorkoutLogData =
-    {} as IModalStateWorkoutLogData
+  const initialModalState = useMemo(() => {
+    let weightsDatesDone: IWeightDoneLog = {} as IWeightDoneLog
 
-  let weightsDatesDone: IWeightDoneLog = {} as IWeightDoneLog
+    if (cachedUserWorkoutsLog && cachedUserWorkoutsLog.workoutsLog) {
+      const sessionIndex = cachedUserWorkoutsLog.workoutsLog.findIndex(
+        (v) => v.workoutId === workoutId,
+      )
 
-  myWeightDateDone = {
-    ...defaultModalState,
-    ...weightsDatesDone,
-  }
+      if (sessionIndex !== -1) {
+        const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
+          sessionIndex
+        ].workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
 
-  if (cachedUserWorkoutsLog && cachedUserWorkoutsLog.workoutsLog) {
-    const sessionIndex = cachedUserWorkoutsLog.workoutsLog.findIndex(
-      (v) => v.workoutId === workoutId,
-    )
+        if (findCachedCard && findCachedCard.weightDoneLogs) {
+          const weightLog = findCachedCard.weightDoneLogs.find(
+            (log) => log.exerciseIndex === exerciseIndex,
+          )
 
-    if (sessionIndex !== -1) {
-      /* &&
-      cachedUserWorkoutsLog.workoutsLog[sessionIndex].workoutCardsLogData[
-        workoutCardIndex
-      ] */
-      const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
-        sessionIndex
-      ].workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
-
-      if (findCachedCard) {
-        weightsDatesDone = findCachedCard.weightDoneLogs[exerciseIndex]
-      }
-
-      myWeightDateDone = {
-        ...myWeightDateDone,
-        ...weightsDatesDone,
+          if (weightLog) {
+            weightsDatesDone = weightLog
+          }
+        }
       }
     }
-  }
 
-  if (weightsDatesDone?.completedTimestamp) {
-    // so entra aqui se tiver algum tempo registrado , pq sem eh 0 e ai da false
     const todayDate = new Date()
+    const areSameDay = weightsDatesDone?.completedTimestamp
+      ? isSameDay(todayDate, weightsDatesDone.completedTimestamp)
+      : false
 
-    const areSameDay = isSameDay(
-      todayDate,
-      weightsDatesDone?.completedTimestamp,
-    )
+    console.log(
+      `Estou no card : ${workoutCardIndex} , no exercício ${exerciseIndex}achou  weightsDatesDone  ! ! ! ! `,
+      weightsDatesDone,
+    ) // ok
 
-    // se nao for hoje eu seto como false
-    myWeightDateDone.completed = !areSameDay
-      ? false
-      : myWeightDateDone.completed
-  }
+    // console.log(workoutCardIndex, exerciseIndex, workoutId, isFocused)
+
+    const finalData = {
+      ...defaultModalState,
+      ...weightsDatesDone,
+      completed: areSameDay ? weightsDatesDone.completed : false,
+    }
+
+    return finalData
+  }, [cachedUserWorkoutsLog, workoutId, workoutCardIndex, exerciseIndex])
 
   const [modalWeightState, setModalWeightState] =
-    useState<IModalStateWorkoutLogData>(myWeightDateDone)
+    useState<IModalStateWorkoutLogData>(initialModalState)
 
   const [modalNotesState, setModalNotesState] = useState<string>('')
-
   const [modalVideoLocalPathState, setModalVideoLocalPathState] =
     useState<string>('')
 
   const [weightProgressionData, setWeightProgressionData] = useState<
     ICachedExerciseHistoryData[] | null
-  >(
-    /* weightProgression */ [
-      {
-        userId: 'user123', // ID do usuário ---- TENHO ----
-        workoutId: 'Lf7BeUzt3OEShbCVx88J', // ID do card do treino ---- TENHO ----
-        createdAt: 1590000000, // Timestamp da criação ---- TENHO ----
-        updatedAt: 1590003600, // Timestamp da última atualização ---- TENHO ----
-        exerciseHistory: [
-          {
-            year: 2021,
-            createdAt: 1590000000, // Timestamp da criação
-            updatedAt: 1590003600, // Timestamp da última atualização
-            months: [
-              {
-                month: 5,
-                createdAt: 1590000000, // Timestamp da criação
-                updatedAt: 1590003600, // Timestamp da última atualização
-                days: [
-                  {
-                    day: 30,
-                    createdAt: 1590000000, // Timestamp da criação
-                    updatedAt: 1590003600, // Timestamp da última atualização
-                    exerciseTotalTime: '12:00', // Tempo total de exercício no formato 'hh:mm'
-                    exerciseIntervals: [
-                      {
-                        index: 0,
-                        startedAt: 15, // primeiro item da lista
-                        endAt: 17, // ultimo item da lista
-                        periodGroupBetweenStartAndEnd: [15, 16, 17],
-                      },
-                    ],
-                    exercises: [
-                      {
-                        workoutExerciseId: '2GoOlaJYvEgmiI5scTAI', // IDENTIFICACAO PARA FILTRAR
-                        workoutExerciseIndex: 0, // IDENTIFICACAO PARA FILTRAR
-                        workoutCardIndex: 1, // IDENTIFICACAO PARA FILTRAR
-                        workoutExerciseWeight: 45, // VALOR PARA CALCULO
-
-                        updatedAt: 12123, // CALCULAR TEMPO INTERVALO
-                        workoutExerciseRestTimeNumber: 60, // Tempo de descanso total em segundos // MONTAR GRAFICOS FINAIS //---- TENHO ----,
-                        workoutExerciseSets: '4', // Número de séries feitas //MONTARGRAFICO FINAL
-                        workoutExerciseRepetition: '12', // Número de repetições por série
-                        workoutExerciseMuscleGroup: {
-                          'pt-br': 'peitoral',
-                          us: 'chest',
-                        }, // Grupo muscular trabalhado ---- TENHO ----
-                        workoutExerciseName_insensitive: {
-                          'pt-br': 'supino reto',
-                          us: 'bench press',
-                        }, // Nome do exercício em minúsculas para pesquisa
-                      },
-                      // Outros exercícios do dia
-                    ],
-                  },
-                  // Outros dias do mês
-                ],
-              },
-              // Outros meses do ano
-            ],
-          },
-          // Outros anos
-        ],
-      },
-    ],
-  )
+  >(null)
 
   async function handleUpdateNotes(_notes: string) {
     if (!_notes) return
@@ -273,42 +205,17 @@ function WorkoutVideoCardComponent({
     })
   }
 
-  // ok
-  function openNotes() {
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserNotes: true,
-    }))
-  }
-  // ok
-  function openWeight(index: number) {
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserWeight: true,
-      activeWeightIndex: index,
-    }))
-  }
-
-  function handleShowVideoPlayer() {
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalVideoPlayer: !prevState.isOpenModalVideoPlayer,
-    }))
-  }
-
   function handleDoneWorkout() {
     if (!workoutId) return
     saveFastCachedWorkoutData(workoutId)
+
+    // saveCachedHistoricDateWorkoutData()
+
     setModalWeightState((prevState) => ({
       ...prevState,
       completed: !prevState.completed,
     }))
-
-    saveCachedHistoricDateWorkoutData()
-
-    // TODO > ver dps q weight tiver pronto
+    // TODO > ver dps q weight em saveFastCachedWorkoutData
 
     async function saveFastCachedWorkoutData(_workoutId: string) {
       if (!item.workoutExerciseId) return console.log(`vish`)
@@ -693,24 +600,45 @@ function WorkoutVideoCardComponent({
     })
   }
 
-  function handleWeightChange(x: string, index: number) {
-    const copyWeight = modalWeightState.weight
-
-    copyWeight[index] = Number(x)
+  function openVideoPlayer() {
     setModalWeightState((prevState) => ({
       ...prevState,
-      weight: copyWeight,
+      isOpenModalVideoPlayer: true,
     }))
   }
 
-  function handleCloseNotesModal() {
+  function closeVideoPlayer() {
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      isOpenModalVideoPlayer: false,
+    }))
+  }
+
+  function openNotes() {
+    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      isOpenModalUserNotes: true,
+    }))
+  }
+
+  function closeNotes() {
     setModalWeightState((prevState) => ({
       ...prevState,
       isOpenModalUserNotes: false,
     }))
   }
 
-  function handleCloseWeightModal() {
+  function openWeight(index: number) {
+    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      isOpenModalUserWeight: true,
+      activeWeightIndex: index,
+    }))
+  }
+
+  function closeWeight() {
     setModalWeightState((prevState) => ({
       ...prevState,
       isOpenModalUserWeight: false,
@@ -773,7 +701,6 @@ function WorkoutVideoCardComponent({
       !!cachedVideoTable &&
       mySelectedCachedWorkoutIndex !== undefined
     ) {
-      console.log(cachedVideoTable)
       const getPath =
         cachedVideoTable[mySelectedCachedWorkoutIndex].cachedLocalPathVideo
 
@@ -864,7 +791,7 @@ function WorkoutVideoCardComponent({
         </WorkoutNameWrapper>
         {item.workoutExerciseThumbnailUrl && (
           <WorkoutVideoPlayerButton
-            onPress={handleShowVideoPlayer}
+            onPress={openVideoPlayer}
             enabled={isFocused}
           >
             <View
@@ -970,12 +897,11 @@ function WorkoutVideoCardComponent({
         </WorkoutUserNotesAndConfirmButtonWrapper>
       </WorkoutInfoWrapper>
 
-      {/* esse modal */}
       <Modal
         visible={modalWeightState.isOpenModalUserWeight}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
+        onRequestClose={closeWeight} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -983,10 +909,15 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserWeightModal
-          closeModal={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
+          closeModal={closeWeight} // Método para fechar o modal (iOS, Android)
           handleUpdateWeight={handleUpdateWeight}
           weight={modalWeightState.weight[modalWeightState.activeWeightIndex]}
           weightIndex={modalWeightState.activeWeightIndex + 1}
+          exerciseName={
+            item.workoutExerciseName
+              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
+              : ''
+          }
         />
       </Modal>
 
@@ -994,7 +925,7 @@ function WorkoutVideoCardComponent({
         visible={modalWeightState.isOpenModalUserNotes}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={handleCloseWeightModal} // Método para fechar o modal (iOS, Android)
+        onRequestClose={closeWeight} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1002,7 +933,7 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserNotesModal
-          closeModal={handleCloseNotesModal} // Método para fechar o modal (iOS, Android)
+          closeModal={closeNotes} // Método para fechar o modal (iOS, Android)
           handleUpdateNotes={handleUpdateNotes}
           workoutExerciseId={item.workoutExerciseId}
           notes={modalNotesState}
@@ -1017,7 +948,7 @@ function WorkoutVideoCardComponent({
       <Modal visible={modalWeightState.isOpenModalVideoPlayer}>
         {modalVideoLocalPathState && (
           <CachedVideoPlayerModal
-            handleShowVideoPlayer={handleShowVideoPlayer}
+            closeVideoPlayer={closeVideoPlayer}
             localPath={modalVideoLocalPathState}
           />
         )}
