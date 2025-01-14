@@ -11,7 +11,7 @@ import { WorkoutBlueCardList } from '@components/Cards/WorkoutBlueCard/WorkoutBl
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { differenceInDays, startOfDay } from 'date-fns'
-
+import Camera from '@assets/Camera.svg'
 import {
   Container,
   BioInfoWrapper,
@@ -24,6 +24,7 @@ import {
   WarningGreetings,
   WarningWrapper,
   BodyImageBackgroundContainerSpaceBetween,
+  FavoriteIconContainer,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
@@ -72,7 +73,9 @@ export function UserHome() {
       cardIndex,
     })
   }
-
+  async function handleOpenCamera(event: GestureResponderEvent) {
+    navigation.navigate('camera')
+  }
   async function handleSignOut() {
     Alert.alert(
       'Tem certeza?',
@@ -203,6 +206,9 @@ export function UserHome() {
               />
             )
           )}
+          <FavoriteIconContainer onPressOut={handleOpenCamera}>
+            <Camera width={42} height={42} fill={'blue'} />
+          </FavoriteIconContainer>
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>
     </Container>

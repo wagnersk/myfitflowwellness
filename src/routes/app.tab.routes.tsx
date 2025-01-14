@@ -64,6 +64,7 @@ export function AppTabRoutes() {
           tabBarHideOnKeyboard: true,
         }}
       />
+
       {/* TODO , ATIVAR PERSONAL- estatisticas  */}
       {false && (
         <Screen

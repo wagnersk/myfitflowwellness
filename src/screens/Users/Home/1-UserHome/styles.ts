@@ -1,6 +1,5 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { BlurView } from 'expo-blur'
 
 export const Container = styled.View`
   flex: 1;
@@ -75,4 +74,13 @@ export const BodyImageBackgroundContainerSpaceBetween = styled.View`
   height: 100%;
   justify-content: space-between;
   align-items: center;
+`
+
+export const FavoriteIconContainer = styled.TouchableOpacity`
+  position: absolute;
+  bottom: 10px;
+  right: 32px;
+  border-radius: 999px;
+  padding: 8px;
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_BLUE};
 `

@@ -143,9 +143,7 @@ function WorkoutVideoCardComponent({
     console.log(
       `Estou no card : ${workoutCardIndex} , no exercício ${exerciseIndex}achou  weightsDatesDone  ! ! ! ! `,
       weightsDatesDone,
-    ) // ok
-
-    // console.log(workoutCardIndex, exerciseIndex, workoutId, isFocused)
+    )
 
     const finalData = {
       ...defaultModalState,
@@ -209,7 +207,9 @@ function WorkoutVideoCardComponent({
     if (!workoutId) return
     saveFastCachedWorkoutData(workoutId)
 
-    // saveCachedHistoricDateWorkoutData()
+    // saveCachedHistoricDateWorkoutData() 06/01/25
+    // TODO QUANDO FOR MEXER NO HISTORICO DE EXERCICIOS DESCOMENTAR
+    // O GRÁFICO DE HISTÓRICO DE EXERCÍCIOS
 
     setModalWeightState((prevState) => ({
       ...prevState,

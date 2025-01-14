@@ -276,6 +276,8 @@ export declare global {
       userWorkoutList: NavigationUserWorkoutListProps
       userWorkout: WorkoutDataWithSelectedWorkout
 
+      camera: undefined
+
       userSelectEditHomeProfile: undefined
       userFormEditProfile: undefined
       userSelectList: IUserSelectListNavigation
