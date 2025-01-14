@@ -25,6 +25,7 @@ import {
   WarningWrapper,
   BodyImageBackgroundContainerSpaceBetween,
   FavoriteIconContainer,
+  LinearGradientButton,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
@@ -166,6 +167,7 @@ export function UserHome() {
     }, []),
   )
 
+  const colors = theme.COLORS.GRADIENT_CARD
   return (
     <Container>
       <HeaderImageBackground>
@@ -207,7 +209,13 @@ export function UserHome() {
             )
           )}
           <FavoriteIconContainer onPressOut={handleOpenCamera}>
-            <Camera width={42} height={42} fill={'blue'} />
+            <LinearGradientButton
+              colors={colors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Camera width={42} height={42} fill={'white'} />
+            </LinearGradientButton>
           </FavoriteIconContainer>
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>

@@ -1,5 +1,6 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export const Container = styled.View`
   flex: 1;
@@ -80,7 +81,13 @@ export const FavoriteIconContainer = styled.TouchableOpacity`
   position: absolute;
   bottom: 10px;
   right: 32px;
+  color: white;
   border-radius: 999px;
+  border-color: white;
+  border-width: 4px;
+`
+export const LinearGradientButton = styled(LinearGradient)`
+  flex: 1;
   padding: 8px;
-  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_BLUE};
+  border-radius: 999px;
 `

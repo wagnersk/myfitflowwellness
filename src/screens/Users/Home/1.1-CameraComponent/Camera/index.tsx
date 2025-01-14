@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react'
+/* eslint-disable jsx-a11y/alt-text */
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Dimensions } from 'react-native'
 
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
@@ -21,7 +22,6 @@ import X from '@assets/x.svg'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import {
-  CanvasFullScreen,
   CloseButton,
   Container,
   FlipButton,
@@ -40,16 +40,6 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { BackButton } from '@components/Buttons/BackButton'
-
-const daysData = [
-  { name: 'SEG', selected: true },
-  { name: 'TER', selected: true },
-  { name: 'QUA', selected: false },
-  { name: 'QUI', selected: false },
-  { name: 'SEX', selected: true },
-  { name: 'SAB', selected: false },
-  { name: 'DOM', selected: false },
-]
 
 function encode(arraybuffer) {
   const bytes = new Uint8Array(arraybuffer)
@@ -78,8 +68,22 @@ function encode(arraybuffer) {
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
-
+const initialDaysData = [
+  { name: 'SEG', selected: false },
+  { name: 'TER', selected: false },
+  { name: 'QUA', selected: false },
+  { name: 'QUI', selected: false },
+  { name: 'SEX', selected: false },
+  { name: 'SAB', selected: false },
+  { name: 'DOM', selected: false },
+]
 export function Camera() {
+  const [isCameraMounted, setIsCameraMounted] = useState(true)
+
+  const [selectedDays, setSelectedDays] = useState(
+    initialDaysData.map((v, i) => ({ ...v, index: i })),
+  )
+
   const [facing, setFacing] = useState<CameraType>('back')
   const [permission, requestPermission] = useCameraPermissions()
   const [capturedImage, setCapturedImage] = useState<SkImage | null>(null)
@@ -91,7 +95,22 @@ export function Camera() {
   const dayText = capitalizeFirstLetter(getDayText)
 
   const timeText = format(now, 'HH:mm')
+
   const navigation = useNavigation()
+  const handleDayPress = (index: number) => {
+    console.log(`handleDayPress trocando o dia index ${index}`)
+
+    setSelectedDays((prevSelectedDays) =>
+      prevSelectedDays.map((day, i) =>
+        i === index ? { ...day, selected: !day.selected } : day,
+      ),
+    )
+  }
+  useEffect(() => {
+    return () => {
+      setIsCameraMounted(false)
+    }
+  }, [])
 
   useFocusEffect(
     useCallback(() => {
@@ -121,7 +140,7 @@ export function Camera() {
 
   async function takePicture() {
     try {
-      if (cameraRef.current) {
+      if (cameraRef.current && isCameraMounted) {
         const startTime = performance.now()
 
         const photo = await cameraRef.current.takePictureAsync({ base64: true })
@@ -268,7 +287,13 @@ export function Camera() {
       <FullScreen>
         {capturedImage ? (
           <>
-            <CanvasFullScreen ref={canvasRef}>
+            <SkiaContent
+              daysData={selectedDays}
+              dayText={dayText}
+              timeText={timeText}
+              fowardRef={canvasRef}
+              handleDayPress={handleDayPress}
+            >
               <Image
                 image={capturedImage}
                 x={0}
@@ -277,12 +302,7 @@ export function Camera() {
                 height={screenHeight - 80}
                 fit="fill"
               />
-              <SkiaContent
-                daysData={daysData}
-                dayText={dayText}
-                timeText={timeText}
-              />
-            </CanvasFullScreen>
+            </SkiaContent>
 
             <CloseButton onPress={closeImage}>
               <X width={42} height={42} fill="white" />
@@ -296,13 +316,13 @@ export function Camera() {
               facing={facing}
             />
 
-            <CanvasFullScreen ref={canvasRef}>
-              <SkiaContent
-                daysData={daysData}
-                dayText={dayText}
-                timeText={timeText}
-              />
-            </CanvasFullScreen>
+            <SkiaContent
+              daysData={selectedDays}
+              dayText={dayText}
+              timeText={timeText}
+              fowardRef={canvasRef}
+              handleDayPress={handleDayPress}
+            />
             <BackButton
               onPress={handleGoBack}
               style={{ position: 'absolute', left: 32, top: 16 }}

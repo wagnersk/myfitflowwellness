@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Group,
   Rect,
@@ -12,8 +12,10 @@ import {
   rrect,
   vec,
   Line,
+  SkiaDomView,
 } from '@shopify/react-native-skia'
 import { Dimensions, Platform } from 'react-native'
+import { CanvasFullScreen } from './styles'
 
 type Slant = 'normal' | 'italic' | 'oblique'
 
@@ -38,6 +40,7 @@ interface RNFontStyle {
 }
 
 interface IDaysData {
+  index: number
   name: string
   selected: boolean
 }
@@ -46,37 +49,12 @@ interface Props {
   dayText: string
   timeText: string
   daysData: IDaysData[]
+  children?: React.ReactNode
+  fowardRef?: React.RefObject<SkiaDomView>
+  handleDayPress: (index: number) => void
 }
 
-export default function SkiaContent({ dayText, timeText, daysData }: Props) {
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
-  const fontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' })
-
-  const fontBoxDayStyle: RNFontStyle = {
-    fontFamily,
-    fontSize: 16,
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-  }
-  const fontDayStyle: RNFontStyle = {
-    fontFamily,
-    fontSize: 24,
-    fontStyle: 'normal',
-    fontWeight: 'bold',
-  }
-
-  const fonHoursStyle: RNFontStyle = {
-    fontFamily,
-    fontSize: 22,
-    fontStyle: 'italic',
-    fontWeight: 'bold',
-  }
-
-  const fontBoxDay: SkFont = matchFont(fontBoxDayStyle)
-  const fontDay: SkFont = matchFont(fontDayStyle)
-  const fontHour: SkFont = matchFont(fonHoursStyle)
-
-  const logoSvg = Skia.SVG.MakeFromString(`
+const logoSvg = Skia.SVG.MakeFromString(`
     <svg viewBox="0 0  245 58" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M32.0666 0.793457L36.1291 28.5851H29.2957L27.1499 13.0643L20.4832 28.5851H16.8166L10.1499 12.981L7.96241 28.5851H1.17075L5.23325 0.793457H11.2332L18.6916 18.2518L26.1499 0.793457H32.0666Z" fill="white"/>
   <path d="M51.4702 11.1476L56.5535 0.793457H63.991L54.8452 17.856V28.5851H47.9077V17.856L38.8452 0.793457H46.3869L51.4702 11.1476Z" fill="white"/>
@@ -105,17 +83,53 @@ export default function SkiaContent({ dayText, timeText, daysData }: Props) {
   <path d="M240.797 57.34C240.256 57.34 239.766 57.2463 239.339 57.0483C238.922 56.8556 238.589 56.59 238.339 56.2567C238.099 55.9129 237.974 55.5171 237.964 55.0692H239.11C239.151 55.4598 239.302 55.7879 239.568 56.0483C239.844 56.314 240.256 56.4442 240.797 56.4442C241.297 56.4442 241.693 56.3192 241.985 56.0692C242.287 55.8088 242.443 55.4754 242.443 55.0692C242.443 54.7671 242.349 54.5171 242.172 54.3192C242.006 54.1265 241.787 53.9806 241.526 53.8817C241.276 53.7723 240.927 53.6629 240.485 53.5483C239.943 53.3973 239.511 53.2515 239.193 53.1108C238.87 52.9754 238.594 52.7567 238.36 52.465C238.12 52.1629 238.006 51.7515 238.006 51.2358C238.006 50.7931 238.115 50.4025 238.339 50.0692C238.573 49.7254 238.891 49.4598 239.297 49.2775C239.714 49.0848 240.183 48.9858 240.714 48.9858C241.49 48.9858 242.12 49.1838 242.61 49.5692C243.094 49.9442 243.365 50.4442 243.422 51.0692H242.256C242.214 50.7671 242.047 50.4963 241.756 50.2567C241.474 50.0067 241.094 49.8817 240.61 49.8817C240.162 49.8817 239.802 50.0015 239.526 50.2358C239.245 50.4754 239.11 50.7931 239.11 51.1942C239.11 51.5015 239.193 51.7515 239.36 51.9442C239.526 52.1265 239.724 52.2671 239.964 52.3608C240.214 52.4598 240.558 52.5692 241.006 52.6942C241.547 52.8504 241.985 53.0015 242.318 53.1525C242.651 53.2931 242.927 53.5171 243.151 53.8192C243.386 54.1108 243.506 54.5171 243.506 55.0275C243.506 55.4338 243.401 55.8088 243.193 56.1525C242.985 56.5015 242.672 56.7879 242.256 57.0067C241.839 57.2306 241.349 57.34 240.797 57.34Z" fill="white"/>
   </svg>
    `)!
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+const fontFamily = Platform.select({ ios: 'Helvetica', default: 'serif' })
 
-  const logoWidth = screenWidth * 0.45 // Calcula a largura da logo como 45% da largura da tela
-  const logoHeight = screenHeight * 0.05 // Calcula a altura da logo como 5% da altura da tela
+const fontBoxDayStyle: RNFontStyle = {
+  fontFamily,
+  fontSize: 16,
+  fontStyle: 'normal',
+  fontWeight: 'bold',
+}
+const fontDayStyle: RNFontStyle = {
+  fontFamily,
+  fontSize: 24,
+  fontStyle: 'normal',
+  fontWeight: 'bold',
+}
 
-  const rectInitialPositionY = screenHeight * 0.2 // Calcula a posição Y inicial dos quadrados como 20% da altura da tela
-  const rectVerticalSpacing = screenHeight * 0.09 // Calcula o espaçamento vertical entre os quadrados como 10% da altura da tela
+const fonHoursStyle: RNFontStyle = {
+  fontFamily,
+  fontSize: 22,
+  fontStyle: 'italic',
+  fontWeight: 'bold',
+}
 
-  const squareSize = Math.min(screenWidth, screenHeight) * 0.1 // Calcula o tamanho dos quadrados como 10% da menor dimensão da tela
-  const footerDayTextY =
-    rectInitialPositionY + 3.9 * rectVerticalSpacing + squareSize // Calcula a posição Y do texto do dia no footer alinhado com o último quadrado
-  const footerTimeTextY = footerDayTextY + 30 // Calcula a posição Y do texto da hora no footer abaixo do texto do dia
+const fontBoxDay: SkFont = matchFont(fontBoxDayStyle)
+const fontDay: SkFont = matchFont(fontDayStyle)
+const fontHour: SkFont = matchFont(fonHoursStyle)
+
+const logoWidth = screenWidth * 0.45 // Calcula a largura da logo como 45% da largura da tela
+const logoHeight = screenHeight * 0.05 // Calcula a altura da logo como 5% da altura da tela
+
+const rectInitialPositionY = screenHeight * 0.2 // Calcula a posição Y inicial dos quadrados como 20% da altura da tela
+const rectVerticalSpacing = screenHeight * 0.09 // Calcula o espaçamento vertical entre os quadrados como 10% da altura da tela
+
+const squareSize = Math.min(screenWidth, screenHeight) * 0.1 // Calcula o tamanho dos quadrados como 10% da menor dimensão da tela
+const footerDayTextY =
+  rectInitialPositionY + 3.9 * rectVerticalSpacing + squareSize // Calcula a posição Y do texto do dia no footer alinhado com o último quadrado
+const footerTimeTextY = footerDayTextY + 30 // Calcula a posição Y do texto da hora no footer abaixo do texto do dia
+
+export default function SkiaContent({
+  dayText,
+  timeText,
+  daysData,
+  children,
+  fowardRef,
+  handleDayPress,
+}: Props) {
+  const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 })
 
   function renderDay(day: IDaysData, index: number) {
     const rectY = index * rectVerticalSpacing
@@ -154,7 +168,6 @@ export default function SkiaContent({ dayText, timeText, daysData }: Props) {
         />
 
         <DiffRect inner={inner} outer={outer} color="white" />
-
         {day.selected && (
           <Group>
             <Line
@@ -185,6 +198,19 @@ export default function SkiaContent({ dayText, timeText, daysData }: Props) {
     return widths.reduce((acc, width) => acc + width, 0)
   }
 
+  const handleTouch = (event) => {
+    console.log('handleTouch event')
+    const { locationX, locationY } = event.nativeEvent
+    setTouchPosition({ x: locationX, y: locationY })
+    console.log(`handleTouch event x ${locationX} y ${locationY}`)
+    const adjustedY = locationY - (paddingTop + 20)
+
+    const index = Math.floor(adjustedY / rectVerticalSpacing)
+    if (index >= 0 && index < daysData.length) {
+      handleDayPress(index)
+    }
+  }
+
   const dayTextWidth = calculateTextWidth(dayText, fontDay)
   const timeTextWidth = calculateTextWidth(timeText, fontHour)
 
@@ -200,42 +226,45 @@ export default function SkiaContent({ dayText, timeText, daysData }: Props) {
   console.log('daysGroupY', daysGroupY) //   daysGroupY -187.07999999999998
 
   return (
-    <Group>
+    <CanvasFullScreen ref={fowardRef} onTouchStart={handleTouch}>
+      {children}
       <Group>
-        {logoSvg && (
-          <ImageSVG
-            svg={logoSvg}
-            x={paddingLeft}
-            y={paddingTop}
-            width={logoWidth}
-            height={logoHeight}
-          />
-        )}
-      </Group>
+        <Group>
+          {logoSvg && (
+            <ImageSVG
+              svg={logoSvg}
+              x={paddingLeft}
+              y={paddingTop}
+              width={logoWidth}
+              height={logoHeight}
+            />
+          )}
+        </Group>
 
-      <Group
-        transform={[
-          { translateY: paddingTop + 20 },
-          { translateX: paddingRight },
-        ]}
-      >
-        {daysData.map((day, index) => renderDay(day, index))}
-      </Group>
+        <Group
+          transform={[
+            { translateY: paddingTop + 20 },
+            { translateX: paddingRight },
+          ]}
+        >
+          {daysData.map((day, index) => renderDay(day, index))}
+        </Group>
 
-      <SkiaText
-        x={positionXDay}
-        y={footerDayTextY}
-        text={dayText}
-        font={fontDay}
-        color="white"
-      />
-      <SkiaText
-        x={positionXTime}
-        y={footerTimeTextY}
-        text={timeText}
-        font={fontHour}
-        color="white"
-      />
-    </Group>
+        <SkiaText
+          x={positionXDay}
+          y={footerDayTextY}
+          text={dayText}
+          font={fontDay}
+          color="white"
+        />
+        <SkiaText
+          x={positionXTime}
+          y={footerTimeTextY}
+          text={timeText}
+          font={fontHour}
+          color="white"
+        />
+      </Group>
+    </CanvasFullScreen>
   )
 }

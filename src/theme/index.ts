@@ -23,6 +23,7 @@ export default {
 
     AUX_GOOGLE_RED: '#D92727',
     AUX_GOOGLE_GREEN: '#1CAA44',
+
     AUX_GOOGLE_BLUE: '#3863FF',
     AUX_GOOGLE_YELLOW: '#FBBC05',
     AUX_WHATSAPP: '#25D366',
