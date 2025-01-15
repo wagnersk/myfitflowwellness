@@ -36,7 +36,7 @@ import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
 
 export function Login() {
-  const { firebaseSignIn, firebaseForgotPassword, isLogging } = useAuth()
+  const { firebaseSignIn, firebaseForgotPassword, isLogging, user } = useAuth()
 
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
   const navigation = useNavigation()
@@ -62,9 +62,17 @@ export function Login() {
       await firebaseSignIn(userForm.email.value, userForm.password.value)
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert('Erro', error.message)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          error.message,
+        )
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro desconhecido')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Ocorreu um erro desconhecido'
+            : 'An unknown error occurred',
+        )
       }
     }
 
@@ -136,14 +144,26 @@ export function Login() {
   }
 
   async function handleForgotPassword() {
+    if (!user) return
     if (!userForm.email.value) {
-      return Alert.alert('E-mail não informado', 'Preencha o campo E-mail')
+      return Alert.alert(
+        user.selectedLanguage === 'pt-br'
+          ? 'E-mail não informado'
+          : 'Email not provided',
+        user.selectedLanguage === 'pt-br'
+          ? 'Preencha o campo E-mail'
+          : 'Please fill in the Email field',
+      )
     }
 
     await firebaseForgotPassword(userForm.email.value)
     Alert.alert(
-      'Verifique sua caixa Email',
-      `Foi enviado um link para o email \n ${userForm.email.value} `,
+      user.selectedLanguage === 'pt-br'
+        ? 'Verifique sua caixa de Email'
+        : 'Check your Email inbox',
+      user.selectedLanguage === 'pt-br'
+        ? `Foi enviado um link para o email \n ${userForm.email.value}`
+        : `A link has been sent to the email \n ${userForm.email.value}`,
     )
   }
 

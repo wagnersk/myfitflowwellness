@@ -87,8 +87,11 @@ export function MarketPlaceHome() {
       await loadWorkouts(workoutCategoryId).then(
         async (workoutsWithUpdatedAt) => {
           if (!workoutsWithUpdatedAt)
-            return Alert.alert(`Lista treinos não encontrada`)
-
+            return Alert.alert(
+              user?.selectedLanguage === 'pt-br'
+                ? 'Lista de treinos não encontrada'
+                : 'Workout list not found',
+            )
           if (workoutsWithUpdatedAt.data.length > 0) {
             await saveWorkouts(workoutCategoryId, workoutsWithUpdatedAt)
           }
@@ -131,7 +134,13 @@ export function MarketPlaceHome() {
   }
 
   function handleCallTeacherWhatsapp() {
-    Alert.alert(`Opa`, 'Essa funcionalidade será implementada em breve...')
+    if (!user) return
+    Alert.alert(
+      user.selectedLanguage === 'pt-br' ? 'Opa' : 'Oops',
+      user.selectedLanguage === 'pt-br'
+        ? 'Essa funcionalidade será implementada em breve...'
+        : 'This feature will be implemented soon...',
+    )
     console.log('Chamar Professor no whatsapp usando a API')
   }
 
@@ -167,7 +176,10 @@ export function MarketPlaceHome() {
           <BioInfo>
             <BioInfoLetter>
               {contract?.submissionApproved && `Personal Trainer`}
-              {!contract?.submissionApproved && 'Treinos'}
+              {!contract?.submissionApproved &&
+              user?.selectedLanguage === 'pt-br'
+                ? `Treinos`
+                : `Workouts`}
             </BioInfoLetter>
           </BioInfo>
         </BioInfoWrapper>
@@ -190,7 +202,11 @@ export function MarketPlaceHome() {
         {!contract?.submissionApproved && (
           <View style={{ height: '100%' }}>
             <CategoriesWrapper>
-              <Tittle>Categorias</Tittle>
+              <Tittle>
+                {user?.selectedLanguage === 'pt-br'
+                  ? `Categorias`
+                  : `Categories`}
+              </Tittle>
             </CategoriesWrapper>
             <FlatList
               contentContainerStyle={{
@@ -204,7 +220,7 @@ export function MarketPlaceHome() {
                 />
               )}
               keyExtractor={(item, i) => i.toString()}
-              numColumns={3} // Defina o número de colunas aqui
+              numColumns={3}
               showsVerticalScrollIndicator={true}
               ItemSeparatorComponent={() => <View style={{ height: 32 }} />}
             />

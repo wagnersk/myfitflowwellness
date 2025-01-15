@@ -125,7 +125,11 @@ export function UserWorkout() {
             style={{ position: 'absolute', left: 32, bottom: 32 }}
           />
           <BioInfo>
-            <BioInfoLetter>{`Treino ${letter}`}</BioInfoLetter>
+            <BioInfoLetter>
+              {user?.selectedLanguage === 'pt-br'
+                ? `Treino ${letter}`
+                : `Workout ${letter}`}
+            </BioInfoLetter>
             <BioInfoName> {getTrimmedName(30, muscleGroupsLabel)}</BioInfoName>
           </BioInfo>
         </BioInfoWrapper>

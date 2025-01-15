@@ -30,7 +30,7 @@ import { BodyStatistic } from './Components/StatisticBodyComponent' */
 export function UserStatistics() {
   const navigation = useNavigation()
 
-  const { loadWorkoutsCategories } = useAuth()
+  const { loadWorkoutsCategories, user } = useAuth()
 
   type ISelectedComponent = {
     componentInFocus: 'frequência' | 'treinos' | 'corpo'
@@ -79,7 +79,9 @@ export function UserStatistics() {
             }}
             selected={selectComponent.componentInFocus === 'treinos'}
           >
-            <Tittle>Treinos</Tittle>
+            <Tittle>
+              {user?.selectedLanguage === 'pt-br' ? 'Treinos' : 'Workouts'}
+            </Tittle>
           </SelectButton>
           <SelectButton
             onPress={() => {

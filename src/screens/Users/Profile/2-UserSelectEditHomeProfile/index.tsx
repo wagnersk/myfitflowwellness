@@ -192,7 +192,9 @@ export function UserSelectEditHomeProfile() {
     user.goal.goalSelectedData[selectedLanguage]
       ? user.goal.goalSelectedData[selectedLanguage].charAt(0).toUpperCase() +
         user.goal.goalSelectedData[selectedLanguage].slice(1)
-      : 'Selecione um objetivo'
+      : selectedLanguage === 'pt-br'
+        ? 'Selecione um objetivo'
+        : 'Select a goal'
 
   const formattedFrequencyByWeek =
     user &&
@@ -201,7 +203,9 @@ export function UserSelectEditHomeProfile() {
     user.sessionsByWeek.sessionsByWeekSelectedData &&
     user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
       ? user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
-      : 'Selecione quantos dias por semana'
+      : selectedLanguage === 'pt-br'
+        ? 'Selecione quantos dias por semana'
+        : 'Select how many days per week'
 
   const formattedTimeBySession =
     user &&
@@ -211,7 +215,9 @@ export function UserSelectEditHomeProfile() {
     user.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
     user.timeBySession.timeBySessionSelectedData[selectedLanguage]
       ? user.timeBySession.timeBySessionSelectedData[selectedLanguage]
-      : 'Selecione quanto tempo por treino'
+      : selectedLanguage === 'pt-br'
+        ? 'Selecione quanto tempo por treino'
+        : 'Select how long per session'
 
   const formattedMuscleFocus =
     user &&

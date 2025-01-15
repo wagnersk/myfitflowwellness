@@ -48,6 +48,7 @@ import { differenceInYears, isAfter, isBefore, isValid, parse } from 'date-fns'
 
 export function UserFormEditProfile() {
   const { user, updateUserForm, isWaitingApiResponse } = useAuth()
+
   const [isComponentAVisible, setIsComponentAVisible] = useState(true)
   const [isComponentBVisible, setIsComponentBVisible] = useState(true)
   const [isComponentCVisible, setIsComponentCVisible] = useState(true)
@@ -104,9 +105,17 @@ export function UserFormEditProfile() {
       await updateUserForm(data)
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert('Erro', error.message)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          error.message,
+        )
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro desconhecido')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Ocorreu um erro desconhecido'
+            : 'An unknown error occurred',
+        )
       }
     }
 
@@ -255,15 +264,22 @@ export function UserFormEditProfile() {
       }
       if (!result.canceled) {
         if (!sizeInBytes) {
-          return Alert.alert(`Atenção`, `Tamanho da foto não encontrado.`)
+          return Alert.alert(
+            user?.selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Tamanho da foto não encontrado.'
+              : 'Photo size not found.',
+          )
         }
 
         const MAXFIREBASELIMITPROPERTY = 1000000
 
         if (sizeInBytes > MAXFIREBASELIMITPROPERTY) {
           return Alert.alert(
-            `Atenção`,
-            `Sua foto sua deve ter no máximo 1 mega`,
+            user?.selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Sua foto deve ter no máximo 1 mega'
+              : 'Your photo must be at most 1 megabyte',
           )
         }
         if (base64String) {

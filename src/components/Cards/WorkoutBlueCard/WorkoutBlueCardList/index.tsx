@@ -4,6 +4,7 @@ import { WorkoutBlueCardItem } from '../WorkoutBlueCardItem'
 
 import { ItemSeparatorComponent, ListFooterComponent } from './styles'
 import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
+import { useAuth } from '@hooks/auth'
 
 interface DataProps {
   data: IWorkoutInfo
@@ -12,6 +13,7 @@ interface DataProps {
 // aqui que seria feita a inclusao no cache
 export function WorkoutBlueCardList({ data, handleNextStep }: DataProps) {
   const { width } = useWindowDimensions()
+  const { user } = useAuth()
 
   const updatedWorkoutDataWithSequenceData = data.workoutSequence
     .map((val) => {
@@ -22,7 +24,10 @@ export function WorkoutBlueCardList({ data, handleNextStep }: DataProps) {
       if (findWorkoutData) {
         const newWorkoutData: IWorkoutsData = {
           cardExerciseData: findWorkoutData.cardExerciseData,
-          cardExerciseLabel: `Treino ${String.fromCharCode(65 + val.index)}`,
+          cardExerciseLabel:
+            user?.selectedLanguage === 'pt-br'
+              ? `Treino ${String.fromCharCode(65 + val.index)}`
+              : `Workout ${String.fromCharCode(65 + val.index)}`,
           cardExerciseUniquesMuscles:
             findWorkoutData.cardExerciseUniquesMuscles,
           index: val.index,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import Forward from '../../../../assets/Forward.svg'
 import { isSameDay, getHours, getMinutes } from 'date-fns'
 
@@ -23,7 +23,6 @@ import {
 } from './styles'
 import { getTrimmedName } from '@utils/getTrimmedName'
 import { IWorkoutLog, IWorkoutsData } from '@hooks/authTypes'
-import { translateMuscleGroupInfo } from '@utils/translateMuscles'
 import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 interface WorkoutsInfoProps extends TouchableOpacityProps {
   cardIndex: number
@@ -141,34 +140,46 @@ export function WorkoutBlueCardItem({
           </WorkoutCardName>
 
           <WorkoutCardDateWrapperWithLine>
-            {copyWorkoutsLog &&
+            {user &&
+              copyWorkoutsLog &&
               copyWorkoutsLog.workoutCardsLogData &&
               copyWorkoutsLog.workoutCardsLogData[cardIndex] &&
               copyWorkoutsLog.workoutCardsLogData[cardIndex]
                 .lastCompletedFormattedDay &&
+              copyWorkoutsLog.workoutCardsLogData[cardIndex] &&
+              copyWorkoutsLog.workoutCardsLogData[cardIndex]
+                .lastCompletedFormattedDay[user.selectedLanguage] &&
               copyWorkoutsLog.workoutCardsLogData[cardIndex]
                 .lastCompletedFormattedDate &&
-              (!sameDay ? (
+              (sameDay ? (
                 <WorkoutCardDateWrapper>
-                  <WorkoutCardDay>{'Hoje'}</WorkoutCardDay>
+                  <WorkoutCardDay>
+                    {user?.selectedLanguage === 'pt-br' ? 'Hoje' : 'Today'}
+                  </WorkoutCardDay>
                   <WorkoutCardDateSeparator>
-                    {copyWorkoutsLog.workoutCardsLogData[cardIndex]
-                      .lastCompletedFormattedDay && '  -  '}
+                    {user &&
+                      user.selectedLanguage &&
+                      copyWorkoutsLog.workoutCardsLogData[cardIndex]
+                        .lastCompletedFormattedDay[user?.selectedLanguage] &&
+                      '  -  '}
                   </WorkoutCardDateSeparator>
                   <WorkoutCardDay>{`${hours}:${minutes}`}</WorkoutCardDay>
                 </WorkoutCardDateWrapper>
               ) : (
                 <WorkoutCardDateWrapper>
                   <WorkoutCardDay>
-                    {
+                    {user &&
+                      user.selectedLanguage &&
                       copyWorkoutsLog.workoutCardsLogData[cardIndex]
-                        .lastCompletedFormattedDay
-                    }
+                        .lastCompletedFormattedDay[user.selectedLanguage]}
                   </WorkoutCardDay>
 
                   <WorkoutCardDateSeparator>
-                    {copyWorkoutsLog.workoutCardsLogData[cardIndex]
-                      .lastCompletedFormattedDay && '  -  '}
+                    {user &&
+                      user.selectedLanguage &&
+                      copyWorkoutsLog.workoutCardsLogData[cardIndex]
+                        .lastCompletedFormattedDay[user.selectedLanguage] &&
+                      '  -  '}
                   </WorkoutCardDateSeparator>
                   <WorkoutCardDay>
                     {
@@ -182,9 +193,12 @@ export function WorkoutBlueCardItem({
             {copyWorkoutsLog &&
               copyWorkoutsLog.workoutCardsLogData &&
               copyWorkoutsLog.workoutCardsLogData[cardIndex] === undefined && (
-                <WorkoutCardDay>Treino ainda não iniciado</WorkoutCardDay>
+                <WorkoutCardDay>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? 'Treino ainda não iniciado'
+                    : 'Workout not started yet'}
+                </WorkoutCardDay>
               )}
-
             <WorkoutCardLineSeparator />
           </WorkoutCardDateWrapperWithLine>
           <WorkoutCardBulletsWrapper>

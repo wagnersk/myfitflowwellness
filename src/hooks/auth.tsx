@@ -68,6 +68,7 @@ import {
 import {
   IFreeSelectItem,
   IMachineSelectItem,
+  IptBrUs,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
 import {
@@ -245,7 +246,11 @@ function AuthProvider({ children }: AuthProviderProps) {
           personalTrainerId: null,
         })
           .then(() => {
-            Alert.alert('Conta criada com sucesso!')
+            Alert.alert(
+              user?.selectedLanguage === 'pt-br'
+                ? 'Conta criada com sucesso!'
+                : 'Account created successfully!',
+            )
             firebaseSignIn(email, password)
           })
           .catch((error) => {
@@ -257,17 +262,29 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         if (error.code === 'auth/email-already-in-use') {
           return Alert.alert(
-            'E-mail não disponível',
-            'Escolha outro e-mail para cadastrar!',
+            user?.selectedLanguage === 'pt-br'
+              ? 'E-mail não disponível'
+              : 'Email not available',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Escolha outro e-mail para cadastrar!'
+              : 'Choose another email to register!',
           )
         }
 
         if (error.code === 'auth/invalid-email') {
-          return Alert.alert('E-mail inválido!')
+          return Alert.alert(
+            user?.selectedLanguage === 'pt-br'
+              ? 'E-mail inválido!'
+              : 'Invalid email!',
+          )
         }
 
         if (error.code === 'auth/weak-password') {
-          return Alert.alert('A senha deve no mínimo 6 dígitos.')
+          return Alert.alert(
+            user?.selectedLanguage === 'pt-br'
+              ? 'A senha deve no mínimo 6 dígitos.'
+              : 'The password must be at least 6 characters long.',
+          )
         }
       })
       .finally(() => {
@@ -364,25 +381,46 @@ function AuthProvider({ children }: AuthProviderProps) {
           setIsLogging(false)
         } else {
           Alert.alert(
-            'Login realizado',
-            ' Porém não foi possível buscar os dados de perfil do usuário',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Login realizado'
+              : 'Login successful',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Porém não foi possível buscar os dados de perfil do usuário'
+              : 'However, it was not possible to fetch the user profile data',
           )
         }
       })
       .catch((error) => {
         const { code } = error
-        setIsLogging(false)
 
         if (code === 'auth/too-many-requests') {
+          setIsLogging(false)
+
           return Alert.alert(
-            'Login',
-            'Você excedeu o limite de tentativas de autenticação. Por favor, aguarde um tempo antes de tentar novamente.',
+            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Você excedeu o limite de tentativas de autenticação. Por favor, aguarde um tempo antes de tentar novamente.'
+              : 'You have exceeded the authentication attempt limit. Please wait a while before trying again.',
           )
         }
         if (code === 'auth/user-not-found' || code === 'auth/wrong-password') {
-          return Alert.alert('Login', 'E-email e/ou senha inválida.')
+          setIsLogging(false)
+
+          return Alert.alert(
+            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            user?.selectedLanguage === 'pt-br'
+              ? 'E-mail e/ou senha inválida.'
+              : 'Invalid email and/or password.',
+          )
         } else {
-          return Alert.alert('Login', 'Não foi possível realizar o login.')
+          setIsLogging(false)
+
+          return Alert.alert(
+            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            user?.selectedLanguage === 'pt-br'
+              ? 'Não foi possível realizar o login.'
+              : 'Login could not be completed.',
+          )
         }
       })
   }
@@ -406,20 +444,35 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function firebaseForgotPassword(email: string) {
     if (!email) {
-      return Alert.alert('Redefinir senha', 'Informe o e-mail.')
+      return Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Redefinir senha'
+          : 'Reset Password',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Informe o e-mail.'
+          : 'Please provide the email.',
+      )
     }
 
     sendPasswordResetEmail(auth, email)
       .then(() =>
         Alert.alert(
-          'Redefinir senha',
-          'Enviamos um link no seu e-mail para redefinir sua senha.',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Redefinir senha'
+            : 'Reset Password',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Enviamos um link no seu e-mail para redefinir sua senha.'
+            : 'We have sent a link to your email to reset your password.',
         ),
       )
       .catch(() =>
         Alert.alert(
-          'Redefinir senha',
-          'Não foi possível enviar o e-mail para redefinir a senha.',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Redefinir senha'
+            : 'Reset Password',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Não foi possível enviar o e-mail para redefinir a senha.'
+            : 'Could not send the email to reset the password.',
         ),
       )
   }
@@ -489,7 +542,58 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
+      })
+  }
+  async function updateUserSelectedLanguage(language: 'pt-br' | 'us') {
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    if (!user) return
+    const { id } = user
+
+    // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
+    const updatedAt = serverTimestamp()
+
+    await updateDoc(doc(userRef, id), {
+      selectedLanguage: language,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user) {
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          selectedLanguage: language,
+          updatedAt,
+        }
+
+        if (updatedUser) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -541,7 +645,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -599,7 +707,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -666,7 +778,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -733,7 +849,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -859,7 +979,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -932,7 +1056,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -1005,7 +1133,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Dados alterados com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
       })
   }
 
@@ -1096,7 +1228,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
-        Alert.alert('Convite enviado com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Convite enviado com sucesso!'
+            : 'Invitation sent successfully!',
+        )
       })
   }
 
@@ -1151,7 +1287,12 @@ function AuthProvider({ children }: AuthProviderProps) {
       })
       .finally(() => {
         // setIsWaitingApiResponse(false)
-        Alert.alert('Convite cancelado.')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Convite cancelado.'
+            : 'Invitation canceled.',
+        )
+
         setIsWaitingApiResponse(false)
       })
   }
@@ -1416,7 +1557,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     newExercise: IWeightDoneLog,
     workoutId: string,
     lastCompletedTimestamp: number,
-    lastCompletedFormattedDay: string,
+    lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ): Promise<IWeightDoneLog | null> {
@@ -2040,12 +2181,21 @@ function AuthProvider({ children }: AuthProviderProps) {
       await saveMyWorkoutInCache(userId, _workouts)
 
       setIsWaitingApiResponse(false)
-      Alert.alert(`Seu treino adicionado foi com sucesso!`)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Seu treino foi adicionado com sucesso!'
+          : 'Your workout was added successfully!',
+      )
 
       return true
     } else {
-      Alert.alert('Opa', 'Esse treino ainda não está pronto.')
-
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Opa' : 'Oops',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Esse treino ainda não está pronto.'
+          : 'This workout is not ready yet.',
+      )
       return false
     }
 
@@ -2167,11 +2317,21 @@ function AuthProvider({ children }: AuthProviderProps) {
         AsyncStorage.setItem(USER_SIGNIN_COLLECTION, JSON.stringify(user))
         setUser(user)
 
-        Alert.alert('Alerta', 'Treino adicionado com sucesso!')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Treino adicionado com sucesso!'
+            : 'Workout added successfully!',
+        )
       })
     } catch (err) {
       console.log(err)
-      Alert.alert('Opa', 'Esse treino ainda  não está pronto ')
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Opa' : 'Oops',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Esse treino ainda não está pronto'
+          : 'This workout is not ready yet',
+      )
     } finally {
       // setIsWaitingApiResponse(false)
     }
@@ -2557,6 +2717,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         cancelNewContractWithPersonalUpdateUserClientId,
 
         updateUserForm,
+        updateUserSelectedLanguage,
         updateUserGoalPreffer,
         updateUserGoalFocusMusclePreffer,
         updateUserFrequencyByWeekPreffer,

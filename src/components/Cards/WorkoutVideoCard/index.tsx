@@ -7,7 +7,7 @@ import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
 
 import { format, isSameDay } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { ptBR, enUS } from 'date-fns/locale'
 import * as FileSystem from 'expo-file-system'
 
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
@@ -222,9 +222,13 @@ function WorkoutVideoCardComponent({
 
       const date = new Date()
       const completedTimestamp = date.getTime()
-      const lastCompletedDay = format(date, 'EEEE', { locale: ptBR })
+      const lastCompletedDay = {
+        'pt-br': format(date, 'EEEE', { locale: ptBR }),
+        us: format(date, 'EEEE', { locale: enUS }),
+      }
       const lastCompletedDate = format(date, 'dd/MM/yyyy')
-
+      console.log(`lastCompletedDay!!!!!!!!`)
+      console.log(lastCompletedDay)
       const newExercise: IWeightDoneLog = {
         exerciseIndex,
         exerciseId: item.workoutExerciseId,

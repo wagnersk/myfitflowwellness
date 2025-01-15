@@ -587,7 +587,7 @@ export interface IWorkoutCardLogData {
   totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
 
   lastCompletedTimestamp: number // mudar isso para algo mais descritivo com o real valor
-  lastCompletedFormattedDay: string
+  lastCompletedFormattedDay: IptBrUs
   lastCompletedFormattedDate: string
 }
 
@@ -680,7 +680,7 @@ export interface AuthContextData {
     newExercise: IWeightDoneLog,
     workoutId: string,
     lastCompletedTimestamp: number,
-    lastCompletedFormattedDay: string,
+    lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ) => Promise<IWeightDoneLog | null>
@@ -718,6 +718,7 @@ export interface AuthContextData {
     clientId: string,
   ) => Promise<IContract | null>
   updateUserForm: (data: IUserFormProps) => Promise<void>
+  updateUserSelectedLanguage: (language: 'pt-br' | 'us') => Promise<void>
 
   fetchGoalOptionData: () => Promise<IGoalSelectData | null>
   updateUserGoalPreffer: (data: IUserGoal) => Promise<void>

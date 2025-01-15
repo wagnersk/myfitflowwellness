@@ -47,7 +47,6 @@ export function UserHome() {
     loadPersonalTrainerData,
     savePersonalTrainerData,
   } = useAuth()
-  console.log(`weightProgression`)
 
   const findWeightProgression = weightProgression?.find(
     (v) => v.userId === user?.id,
@@ -78,16 +77,19 @@ export function UserHome() {
     navigation.navigate('camera')
   }
   async function handleSignOut() {
+    if (!user) return
     Alert.alert(
-      'Tem certeza?',
-      'Se você sair , irá precisar de internet para conectar-se novamente.',
+      user.selectedLanguage === 'pt-br' ? 'Tem certeza?' : 'Are you sure?',
+      user.selectedLanguage === 'pt-br'
+        ? 'Se você sair, irá precisar de internet para conectar-se novamente.'
+        : 'If you leave, you will need internet to connect again.',
       [
         {
-          text: 'Cancelar',
+          text: user.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
           onPress: () => {},
         },
         {
-          text: 'Sair',
+          text: user.selectedLanguage === 'pt-br' ? 'Sair' : 'Sign Out',
           onPress: () => firebaseSignOut(),
         },
       ],
@@ -95,16 +97,23 @@ export function UserHome() {
   }
 
   function getGreetingMessage() {
+    if (!user) return
     const ndate = new Date()
 
     const hours = ndate.getHours()
 
     const message =
-      hours > 6 && hours < 12
-        ? 'Bom dia'
-        : hours > 12 && hours < 18
-          ? 'Boa tarde'
-          : 'Boa noite'
+      hours >= 6 && hours < 12
+        ? user.selectedLanguage === 'pt-br'
+          ? 'Bom dia'
+          : 'Good morning'
+        : hours >= 12 && hours < 18
+          ? user.selectedLanguage === 'pt-br'
+            ? 'Boa tarde'
+            : 'Good afternoon'
+          : user.selectedLanguage === 'pt-br'
+            ? 'Boa noite'
+            : 'Good evening'
 
     return message
   }
@@ -186,9 +195,13 @@ export function UserHome() {
           <BodyTopWrapper>
             {myWorkout?.workoutPeriod.periodNumber && (
               <WarningWrapper>
-                <Warning>Dia </Warning>
+                <Warning>
+                  {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
+                </Warning>
                 <WarningGreetings>{daysPassed} </WarningGreetings>
-                <Warning>de </Warning>
+                <Warning>
+                  {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}
+                </Warning>
                 <WarningGreetings>
                   {myWorkout?.workoutPeriod.periodNumber * 7}
                 </WarningGreetings>

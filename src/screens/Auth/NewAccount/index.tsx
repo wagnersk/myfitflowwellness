@@ -64,7 +64,7 @@ interface IUserForm {
   }
 }
 export function NewAccount() {
-  const { isWaitingApiResponse, firebaseSignUp, isLogging } = useAuth()
+  const { isWaitingApiResponse, firebaseSignUp, isLogging, user } = useAuth()
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
 
   const [userForm, setUserForm] = useState<IUserForm>({
@@ -101,9 +101,17 @@ export function NewAccount() {
       )
     } catch (error) {
       if (error instanceof Error) {
-        Alert.alert('Erro', error.message)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          error.message,
+        )
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro desconhecido')
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Ocorreu um erro desconhecido'
+            : 'An unknown error occurred',
+        )
       }
     }
 

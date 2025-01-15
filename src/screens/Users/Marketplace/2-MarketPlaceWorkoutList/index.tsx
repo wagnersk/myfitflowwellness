@@ -79,9 +79,14 @@ export function MarketPlaceWorkoutList() {
           />
           {selectedLanguage && (
             <BioInfo>
-              <BioInfoLetter>Treinos </BioInfoLetter>
+              <BioInfoLetter>
+                {user?.selectedLanguage === 'pt-br' ? `Treinos` : `Workouts`}
+              </BioInfoLetter>
               <BioInfoSubtitle>
-                Categoria:
+                {user?.selectedLanguage === 'pt-br'
+                  ? `Categorias`
+                  : `Categories`}
+                :{' '}
                 {
                   dataParams.selectedCategoryData.workoutCategoryName[
                     selectedLanguage

@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react'
-import { Alert, ImageBackground, View } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { Alert, ImageBackground, TouchableOpacity, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
@@ -28,7 +28,11 @@ import {
   Label,
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
-import { IEquipamentsFilters } from '@hooks/authTypes'
+import {
+  IEquipamentsFilters,
+  IUserFormProps,
+  SignInProps,
+} from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 
 export interface IptBrUs {
@@ -37,18 +41,32 @@ export interface IptBrUs {
 }
 
 export function UserProfile() {
-  const { user } = useAuth()
+  const { user, updateUserSelectedLanguage, isWaitingApiResponse } = useAuth()
   const navigation = useNavigation()
-  const selectedLanguage = user?.selectedLanguage
+
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    user?.selectedLanguage || 'us',
+  )
 
   function handleNextStep() {
-    Alert.alert('Atenção', 'Funcionalidade desabilitada temporariamente')
+    Alert.alert(
+      selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
+      selectedLanguage === 'pt-br'
+        ? 'Funcionalidade desabilitada temporariamente'
+        : 'Functionality temporarily disabled',
+    )
     return
     navigation.navigate('userSelectEditHomeProfile')
   }
 
   const userAge = diffInAge(user?.birthdate)
   const experienceTime = diffInAge(user?.whenStartedAtGym)
+
+  async function handleLanguageChange(language: 'pt-br' | 'us') {
+    setSelectedLanguage(language)
+
+    await updateUserSelectedLanguage(language)
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -164,54 +182,103 @@ export function UserProfile() {
               </PhotoBorderWrapper>
 
               <UserNameWrapper>
-                <UserName>
-                  {user?.name}, {userAge}
-                </UserName>
+                <View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleLanguageChange(
+                        selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
+                      )
+                    }
+                  >
+                    <UserName style={{ fontSize: 32, marginRight: 4 }}>
+                      {selectedLanguage === 'us' ? '🇺🇸' : '🇧🇷'}
+                    </UserName>
+                  </TouchableOpacity>
+                </View>
+                <View>
+                  <UserName>
+                    {user?.name}, {userAge}
+                  </UserName>
+                </View>
               </UserNameWrapper>
             </ProfileWrapper>
 
             <Body>
               <ProfileInfoWrapper>
-                <Title>Objetivo:</Title>
+                <Title>
+                  {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
+                </Title>
                 <ProfileInfoText>
                   {formattedGoal}
                   {formattedGoal && ', '}
-                  {formattedMuscleFocus && 'foco em: '}
+                  {formattedMuscleFocus &&
+                    (selectedLanguage === 'pt-br' ? 'foco em: ' : 'focus on: ')}
                   {formattedMuscleFocus}
                 </ProfileInfoText>
                 <ProfileInfoDivisor />
 
-                <Title>Tempo de treino: </Title>
+                <Title>
+                  {selectedLanguage === 'pt-br'
+                    ? 'Tempo de treino'
+                    : 'Training time'}
+                  :{' '}
+                </Title>
                 <ProfileInfoText>
-                  {experienceTime} {experienceTime && 'anos'}
+                  {experienceTime}{' '}
+                  {experienceTime &&
+                    (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
                 </ProfileInfoText>
                 <ProfileInfoDivisor />
 
-                <Title>Academia:</Title>
+                <Title>
+                  {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
+                </Title>
                 <ProfileInfoText>{user && user.gym}</ProfileInfoText>
                 <ProfileInfoDivisor />
 
-                <Title>Por semana: </Title>
+                <Title>
+                  {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}:{' '}
+                </Title>
                 <ProfileInfoText>
                   {formattedFrequencyByWeek || ''}
-                  {formattedFrequencyByWeek && ' de '}
+                  {formattedFrequencyByWeek &&
+                    (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
                   {formattedTimeBySession || ''}
-                  {formattedTimeBySession && ' cada'}
+                  {formattedTimeBySession &&
+                    (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
                 </ProfileInfoText>
                 <ProfileInfoDivisor />
 
-                <Title>Anabolizante:</Title>
+                <Title>
+                  {selectedLanguage === 'pt-br' ? 'Anabolizante' : 'Anabolic'}:
+                </Title>
                 <ProfileInfoText>
-                  {user && user.anabol ? user.anabol : 'Nenhum'}
+                  {user && user.anabol
+                    ? user.anabol
+                    : selectedLanguage === 'pt-br'
+                      ? 'Nenhum'
+                      : 'None'}
                 </ProfileInfoText>
                 <ProfileInfoDivisor />
 
-                <Title>Restrições:</Title>
+                <Title>
+                  {selectedLanguage === 'pt-br' ? 'Restrições' : 'Restrictions'}
+                  :
+                </Title>
                 <ProfileInfoText>
-                  {user && user.restrictions ? user.restrictions : 'Nenhuma'}
+                  {user && user.restrictions
+                    ? user.restrictions
+                    : selectedLanguage === 'pt-br'
+                      ? 'Nenhuma'
+                      : 'None'}
                 </ProfileInfoText>
                 <ProfileInfoDivisor />
-                <Title>Equipamentos disponíveis:</Title>
+                <Title>
+                  {selectedLanguage === 'pt-br'
+                    ? 'Equipamentos disponíveis'
+                    : 'Available equipment'}
+                  :
+                </Title>
 
                 <View
                   style={{

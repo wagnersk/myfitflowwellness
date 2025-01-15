@@ -37,7 +37,11 @@ export const ProfileWrapper = styled.View`
   margin-bottom: 20px;
 `
 
-export const UserNameWrapper = styled.View``
+export const UserNameWrapper = styled.View`
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+`
 
 export const UserName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

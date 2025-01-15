@@ -95,8 +95,11 @@ export function UserWorkoutList() {
             style={{ position: 'absolute', left: 32, bottom: 32 }}
           />
           <BioInfo>
-            <BioInfoLetter>{`Treino ${letter}`}</BioInfoLetter>
-
+            <BioInfoLetter>
+              {user?.selectedLanguage === 'pt-br'
+                ? `Treino ${letter}`
+                : `Workout ${letter}`}
+            </BioInfoLetter>
             <BioInfoName>{getTrimmedName(26, muscleGroupsLabel)}</BioInfoName>
           </BioInfo>
         </BioInfoWrapper>
@@ -130,7 +133,11 @@ export function UserWorkoutList() {
             <CTAButton
               onPress={handleNextScreen}
               changeColor={true}
-              title="Começar Treino"
+              title={
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Começar Treino'
+                  : 'Start Workout'
+              }
             />
           </View>
         </BodyImageBackgroundContainerSpaceBetween>

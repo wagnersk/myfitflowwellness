@@ -63,15 +63,17 @@ export function MarketPlacePersonalsDetail() {
       if (!personalTrainerContractId) return
 
       Alert.alert(
-        'Atenção',
-        'Voce já possui um convite em aberto para outro personal trainer, deseja cancelar o outro personal?',
+        user.selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
+        user.selectedLanguage === 'pt-br'
+          ? 'Você já possui um convite em aberto para outro personal trainer, deseja cancelar o outro personal?'
+          : 'You already have an open invitation for another personal trainer, do you want to cancel the other personal?',
         [
           {
-            text: 'Cancelar',
+            text: user.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
             onPress: () => {},
           },
           {
-            text: 'Confirmar',
+            text: user.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
             onPress: async () =>
               await cancelNewContractWithPersonalUpdateUserClientId(
                 personalTrainerContractId,
@@ -86,18 +88,24 @@ export function MarketPlacePersonalsDetail() {
     }
 
     async function choose() {
+      if (!user) return
+
       const { personalTrainerContractId } = data
 
       Alert.alert(
-        'Confirmar Envio de Convite',
-        'Deseja realmente enviar o convite para este personal trainer?',
+        user.selectedLanguage === 'pt-br'
+          ? 'Confirmar Envio de Convite'
+          : 'Confirm Invitation Sending',
+        user.selectedLanguage === 'pt-br'
+          ? 'Deseja realmente enviar o convite para este personal trainer?'
+          : 'Do you really want to send the invitation to this personal trainer?',
         [
           {
-            text: 'Cancelar',
+            text: user.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
             onPress: () => {},
           },
           {
-            text: 'Confirmar',
+            text: user.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
             onPress: async () =>
               await createNewContractWithPersonalUpdateUserClientId(
                 personalTrainerContractId,
@@ -126,15 +134,19 @@ export function MarketPlacePersonalsDetail() {
     console.log(`clientId`)
     console.log(clientId)
     Alert.alert(
-      'Confirmar Cancelamento de Convite',
-      'Tem certeza de que deseja cancelar o convite enviado para este personal trainer?',
+      user.selectedLanguage === 'pt-br'
+        ? 'Confirmar Cancelamento de Convite'
+        : 'Confirm Invitation Cancellation',
+      user.selectedLanguage === 'pt-br'
+        ? 'Tem certeza de que deseja cancelar o convite enviado para este personal trainer?'
+        : 'Are you sure you want to cancel the invitation sent to this personal trainer?',
       [
         {
-          text: 'Não',
+          text: user.selectedLanguage === 'pt-br' ? 'Não' : 'No',
           onPress: () => {},
         },
         {
-          text: 'Confirmar',
+          text: user.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
           onPress: async () =>
             await cancelNewContractWithPersonalUpdateUserClientId(
               personalTrainerContractId,

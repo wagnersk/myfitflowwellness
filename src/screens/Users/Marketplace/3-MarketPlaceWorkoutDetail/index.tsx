@@ -274,6 +274,7 @@ export function MarketPlaceWorkoutDetail() {
               machineLabel={machineLabel}
               otherLabel={otherLabel}
               weightLabel={weightLabel}
+              selectedLanguage={user?.selectedLanguage}
             />
             {muscleGroupsLabel && (
               <WorkoutMuscleComponent description={muscleGroupsLabel} />
@@ -300,7 +301,11 @@ export function MarketPlaceWorkoutDetail() {
             }}
             /* bigSize={true} */
             changeColor
-            title="Quero esse treino"
+            title={
+              selectedLanguage === 'pt-br'
+                ? 'Selecionar este treino'
+                : 'Select this workout'
+            }
           />
         </BlurViewWrapper>
       </BodyBottomWrapper>

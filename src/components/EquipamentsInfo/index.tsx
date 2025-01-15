@@ -22,6 +22,7 @@ interface Props {
   machineLabel?: string
   otherLabel?: string
   weightLabel?: string
+  selectedLanguage: 'pt-br' | 'us' | undefined
 }
 
 export function EquipamentsInfo({
@@ -32,37 +33,48 @@ export function EquipamentsInfo({
   machineLabel,
   otherLabel,
   weightLabel,
+  selectedLanguage,
 }: Props) {
   return (
     <Container>
       <BorderWrapper>
         <TitleWrapper>
-          <Title>Equipamentos</Title>
+          <Title>
+            {selectedLanguage === 'pt-br' ? `Equipamentos` : `Equipaments`}
+          </Title>
         </TitleWrapper>
 
         <FreeStyleWrapper>
           {weightLabel && (
             <InfoWrapper>
-              <EquipamentTitle>Pesos: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Pesos' : 'Weights'}:
+              </EquipamentTitle>
               <EquipamentItens>{weightLabel}</EquipamentItens>
             </InfoWrapper>
           )}
           {barLabel && (
             <InfoWrapper>
-              <EquipamentTitle>Barras: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Barras' : 'Bars'}:
+              </EquipamentTitle>
               <EquipamentItens>{barLabel}</EquipamentItens>
             </InfoWrapper>
           )}
 
           {benchLabel && (
             <InfoWrapper>
-              <EquipamentTitle>Bancos: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Outros' : 'Others'}:
+              </EquipamentTitle>
               <EquipamentItens>{benchLabel}</EquipamentItens>
             </InfoWrapper>
           )}
           {otherLabel && (
             <InfoWrapper>
-              <EquipamentTitle>Outros: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Pulley' : 'Pulley'}:
+              </EquipamentTitle>
               <EquipamentItens>{otherLabel}</EquipamentItens>
             </InfoWrapper>
           )}
@@ -71,13 +83,23 @@ export function EquipamentsInfo({
         <PoliaStyleWrapper>
           {pulley && (
             <InfoWrapper>
-              <EquipamentTitle>Pulley: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br'
+                  ? 'Puxadores do pulley'
+                  : 'Pulley handles'}
+                :
+              </EquipamentTitle>
               <EquipamentItens>{pulley}</EquipamentItens>
             </InfoWrapper>
           )}
           {pulleyHandles && (
             <InfoWrapper>
-              <EquipamentTitle>Puxadores do pulley: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br'
+                  ? 'Puxadores do pulley'
+                  : 'Pulley handles'}
+                :
+              </EquipamentTitle>
               <EquipamentItens>{pulleyHandles}</EquipamentItens>
             </InfoWrapper>
           )}
@@ -85,7 +107,9 @@ export function EquipamentsInfo({
         <MachineStyleWrapper>
           {machineLabel && (
             <InfoWrapper>
-              <EquipamentTitle>Máquinas: </EquipamentTitle>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Máquinas' : 'Machines'}:{' '}
+              </EquipamentTitle>
               <EquipamentItens>{machineLabel}</EquipamentItens>
             </InfoWrapper>
           )}
