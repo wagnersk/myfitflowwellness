@@ -26,6 +26,8 @@ import {
   PhotoBorderWrapper,
   LabelWrapper,
   Label,
+  ToggleButton,
+  ToggleButtonText,
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
 import {
@@ -183,25 +185,28 @@ export function UserProfile() {
 
               <UserNameWrapper>
                 <View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleLanguageChange(
-                        selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
-                      )
-                    }
-                  >
-                    <UserName style={{ fontSize: 32, marginRight: 4 }}>
-                      {selectedLanguage === 'us' ? '🇺🇸' : '🇧🇷'}
-                    </UserName>
-                  </TouchableOpacity>
-                </View>
-                <View>
                   <UserName>
                     {user?.name}, {userAge}
                   </UserName>
                 </View>
               </UserNameWrapper>
             </ProfileWrapper>
+            <View>
+              <ToggleButton
+                onPress={() =>
+                  handleLanguageChange(
+                    selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
+                  )
+                }
+              >
+                <ToggleButtonText selected={selectedLanguage === 'pt-br'}>
+                  🇧🇷 Português
+                </ToggleButtonText>
+                <ToggleButtonText selected={selectedLanguage === 'us'}>
+                  🇺🇸 English
+                </ToggleButtonText>
+              </ToggleButton>
+            </View>
 
             <Body>
               <ProfileInfoWrapper>

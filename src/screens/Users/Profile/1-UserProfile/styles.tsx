@@ -98,3 +98,22 @@ export const Label = styled.Text`
   font-size: ${RFValue(14)}px;
   margin-bottom: 12px;
 `
+export const ToggleButton = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+`
+
+export const ToggleButtonText = styled.Text<{ selected: boolean }>`
+  color: ${({ selected, theme }) =>
+    selected ? theme.COLORS.BLUE_STROKE : '#888'};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  margin: 0 10px;
+  opacity: ${({ selected }) => (selected ? 1 : 0.6)};
+`

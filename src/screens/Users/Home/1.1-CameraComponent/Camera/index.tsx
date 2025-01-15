@@ -40,6 +40,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { BackButton } from '@components/Buttons/BackButton'
+import { useAuth } from '@hooks/auth'
 
 function encode(arraybuffer) {
   const bytes = new Uint8Array(arraybuffer)
@@ -68,6 +69,7 @@ function encode(arraybuffer) {
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
+
 const initialDaysData = [
   { name: 'SEG', selected: false },
   { name: 'TER', selected: false },
@@ -77,6 +79,7 @@ const initialDaysData = [
   { name: 'SAB', selected: false },
   { name: 'DOM', selected: false },
 ]
+
 export function Camera() {
   const [isCameraMounted, setIsCameraMounted] = useState(true)
 
@@ -97,6 +100,8 @@ export function Camera() {
   const timeText = format(now, 'HH:mm')
 
   const navigation = useNavigation()
+  const { isWaitingApiResponse, user } = useAuth()
+
   const handleDayPress = (index: number) => {
     console.log(`handleDayPress trocando o dia index ${index}`)
 
@@ -128,8 +133,18 @@ export function Camera() {
     // Camera permissions are not granted yet.
     return (
       <Container>
-        <Message>We need your permission to show the camera</Message>
-        <ShareButton>Grant Permission</ShareButton>
+        <ShareButton onPress={requestPermission}>
+          <Message>
+            {user?.selectedLanguage === 'pt-br'
+              ? 'Precisamos da sua permissão para acessar a câmera'
+              : 'We need your permission to show the camera'}
+          </Message>
+          <Message>
+            {user?.selectedLanguage === 'pt-br'
+              ? 'Conceder Permissão'
+              : 'Grant Permission'}
+          </Message>
+        </ShareButton>
       </Container>
     )
   }
