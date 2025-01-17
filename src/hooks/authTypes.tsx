@@ -176,6 +176,7 @@ export type SignInProps = {
   updatedAt: ServerTimestamp
   whatsappNumber: string
   whenStartedAtGym: string
+  anonymousUser: boolean
 }
 export interface IStatisticsItens {
   createdAt: number
@@ -635,6 +636,7 @@ export interface AuthProviderProps {
 }
 
 export interface AuthContextData {
+  firebaseAnonymousSignUp: (selectedLanguage: 'pt-br' | 'us') => Promise<void>
   firebaseSignUp: (
     email: string,
     password: string,
@@ -718,6 +720,9 @@ export interface AuthContextData {
     clientId: string,
   ) => Promise<IContract | null>
   updateUserForm: (data: IUserFormProps) => Promise<void>
+  updateLocalCacheAnonymousUserSelectedLanguage: (
+    language: 'pt-br' | 'us',
+  ) => Promise<void>
   updateUserSelectedLanguage: (language: 'pt-br' | 'us') => Promise<void>
 
   fetchGoalOptionData: () => Promise<IGoalSelectData | null>
@@ -745,7 +750,7 @@ export interface AuthContextData {
   saveGraphicsValues: (data: IGraphicsValues[] | null) => Promise<void>
   loadWeightProgression: (
     userId: string,
-  ) => Promise<ICachedExerciseHistoryData[]>
+  ) => Promise<ICachedExerciseHistoryData[] | null>
 
   loadGraphicsValues: (userId: string) => Promise<IGraphicsValues[]>
   saveWeightProgression: (

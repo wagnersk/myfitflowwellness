@@ -13,7 +13,7 @@ export function AppStackMarketPlaceHomeRoutes() {
   return (
     <Navigator
       screenOptions={{ headerShown: false }}
-      initialRouteName="userWorkoutDiet"
+      initialRouteName="marketPlaceHome"
     >
       <Screen
         name="marketPlaceHome"

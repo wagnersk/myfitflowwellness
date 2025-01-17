@@ -26,6 +26,7 @@ import {
 import {
   sendPasswordResetEmail,
   createUserWithEmailAndPassword,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
@@ -71,10 +72,7 @@ import {
   IptBrUs,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
-import {
-  IWorkoutCategory,
-  IWorkoutExercisesFirebase,
-} from '@src/@types/navigation'
+import { IWorkoutCategory } from '@src/@types/navigation'
 import { IBenchDataSelect, IFreeSelect } from './selectOptionsTypes'
 
 const db = getFirestore(firebaseApp)
@@ -132,6 +130,212 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [isWaitingApiResponse, setIsWaitingApiResponse] = useState(false)
   const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
     useState(false)
+
+  async function firebaseAnonymousSignUp(selectedLanguage: 'pt-br' | 'us') {
+    setIsWaitingApiResponse(true)
+    await signInAnonymously(auth)
+      .then(async (account) => {
+        const usersRef = collection(db, 'anonymousUsers')
+        const updatedTime = serverTimestamp()
+
+        const muscleFocus = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          muscleSelectedData: [
+            {
+              'pt-br': `equilibrado`,
+              us: `balanced`,
+            },
+          ],
+        }
+
+        const freeData: IFreeSelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            barSelectData: [
+              {
+                bar_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            benchSelectData: [
+              {
+                bench_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            otherSelectData: [
+              {
+                other_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            weightSelectData: [
+              {
+                weight_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        const pulleyData: IPulleySelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            pulleyHandlerSelectData: [
+              {
+                pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+            pulleySelectData: [
+              {
+                pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        const machineData: IMachineSelectData = {
+          createdAt: updatedTime,
+          updatedAt: updatedTime,
+          data: {
+            machineSelectData: [
+              {
+                machine_insensitive: { 'pt-br': 'todos', us: 'all' },
+              },
+            ],
+          },
+        }
+
+        await setDoc(doc(usersRef, account.user.uid), {
+          anabol: null,
+          birthdate: null,
+          clientId: null,
+          createdAt: updatedTime,
+          email: null,
+          freeData,
+          goal: null,
+          gym: null,
+          id: account.user.uid,
+          isNewUser: true,
+          machineData,
+          muscleFocus,
+          name: null,
+          name_insensitive: null,
+          personalPlanActive: false,
+          photoBase64: '',
+          premiumPlanActive: false,
+          anonymousUser: true,
+          pulleyData,
+          restrictions: null,
+          selectedLanguage,
+          sessionsByWeek: null,
+          submissionPending: false,
+          timeBySession: null,
+          updatedAt: updatedTime,
+          whatsappNumber: null,
+          whenStartedAtGym: '',
+          personalTrainerContractId: null,
+          personalTrainerId: null,
+        })
+          .then(() => {
+            Alert.alert(
+              user?.selectedLanguage === 'pt-br'
+                ? 'Conta anônima criada com sucesso!'
+                : 'Anonymous account created successfully!',
+            )
+            firebaseAnonymousSignIn(account.user.uid)
+          })
+          .catch((error) => {
+            console.error(error)
+            console.log(error.code)
+          })
+      })
+      .catch((error) => {
+        const { code } = error
+        console.log(`code`, code)
+        setIsWaitingApiResponse(false)
+
+        Alert.alert(
+          selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          selectedLanguage === 'pt-br'
+            ? 'Não foi possível criar a conta anônima.'
+            : 'Could not create an anonymous account.',
+        )
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+      })
+  }
+
+  async function firebaseAnonymousSignIn(uid: string) {
+    setIsLogging(true)
+
+    const userDocRef = doc(db, 'anonymousUsers', uid)
+    const docSnap = await getDoc(userDocRef)
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data() as SignInProps
+
+      await AsyncStorage.setItem(
+        USER_SIGNIN_COLLECTION,
+        JSON.stringify(userData),
+      )
+      setUser(userData)
+
+      loadLoginInitialCachedWorkoutsData(uid)
+      setIsLogging(false)
+    } else {
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Login realizado'
+          : 'Login successful',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Porém não foi possível buscar os dados de perfil do usuário'
+          : 'However, it was not possible to fetch the user profile data',
+      )
+    }
+  }
+
+  async function upgradeAnonymousToRegistered(email: string, password: string) {
+    try {
+      const currentUser = auth.currentUser
+      if (!currentUser || !currentUser.isAnonymous) {
+        throw new Error('Usuário não está logado anonimamente.')
+      }
+
+      const credential = EmailAuthProvider.credential(email, password)
+      const linkedUser = await currentUser.linkWithCredential(credential)
+
+      const anonUserId = currentUser.uid
+
+      // Move os dados da coleção anonymous_users para users
+      const anonUserDocRef = doc(db, 'anonymous_users', anonUserId)
+      const anonUserDoc = await getDoc(anonUserDocRef)
+
+      if (anonUserDoc.exists()) {
+        const userData = anonUserDoc.data()
+
+        // Copia para a coleção users
+        const usersRef = collection(db, 'users')
+        await setDoc(doc(usersRef, linkedUser.user.uid), {
+          id: linkedUser.user.uid,
+          email,
+          createdAt: userData.createdAt,
+          updatedAt: serverTimestamp(),
+        })
+
+        // Exclui o documento do anonymous_users
+        await deleteDoc(anonUserDocRef)
+
+        Alert.alert('Conta registrada com sucesso!')
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar usuário anônimo:', error)
+      Alert.alert(
+        'Erro',
+        'Não foi possível atualizar para uma conta registrada.',
+      )
+    }
+  }
 
   async function firebaseSignUp(
     email: string,
@@ -595,6 +799,30 @@ function AuthProvider({ children }: AuthProviderProps) {
             : 'Data changed successfully!',
         )
       })
+  }
+  async function updateLocalCacheAnonymousUserSelectedLanguage(
+    language: 'pt-br' | 'us',
+  ) {
+    setIsWaitingApiResponse(true)
+    const updatedAt = new Date().getTime()
+
+    const updatedUser = {
+      ...user,
+      selectedLanguage: language,
+      updatedAt,
+    }
+
+    await AsyncStorage.setItem(
+      USER_SIGNIN_COLLECTION,
+      JSON.stringify(updatedUser),
+    )
+    // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
+
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br'
+        ? 'Dados alterados com sucesso!'
+        : 'Data changed successfully!',
+    )
   }
 
   async function updateUserGoalPreffer(userGoal: IUserGoal) {
@@ -1486,12 +1714,12 @@ function AuthProvider({ children }: AuthProviderProps) {
         userLocalWeightProgressionDateKey,
       ) as ICachedExerciseHistoryData[]
 
-      if (!cachedUserLocalWeightProgressionDateKey) return
+      if (!cachedUserLocalWeightProgressionDateKey) return null
 
       setWeightProgression(cachedUserLocalWeightProgressionDateKey)
 
       return cachedUserLocalWeightProgressionDateKey
-    }
+    } else return null
   }
 
   async function saveGraphicsValues(data: IGraphicsValues[] | null) {
@@ -2679,6 +2907,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider
       value={{
+        firebaseAnonymousSignUp,
         firebaseSignUp,
         firebaseSignIn,
         firebaseSignOut,
@@ -2718,6 +2947,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         updateUserForm,
         updateUserSelectedLanguage,
+        updateLocalCacheAnonymousUserSelectedLanguage,
         updateUserGoalPreffer,
         updateUserGoalFocusMusclePreffer,
         updateUserFrequencyByWeekPreffer,

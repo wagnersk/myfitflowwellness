@@ -30,6 +30,8 @@ export const Body = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-end;
   width: 100%;
+  width: 48px;
+  height: 48px;
 `
 
 export const ProfileWrapper = styled.View`
@@ -41,6 +43,7 @@ export const UserNameWrapper = styled.View`
   justify-content: center;
   align-items: center;
   flex-direction: row;
+  padding-top: 16px;
 `
 
 export const UserName = styled.Text`

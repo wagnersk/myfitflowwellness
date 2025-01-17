@@ -8,9 +8,14 @@ import { useAuth } from '@hooks/auth'
 type Props = {
   defaultPhotoBase64?: string
   newDefaultPhotoBase64?: string
+  defaultText: string
 }
 
-export function Photo({ defaultPhotoBase64, newDefaultPhotoBase64 }: Props) {
+export function Photo({
+  defaultPhotoBase64,
+  newDefaultPhotoBase64,
+  defaultText,
+}: Props) {
   const { user } = useAuth()
   const [displayedImage, setDisplayedImage] = useState<string | undefined>(
     defaultPhotoBase64,
@@ -39,7 +44,7 @@ export function Photo({ defaultPhotoBase64, newDefaultPhotoBase64 }: Props) {
   return (
     <Container>
       <PhotoBorderWrapper>
-        {!displayedImage && <PhotoNotFound>{'Não há foto'}</PhotoNotFound>}
+        {!displayedImage && <PhotoNotFound>{defaultText}</PhotoNotFound>}
 
         {!!displayedImage && (
           <Image

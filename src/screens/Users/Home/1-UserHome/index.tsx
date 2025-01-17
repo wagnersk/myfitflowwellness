@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { BackHandler, ActivityIndicator, Alert } from 'react-native'
+import {
+  BackHandler,
+  ActivityIndicator,
+  Alert,
+  View,
+  Button,
+} from 'react-native'
 import { useTheme } from 'styled-components'
 
 import { useAuth } from '@hooks/auth'
@@ -30,6 +36,8 @@ import {
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutsData, IUserWorkoutsLog } from '@hooks/authTypes'
+import WorkoutNotFoundAnimationLottie from '@components/WorkoutNotFoundAnimationLottie'
+import SmileySad from '@assets/SmileySad.svg'
 
 export function UserHome() {
   const navigation = useNavigation()
@@ -177,13 +185,20 @@ export function UserHome() {
   )
 
   const colors = theme.COLORS.GRADIENT_CARD
+  const svgColor = theme.COLORS.BLUE_STROKE
+
   return (
     <Container>
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BioInfo>
             <BioInfoGreetings>{getGreetingMessage()},</BioInfoGreetings>
-            <BioInfoName>{firstName && firstName[0]}</BioInfoName>
+            {firstName && <BioInfoName>{firstName[0]}</BioInfoName>}
+            {user?.anonymousUser && (
+              <BioInfoName>
+                {user?.selectedLanguage === 'pt-br' ? 'Convidado' : 'Guest'}
+              </BioInfoName>
+            )}
           </BioInfo>
           <LogoutButton onPress={handleSignOut} />
         </BioInfoWrapper>
@@ -198,6 +213,10 @@ export function UserHome() {
                 <Warning>
                   {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
                 </Warning>
+                <Warning>
+                  {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
+                </Warning>
+                <WarningGreetings>{daysPassed} </WarningGreetings>
                 <WarningGreetings>{daysPassed} </WarningGreetings>
                 <Warning>
                   {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}
@@ -208,6 +227,30 @@ export function UserHome() {
               </WarningWrapper>
             )}
           </BodyTopWrapper>
+
+          {!myWorkoutDataArray && (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                padding: 64,
+              }}
+            >
+              <SmileySad width={180} height={180} fill={svgColor} />
+
+              <Warning>
+                {user?.selectedLanguage === 'pt-br'
+                  ? 'Nenhum treino encontrado'
+                  : 'No workout found'}
+              </Warning>
+              <WarningGreetings>
+                {user?.selectedLanguage === 'pt-br'
+                  ? 'Escolha um treino para começar!'
+                  : 'Choose a workout to start!'}
+              </WarningGreetings>
+            </View>
+          )}
           {/*         {console.log(`JSON.stringify(myWorkoutDataArray)`)}
           {console.log(JSON.stringify(myWorkoutDataArray))} */}
           {isLoadingUserStorageData ? (

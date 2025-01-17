@@ -43,7 +43,13 @@ import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
 
 export function Login() {
-  const { firebaseSignIn, firebaseForgotPassword, isLogging, user } = useAuth()
+  const {
+    firebaseSignIn,
+    firebaseAnonymousSignUp,
+    firebaseForgotPassword,
+    isLogging,
+    user,
+  } = useAuth()
 
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
   const navigation = useNavigation()
@@ -152,6 +158,29 @@ export function Login() {
 
   async function handleSignUp() {
     navigation.navigate('newAccount')
+  }
+
+  async function handleSignUpAsGuest() {
+    const letActiveErrorCheck = true
+    setActiveErrorCheck(letActiveErrorCheck)
+
+    try {
+      await firebaseAnonymousSignUp(selectedLanguage)
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          error.message,
+        )
+      } else {
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+          user?.selectedLanguage === 'pt-br'
+            ? 'Ocorreu um erro desconhecido'
+            : 'An unknown error occurred',
+        )
+      }
+    }
   }
 
   async function handleForgotPassword() {
@@ -279,7 +308,7 @@ export function Login() {
                 </KeyboardAvoidingView>
                 <Footer>
                   <CreateGuestAccountButton
-                    onPress={() => console.log('entrar como convidado')}
+                    onPress={handleSignUpAsGuest}
                     disabled={isLogging}
                   >
                     <FooterTopWrapper>

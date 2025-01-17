@@ -43,7 +43,12 @@ export interface IptBrUs {
 }
 
 export function UserProfile() {
-  const { user, updateUserSelectedLanguage, isWaitingApiResponse } = useAuth()
+  const {
+    user,
+    updateUserSelectedLanguage,
+    updateLocalCacheAnonymousUserSelectedLanguage,
+    isWaitingApiResponse,
+  } = useAuth()
   const navigation = useNavigation()
 
   const [selectedLanguage, setSelectedLanguage] = useState(
@@ -51,13 +56,13 @@ export function UserProfile() {
   )
 
   function handleNextStep() {
-    Alert.alert(
+    /*    Alert.alert(
       selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
       selectedLanguage === 'pt-br'
         ? 'Funcionalidade desabilitada temporariamente'
         : 'Functionality temporarily disabled',
     )
-    return
+    return */
     navigation.navigate('userSelectEditHomeProfile')
   }
 
@@ -67,7 +72,12 @@ export function UserProfile() {
   async function handleLanguageChange(language: 'pt-br' | 'us') {
     setSelectedLanguage(language)
 
-    await updateUserSelectedLanguage(language)
+    if (user?.anonymousUser) {
+      await updateLocalCacheAnonymousUserSelectedLanguage(language)
+    }
+    if (!user?.anonymousUser) {
+      await updateUserSelectedLanguage(language)
+    }
   }
 
   useFocusEffect(
@@ -175,20 +185,31 @@ export function UserProfile() {
         >
           <ImageBackgroundContainer>
             <SettingsWrapper>
-              <SettingsButton onPress={handleNextStep} />
+              {!user?.anonymousUser && (
+                <SettingsButton onPress={handleNextStep} />
+              )}
             </SettingsWrapper>
 
             <ProfileWrapper>
               <PhotoBorderWrapper>
-                <Photo defaultPhotoBase64={user?.photoBase64} />
+                <Photo
+                  defaultPhotoBase64={user?.photoBase64}
+                  defaultText={
+                    selectedLanguage === 'pt-br' ? `'Não há foto'` : ` `
+                  }
+                />
               </PhotoBorderWrapper>
 
               <UserNameWrapper>
-                <View>
+                {user?.anonymousUser ? (
+                  <UserName>
+                    {selectedLanguage === 'pt-br' ? `Convidado` : `Guest`}
+                  </UserName>
+                ) : (
                   <UserName>
                     {user?.name}, {userAge}
                   </UserName>
-                </View>
+                )}
               </UserNameWrapper>
             </ProfileWrapper>
             <View>
@@ -207,113 +228,113 @@ export function UserProfile() {
                 </ToggleButtonText>
               </ToggleButton>
             </View>
-
             <Body>
-              <ProfileInfoWrapper>
-                <Title>
-                  {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
-                </Title>
-                <ProfileInfoText>
-                  {formattedGoal}
-                  {formattedGoal && ', '}
-                  {formattedMuscleFocus &&
-                    (selectedLanguage === 'pt-br' ? 'foco em: ' : 'focus on: ')}
-                  {formattedMuscleFocus}
-                </ProfileInfoText>
-                <ProfileInfoDivisor />
-
-                <Title>
-                  {selectedLanguage === 'pt-br'
-                    ? 'Tempo de treino'
-                    : 'Training time'}
-                  :{' '}
-                </Title>
-                <ProfileInfoText>
-                  {experienceTime}{' '}
-                  {experienceTime &&
-                    (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
-                </ProfileInfoText>
-                <ProfileInfoDivisor />
-
-                <Title>
-                  {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
-                </Title>
-                <ProfileInfoText>{user && user.gym}</ProfileInfoText>
-                <ProfileInfoDivisor />
-
-                <Title>
-                  {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}:{' '}
-                </Title>
-                <ProfileInfoText>
-                  {formattedFrequencyByWeek || ''}
-                  {formattedFrequencyByWeek &&
-                    (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
-                  {formattedTimeBySession || ''}
-                  {formattedTimeBySession &&
-                    (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
-                </ProfileInfoText>
-                <ProfileInfoDivisor />
-
-                <Title>
-                  {selectedLanguage === 'pt-br' ? 'Anabolizante' : 'Anabolic'}:
-                </Title>
-                <ProfileInfoText>
-                  {user && user.anabol
-                    ? user.anabol
-                    : selectedLanguage === 'pt-br'
-                      ? 'Nenhum'
-                      : 'None'}
-                </ProfileInfoText>
-                <ProfileInfoDivisor />
-
-                <Title>
-                  {selectedLanguage === 'pt-br' ? 'Restrições' : 'Restrictions'}
-                  :
-                </Title>
-                <ProfileInfoText>
-                  {user && user.restrictions
-                    ? user.restrictions
-                    : selectedLanguage === 'pt-br'
-                      ? 'Nenhuma'
-                      : 'None'}
-                </ProfileInfoText>
-                <ProfileInfoDivisor />
-                <Title>
-                  {selectedLanguage === 'pt-br'
-                    ? 'Equipamentos disponíveis'
-                    : 'Available equipment'}
-                  :
-                </Title>
-
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
-                  }}
-                >
-                  {auxDataUnicFiltersText.map((val, i) => {
-                    return (
-                      <LabelWrapper key={i}>
-                        {val.data.length > 0 &&
-                          val.data.map((_val, _i) => {
-                            if (_val.value) {
-                              return (
-                                <LabelWrapper key={_i}>
-                                  <Label>
-                                    {_val.key}: {_val.value}
-                                  </Label>
-                                </LabelWrapper>
-                              )
-                            } else {
-                              return null
-                            }
-                          })}
-                      </LabelWrapper>
-                    )
-                  })}
-                </View>
-              </ProfileInfoWrapper>
+              {!user?.anonymousUser && (
+                <ProfileInfoWrapper>
+                  <Title>
+                    {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
+                  </Title>
+                  <ProfileInfoText>
+                    {formattedGoal}
+                    {formattedGoal && ', '}
+                    {formattedMuscleFocus &&
+                      (selectedLanguage === 'pt-br'
+                        ? 'foco em: '
+                        : 'focus on: ')}
+                    {formattedMuscleFocus}
+                  </ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Tempo de treino'
+                      : 'Training time'}
+                    :{' '}
+                  </Title>
+                  <ProfileInfoText>
+                    {experienceTime}{' '}
+                    {experienceTime &&
+                      (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
+                  </ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
+                  </Title>
+                  <ProfileInfoText>{user && user.gym}</ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}:{' '}
+                  </Title>
+                  <ProfileInfoText>
+                    {formattedFrequencyByWeek || ''}
+                    {formattedFrequencyByWeek &&
+                      (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
+                    {formattedTimeBySession || ''}
+                    {formattedTimeBySession &&
+                      (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
+                  </ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br' ? 'Anabolizante' : 'Anabolic'}
+                    :
+                  </Title>
+                  <ProfileInfoText>
+                    {user && user.anabol
+                      ? user.anabol
+                      : selectedLanguage === 'pt-br'
+                        ? 'Nenhum'
+                        : 'None'}
+                  </ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Restrições'
+                      : 'Restrictions'}
+                    :
+                  </Title>
+                  <ProfileInfoText>
+                    {user && user.restrictions
+                      ? user.restrictions
+                      : selectedLanguage === 'pt-br'
+                        ? 'Nenhuma'
+                        : 'None'}
+                  </ProfileInfoText>
+                  <ProfileInfoDivisor />
+                  <Title>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Equipamentos disponíveis'
+                      : 'Available equipment'}
+                    :
+                  </Title>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
+                    {auxDataUnicFiltersText.map((val, i) => {
+                      return (
+                        <LabelWrapper key={i}>
+                          {val.data.length > 0 &&
+                            val.data.map((_val, _i) => {
+                              if (_val.value) {
+                                return (
+                                  <LabelWrapper key={_i}>
+                                    <Label>
+                                      {_val.key}: {_val.value}
+                                    </Label>
+                                  </LabelWrapper>
+                                )
+                              } else {
+                                return null
+                              }
+                            })}
+                        </LabelWrapper>
+                      )
+                    })}
+                  </View>
+                </ProfileInfoWrapper>
+              )}
             </Body>
           </ImageBackgroundContainer>
         </ImageBackground>
