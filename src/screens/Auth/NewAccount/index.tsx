@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native'
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { useTheme } from 'styled-components'
 import { useNavigation } from '@react-navigation/core'
@@ -303,6 +304,11 @@ export function NewAccount() {
                 topPosition={4}
               />
               <EmailInput
+                placeholder={
+                  `selectedLanguage` === 'pt-br'
+                    ? 'Esqueci minha senha'
+                    : 'Forgot my password'
+                }
                 handleChangeEmail={handleChangeEmail}
                 value={userForm.email.value}
                 errorBoolean={userForm.email.errorBoolean}

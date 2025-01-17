@@ -4,7 +4,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { TouchableHighlightProps, ActivityIndicator } from 'react-native'
 import { useTheme } from 'styled-components'
 
-import { Container, Title, LinearGradientButton } from './styles'
+import {
+  Container,
+  Title,
+  LinearGradientButton,
+  CTAButtonPressable,
+} from './styles'
 
 interface Props extends TouchableHighlightProps {
   title: string
@@ -27,18 +32,20 @@ export function CTAButton({
     : theme.COLORS.GRADIENT_BUTTON
 
   return (
-    <Container disabled={!enabled} loading={loading} {...rest}>
-      <LinearGradientButton
-        colors={colors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
-        ) : (
-          <Title>{title}</Title>
-        )}
-      </LinearGradientButton>
+    <Container>
+      <CTAButtonPressable disabled={!enabled} loading={loading} {...rest}>
+        <LinearGradientButton
+          colors={colors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
+          ) : (
+            <Title>{title}</Title>
+          )}
+        </LinearGradientButton>
+      </CTAButtonPressable>
     </Container>
   )
 }

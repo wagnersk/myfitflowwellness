@@ -80,7 +80,7 @@ export function UserStatistics() {
             selected={selectComponent.componentInFocus === 'treinos'}
           >
             <Tittle>
-              {user?.selectedLanguage === 'pt-br' ? 'Treinos' : 'Workouts'}
+              {user?.selected === 'pt-br' ? 'Treinos' : 'Workouts'}
             </Tittle>
           </SelectButton>
           <SelectButton

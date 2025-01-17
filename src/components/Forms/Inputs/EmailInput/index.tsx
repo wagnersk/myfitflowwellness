@@ -7,6 +7,7 @@ import { Container, IconContainer, ContainerWrapper, InputText } from './styles'
 import { Keyboard } from 'react-native'
 
 export interface Props {
+  placeholder?: string
   value?: string
   errorBoolean?: boolean
 
@@ -21,6 +22,7 @@ export interface Props {
 }
 
 export function EmailInput({
+  placeholder,
   value,
   errorBoolean,
   onFocus,
@@ -59,7 +61,7 @@ export function EmailInput({
         <InputText
           onFocus={onFocus}
           onChangeText={handleChangeEmail}
-          placeholder={`Email`}
+          placeholder={placeholder}
           placeholderTextColor={COLOR}
           autoCorrect={false}
           placeholderOpacity={!value}

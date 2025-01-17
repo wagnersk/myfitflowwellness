@@ -8,7 +8,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native'
-
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 import { useAuth } from '@hooks/auth'
 import { useTheme } from 'styled-components'
 
@@ -27,10 +27,17 @@ import {
   ForgotPasswordButtonWrapper,
   Footer,
   IconContainer,
-  FooterWrapper,
   FooterText,
   LinearGradientContainer,
   ButtonWithIcon,
+  ToggleButtonText,
+  ToggleButton,
+  ToggleButtonWrapper,
+  CreateAccountButton,
+  FooterTopWrapper,
+  Container,
+  FormWrapper,
+  CreateGuestAccountButton,
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
@@ -41,6 +48,10 @@ export function Login() {
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
   const navigation = useNavigation()
   const theme = useTheme()
+
+  const [selectedLanguage, setSelectedLanguage] = useState<'pt-br' | 'us'>(
+    'pt-br',
+  )
 
   const [userForm, setUserForm] = useState({
     email: { value: '', errorBoolean: false },
@@ -144,6 +155,7 @@ export function Login() {
   }
 
   async function handleForgotPassword() {
+    console.log(`asdsad`)
     if (!user) return
     if (!userForm.email.value) {
       return Alert.alert(
@@ -167,6 +179,9 @@ export function Login() {
     )
   }
 
+  async function handleLanguageChange(language: 'pt-br' | 'us') {
+    setSelectedLanguage(language)
+  }
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', () => {
       return true
@@ -174,77 +189,132 @@ export function Login() {
   }, [])
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <KeyboardAvoidingView
-          style={{ width: '100%', flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <Header>
-              <MyFitFlowLogoComponent width={500} height={500} />
-            </Header>
-            <BodyTop>
-              <EmailInput
-                handleChangeEmail={handleChangeEmail}
-                value={userForm.email.value}
-                errorBoolean={userForm.email.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="up"
-                order="top"
-                topPosition={2}
-                editable={!isLogging}
-              />
-              <PasswordInput
-                handleChangePassword={handleChangePassword}
-                value={userForm.password.value}
-                errorBoolean={userForm.password.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="down"
-                order="bottom"
-                editable={!isLogging}
-              />
-
-              <ForgotPasswordWrapper>
-                <ForgotPasswordButtonWrapper
-                  onPress={handleForgotPassword}
-                  disabled={!isLogging}
+        <SafeAreaProvider style={{ width: `100%` }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <>
+                <ToggleButtonWrapper>
+                  <ToggleButton
+                    onPress={() =>
+                      handleLanguageChange(
+                        selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
+                      )
+                    }
+                  >
+                    <ToggleButtonText>
+                      {selectedLanguage === 'pt-br' ? '🇧🇷' : '🇺🇸'}
+                    </ToggleButtonText>
+                  </ToggleButton>
+                </ToggleButtonWrapper>
+                <KeyboardAvoidingView
+                  style={{ width: '100%', flex: 1 }}
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
-                  <ForgotPasswordText>esqueci minha senha</ForgotPasswordText>
-                </ForgotPasswordButtonWrapper>
-              </ForgotPasswordWrapper>
+                  <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    <Header>
+                      <MyFitFlowLogoComponent width={250} height={250} />
+                    </Header>
 
-              <ButtonWithIcon>
-                <CTAButton
-                  disabled={isLogging}
-                  loading={isLogging}
-                  title="Entrar"
-                  onPress={handleSignIn}
-                />
-                <ViewWithLineAndIcon />
-              </ButtonWithIcon>
-            </BodyTop>
-          </ScrollView>
-        </KeyboardAvoidingView>
-        <Footer>
-          <FooterWrapper onPress={handleSignUp} disabled={isLogging}>
-            <IconContainer style={{ width: 48 }}></IconContainer>
+                    <BodyTop>
+                      <FormWrapper>
+                        <EmailInput
+                          placeholder={
+                            selectedLanguage === 'pt-br' ? 'Email' : 'Email'
+                          }
+                          handleChangeEmail={handleChangeEmail}
+                          value={userForm.email.value}
+                          errorBoolean={userForm.email.errorBoolean}
+                          onFocus={() => {}}
+                          type="transparent"
+                          borderDesign="up"
+                          order="top"
+                          topPosition={2}
+                          editable={!isLogging}
+                        />
+                        <PasswordInput
+                          placeholder={
+                            selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
+                          }
+                          handleChangePassword={handleChangePassword}
+                          value={userForm.password.value}
+                          errorBoolean={userForm.password.errorBoolean}
+                          onFocus={() => {}}
+                          type="transparent"
+                          borderDesign="down"
+                          order="bottom"
+                          editable={!isLogging}
+                        />
+                      </FormWrapper>
+                      <ForgotPasswordWrapper>
+                        <ForgotPasswordButtonWrapper
+                          onPress={handleForgotPassword}
+                          disabled={isLogging}
+                        >
+                          <ForgotPasswordText>
+                            {selectedLanguage === 'pt-br'
+                              ? 'Esqueci minha senha'
+                              : 'Forgot my password'}
+                          </ForgotPasswordText>
+                        </ForgotPasswordButtonWrapper>
+                      </ForgotPasswordWrapper>
 
-            <FooterText>Criar uma conta</FooterText>
-            <IconContainer>
-              <Forward
-                width={40}
-                height={40}
-                stroke={theme.COLORS.TEXT_LIGHT}
-                style={{ top: 2 }}
-                strokeWidth={2}
-              />
-            </IconContainer>
-          </FooterWrapper>
-        </Footer>
+                      <ButtonWithIcon>
+                        <CTAButton
+                          disabled={isLogging}
+                          loading={isLogging}
+                          title={
+                            selectedLanguage === 'pt-br' ? 'Entrar' : 'Sign In'
+                          }
+                          onPress={handleSignIn}
+                        />
+                        <ViewWithLineAndIcon />
+                      </ButtonWithIcon>
+                    </BodyTop>
+                  </ScrollView>
+                </KeyboardAvoidingView>
+                <Footer>
+                  <CreateGuestAccountButton
+                    onPress={() => console.log('entrar como convidado')}
+                    disabled={isLogging}
+                  >
+                    <FooterTopWrapper>
+                      <FooterText>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Entrar como Convidado'
+                          : 'Enter as Guest'}
+                      </FooterText>
+                    </FooterTopWrapper>
+                  </CreateGuestAccountButton>
+                  <CreateAccountButton
+                    onPress={handleSignUp}
+                    disabled={isLogging}
+                  >
+                    <FooterText>
+                      {selectedLanguage === 'pt-br'
+                        ? 'Criar uma conta'
+                        : 'Sign up'}
+                    </FooterText>
+                    <IconContainer>
+                      <Forward
+                        width={40}
+                        height={40}
+                        stroke={theme.COLORS.TEXT_LIGHT}
+                        style={{ top: 2 }}
+                        strokeWidth={2}
+                      />
+                    </IconContainer>
+                  </CreateAccountButton>
+                </Footer>
+              </>
+            </TouchableWithoutFeedback>
+          </SafeAreaView>
+        </SafeAreaProvider>
       </LinearGradientContainer>
-    </TouchableWithoutFeedback>
+    </Container>
   )
 }

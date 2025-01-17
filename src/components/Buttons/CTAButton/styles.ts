@@ -9,7 +9,8 @@ interface Props {
   loading?: boolean
 }
 
-export const Container = styled(TouchableOpacity)<Props>`
+export const Container = styled.View``
+export const CTAButtonPressable = styled(TouchableOpacity)<Props>`
   background-color: transparent;
   justify-content: center;
   align-items: center;

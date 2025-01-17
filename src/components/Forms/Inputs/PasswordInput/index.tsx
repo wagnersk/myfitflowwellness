@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { Keyboard, TextInputProps, TouchableOpacity } from 'react-native'
 
-import { SvgProps } from 'react-native-svg'
-
 import { useTheme } from 'styled-components'
 
 import { Container, IconContainer, InputText, ContainerWrapper } from './styles'
@@ -12,6 +10,7 @@ import EyePasswordOff from '@assets/EyePasswordOff.svg'
 import Lock from '@assets/Lock.svg'
 
 export interface Props {
+  placeholder?: string
   value?: string
   errorBoolean?: boolean
 
@@ -26,6 +25,7 @@ export interface Props {
 }
 
 export function PasswordInput({
+  placeholder,
   value,
   errorBoolean,
   onFocus,
@@ -62,7 +62,7 @@ export function PasswordInput({
 
         <InputText
           onFocus={onFocus}
-          placeholder={`Senha`}
+          placeholder={placeholder}
           placeholderTextColor={COLOR}
           secureTextEntry={!isPasswordVisible}
           autoCorrect={false}
