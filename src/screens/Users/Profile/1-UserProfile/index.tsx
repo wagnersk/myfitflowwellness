@@ -195,7 +195,7 @@ export function UserProfile() {
                 <Photo
                   defaultPhotoBase64={user?.photoBase64}
                   defaultText={
-                    selectedLanguage === 'pt-br' ? `'Não há foto'` : ` `
+                    selectedLanguage === 'pt-br' ? `Não há foto` : `No Photo`
                   }
                 />
               </PhotoBorderWrapper>

@@ -5,6 +5,7 @@ import {
   Alert,
   View,
   Button,
+  GestureResponderEvent,
 } from 'react-native'
 import { useTheme } from 'styled-components'
 
@@ -36,7 +37,6 @@ import {
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutsData, IUserWorkoutsLog } from '@hooks/authTypes'
-import WorkoutNotFoundAnimationLottie from '@components/WorkoutNotFoundAnimationLottie'
 import SmileySad from '@assets/SmileySad.svg'
 
 export function UserHome() {
@@ -81,9 +81,11 @@ export function UserHome() {
       cardIndex,
     })
   }
+
   async function handleOpenCamera(event: GestureResponderEvent) {
     navigation.navigate('camera')
   }
+
   async function handleSignOut() {
     if (!user) return
     Alert.alert(
@@ -213,10 +215,6 @@ export function UserHome() {
                 <Warning>
                   {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
                 </Warning>
-                <Warning>
-                  {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
-                </Warning>
-                <WarningGreetings>{daysPassed} </WarningGreetings>
                 <WarningGreetings>{daysPassed} </WarningGreetings>
                 <Warning>
                   {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}

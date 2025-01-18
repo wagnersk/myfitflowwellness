@@ -13,6 +13,7 @@ import SquaresFour from '../assets/Squares-four.svg'
 import Steps from '../assets/Steps.svg'
 import Female from '../assets/Gender-female.svg'
 import Male from '../assets/Gender-male.svg'
+import All from '../assets/Gender-intersex.svg'
 import Crosshair from '../assets/Crosshair.svg'
 import Lock from '../assets/Lock-simple-fill.svg'
 
@@ -48,6 +49,8 @@ export function getIcon(type: string) {
       return Female
     case 'gender-male':
       return Male
+    case 'gender-intersex':
+      return All
     case 'crosshair':
       return Crosshair
     case 'premium':

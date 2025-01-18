@@ -1,5 +1,4 @@
 import React from 'react'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { TouchableHighlightProps, ActivityIndicator } from 'react-native'
 import { useTheme } from 'styled-components'

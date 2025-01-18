@@ -9,6 +9,8 @@ export const Container = styled.View`
 
 export const BackButtonWrapper = styled.View`
   position: absolute;
+  left: 0;
+  top: 32px;
 `
 
 export const BodyImageContainer = styled.View`
@@ -43,7 +45,6 @@ export const PhotoImageWrapper = styled.View`
   padding-left: 16px;
   padding-right: 16px;
   padding-bottom: 24px;
-  margin-top: 30px;
 
   width: 100%;
   height: 320px;

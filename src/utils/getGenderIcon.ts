@@ -5,5 +5,8 @@ export function getGenderIcon(gender: string) {
   if (gender === 'female' || gender === 'feminino') {
     return `gender-female`
   }
+  if (gender === 'ambos' || gender === 'all') {
+    return `gender-intersex`
+  }
   return `gender-female`
 }

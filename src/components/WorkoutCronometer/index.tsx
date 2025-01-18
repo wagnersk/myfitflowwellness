@@ -13,11 +13,15 @@ import {
 interface CronometerProps {
   rest_time: number
   flagToResetCronometer: number
+  startText: string
+  resetText: string
 }
 
 export function WorkoutCronometer({
   rest_time,
   flagToResetCronometer,
+  startText,
+  resetText,
 }: CronometerProps) {
   const time = new Date()
 
@@ -62,7 +66,7 @@ export function WorkoutCronometer({
         }}
       >
         <WorkoutCronometerText>
-          {isRunning ? 'Zerar' : 'Iniciar'}
+          {isRunning ? resetText : startText}
         </WorkoutCronometerText>
       </WorkoutCronometerButtonStart>
     </WorkoutCronometerWrapper>

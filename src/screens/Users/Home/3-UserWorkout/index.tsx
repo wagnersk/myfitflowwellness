@@ -231,6 +231,8 @@ export function UserWorkout() {
 
           <BulletsCronometerAndCTAButtonWrapper>
             <WorkoutCronometer
+              resetText={selectedLanguage === 'pt-br' ? 'Zerar' : 'Reset'}
+              startText={selectedLanguage === 'pt-br' ? 'Iniciar' : 'Start'}
               rest_time={
                 workoutCardInfo.workoutExerciseRestTimeNumber
                   ? workoutCardInfo.workoutExerciseRestTimeNumber

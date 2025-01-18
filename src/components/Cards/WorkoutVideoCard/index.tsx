@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { View, Modal } from 'react-native'
+import { View, Modal, Alert } from 'react-native'
 import React, { useState, memo, useEffect, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -51,7 +51,9 @@ import {
   WorkoutUserNotes,
   BlurViewWrapper,
   TableWrapper,
+  OverLayWrapper,
 } from './styles'
+import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
 
 interface Props {
   item: IFormattedCardExerciseData
@@ -205,6 +207,10 @@ function WorkoutVideoCardComponent({
 
   function handleDoneWorkout() {
     if (!workoutId) return
+    if (exerciseIndex !== 0 && user?.anonymousUser) {
+      return
+    }
+
     saveFastCachedWorkoutData(workoutId)
 
     // saveCachedHistoricDateWorkoutData() 06/01/25
@@ -581,6 +587,9 @@ function WorkoutVideoCardComponent({
   }
 
   function handlePlusWeight(index: number) {
+    if (exerciseIndex !== 0 && user?.anonymousUser) {
+      return
+    }
     setModalWeightState((prevState) => {
       const newWeight = [...prevState.weight]
       newWeight[index] += 1
@@ -592,6 +601,9 @@ function WorkoutVideoCardComponent({
   }
 
   function handleLessWeight(index: number) {
+    if (exerciseIndex !== 0 && user?.anonymousUser) {
+      return
+    }
     setModalWeightState((prevState) => {
       const newWeight = [...prevState.weight]
       if (newWeight[index] > 0) {
@@ -619,6 +631,9 @@ function WorkoutVideoCardComponent({
   }
 
   function openNotes() {
+    if (exerciseIndex !== 0 && user?.anonymousUser) {
+      return
+    }
     // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
     setModalWeightState((prevState) => ({
       ...prevState,
@@ -634,6 +649,9 @@ function WorkoutVideoCardComponent({
   }
 
   function openWeight(index: number) {
+    if (exerciseIndex !== 0 && user?.anonymousUser) {
+      return
+    }
     // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
     setModalWeightState((prevState) => ({
       ...prevState,
@@ -647,6 +665,16 @@ function WorkoutVideoCardComponent({
       ...prevState,
       isOpenModalUserWeight: false,
     }))
+  }
+  function handlePress() {
+    Alert.alert(
+      selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
+      selectedLanguage === 'pt-br'
+        ? 'Disponível apenas para usuários cadastrados'
+        : 'Available only for registered users',
+      [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+      { cancelable: false },
+    )
   }
 
   // const openedTimeRef = useRef(new Date().getTime())
@@ -795,6 +823,7 @@ function WorkoutVideoCardComponent({
         </WorkoutNameWrapper>
         {item.workoutExerciseThumbnailUrl && (
           <WorkoutVideoPlayerButton
+            disabled={exerciseIndex !== 0 && user?.anonymousUser}
             onPress={openVideoPlayer}
             enabled={isFocused}
           >
@@ -834,18 +863,25 @@ function WorkoutVideoCardComponent({
       </WorkoutNameAndVideoWrapper>
       <WorkoutInfoWrapper>
         <WorkoutRepetitionAndSerieWrapper
-          style={{ opacity: isFocused ? 1 : 0.4 }}
+          style={{ opacity: isFocused ? 1 : 0.2 }}
         >
-          <TableWrapper>
+          <TableWrapper
+            style={{
+              opacity: exerciseIndex === 0 && user?.anonymousUser ? 1 : 0.4,
+            }}
+          >
             {item.workoutExerciseSets &&
               item.workoutExerciseSets.map((v, i) => (
                 <WorkoutSerieWrapper key={i}>
                   <WorkoutSerieValue>
-                    {i + 1}º serie: {v}
+                    {selectedLanguage === 'pt-br'
+                      ? `${i + 1}ª série: ${v}`
+                      : `${i + 1}th set: ${v}`}
                   </WorkoutSerieValue>
                   <ButtonsWrapper>
                     <WorkoutWeightValueAndTextWrapper>
                       <WorkoutWeightValue
+                        disabled={exerciseIndex !== 0 && user?.anonymousUser}
                         onPress={() => {
                           openWeight(i)
                         }}
@@ -866,9 +902,9 @@ function WorkoutVideoCardComponent({
               ))}
           </TableWrapper>
         </WorkoutRepetitionAndSerieWrapper>
-
         <WorkoutUserNotesAndConfirmButtonWrapper>
           <WorkoutUserNotesButton
+            disabled={exerciseIndex !== 0 && user?.anonymousUser}
             onPress={openNotes}
             enabled={isFocused}
             style={{ opacity: isFocused ? 1 : 0.4 }}
@@ -882,6 +918,7 @@ function WorkoutVideoCardComponent({
           </WorkoutUserNotesButton>
 
           <WorkoutButtonConfirm
+            disabled={exerciseIndex !== 0 && user?.anonymousUser}
             onPress={handleDoneWorkout}
             workoutExerciseDone={modalWeightState.completed}
           >
@@ -894,11 +931,20 @@ function WorkoutVideoCardComponent({
               }}
             >
               <WorkoutButtonText>
-                {modalWeightState.completed ? 'Feito' : 'Fazer'}
+                {modalWeightState.completed
+                  ? selectedLanguage === 'pt-br'
+                    ? 'Feito'
+                    : 'Done'
+                  : selectedLanguage === 'pt-br'
+                    ? 'Fazer'
+                    : 'Do'}
               </WorkoutButtonText>
             </BlurViewWrapper>
           </WorkoutButtonConfirm>
         </WorkoutUserNotesAndConfirmButtonWrapper>
+        {exerciseIndex !== 0 && user?.anonymousUser && (
+          <OverLayWaterMarkButton onPress={handlePress} />
+        )}
       </WorkoutInfoWrapper>
 
       <Modal

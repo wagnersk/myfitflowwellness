@@ -166,9 +166,26 @@ export function MarketPlaceHome() {
     }, []),
   )
 
-  const filteredByActiveWorkoutCategoriesList = workoutsCategories
-    ? workoutsCategories.filter((v) => v.workoutCategoryActive)
+  const categoryToRemoveIfArentGuest = { 'pt-br': 'convidado', us: 'guest' }
+
+  const categoriesWithoutGuest = workoutsCategories
+    ? workoutsCategories.filter(
+        (v) =>
+          v.workoutCategoryName_insensitive['pt-br'] !==
+            categoryToRemoveIfArentGuest['pt-br'] &&
+          v.workoutCategoryName_insensitive.us !==
+            categoryToRemoveIfArentGuest.us,
+      )
     : []
+
+  const categoriesGuestUserOrNo = user?.anonymousUser
+    ? workoutsCategories
+    : categoriesWithoutGuest
+
+  const filteredByActiveWorkoutCategoriesList = categoriesGuestUserOrNo
+    ? categoriesGuestUserOrNo.filter((v) => v.workoutCategoryActive)
+    : []
+
   return (
     <Container>
       <HeaderImageBackground>
@@ -217,6 +234,12 @@ export function MarketPlaceHome() {
                 <WorkoutsCategoriesCardList
                   item={item}
                   handleNextStep={handleWorkouts}
+                  isGuestCategory={
+                    item.workoutCategoryName_insensitive['pt-br'] ===
+                      categoryToRemoveIfArentGuest['pt-br'] &&
+                    item.workoutCategoryName_insensitive.us ===
+                      categoryToRemoveIfArentGuest.us
+                  }
                 />
               )}
               keyExtractor={(item, i) => i.toString()}
@@ -286,7 +309,7 @@ export function MarketPlaceHome() {
           </View>
         )}
 
-        {contract?.submissionApproved && (
+        {contract?.submissionApproved && user?.selectedLanguage && (
           <View
             style={{
               flex: 1,
@@ -304,6 +327,11 @@ export function MarketPlaceHome() {
               }}
             >
               <Photo
+                defaultText={
+                  user?.selectedLanguage === 'pt-br'
+                    ? `Não há foto`
+                    : `No Photo`
+                }
                 defaultPhotoBase64={personalData ? personalData.photo : ''}
               />
               <Text

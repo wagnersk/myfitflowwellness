@@ -37,7 +37,7 @@ export function WorkoutsCardItem({ data, handleNextStep, ...rest }: Props) {
   const selectedLanguage = user?.selectedLanguage
   return (
     <Container {...rest} onPress={() => handleNextStep(data)}>
-      <ContainerGradient colors={[]}>
+      <ContainerGradient colors={['#000000', '#FFFFFF']}>
         <PhotoImageWrapper size={size}>
           <PhotoPreLoadingImageBackground size={size} />
           {data && data.workoutCardPhoto && (

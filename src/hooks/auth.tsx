@@ -790,7 +790,6 @@ function AuthProvider({ children }: AuthProviderProps) {
           })
         }
       })
-
       .finally(() => {
         setIsWaitingApiResponse(false)
         Alert.alert(
@@ -803,19 +802,28 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function updateLocalCacheAnonymousUserSelectedLanguage(
     language: 'pt-br' | 'us',
   ) {
-    setIsWaitingApiResponse(true)
-    const updatedAt = new Date().getTime()
+    if (!user) {
+      return
+    }
 
     const updatedUser = {
       ...user,
       selectedLanguage: language,
-      updatedAt,
     }
 
-    await AsyncStorage.setItem(
-      USER_SIGNIN_COLLECTION,
-      JSON.stringify(updatedUser),
-    )
+    if (updatedUser) {
+      await AsyncStorage.setItem(
+        USER_SIGNIN_COLLECTION,
+        JSON.stringify(updatedUser),
+      )
+        .then(() => {
+          setUser(updatedUser)
+        })
+        .finally(() => {
+          setIsWaitingApiResponse(false)
+        })
+    }
+
     // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
 
     Alert.alert(

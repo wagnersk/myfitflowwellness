@@ -531,6 +531,11 @@ export function UserFormEditProfile() {
               <ProfileWrapper>
                 <PhotoBorderWrapper>
                   <Photo
+                    defaultText={
+                      user?.selectedLanguage === 'pt-br'
+                        ? `Não há foto`
+                        : `No Photo`
+                    }
                     defaultPhotoBase64={user?.photoBase64}
                     newDefaultPhotoBase64={userForm.photoBase64.value}
                   />

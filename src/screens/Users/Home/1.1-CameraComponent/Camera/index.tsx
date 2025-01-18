@@ -20,7 +20,7 @@ import FlipCameraIcon from '@assets/Flip-camera.svg'
 import X from '@assets/x.svg'
 
 import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { ptBR, enUS } from 'date-fns/locale'
 import {
   CloseButton,
   Container,
@@ -70,17 +70,30 @@ const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
-const initialDaysData = [
-  { name: 'SEG', selected: false },
-  { name: 'TER', selected: false },
-  { name: 'QUA', selected: false },
-  { name: 'QUI', selected: false },
-  { name: 'SEX', selected: false },
-  { name: 'SAB', selected: false },
-  { name: 'DOM', selected: false },
-]
-
 export function Camera() {
+  const { user } = useAuth()
+
+  const initialDaysData =
+    user?.selectedLanguage === 'pt-br'
+      ? [
+          { name: 'SEG', selected: false },
+          { name: 'TER', selected: false },
+          { name: 'QUA', selected: false },
+          { name: 'QUI', selected: false },
+          { name: 'SEX', selected: false },
+          { name: 'SAB', selected: false },
+          { name: 'DOM', selected: false },
+        ]
+      : [
+          { name: 'MON', selected: false },
+          { name: 'TUE', selected: false },
+          { name: 'WED', selected: false },
+          { name: 'THU', selected: false },
+          { name: 'FRI', selected: false },
+          { name: 'SAT', selected: false },
+          { name: 'SUN', selected: false },
+        ]
+
   const [isCameraMounted, setIsCameraMounted] = useState(true)
 
   const [selectedDays, setSelectedDays] = useState(
@@ -94,13 +107,14 @@ export function Camera() {
   const canvasRef = useCanvasRef()
 
   const now = new Date()
-  const getDayText = format(now, 'EEEE', { locale: ptBR })
+  const getDayText = format(now, 'EEEE', {
+    locale: user?.selectedLanguage === 'pt-br' ? ptBR : enUS,
+  })
   const dayText = capitalizeFirstLetter(getDayText)
 
   const timeText = format(now, 'HH:mm')
 
   const navigation = useNavigation()
-  const { isWaitingApiResponse, user } = useAuth()
 
   const handleDayPress = (index: number) => {
     console.log(`handleDayPress trocando o dia index ${index}`)
