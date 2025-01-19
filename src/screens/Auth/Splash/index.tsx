@@ -25,7 +25,7 @@ export function Splash() {
   })
 
   function startApp() {
-    navigation.navigate('login')
+    navigation.navigate('onBoarding1')
   }
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function Splash() {
   })
 
   return (
-    <LinearGradientContainer>
+    <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
       <Animated.View style={{ position: 'absolute' }}>
         <MyFitFlowLetterComponent />
       </Animated.View>

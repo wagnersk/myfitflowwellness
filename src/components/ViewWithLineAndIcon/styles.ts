@@ -7,8 +7,8 @@ export const LineWithGymIconWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   width: 100%;
-  padding-bottom: 40px;
-  padding-top: 16px;
+  padding-bottom: 32px;
+  padding-top: 32px;
 `
 
 // Quadrado que envolve onde tem a linha

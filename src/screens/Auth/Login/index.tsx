@@ -12,7 +12,7 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 import { useAuth } from '@hooks/auth'
 import { useTheme } from 'styled-components'
 
-import { useNavigation } from '@react-navigation/core'
+import { useNavigation, useRoute } from '@react-navigation/core'
 
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { ViewWithLineAndIcon } from '@components/ViewWithLineAndIcon'
@@ -38,9 +38,11 @@ import {
   Container,
   FormWrapper,
   CreateGuestAccountButton,
+  BodyWrapper,
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
+import { IOnBoading } from '@src/@types/navigation'
 
 export function Login() {
   const {
@@ -55,8 +57,12 @@ export function Login() {
   const navigation = useNavigation()
   const theme = useTheme()
 
+  const route = useRoute()
+  const { selectedLanguage: selectedLanguageParams } =
+    route.params as IOnBoading
+
   const [selectedLanguage, setSelectedLanguage] = useState<'pt-br' | 'us'>(
-    'pt-br',
+    selectedLanguageParams || 'pt-br',
   )
 
   const [userForm, setUserForm] = useState({
@@ -157,7 +163,7 @@ export function Login() {
   }
 
   async function handleSignUp() {
-    navigation.navigate('newAccount')
+    navigation.navigate('newAccount', { selectedLanguage })
   }
 
   async function handleSignUpAsGuest() {
@@ -211,11 +217,6 @@ export function Login() {
   async function handleLanguageChange(language: 'pt-br' | 'us') {
     setSelectedLanguage(language)
   }
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      return true
-    })
-  }, [])
 
   return (
     <Container>
@@ -223,7 +224,7 @@ export function Login() {
         <SafeAreaProvider style={{ width: `100%` }}>
           <SafeAreaView style={{ flex: 1 }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <>
+              <BodyWrapper>
                 <ToggleButtonWrapper>
                   <ToggleButton
                     onPress={() =>
@@ -339,7 +340,7 @@ export function Login() {
                     </IconContainer>
                   </CreateAccountButton>
                 </Footer>
-              </>
+              </BodyWrapper>
             </TouchableWithoutFeedback>
           </SafeAreaView>
         </SafeAreaProvider>

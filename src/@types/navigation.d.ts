@@ -239,6 +239,12 @@ export interface IUserPulleyEquipSelect {
   tittle: IptBrUs
   selected: boolean
 }
+export interface INewAccount {
+  selectedLanguage: 'pt-br' | 'us'
+}
+export interface IOnBoading {
+  selectedLanguage: 'pt-br' | 'us'
+}
 export interface IUserSelectListNavigation {
   dataType:
     | `Objetivo`
@@ -259,7 +265,11 @@ export interface IUserSelectMachineEquipamentListNavigation {
 export declare global {
   namespace ReactNavigation {
     interface RootParamList {
-      login: undefined
+      onBoarding1: undefined
+      onBoarding2: IOnBoading
+      onBoarding3: IOnBoading
+      onBoarding4: IOnBoading
+      login: IOnBoading
 
       userHome: undefined
       userWorkoutInfoList: NavigationUserWorkoutInfoListProps
@@ -285,7 +295,7 @@ export declare global {
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation
       userSelectMachineEquipamentList: IUserSelectMachineEquipamentListNavigation
 
-      newAccount: undefined
+      newAccount: INewAccount
     }
   }
 }

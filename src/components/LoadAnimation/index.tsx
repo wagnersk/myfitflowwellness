@@ -1,16 +1,21 @@
 import React from 'react'
 import LottieView from 'lottie-react-native'
 
-import halterAnimated from '../../assets/halterAnimated.json'
+import halterAnimatedWhite from '../../assets/halterAnimatedWhite.json'
 
 import { Container } from './styles'
+interface LoadAnimationProps {
+  width: number
+  height: number
+}
 
-export function LoadAnimation() {
+export function LoadAnimation({ width, height }: LoadAnimationProps) {
   return (
     <Container>
       <LottieView
-        source={halterAnimated}
-        style={{ height: 200 }}
+        speed={0.7}
+        source={halterAnimatedWhite}
+        style={{ height, width }}
         resizeMode="contain"
         autoPlay
         loop

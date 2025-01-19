@@ -11,7 +11,7 @@ import {
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { useTheme } from 'styled-components'
-import { useNavigation } from '@react-navigation/core'
+import { useNavigation, useRoute } from '@react-navigation/core'
 import { useAuth } from '@hooks/auth'
 
 import { ViewWithLineAndIcon } from '@components/ViewWithLineAndIcon'
@@ -29,6 +29,7 @@ import {
   SpaceBetweenInput,
   SpaceBetweenFormAndButton,
   LinearGradientContainer,
+  Container,
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
@@ -37,6 +38,8 @@ import { WhatsappInput } from '@components/Forms/Inputs/WhatsappInput'
 import { CalendarInput } from '@components/Forms/Inputs/CalendarInput'
 import { checkBirthdayDate } from '@utils/checkBirthdayDate'
 import { emailRegex } from '@utils/emailRegex'
+import { INewAccount } from '@src/@types/navigation'
+import { BodyWrapper } from '../Login/styles'
 
 interface IUserForm {
   name: {
@@ -67,6 +70,10 @@ interface IUserForm {
 export function NewAccount() {
   const { isWaitingApiResponse, firebaseSignUp, isLogging, user } = useAuth()
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
+
+  const route = useRoute()
+
+  const { selectedLanguage } = route.params as INewAccount
 
   const [userForm, setUserForm] = useState<IUserForm>({
     name: { value: '', errorBoolean: false },
@@ -281,109 +288,142 @@ export function NewAccount() {
     })
   }, [])
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <KeyboardAvoidingView
-          style={{ width: '100%', flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <Header>
-              <MyFitFlowLogoComponent width={500} height={500} />
-            </Header>
-            <BodyTop>
-              <UserNameInput
-                handleChangeUserName={handleChangeUserName}
-                value={userForm.name.value}
-                errorBoolean={userForm.name.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="up"
-                order="top"
-                editable={!isLogging}
-                topPosition={4}
-              />
-              <EmailInput
-                placeholder={
-                  `selectedLanguage` === 'pt-br'
-                    ? 'Esqueci minha senha'
-                    : 'Forgot my password'
-                }
-                handleChangeEmail={handleChangeEmail}
-                value={userForm.email.value}
-                errorBoolean={userForm.email.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="up"
-                order="middle"
-                editable={!isLogging}
-                topPosition={2}
-              />
-              <PasswordInput
-                handleChangePassword={handleChangePassword}
-                value={userForm.password.value}
-                errorBoolean={userForm.password.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="down"
-                order="bottom"
-                editable={!isLogging}
-                topPosition={2}
-              />
-              <SpaceBetweenInput />
-              <WhatsappInput
-                handleChangeWhatsapp={handleChangeWhatsappNumber}
-                value={userForm.whatsappNumber.value}
-                errorBoolean={userForm.whatsappNumber.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="up"
-                order="top"
-                editable={!isLogging}
-                topPosition={2}
-              />
+        <SafeAreaProvider style={{ width: `100%` }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <BodyWrapper>
+                <KeyboardAvoidingView
+                  style={{ width: '100%', flex: 1 }}
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                >
+                  <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                    <Header>
+                      <MyFitFlowLogoComponent width={500} height={500} />
+                    </Header>
+                    <BodyTop>
+                      <UserNameInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'Nome' : 'Name'
+                        }
+                        handleChangeUserName={handleChangeUserName}
+                        value={userForm.name.value}
+                        errorBoolean={userForm.name.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="up"
+                        order="top"
+                        editable={!isLogging}
+                        topPosition={4}
+                      />
+                      <EmailInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'E-mail' : 'Email'
+                        }
+                        handleChangeEmail={handleChangeEmail}
+                        value={userForm.email.value}
+                        errorBoolean={userForm.email.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="up"
+                        order="middle"
+                        editable={!isLogging}
+                        topPosition={2}
+                      />
+                      <PasswordInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
+                        }
+                        handleChangePassword={handleChangePassword}
+                        value={userForm.password.value}
+                        errorBoolean={userForm.password.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="down"
+                        order="bottom"
+                        editable={!isLogging}
+                        topPosition={2}
+                      />
+                      <SpaceBetweenInput />
+                      <WhatsappInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'Whatsapp' : 'Whatsapp'
+                        }
+                        mask={
+                          selectedLanguage === 'pt-br'
+                            ? '(99) 99999-9999'
+                            : '(999) 999-9999'
+                        }
+                        handleChangeWhatsapp={handleChangeWhatsappNumber}
+                        value={userForm.whatsappNumber.value}
+                        errorBoolean={userForm.whatsappNumber.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="up"
+                        order="top"
+                        editable={!isLogging}
+                        topPosition={2}
+                      />
 
-              <CalendarInput
-                handleChangeBirthday={handleChangeBirthdate}
-                value={userForm.birthdate.value}
-                errorBoolean={userForm.birthdate.errorBoolean}
-                onFocus={() => {}}
-                type="transparent"
-                borderDesign="down"
-                order="bottom"
-                editable={!isLogging}
-              />
+                      <CalendarInput
+                        placeholder={
+                          selectedLanguage === 'pt-br'
+                            ? 'Data de nascimento'
+                            : 'Date of Birth'
+                        }
+                        handleChangeBirthday={handleChangeBirthdate}
+                        value={userForm.birthdate.value}
+                        errorBoolean={userForm.birthdate.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="down"
+                        order="bottom"
+                        editable={!isLogging}
+                      />
 
-              <SpaceBetweenFormAndButton />
+                      <SpaceBetweenFormAndButton />
 
-              <ViewWithLineAndIcon />
+                      <ViewWithLineAndIcon />
 
-              <CTAButton
-                onPress={handleSignUp}
-                title="Cadastrar"
-                loading={isWaitingApiResponse}
-              />
-            </BodyTop>
-          </ScrollView>
-        </KeyboardAvoidingView>
+                      <CTAButton
+                        onPress={handleSignUp}
+                        title={
+                          selectedLanguage === 'pt-br'
+                            ? 'Cadastrar'
+                            : 'Register'
+                        }
+                        loading={isWaitingApiResponse}
+                      />
+                    </BodyTop>
+                  </ScrollView>
+                </KeyboardAvoidingView>
 
-        <Footer>
-          <FooterWrapper onPress={handleGoBack}>
-            <IconContainer>
-              <Back
-                width={40}
-                height={40}
-                stroke={theme.COLORS.TEXT_LIGHT}
-                style={{ top: 2 }}
-                strokeWidth={2}
-              />
-            </IconContainer>
-            <FooterText>Voltar para o login</FooterText>
+                <Footer>
+                  <FooterWrapper onPress={handleGoBack}>
+                    <IconContainer>
+                      <Back
+                        width={40}
+                        height={40}
+                        stroke={theme.COLORS.TEXT_LIGHT}
+                        style={{ top: 2 }}
+                        strokeWidth={2}
+                      />
+                    </IconContainer>
+                    <FooterText>
+                      {selectedLanguage === 'pt-br'
+                        ? 'Voltar para o login'
+                        : 'Back to login'}
+                    </FooterText>
 
-            <IconContainer style={{ width: 48 }}></IconContainer>
-          </FooterWrapper>
-        </Footer>
+                    <IconContainer style={{ width: 48 }}></IconContainer>
+                  </FooterWrapper>
+                </Footer>
+              </BodyWrapper>
+            </TouchableWithoutFeedback>
+          </SafeAreaView>
+        </SafeAreaProvider>
       </LinearGradientContainer>
-    </TouchableWithoutFeedback>
+    </Container>
   )
 }

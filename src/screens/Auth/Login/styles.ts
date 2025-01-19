@@ -12,7 +12,12 @@ export const Container = styled.View`
   width: 100%;
   align-items: center;
   justify-content: center;
-  background-color: red;
+`
+export const BodyWrapper = styled.View`
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 `
 
 export const Header = styled.View`
@@ -62,6 +67,7 @@ export const ForgotPasswordWrapper = styled.View`
 `
 export const ButtonWithIcon = styled.View`
   gap: 24px;
+  width: 100%;
 `
 
 export const ForgotPasswordText = styled.Text`
@@ -78,10 +84,9 @@ export const ForgotPasswordButtonWrapper = styled(TouchableOpacity)`
 export const Footer = styled.View`
   width: 100%;
   flex-direction: row;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   flex-direction: column;
-  padding-bottom: 16px;
 
   gap: 12px;
 `

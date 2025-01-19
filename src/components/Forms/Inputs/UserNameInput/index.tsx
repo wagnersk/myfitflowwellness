@@ -13,6 +13,8 @@ import {
 import { Keyboard } from 'react-native'
 
 export interface Props {
+  placeholder?: string
+
   value?: string
   errorBoolean?: boolean
 
@@ -27,6 +29,7 @@ export interface Props {
 }
 
 export function UserNameInput({
+  placeholder,
   value,
   errorBoolean,
   onFocus,
@@ -65,7 +68,7 @@ export function UserNameInput({
         <InputText
           onFocus={onFocus}
           onChangeText={handleChangeUserName}
-          placeholder={`Nome`}
+          placeholder={placeholder}
           placeholderTextColor={COLOR}
           autoCorrect={false}
           placeholderOpacity={!value}

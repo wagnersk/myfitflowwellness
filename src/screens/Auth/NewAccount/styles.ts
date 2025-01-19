@@ -3,13 +3,18 @@ import MyFitFlowNameAndSlogan from '@assets/MyFitFlowNameAndSlogan.svg'
 
 import { LinearGradient } from 'expo-linear-gradient'
 import { RFValue } from '@utils/RFValue'
-import { TouchableOpacity, Platform } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 
+export const Container = styled.View`
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+`
 export const Header = styled.View`
   height: 240px;
   align-items: center;
   justify-content: center;
-  margin-top: ${Platform.OS === 'ios' ? 24 : 24}px;
 `
 
 export const MyFitFlowLogoComponent = styled(MyFitFlowNameAndSlogan)``
@@ -24,7 +29,6 @@ export const Footer = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 12px 0;
 `
 
 export const FooterWrapper = styled(TouchableOpacity)`

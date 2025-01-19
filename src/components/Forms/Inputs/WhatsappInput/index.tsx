@@ -12,6 +12,8 @@ import {
 import { Keyboard } from 'react-native'
 
 export interface Props {
+  mask: string
+  placeholder?: string
   value?: string
   errorBoolean?: boolean
 
@@ -27,6 +29,8 @@ export interface Props {
 }
 
 export function WhatsappInput({
+  mask,
+  placeholder,
   value,
   errorBoolean,
   onFocus,
@@ -65,14 +69,14 @@ export function WhatsappInput({
         <InputTextMasked
           onFocus={onFocus}
           onChangeText={handleChangeWhatsapp}
-          placeholder={'Whatsapp'}
+          placeholder={placeholder}
           placeholderTextColor={COLOR}
           autoCorrect={false}
           placeholderOpacity={!value}
           value={value}
           editable={editable}
           maxLength={16}
-          mask="(99) 99999-9999"
+          mask={mask}
           keyboardType="numeric"
           returnKeyType="done"
           onBlur={Keyboard.dismiss}

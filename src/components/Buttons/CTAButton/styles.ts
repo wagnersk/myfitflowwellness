@@ -20,7 +20,6 @@ export const CTAButtonPressable = styled(TouchableOpacity)<Props>`
   border-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   height: 48px;
   width: 100%;
-
   ${({ loading }) =>
     loading &&
     css`

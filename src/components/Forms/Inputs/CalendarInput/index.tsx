@@ -12,6 +12,7 @@ import {
 import { Keyboard } from 'react-native'
 
 export interface Props {
+  placeholder?: string
   value?: string
   errorBoolean?: boolean
 
@@ -26,6 +27,7 @@ export interface Props {
 }
 
 export function CalendarInput({
+  placeholder,
   value,
   errorBoolean,
   onFocus,
@@ -64,7 +66,7 @@ export function CalendarInput({
         <InputTextMasked
           onFocus={onFocus}
           onChangeText={handleChangeBirthday}
-          placeholder={'Data de nascimento'}
+          placeholder={placeholder}
           placeholderTextColor={COLOR}
           autoCorrect={false}
           placeholderOpacity={!value}
