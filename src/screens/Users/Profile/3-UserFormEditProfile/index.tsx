@@ -49,9 +49,6 @@ import { differenceInYears, isAfter, isBefore, isValid, parse } from 'date-fns'
 export function UserFormEditProfile() {
   const { user, updateUserForm, isWaitingApiResponse } = useAuth()
 
-  const [isComponentAVisible, setIsComponentAVisible] = useState(true)
-  const [isComponentBVisible, setIsComponentBVisible] = useState(true)
-  const [isComponentCVisible, setIsComponentCVisible] = useState(true)
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
 
   const [userForm, setUserForm] = useState({
@@ -445,21 +442,6 @@ export function UserFormEditProfile() {
     })
   }
 
-  function toggleComponentAVisibility() {
-    setIsComponentBVisible(false)
-    setIsComponentCVisible(false)
-  }
-
-  function toggleComponentBVisibility() {
-    setIsComponentAVisible(false)
-    setIsComponentCVisible(false)
-  }
-
-  function toggleComponentCVisibility() {
-    setIsComponentAVisible(false)
-    setIsComponentBVisible(false)
-  }
-
   useEffect(() => {
     if (user === null) return
 
@@ -486,21 +468,6 @@ export function UserFormEditProfile() {
       restrictions: { value: restrictions || '', errorBoolean: false },
       email: { value: email || '', errorBoolean: false },
     })
-  }, [])
-
-  useEffect(() => {
-    const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-
-    const keyboardDidHideListener = Keyboard.addListener(hideEvent, () => {
-      setIsComponentAVisible(true)
-      setIsComponentBVisible(true)
-      setIsComponentCVisible(true)
-    })
-
-    return () => {
-      keyboardDidHideListener.remove()
-    }
   }, [])
 
   useFocusEffect(
@@ -565,51 +532,53 @@ export function UserFormEditProfile() {
                     topPosition={2}
                   />
 
-                  {isComponentAVisible && (
-                    <InputWrapper>
-                      <UserNameInput
-                        handleChangeUserName={handleChangeUserName}
-                        value={userForm.name.value}
-                        errorBoolean={userForm.name.errorBoolean}
-                        editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentAVisibility}
-                        type="blue"
-                        borderDesign="up"
-                        order="top"
-                        topPosition={4}
-                      />
-                      <CalendarInput
-                        handleChangeBirthday={handleChangeBirthday}
-                        value={userForm.birthdate.value}
-                        errorBoolean={userForm.birthdate.errorBoolean}
-                        editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentAVisibility}
-                        type="blue"
-                        borderDesign="up-down"
-                        order="middle"
-                        topPosition={2}
-                      />
-                      <WhatsappInput
-                        handleChangeWhatsapp={handleChangeWhatsappNumber}
-                        value={userForm.whatsappNumber.value}
-                        errorBoolean={userForm.whatsappNumber.errorBoolean}
-                        editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentAVisibility}
-                        type="blue"
-                        borderDesign="down"
-                        order="bottom"
-                      />
-                    </InputWrapper>
-                  )}
-
-                  {isComponentBVisible === true && (
+                  <InputWrapper>
+                    <UserNameInput
+                      handleChangeUserName={handleChangeUserName}
+                      value={userForm.name.value}
+                      errorBoolean={userForm.name.errorBoolean}
+                      editable={!isWaitingApiResponse}
+                      onFocus={() => {}}
+                      type="blue"
+                      borderDesign="up"
+                      order="top"
+                      topPosition={4}
+                    />
+                    <CalendarInput
+                      handleChangeBirthday={handleChangeBirthday}
+                      value={userForm.birthdate.value}
+                      errorBoolean={userForm.birthdate.errorBoolean}
+                      editable={!isWaitingApiResponse}
+                      onFocus={() => {}}
+                      type="blue"
+                      borderDesign="up-down"
+                      order="middle"
+                      topPosition={2}
+                    />
+                    <WhatsappInput
+                      mask={
+                        user?.selectedLanguage === 'pt-br'
+                          ? '(99) 99999-9999'
+                          : '(999) 99999-9999'
+                      }
+                      handleChangeWhatsapp={handleChangeWhatsappNumber}
+                      value={userForm.whatsappNumber.value}
+                      errorBoolean={userForm.whatsappNumber.errorBoolean}
+                      editable={!isWaitingApiResponse}
+                      onFocus={() => {}}
+                      type="blue"
+                      borderDesign="down"
+                      order="bottom"
+                    />
+                  </InputWrapper>
+                  {user?.personalTrainerContractId && (
                     <InputWrapper>
                       <GymInput
                         handleChangeGym={handleChangeGym}
                         value={userForm.gym.value}
                         errorBoolean={false}
                         editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentBVisibility}
+                        onFocus={() => {}}
                         type="blue"
                         borderDesign="up"
                         order="top"
@@ -619,26 +588,26 @@ export function UserFormEditProfile() {
                         value={userForm.anabol.value}
                         errorBoolean={false}
                         editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentBVisibility}
+                        onFocus={() => {}}
                       />
                     </InputWrapper>
                   )}
 
-                  {isComponentCVisible && (
+                  {user?.personalTrainerContractId && (
                     <InputWrapper>
                       <WhenStartedAtGymInput
                         handleChangeBirthday={handleChangeWhenStartedAtGym}
                         value={userForm.whenStartedAtGym.value}
                         errorBoolean={false}
                         editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentCVisibility}
+                        onFocus={() => {}}
                       />
                       <RestrictionsInput
                         handleChangeRestrictions={handleChangeRestrictions}
                         value={userForm.restrictions.value}
                         errorBoolean={false}
                         editable={!isWaitingApiResponse}
-                        onFocus={toggleComponentCVisibility}
+                        onFocus={() => {}}
                       />
                     </InputWrapper>
                   )}

@@ -55,8 +55,10 @@ export function UserHome() {
     loadPersonalTrainerClientContract,
     loadPersonalTrainerData,
     savePersonalTrainerData,
+    premiumUserContract,
   } = useAuth()
-
+  console.log(`premiumUserContract`)
+  console.log(premiumUserContract)
   const findWeightProgression = weightProgression?.find(
     (v) => v.userId === user?.id,
   )

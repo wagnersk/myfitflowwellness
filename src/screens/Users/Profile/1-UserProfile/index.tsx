@@ -243,23 +243,34 @@ export function UserProfile() {
                         : 'focus on: ')}
                     {formattedMuscleFocus}
                   </ProfileInfoText>
-                  <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br'
-                      ? 'Tempo de treino'
-                      : 'Training time'}
-                    :{' '}
-                  </Title>
-                  <ProfileInfoText>
-                    {experienceTime}{' '}
-                    {experienceTime &&
-                      (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
-                  </ProfileInfoText>
-                  <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
-                  </Title>
-                  <ProfileInfoText>{user && user.gym}</ProfileInfoText>
+
+                  {user && user.personalTrainerContractId && (
+                    <>
+                      <ProfileInfoDivisor />
+                      <Title>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Tempo de treino'
+                          : 'Training time'}
+                        :{' '}
+                      </Title>
+                      <ProfileInfoText>
+                        {experienceTime}{' '}
+                        {experienceTime &&
+                          (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
+                      </ProfileInfoText>
+                      <ProfileInfoDivisor />
+                    </>
+                  )}
+
+                  {user && user.personalTrainerContractId && (
+                    <>
+                      <Title>
+                        {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
+                      </Title>
+                      <ProfileInfoText>{user && user.gym}</ProfileInfoText>
+                    </>
+                  )}
+
                   <ProfileInfoDivisor />
                   <Title>
                     {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}:{' '}
@@ -273,66 +284,72 @@ export function UserProfile() {
                       (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
                   </ProfileInfoText>
                   <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br' ? 'Anabolizante' : 'Anabolic'}
-                    :
-                  </Title>
-                  <ProfileInfoText>
-                    {user && user.anabol
-                      ? user.anabol
-                      : selectedLanguage === 'pt-br'
-                        ? 'Nenhum'
-                        : 'None'}
-                  </ProfileInfoText>
-                  <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br'
-                      ? 'Restrições'
-                      : 'Restrictions'}
-                    :
-                  </Title>
-                  <ProfileInfoText>
-                    {user && user.restrictions
-                      ? user.restrictions
-                      : selectedLanguage === 'pt-br'
-                        ? 'Nenhuma'
-                        : 'None'}
-                  </ProfileInfoText>
-                  <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br'
-                      ? 'Equipamentos disponíveis'
-                      : 'Available equipment'}
-                    :
-                  </Title>
-                  <View
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 8,
-                    }}
-                  >
-                    {auxDataUnicFiltersText.map((val, i) => {
-                      return (
-                        <LabelWrapper key={i}>
-                          {val.data.length > 0 &&
-                            val.data.map((_val, _i) => {
-                              if (_val.value) {
-                                return (
-                                  <LabelWrapper key={_i}>
-                                    <Label>
-                                      {_val.key}: {_val.value}
-                                    </Label>
-                                  </LabelWrapper>
-                                )
-                              } else {
-                                return null
-                              }
-                            })}
-                        </LabelWrapper>
-                      )
-                    })}
-                  </View>
+                  {user && user.personalTrainerContractId && (
+                    <>
+                      <Title>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Anabolizante'
+                          : 'Anabolic'}
+                        :
+                      </Title>
+                      <ProfileInfoText>
+                        {user && user.anabol
+                          ? user.anabol
+                          : selectedLanguage === 'pt-br'
+                            ? 'Nenhum'
+                            : 'None'}
+                      </ProfileInfoText>
+                      <ProfileInfoDivisor />
+                      <Title>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Restrições'
+                          : 'Restrictions'}
+                        :
+                      </Title>
+                      <ProfileInfoText>
+                        {user && user.restrictions
+                          ? user.restrictions
+                          : selectedLanguage === 'pt-br'
+                            ? 'Nenhuma'
+                            : 'None'}
+                      </ProfileInfoText>
+                      <ProfileInfoDivisor />
+                      <Title>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Equipamentos disponíveis'
+                          : 'Available equipment'}
+                        :
+                      </Title>
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 8,
+                        }}
+                      >
+                        {auxDataUnicFiltersText.map((val, i) => {
+                          return (
+                            <LabelWrapper key={i}>
+                              {val.data.length > 0 &&
+                                val.data.map((_val, _i) => {
+                                  if (_val.value) {
+                                    return (
+                                      <LabelWrapper key={_i}>
+                                        <Label>
+                                          {_val.key}: {_val.value}
+                                        </Label>
+                                      </LabelWrapper>
+                                    )
+                                  } else {
+                                    return null
+                                  }
+                                })}
+                            </LabelWrapper>
+                          )
+                        })}
+                      </View>
+                    </>
+                  )}
                 </ProfileInfoWrapper>
               )}
             </Body>

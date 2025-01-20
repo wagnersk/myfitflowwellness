@@ -30,7 +30,6 @@ export const Body = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-end;
   width: 100%;
-  width: 48px;
   height: 48px;
 `
 

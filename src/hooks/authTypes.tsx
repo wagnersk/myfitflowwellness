@@ -171,7 +171,7 @@ export type SignInProps = {
   name: string
   name_insensitive: string
 
-  personalPlanActive: boolean
+  premiumContractId: string | null
   personalTrainerContractId: string | null
   personalTrainerId: string | null
   photoBase64?: string
@@ -798,6 +798,7 @@ export interface AuthContextData {
   workouts: ICachedWorkoutsWithLastUpdatedTimestamp | null
   myWorkoutDataArray: IWorkoutInfo | null
   myWorkout: IMyfitflowWorkoutInUse | null
+  premiumUserContract: IPremiumUserContract | null
 
   isLogging: boolean
   isWaitingApiResponse: boolean

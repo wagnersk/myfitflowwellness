@@ -77,7 +77,6 @@ import {
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
 import { IWorkoutCategory } from '@src/@types/navigation'
-import { IBenchDataSelect, IFreeSelect } from './selectOptionsTypes'
 
 const db = getFirestore(firebaseApp)
 
@@ -396,7 +395,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     selectedLanguage: 'pt-br' | 'us',
   ) {
     setIsLogging(true)
-
+    console.log('firebaseSignIn teste', email)
     signInWithEmailAndPassword(auth, email, password)
       .then(async (account) => {
         const userDocRef = doc(db, 'users', account.user.uid)
@@ -427,7 +426,7 @@ function AuthProvider({ children }: AuthProviderProps) {
             muscleFocus,
             name,
             name_insensitive,
-            personalPlanActive,
+            premiumContractId,
             photoBase64,
             premiumPlanActive,
 
@@ -461,9 +460,9 @@ function AuthProvider({ children }: AuthProviderProps) {
             muscleFocus,
             name,
             name_insensitive,
-            personalPlanActive,
             photoBase64,
             premiumPlanActive,
+            premiumContractId,
 
             pulleyData,
             restrictions,
@@ -481,17 +480,22 @@ function AuthProvider({ children }: AuthProviderProps) {
 
             anonymousUser: false,
           }
-
+          console.log(`AsyncStorage a`)
           await AsyncStorage.setItem(
             USER_SIGNIN_COLLECTION,
             JSON.stringify(userData),
           )
+          console.log(`AsyncStorage d`)
+
+          console.log(`userData`)
+          console.log(userData)
           setUser(userData)
 
           loadLoginInitialCachedWorkoutsData(id)
         } else {
           let userData: IUnconfirmedUserData | null =
             await loadNewUserTempUnconfirmedData(account.user.uid)
+
           if (!userData) {
             userData = {
               email,
@@ -629,10 +633,13 @@ function AuthProvider({ children }: AuthProviderProps) {
         ],
       },
     }
+    console.log('accountUserUid passando', accountUserUid)
+
     const premiumContractId =
       await createNewContractWithPremiumPersonalUpdateUserClientId(
         accountUserUid,
       )
+    console.log('premiumContractId retornado', premiumContractId)
 
     if (!premiumContractId) {
       Alert.alert(
@@ -676,6 +683,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       personalTrainerContractId: null,
       personalTrainerId: null,
     }
+
     console.log('userDataCreate', userDataCreate)
     await setDoc(doc(usersRef, accountUserUid), userDataCreate)
       .then(() => {
@@ -819,6 +827,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
+
   async function updateUserSelectedLanguage(language: 'pt-br' | 'us') {
     setIsWaitingApiResponse(true)
     const userRef = collection(db, 'users')
@@ -865,6 +874,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
+
   async function updateLocalCacheAnonymousUserSelectedLanguage(
     language: 'pt-br' | 'us',
   ) {
@@ -1467,7 +1477,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     userId: string,
   ) {
     setIsWaitingApiResponse(true)
-    console.log(`asdasd`)
+
     /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     const contractDoc = collection(db, 'premiumUsersContracts')
     const today = new Date()
@@ -1488,31 +1498,19 @@ function AuthProvider({ children }: AuthProviderProps) {
         premiumBonusState: true,
       },
     }
-    console.log(newPremiumContract)
 
     const premiumContractId = await addDoc(contractDoc, newPremiumContract)
       .then(async (clientData) => {
+        console.log(`clientData`)
+
         const newPremiumContractWithId = {
           ...newPremiumContract,
           id: clientData.id,
         }
 
-        async function savePersonalTrainerData(data: IPremiumUserContract) {
-          if (!user) return
-
-          const USER_PREMIUMCONTRACT_COLLECTION = `@myfitflow:userlocaldata-premiumcontract-${clientData.id}`
-
-          if (data) {
-            await AsyncStorage.setItem(
-              USER_PREMIUMCONTRACT_COLLECTION,
-              JSON.stringify(data),
-            ).then(() => {
-              setPremiumUserContract(data)
-            })
-          }
+        if (newPremiumContractWithId.id) {
+          savePremiumUserData(newPremiumContractWithId)
         }
-
-        savePersonalTrainerData(newPremiumContractWithId)
 
         return clientData.id
       })
@@ -1526,6 +1524,38 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     return premiumContractId
   }
+
+  async function savePremiumUserData(data: IPremiumUserContract) {
+    const USER_PREMIUMCONTRACT_COLLECTION = `@myfitflow:userlocaldata-premiumcontract-${data.id}`
+
+    if (data) {
+      await AsyncStorage.setItem(
+        USER_PREMIUMCONTRACT_COLLECTION,
+        JSON.stringify(data),
+      ).then(() => {
+        setPremiumUserContract(data)
+      })
+    }
+  }
+
+  async function loadPremiumUserData(premiumUsersContractId: string) {
+    const muscleSelectDataRef = doc(
+      db,
+      'premiumUsersContracts',
+      premiumUsersContractId,
+    )
+
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IPremiumUserContract
+      savePremiumUserData(initialData)
+      return initialData
+    } else {
+      return null
+    }
+  }
+
   async function createNewContractWithPersonalUpdateUserClientId(
     personalTrainerContractId: string,
     personalTrainerData: IPersonal,
@@ -2974,6 +3004,13 @@ function AuthProvider({ children }: AuthProviderProps) {
       await updateUserState(cachedUserData)
       //  await loadWorkoutData(cachedUserData)
       await loadLoginInitialCachedWorkoutsData(cachedUserData.id)
+
+      if (cachedUserData.premiumContractId) {
+        if (!premiumUserContract) {
+          await loadPremiumUserData(cachedUserData.premiumContractId)
+        }
+      }
+
       // await checkForUpdates(cachedUserData)
       setIsLoadingUserStorageData(false)
     } catch (error) {
@@ -3122,6 +3159,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         loadStatisticsItens,
 
         user,
+        premiumUserContract,
 
         workoutsCategories,
         workouts,

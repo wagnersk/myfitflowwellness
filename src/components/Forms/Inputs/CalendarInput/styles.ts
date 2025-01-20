@@ -53,6 +53,15 @@ export const Container = styled.View<Props>`
       border-top-width: 2px;
       border-bottom-width: 2px;
     `}
+  ${({ borderDesign, order }) =>
+    borderDesign === 'up-down' &&
+    order === 'middle' &&
+    css`
+      border-left-width: 2px;
+      border-right-width: 2px;
+      border-top-width: 2px;
+      border-bottom-width: 2px;
+    `}
   top: ${({ topPosition }) => (topPosition ? `${topPosition}px` : '0px')};
 `
 

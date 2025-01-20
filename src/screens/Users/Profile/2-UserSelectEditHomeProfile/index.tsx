@@ -31,7 +31,6 @@ import {
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { ViewWithLineAndIcon } from '@components/ViewWithLineAndIcon'
-import { differenceInYears } from 'date-fns'
 import { UserProfileCard } from '@components/Cards/UserProfileCard'
 import { SelectButton } from '@components/Buttons/SelectButton'
 import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
@@ -309,49 +308,49 @@ export function UserSelectEditHomeProfile() {
                     />
                   </SelectWrapper>
                 </SelectContentWrapper>
-
-                <FooterWrapper>
-                  <EquipamentTitle>Equipamentos disponíveis</EquipamentTitle>
-
-                  <FooterContainer>
-                    <SelectFilterButtonWrapper>
-                      <SelectFilterButton
-                        title={`Livre`}
-                        onPress={() => {
-                          handleOpenFilterFreeEquipamentList({
-                            dataType: 'Livre',
-                          })
-                        }}
-                        enabled={true}
-                        loading={false}
-                      />
-                    </SelectFilterButtonWrapper>
-                    <SelectFilterButtonWrapper>
-                      <SelectFilterButton
-                        title={`Polia`}
-                        onPress={() => {
-                          handleOpenFilterPulleyEquipamentList({
-                            dataType: 'Polia',
-                          })
-                        }}
-                        enabled={true}
-                        loading={false}
-                      />
-                    </SelectFilterButtonWrapper>
-                    <SelectFilterButtonWrapper>
-                      <SelectFilterButton
-                        title={`Máquina`}
-                        onPress={() => {
-                          handleOpenFilterMachineEquipamentList({
-                            dataType: 'Máquina',
-                          })
-                        }}
-                        enabled={true}
-                        loading={false}
-                      />
-                    </SelectFilterButtonWrapper>
-                  </FooterContainer>
-                </FooterWrapper>
+                {user && user.personalTrainerContractId && (
+                  <FooterWrapper>
+                    <EquipamentTitle>Equipamentos disponíveis</EquipamentTitle>
+                    <FooterContainer>
+                      <SelectFilterButtonWrapper>
+                        <SelectFilterButton
+                          title={`Livre`}
+                          onPress={() => {
+                            handleOpenFilterFreeEquipamentList({
+                              dataType: 'Livre',
+                            })
+                          }}
+                          enabled={true}
+                          loading={false}
+                        />
+                      </SelectFilterButtonWrapper>
+                      <SelectFilterButtonWrapper>
+                        <SelectFilterButton
+                          title={`Polia`}
+                          onPress={() => {
+                            handleOpenFilterPulleyEquipamentList({
+                              dataType: 'Polia',
+                            })
+                          }}
+                          enabled={true}
+                          loading={false}
+                        />
+                      </SelectFilterButtonWrapper>
+                      <SelectFilterButtonWrapper>
+                        <SelectFilterButton
+                          title={`Máquina`}
+                          onPress={() => {
+                            handleOpenFilterMachineEquipamentList({
+                              dataType: 'Máquina',
+                            })
+                          }}
+                          enabled={true}
+                          loading={false}
+                        />
+                      </SelectFilterButtonWrapper>
+                    </FooterContainer>
+                  </FooterWrapper>
+                )}
               </Body>
             </ImageBackgroundContainer>
           </ImageBackground>
