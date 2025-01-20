@@ -82,7 +82,11 @@ export function Login() {
       await checkEmail()
       await checkPassword()
 
-      await firebaseSignIn(userForm.email.value, userForm.password.value)
+      await firebaseSignIn(
+        userForm.email.value,
+        userForm.password.value,
+        selectedLanguage,
+      )
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(

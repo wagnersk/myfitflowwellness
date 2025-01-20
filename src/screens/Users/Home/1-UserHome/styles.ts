@@ -51,6 +51,9 @@ export const BodyImageContainer = styled.View`
 export const BodyTopWrapper = styled.View`
   width: 100%;
 `
+export const NoWorkoutFoundWrapper = styled.View`
+  width: 100%;
+`
 
 export const Warning = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};

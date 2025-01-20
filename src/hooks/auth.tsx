@@ -4,7 +4,7 @@ import { Alert } from 'react-native'
 
 import { firebaseApp, auth } from '../../firebase-config'
 
-import { format } from 'date-fns'
+import { addDays, format } from 'date-fns'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -29,6 +29,8 @@ import {
   signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
+  sendEmailVerification,
+  UserCredential,
 } from 'firebase/auth'
 
 import {
@@ -64,6 +66,8 @@ import {
   IPulleySelectData,
   IMachineSelectData,
   IMyfitflowWorkoutInUse,
+  IUnconfirmedUserData,
+  IPremiumUserContract,
 } from './authTypes'
 
 import {
@@ -83,7 +87,12 @@ export const AuthContext = createContext({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<SignInProps | null>(null)
+
   const [contract, setContract] = useState<IContract | null>(null)
+
+  const [premiumUserContract, setPremiumUserContract] =
+    useState<IPremiumUserContract | null>(null)
+
   const [personalsList, setPersonalsList] = useState<IPersonal[] | null>(null)
   const [workouts, setWorkouts] =
     useState<ICachedWorkoutsWithLastUpdatedTimestamp | null>(null)
@@ -295,177 +304,25 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function upgradeAnonymousToRegistered(email: string, password: string) {
-    try {
-      const currentUser = auth.currentUser
-      if (!currentUser || !currentUser.isAnonymous) {
-        throw new Error('Usuário não está logado anonimamente.')
-      }
-
-      const credential = EmailAuthProvider.credential(email, password)
-      const linkedUser = await currentUser.linkWithCredential(credential)
-
-      const anonUserId = currentUser.uid
-
-      // Move os dados da coleção anonymous_users para users
-      const anonUserDocRef = doc(db, 'anonymous_users', anonUserId)
-      const anonUserDoc = await getDoc(anonUserDocRef)
-
-      if (anonUserDoc.exists()) {
-        const userData = anonUserDoc.data()
-
-        // Copia para a coleção users
-        const usersRef = collection(db, 'users')
-        await setDoc(doc(usersRef, linkedUser.user.uid), {
-          id: linkedUser.user.uid,
-          email,
-          createdAt: userData.createdAt,
-          updatedAt: serverTimestamp(),
-        })
-
-        // Exclui o documento do anonymous_users
-        await deleteDoc(anonUserDocRef)
-
-        Alert.alert('Conta registrada com sucesso!')
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar usuário anônimo:', error)
-      Alert.alert(
-        'Erro',
-        'Não foi possível atualizar para uma conta registrada.',
-      )
-    }
-  }
-
-  async function firebaseSignUp(
+  async function firebaseCreateUserAndSendEmailVerification(
     email: string,
     password: string,
-    name: string,
-    birthdate: string,
-    whatsappNumber: string,
-    selectedLanguage: 'pt-br' | 'us',
   ) {
     setIsWaitingApiResponse(true)
 
-    createUserWithEmailAndPassword(auth, email, password)
+    const sucess = createUserWithEmailAndPassword(auth, email, password)
       .then(async (account) => {
-        const usersRef = collection(db, 'users')
-        const updatedTime = serverTimestamp()
-
-        const muscleFocus = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          muscleSelectedData: [
-            {
-              'pt-br': `equilibrado`,
-              us: `balanced`,
-            },
-          ],
-        }
-
-        const freeData: IFreeSelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            barSelectData: [
-              {
-                bar_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            benchSelectData: [
-              {
-                bench_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            otherSelectData: [
-              {
-                other_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            weightSelectData: [
-              {
-                weight_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        const pulleyData: IPulleySelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            pulleyHandlerSelectData: [
-              {
-                pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            pulleySelectData: [
-              {
-                pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        const machineData: IMachineSelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            machineSelectData: [
-              {
-                machine_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        await setDoc(doc(usersRef, account.user.uid), {
-          anabol: null,
-          birthdate,
-          clientId: null,
-          createdAt: updatedTime,
-          email,
-          freeData,
-          goal: null,
-          gym: null,
-          id: account.user.uid,
-          isNewUser: true,
-          machineData,
-          muscleFocus,
-          name,
-          name_insensitive: name.toLocaleLowerCase().trim(),
-          personalPlanActive: false,
-          photoBase64: '',
-          premiumPlanActive: false,
-          pulleyData,
-          restrictions: null,
-          selectedLanguage,
-          sessionsByWeek: null,
-          submissionPending: false,
-          timeBySession: null,
-          updatedAt: updatedTime,
-          whatsappNumber,
-          whenStartedAtGym: '',
-          personalTrainerContractId: null,
-          personalTrainerId: null,
-        })
-          .then(() => {
-            Alert.alert(
-              user?.selectedLanguage === 'pt-br'
-                ? 'Conta criada com sucesso!'
-                : 'Account created successfully!',
-            )
-            firebaseSignIn(email, password)
-          })
-          .catch((error) => {
-            console.log(error.code)
-          })
+        await sendEmailVerification(account.user)
+        Alert.alert(
+          'Verificação de Email',
+          'Um email de verificação foi enviado. Por favor, verifique seu email antes de continuar.',
+        )
+        return account.user.uid
       })
-      .catch((error) => {
-        setIsWaitingApiResponse(false)
 
+      .catch((error) => {
         if (error.code === 'auth/email-already-in-use') {
-          return Alert.alert(
+          Alert.alert(
             user?.selectedLanguage === 'pt-br'
               ? 'E-mail não disponível'
               : 'Email not available',
@@ -473,36 +330,86 @@ function AuthProvider({ children }: AuthProviderProps) {
               ? 'Escolha outro e-mail para cadastrar!'
               : 'Choose another email to register!',
           )
+          return null
         }
 
         if (error.code === 'auth/invalid-email') {
-          return Alert.alert(
+          Alert.alert(
             user?.selectedLanguage === 'pt-br'
               ? 'E-mail inválido!'
               : 'Invalid email!',
           )
+          return null
         }
 
         if (error.code === 'auth/weak-password') {
-          return Alert.alert(
+          Alert.alert(
             user?.selectedLanguage === 'pt-br'
               ? 'A senha deve no mínimo 6 dígitos.'
               : 'The password must be at least 6 characters long.',
           )
+          return null
         }
+        return null
       })
-      .finally(() => {
+      .finally(async () => {
+        await signOut(auth)
         setIsWaitingApiResponse(false)
       })
+
+    return sucess
   }
 
-  async function firebaseSignIn(email: string, password: string) {
+  async function saveNewUserTempUnconfirmedData(
+    data: IUnconfirmedUserData,
+    newUnconfirmedUserId: string,
+  ) {
+    if (!newUnconfirmedUserId) return
+
+    const storageNewUnconfirmedKey = `@myfitflow:userlocaldata-unconfirmedUserData-${newUnconfirmedUserId}`
+
+    if (data) {
+      await AsyncStorage.setItem(storageNewUnconfirmedKey, JSON.stringify(data))
+    }
+  }
+
+  async function loadNewUserTempUnconfirmedData(newUnconfirmedUserId: string) {
+    if (!newUnconfirmedUserId) return null
+
+    const storageNewUnconfirmedKey = `@myfitflow:userlocaldata-unconfirmedUserData-${newUnconfirmedUserId}`
+
+    const userLocalData = await AsyncStorage.getItem(storageNewUnconfirmedKey)
+
+    if (userLocalData) {
+      const cachedUserLocalData = JSON.parse(
+        userLocalData,
+      ) as IUnconfirmedUserData
+      return cachedUserLocalData
+    } else {
+      return null
+    }
+  }
+
+  async function firebaseSignIn(
+    email: string,
+    password: string,
+    selectedLanguage: 'pt-br' | 'us',
+  ) {
     setIsLogging(true)
 
     signInWithEmailAndPassword(auth, email, password)
       .then(async (account) => {
         const userDocRef = doc(db, 'users', account.user.uid)
         const docSnap = await getDoc(userDocRef)
+
+        if (!account.user.emailVerified) {
+          Alert.alert(
+            'Verificação de Email',
+            'Seu email não está verificado. Por favor, verifique seu email antes de continuar.',
+          )
+          await signOut(auth)
+          setIsLogging(true)
+        }
 
         if (docSnap.exists()) {
           const {
@@ -571,6 +478,8 @@ function AuthProvider({ children }: AuthProviderProps) {
 
             personalTrainerContractId,
             personalTrainerId,
+
+            anonymousUser: false,
           }
 
           await AsyncStorage.setItem(
@@ -579,18 +488,27 @@ function AuthProvider({ children }: AuthProviderProps) {
           )
           setUser(userData)
 
-          // carrega os dados e salva em cache o que acabou de pegar do servidor
-          // é a mesma funcao de quando eu logo e puxa o user do cache
           loadLoginInitialCachedWorkoutsData(id)
-          setIsLogging(false)
         } else {
-          Alert.alert(
-            user?.selectedLanguage === 'pt-br'
-              ? 'Login realizado'
-              : 'Login successful',
-            user?.selectedLanguage === 'pt-br'
-              ? 'Porém não foi possível buscar os dados de perfil do usuário'
-              : 'However, it was not possible to fetch the user profile data',
+          let userData: IUnconfirmedUserData | null =
+            await loadNewUserTempUnconfirmedData(account.user.uid)
+          if (!userData) {
+            userData = {
+              email,
+              password,
+              name: '',
+              birthdate: '',
+              selectedLanguage,
+            }
+          }
+
+          await firebaseSignUpWithUserAndPopulateDatabase(
+            account.user.uid,
+            email,
+            password,
+            userData.name,
+            userData.birthdate,
+            userData.selectedLanguage,
           )
         }
       })
@@ -601,8 +519,8 @@ function AuthProvider({ children }: AuthProviderProps) {
           setIsLogging(false)
 
           return Alert.alert(
-            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
-            user?.selectedLanguage === 'pt-br'
+            selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            selectedLanguage === 'pt-br'
               ? 'Você excedeu o limite de tentativas de autenticação. Por favor, aguarde um tempo antes de tentar novamente.'
               : 'You have exceeded the authentication attempt limit. Please wait a while before trying again.',
           )
@@ -611,21 +529,169 @@ function AuthProvider({ children }: AuthProviderProps) {
           setIsLogging(false)
 
           return Alert.alert(
-            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
-            user?.selectedLanguage === 'pt-br'
+            selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            selectedLanguage === 'pt-br'
               ? 'E-mail e/ou senha inválida.'
               : 'Invalid email and/or password.',
           )
         } else {
           setIsLogging(false)
-
+          console.log(`code`, code)
           return Alert.alert(
-            user?.selectedLanguage === 'pt-br' ? 'Login' : 'Login',
-            user?.selectedLanguage === 'pt-br'
+            selectedLanguage === 'pt-br' ? 'Login' : 'Login',
+            selectedLanguage === 'pt-br'
               ? 'Não foi possível realizar o login.'
               : 'Login could not be completed.',
           )
         }
+      })
+      .finally(() => {
+        setIsLogging(false)
+      })
+  }
+
+  async function firebaseSignUpWithUserAndPopulateDatabase(
+    accountUserUid: string,
+    email: string,
+    password: string,
+    name: string,
+    birthdate: string,
+    selectedLanguage: 'pt-br' | 'us',
+  ) {
+    setIsWaitingApiResponse(true)
+
+    const usersRef = collection(db, 'users')
+    const updatedTime = serverTimestamp()
+
+    const muscleFocus = {
+      createdAt: updatedTime,
+      updatedAt: updatedTime,
+      muscleSelectedData: [
+        {
+          'pt-br': `equilibrado`,
+          us: `balanced`,
+        },
+      ],
+    }
+
+    const freeData: IFreeSelectData = {
+      createdAt: updatedTime,
+      updatedAt: updatedTime,
+      data: {
+        barSelectData: [
+          {
+            bar_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+        benchSelectData: [
+          {
+            bench_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+        otherSelectData: [
+          {
+            other_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+        weightSelectData: [
+          {
+            weight_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+      },
+    }
+
+    const pulleyData: IPulleySelectData = {
+      createdAt: updatedTime,
+      updatedAt: updatedTime,
+      data: {
+        pulleyHandlerSelectData: [
+          {
+            pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+        pulleySelectData: [
+          {
+            pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+      },
+    }
+
+    const machineData: IMachineSelectData = {
+      createdAt: updatedTime,
+      updatedAt: updatedTime,
+      data: {
+        machineSelectData: [
+          {
+            machine_insensitive: { 'pt-br': 'todos', us: 'all' },
+          },
+        ],
+      },
+    }
+    const premiumContractId =
+      await createNewContractWithPremiumPersonalUpdateUserClientId(
+        accountUserUid,
+      )
+
+    if (!premiumContractId) {
+      Alert.alert(
+        selectedLanguage === 'pt-br'
+          ? 'erro premium bonus'
+          : 'erro premium bonus',
+      )
+      return
+    }
+    console.log('email', email)
+    console.log('password', password)
+    console.log('accountUserUid', accountUserUid)
+
+    const userDataCreate = {
+      anabol: null,
+      birthdate,
+      clientId: null,
+      createdAt: updatedTime,
+      email,
+      freeData,
+      goal: null,
+      gym: null,
+      id: accountUserUid,
+      isNewUser: true,
+      machineData,
+      muscleFocus,
+      name,
+      name_insensitive: name.toLocaleLowerCase().trim(),
+      personalPlanActive: false,
+      photoBase64: '',
+      premiumContractId,
+      pulleyData,
+      restrictions: null,
+      selectedLanguage,
+      sessionsByWeek: null,
+      submissionPending: false,
+      timeBySession: null,
+      updatedAt: updatedTime,
+      whatsappNumber: null,
+      whenStartedAtGym: '',
+      personalTrainerContractId: null,
+      personalTrainerId: null,
+    }
+    console.log('userDataCreate', userDataCreate)
+    await setDoc(doc(usersRef, accountUserUid), userDataCreate)
+      .then(() => {
+        Alert.alert(
+          selectedLanguage === 'pt-br'
+            ? 'Conta criada com sucesso!'
+            : 'Account created successfully!',
+        )
+
+        firebaseSignIn(email, password, selectedLanguage)
+      })
+      .catch((error) => {
+        console.log(error.code)
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
       })
   }
 
@@ -1397,15 +1463,81 @@ function AuthProvider({ children }: AuthProviderProps) {
     // o grupo muscular e o tipo , free, pulley ou machine
   }
 
+  async function createNewContractWithPremiumPersonalUpdateUserClientId(
+    userId: string,
+  ) {
+    setIsWaitingApiResponse(true)
+    console.log(`asdasd`)
+    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
+    const contractDoc = collection(db, 'premiumUsersContracts')
+    const today = new Date()
+    const formattedProfileUpdatedAt = format(today, 'dd/MM/yyyy')
+    const updatedAt = serverTimestamp()
+
+    if (!userId) return null
+    const futureDate = addDays(today, 15)
+    const formattedFutureDate = format(futureDate, 'dd/MM/yyyy')
+    const newPremiumContract = {
+      createdAt: updatedAt,
+      updatedAt,
+      userId,
+      premiumPlanActive: false,
+      premiumBonusStart: {
+        startDate: formattedProfileUpdatedAt,
+        endDate: formattedFutureDate,
+        premiumBonusState: true,
+      },
+    }
+    console.log(newPremiumContract)
+
+    const premiumContractId = await addDoc(contractDoc, newPremiumContract)
+      .then(async (clientData) => {
+        const newPremiumContractWithId = {
+          ...newPremiumContract,
+          id: clientData.id,
+        }
+
+        async function savePersonalTrainerData(data: IPremiumUserContract) {
+          if (!user) return
+
+          const USER_PREMIUMCONTRACT_COLLECTION = `@myfitflow:userlocaldata-premiumcontract-${clientData.id}`
+
+          if (data) {
+            await AsyncStorage.setItem(
+              USER_PREMIUMCONTRACT_COLLECTION,
+              JSON.stringify(data),
+            ).then(() => {
+              setPremiumUserContract(data)
+            })
+          }
+        }
+
+        savePersonalTrainerData(newPremiumContractWithId)
+
+        return clientData.id
+      })
+      .catch((error) => {
+        console.log(error.code)
+        return null
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+      })
+
+    return premiumContractId
+  }
   async function createNewContractWithPersonalUpdateUserClientId(
     personalTrainerContractId: string,
     personalTrainerData: IPersonal,
   ) {
     setIsWaitingApiResponse(true)
+
     console.log(`personalTrainerContractId`)
     console.log(personalTrainerContractId)
+
     console.log(`personalTrainerData`)
     console.log(personalTrainerData)
+
     /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     const contractDoc = collection(
       db,
@@ -2915,8 +3047,10 @@ function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider
       value={{
+        saveNewUserTempUnconfirmedData,
+        loadNewUserTempUnconfirmedData,
         firebaseAnonymousSignUp,
-        firebaseSignUp,
+        firebaseCreateUserAndSendEmailVerification,
         firebaseSignIn,
         firebaseSignOut,
         firebaseForgotPassword,

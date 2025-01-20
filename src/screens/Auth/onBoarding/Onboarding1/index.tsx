@@ -80,6 +80,7 @@ export function OnBoarding1() {
                     <SelectLanguageWrapper>
                       <ToggleButton
                         onPress={() => handleLanguageChange('pt-br')}
+                        selected={selectedLanguage === 'pt-br'}
                       >
                         <ButtonText
                           style={{
@@ -89,7 +90,10 @@ export function OnBoarding1() {
                           🇧🇷
                         </ButtonText>
                       </ToggleButton>
-                      <ToggleButton onPress={() => handleLanguageChange('us')}>
+                      <ToggleButton
+                        selected={selectedLanguage === 'us'}
+                        onPress={() => handleLanguageChange('us')}
+                      >
                         <ButtonText
                           style={{
                             opacity: selectedLanguage === 'us' ? 1 : 0.5,

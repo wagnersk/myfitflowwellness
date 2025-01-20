@@ -30,6 +30,8 @@ import {
   SpaceBetweenFormAndButton,
   LinearGradientContainer,
   Container,
+  AuxText,
+  AuxTextWrapper,
 } from './styles'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { PasswordInput } from '@components/Forms/Inputs/PasswordInput'
@@ -40,6 +42,7 @@ import { checkBirthdayDate } from '@utils/checkBirthdayDate'
 import { emailRegex } from '@utils/emailRegex'
 import { INewAccount } from '@src/@types/navigation'
 import { BodyWrapper } from '../Login/styles'
+import { IUnconfirmedUserData } from '@hooks/authTypes'
 
 interface IUserForm {
   name: {
@@ -54,10 +57,6 @@ interface IUserForm {
     value: string
     errorBoolean: boolean
   }
-  whatsappNumber: {
-    value: string
-    errorBoolean: boolean
-  }
   birthdate: {
     value: string
     errorBoolean: boolean
@@ -68,7 +67,13 @@ interface IUserForm {
   }
 }
 export function NewAccount() {
-  const { isWaitingApiResponse, firebaseSignUp, isLogging, user } = useAuth()
+  const {
+    isWaitingApiResponse,
+    firebaseCreateUserAndSendEmailVerification,
+    saveNewUserTempUnconfirmedData,
+    isLogging,
+    user,
+  } = useAuth()
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
 
   const route = useRoute()
@@ -79,7 +84,6 @@ export function NewAccount() {
     name: { value: '', errorBoolean: false },
     email: { value: '', errorBoolean: false },
     password: { value: '', errorBoolean: false },
-    whatsappNumber: { value: '', errorBoolean: false },
     birthdate: { value: '', errorBoolean: false },
     selectedLanguage: { value: 'pt-br', errorBoolean: false },
   })
@@ -96,17 +100,26 @@ export function NewAccount() {
       await checkName()
       await checkEmail()
       await checkPassword()
-      await checkWhatsappNumber()
       await checkBirthdate()
 
-      await firebaseSignUp(
+      const userData: IUnconfirmedUserData = {
+        email: userForm.email.value,
+        password: userForm.password.value,
+        name: userForm.name.value,
+        birthdate: userForm.birthdate.value,
+        selectedLanguage: userForm.selectedLanguage.value,
+      }
+
+      const userId = await firebaseCreateUserAndSendEmailVerification(
         userForm.email.value,
         userForm.password.value,
-        userForm.name.value,
-        userForm.birthdate.value,
-        userForm.whatsappNumber.value,
-        userForm.selectedLanguage.value,
       )
+
+      if (userId) {
+        await saveNewUserTempUnconfirmedData(userData, userId).then(() => {
+          navigation.navigate('login', { selectedLanguage })
+        })
+      }
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(
@@ -161,26 +174,6 @@ export function NewAccount() {
           }
         })
         throw new Error('A senha deve ter pelo menos 6 caracteres')
-      }
-    }
-    async function checkWhatsappNumber() {
-      if (
-        (activeErrorCheck || letActiveErrorCheck) &&
-        (!userForm.whatsappNumber.value ||
-          userForm.whatsappNumber.value.length < 15)
-      ) {
-        setUserForm((prev) => {
-          return {
-            ...prev,
-            whatsappNumber: {
-              value: prev.whatsappNumber.value,
-              errorBoolean: true,
-            },
-          }
-        })
-        throw new Error(
-          'O número de whatsapp deve ter pelo menos 11 caracteres',
-        )
       }
     }
     async function checkBirthdate() {
@@ -346,25 +339,13 @@ export function NewAccount() {
                         topPosition={2}
                       />
                       <SpaceBetweenInput />
-                      <WhatsappInput
-                        placeholder={
-                          selectedLanguage === 'pt-br' ? 'Whatsapp' : 'Whatsapp'
-                        }
-                        mask={
-                          selectedLanguage === 'pt-br'
-                            ? '(99) 99999-9999'
-                            : '(999) 999-9999'
-                        }
-                        handleChangeWhatsapp={handleChangeWhatsappNumber}
-                        value={userForm.whatsappNumber.value}
-                        errorBoolean={userForm.whatsappNumber.errorBoolean}
-                        onFocus={() => {}}
-                        type="transparent"
-                        borderDesign="up"
-                        order="top"
-                        editable={!isLogging}
-                        topPosition={2}
-                      />
+                      <AuxTextWrapper>
+                        <AuxText>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Apenas maiores de 18 anos.'
+                            : 'Only for those over 18 years old.'}
+                        </AuxText>
+                      </AuxTextWrapper>
 
                       <CalendarInput
                         placeholder={
@@ -377,15 +358,16 @@ export function NewAccount() {
                         errorBoolean={userForm.birthdate.errorBoolean}
                         onFocus={() => {}}
                         type="transparent"
-                        borderDesign="down"
-                        order="bottom"
+                        borderDesign="up-down"
+                        order="alone"
                         editable={!isLogging}
                       />
 
                       <SpaceBetweenFormAndButton />
-
+                      <SpaceBetweenFormAndButton />
                       <ViewWithLineAndIcon />
-
+                      <SpaceBetweenFormAndButton />
+                      <SpaceBetweenFormAndButton />
                       <CTAButton
                         onPress={handleSignUp}
                         title={

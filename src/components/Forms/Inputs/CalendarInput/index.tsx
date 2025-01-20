@@ -18,7 +18,7 @@ export interface Props {
 
   type: 'transparent' | 'blue'
   borderDesign?: 'up' | 'down' | 'up-down'
-  order?: 'top' | 'middle' | 'bottom'
+  order?: 'top' | 'middle' | 'bottom' | 'alone'
   topPosition?: number
   editable?: boolean
 

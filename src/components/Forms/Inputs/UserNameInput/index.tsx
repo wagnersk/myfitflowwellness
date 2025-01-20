@@ -3,13 +3,7 @@ import UserCircle from '../../../../assets/UserCircle.svg'
 
 import { useTheme } from 'styled-components'
 
-import {
-  Container,
-  IconContainer,
-  ContainerWrapper,
-  InputText,
-  InputTextMasked,
-} from './styles'
+import { Container, IconContainer, ContainerWrapper, InputText } from './styles'
 import { Keyboard } from 'react-native'
 
 export interface Props {

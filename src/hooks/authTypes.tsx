@@ -13,6 +13,13 @@ export interface IptBrUs {
   us: string
 }
 
+export interface IUnconfirmedUserData {
+  email: string
+  password: string
+  name: string
+  birthdate: string
+  selectedLanguage: 'pt-br' | 'us'
+}
 export type IExerciseItems =
   | `bar`
   | `bench`
@@ -472,6 +479,18 @@ export interface IContract {
   userId: string
   userName: string
 }
+export interface IPremiumUserContract {
+  id: string
+  createdAt: FieldValue
+  updatedAt: FieldValue
+  userId: string
+  premiumPlanActive: boolean
+  premiumBonusStart: {
+    startDate: string
+    endDate: string
+    premiumBonusState: boolean
+  }
+}
 
 export interface DayRecord {
   [day: string]: ExerciseRecord[]
@@ -637,16 +656,28 @@ export interface AuthProviderProps {
 
 export interface AuthContextData {
   firebaseAnonymousSignUp: (selectedLanguage: 'pt-br' | 'us') => Promise<void>
-  firebaseSignUp: (
+  firebaseCreateUserAndSendEmailVerification: (
     email: string,
     password: string,
-    name: string,
-    birthdate: string,
-    whatsappNumber: string,
+  ) => Promise<string | null>
+
+  saveNewUserTempUnconfirmedData: (
+    data: IUnconfirmedUserData,
+    newUnconfirmedUserId: string,
+  ) => Promise<void>
+
+  loadNewUserTempUnconfirmedData: (
+    newUnconfirmedUserId: string,
+  ) => Promise<IUnconfirmedUserData | null>
+
+  firebaseSignIn: (
+    email: string,
+    password: string,
     selectedLanguage: 'pt-br' | 'us',
   ) => Promise<void>
-  firebaseSignIn: (email: string, password: string) => Promise<void>
+
   firebaseSignOut: () => Promise<void>
+
   firebaseForgotPassword: (email: string) => Promise<void>
 
   loadLoginInitialCachedWorkoutsData: (userId: string) => Promise<void>

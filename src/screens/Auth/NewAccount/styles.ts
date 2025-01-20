@@ -43,7 +43,17 @@ export const FooterText = styled.Text`
   color: ${({ theme }) => theme.COLORS.TEXT_LIGHT};
   font-size: ${RFValue(16)}px;
 `
+export const AuxText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 
+  font-size: ${RFValue(14)}px;
+`
+export const AuxTextWrapper = styled.View`
+  padding-top: 8px;
+  padding-bottom: 4px;
+  padding-left: 12px;
+`
 export const IconContainer = styled.View`
   padding-bottom: 2px;
 `
@@ -58,7 +68,10 @@ export const SpaceBetweenFormAndButton = styled.View`
 
 export const LinearGradientContainer = styled(LinearGradient).attrs(
   ({ theme }) => ({
-    colors: theme.COLORS.GRADIENT_SPLASH_BG,
+    colors: [
+      theme.COLORS.GRADIENT_SPLASH_BG[0],
+      theme.COLORS.GRADIENT_SPLASH_BG[1],
+    ],
     start: { x: 0.5, y: 0.4 },
     end: { x: 0.5, y: 1 },
   }),

@@ -33,6 +33,7 @@ import {
   BodyImageBackgroundContainerSpaceBetween,
   FavoriteIconContainer,
   LinearGradientButton,
+  NoWorkoutFoundWrapper,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
@@ -231,22 +232,24 @@ export function UserHome() {
               style={{
                 flex: 1,
                 alignItems: 'center',
-                justifyContent: 'flex-start',
-                padding: 64,
+                justifyContent: 'center',
+                top: -20,
               }}
             >
               <SmileySad width={180} height={180} fill={svgColor} />
 
-              <Warning>
-                {user?.selectedLanguage === 'pt-br'
-                  ? 'Nenhum treino encontrado'
-                  : 'No workout found'}
-              </Warning>
-              <WarningGreetings>
-                {user?.selectedLanguage === 'pt-br'
-                  ? 'Escolha um treino para começar!'
-                  : 'Choose a workout to start!'}
-              </WarningGreetings>
+              <NoWorkoutFoundWrapper>
+                <Warning>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? 'Ops! Nenhum treino encontrado.'
+                    : 'Oops! No workout found.'}
+                </Warning>
+                <WarningGreetings>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? 'Que tal escolher um treino?'
+                    : 'How about choosing a workout?'}
+                </WarningGreetings>
+              </NoWorkoutFoundWrapper>
             </View>
           )}
           {/*         {console.log(`JSON.stringify(myWorkoutDataArray)`)}

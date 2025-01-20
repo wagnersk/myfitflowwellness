@@ -31,11 +31,14 @@ export const SelectLanguageWrapper = styled.View`
   justify-content: space-evenly;
   flex-direction: row;
 `
-export const ToggleButton = styled.TouchableOpacity`
+export const ToggleButton = styled.TouchableOpacity<{ selected: boolean }>`
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
   border-radius: 20px;
+  border-width: ${({ selected }) => (selected ? '1px' : '0px')};
+
+  border-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 `
 
 export const Tittle = styled.Text`

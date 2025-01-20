@@ -9,7 +9,7 @@ interface Props extends TextStyle {
 
   type: 'transparent' | 'blue'
   borderDesign?: 'up' | 'down' | 'up-down'
-  order?: 'top' | 'middle' | 'bottom'
+  order?: 'top' | 'middle' | 'bottom' | 'alone'
   topPosition?: number
   editable?: boolean
 }
@@ -41,8 +41,13 @@ export const Container = styled.View<Props>`
 
   ${({ borderDesign, order }) =>
     borderDesign === 'up-down' &&
-    order === 'middle' &&
+    order === 'alone' &&
     css`
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+
       border-left-width: 2px;
       border-right-width: 2px;
       border-top-width: 2px;
