@@ -288,8 +288,10 @@ export declare global {
 
       camera: undefined
 
-      userSelectEditHomeProfile: undefined
+      userPrefferences: undefined
       userFormEditProfile: undefined
+      userSupport: undefined
+      userPlan: undefined
       userSelectList: IUserSelectListNavigation
       userSelectFreeEquipamentList: IUserSelectFreeEquipamentListNavigation
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation

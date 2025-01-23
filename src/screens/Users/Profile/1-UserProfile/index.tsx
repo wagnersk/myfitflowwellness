@@ -1,5 +1,11 @@
 import React, { useCallback, useState } from 'react'
-import { Alert, ImageBackground, TouchableOpacity, View } from 'react-native'
+import {
+  Alert,
+  Button,
+  ImageBackground,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
@@ -14,7 +20,6 @@ import {
   Container,
   BodyImageWrapper,
   ImageBackgroundContainer,
-  Body,
   SettingsWrapper,
   ProfileWrapper,
   UserNameWrapper,
@@ -28,6 +33,14 @@ import {
   Label,
   ToggleButton,
   ToggleButtonText,
+  BodyText,
+  BodyWrapper,
+  Body,
+  ToggleButtonWrapper,
+  UserEmail,
+  UserNameAndEmailWrapper,
+  EditProfileButton,
+  EditProfileNameText,
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
 import {
@@ -36,6 +49,7 @@ import {
   SignInProps,
 } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
+import { WhiteButton } from '@components/Buttons/WhiteButton'
 
 export interface IptBrUs {
   'pt-br': string
@@ -48,24 +62,44 @@ export function UserProfile() {
     updateUserSelectedLanguage,
     updateLocalCacheAnonymousUserSelectedLanguage,
     isWaitingApiResponse,
+    firebaseSignOut,
   } = useAuth()
   const navigation = useNavigation()
+  async function handleDeleteAccountTimer() {
+    console.log(`mudar para deletar conta em 7 dias e abrir contagem`)
+    if (!user) return
+    Alert.alert(
+      user.selectedLanguage === 'pt-br' ? 'Tem certeza?' : 'Are you sure?',
+      user.selectedLanguage === 'pt-br'
+        ? 'Se você sair, irá precisar de internet para conectar-se novamente.'
+        : 'If you leave, you will need internet to connect again.',
+      [
+        {
+          text: user.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+          onPress: () => {},
+        },
+        {
+          text: user.selectedLanguage === 'pt-br' ? 'Sair' : 'Sign Out',
+          onPress: () => firebaseSignOut(),
+        },
+      ],
+    )
+  }
 
   const [selectedLanguage, setSelectedLanguage] = useState(
     user?.selectedLanguage || 'us',
   )
 
-  function handleNextStep() {
-    /*    Alert.alert(
-      selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
-      selectedLanguage === 'pt-br'
-        ? 'Funcionalidade desabilitada temporariamente'
-        : 'Functionality temporarily disabled',
-    )
-    return */
-    navigation.navigate('userSelectEditHomeProfile')
+  function handleEditProfileNextStep() {
+    navigation.navigate('userFormEditProfile')
+  }
+  function handleMyPlanNextStep() {
+    navigation.navigate('userPlan')
   }
 
+  function handleSuporteNextStep() {
+    navigation.navigate('userSupport')
+  }
   const userAge = diffInAge(user?.birthdate)
   const experienceTime = diffInAge(user?.whenStartedAtGym)
 
@@ -167,7 +201,38 @@ export function UserProfile() {
     user.timeBySession.timeBySessionSelectedData[selectedLanguage]
       ? user.timeBySession.timeBySessionSelectedData[selectedLanguage]
       : ''
+  /* 
+meu plano
+meus treinos
+preferencia de treino
+suporte
 
+push notification
+face id
+logout (opcao deletar conta)
+
+
+
+. Seção: Minha Conta
+	•	Meu Plano (detalhes do plano ativo, histórico de assinaturas ou gerenciamento de plano).
+	•	Meus Treinos (treinos personalizados ou salvos).
+	•	Preferência de Treino (ajustes para metas: emagrecimento, hipertrofia, etc.).
+	// JA TEM	Editar Perfil (dados como nome, idade, altura, peso, e-mail).
+
+2. Seção: Configurações do App
+	•	Push Notification (ativar/desativar notificações de treinos, metas, lembretes).
+	•	Face ID / Biométrico (habilitar para login rápido e seguro).
+	•	Idioma e Moeda (se o app atender diferentes regiões).
+
+3. Seção: Suporte e Informações
+	•	Suporte (FAQ e canal de contato, como chat, e-mail ou WhatsApp).
+	•	Política de Privacidade e Termos de Uso.
+
+4. Seção: Sair e Excluir Conta
+	•	Logout (opção clara para sair da conta atual).
+	•	Deletar Conta (com um fluxo separado e explicativo para excluir a conta).
+
+*/
   return (
     <Container>
       <StatusBar
@@ -186,7 +251,19 @@ export function UserProfile() {
           <ImageBackgroundContainer>
             <SettingsWrapper>
               {!user?.anonymousUser && (
-                <SettingsButton onPress={handleNextStep} />
+                <ToggleButtonWrapper>
+                  <ToggleButton
+                    onPress={() =>
+                      handleLanguageChange(
+                        selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
+                      )
+                    }
+                  >
+                    <ToggleButtonText>
+                      {selectedLanguage === 'pt-br' ? '🇧🇷' : '🇺🇸'}
+                    </ToggleButtonText>
+                  </ToggleButton>
+                </ToggleButtonWrapper>
               )}
             </SettingsWrapper>
 
@@ -206,30 +283,69 @@ export function UserProfile() {
                     {selectedLanguage === 'pt-br' ? `Convidado` : `Guest`}
                   </UserName>
                 ) : (
-                  <UserName>
-                    {user?.name}, {userAge}
-                  </UserName>
+                  <UserNameAndEmailWrapper>
+                    <UserName>
+                      {user?.name}, {userAge}
+                    </UserName>
+                    <UserEmail>{user?.email}</UserEmail>
+                    <EditProfileButton onPress={handleEditProfileNextStep}>
+                      <EditProfileNameText>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Editar Perfil'
+                          : 'Edit Profile'}
+                      </EditProfileNameText>
+                    </EditProfileButton>
+                  </UserNameAndEmailWrapper>
                 )}
               </UserNameWrapper>
             </ProfileWrapper>
-            <View>
-              <ToggleButton
-                onPress={() =>
-                  handleLanguageChange(
-                    selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
-                  )
-                }
-              >
-                <ToggleButtonText selected={selectedLanguage === 'pt-br'}>
-                  🇧🇷 Português
-                </ToggleButtonText>
-                <ToggleButtonText selected={selectedLanguage === 'us'}>
-                  🇺🇸 English
-                </ToggleButtonText>
-              </ToggleButton>
-            </View>
-            <Body>
-              {!user?.anonymousUser && (
+
+            <BodyWrapper>
+              <Body>
+                <BodyText>
+                  {selectedLanguage === 'pt-br'
+                    ? 'Seja bem-vindo ao seu perfil'
+                    : 'Welcome to your profile'}
+                </BodyText>
+
+                <WhiteButton
+                  tittle={
+                    user?.selectedLanguage === 'pt-br' ? 'Meu Plano' : 'My Plan'
+                  }
+                  onPress={handleMyPlanNextStep}
+                  bordertype="up"
+                />
+
+                <WhiteButton
+                  tittle={
+                    user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
+                  }
+                  onPress={handleSuporteNextStep}
+                  bordertype="down"
+                />
+              </Body>
+
+              <Body>
+                <BodyText>
+                  {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}
+                </BodyText>
+
+                {/* so por botao logout facil */}
+
+                <WhiteButton
+                  tittle={
+                    user?.selectedLanguage === 'pt-br'
+                      ? 'Deletar conta'
+                      : 'Delete Account'
+                  }
+                  onPress={handleDeleteAccountTimer}
+                  bordertype="up-down"
+                  iconStyle="trash"
+                />
+              </Body>
+
+              {/* nao mostar pois vou transfromar em botoes */}
+              {user?.anonymousUser && (
                 <ProfileInfoWrapper>
                   <Title>
                     {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
@@ -352,7 +468,7 @@ export function UserProfile() {
                   )}
                 </ProfileInfoWrapper>
               )}
-            </Body>
+            </BodyWrapper>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

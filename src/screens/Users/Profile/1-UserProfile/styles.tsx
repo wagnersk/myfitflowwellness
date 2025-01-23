@@ -1,5 +1,6 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
+import { TouchableOpacity } from 'react-native'
 
 export const Container = styled.View`
   flex: 1;
@@ -19,7 +20,7 @@ export const ImageBackgroundContainer = styled.View`
   flex: 1;
 `
 
-export const Body = styled.View`
+export const BodyWrapper = styled.View`
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -27,10 +28,41 @@ export const Body = styled.View`
   flex: 1;
 `
 
+export const Body = styled.View`
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 8px;
+  width: 100%;
+  flex-direction: column;
+`
+
+export const BodyText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  opacity: 0.5;
+  margin-top: 4px;
+
+  margin-bottom: 8px;
+`
+export const Button = styled(TouchableOpacity)`
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  border: solid 2px ${({ theme }) => theme.COLORS.BLUE_STROKE};
+`
+export const EditProfileButton = styled(TouchableOpacity)`
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  border: solid 2px ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding: 4px;
+  margin-top: 16px;
+`
+
 export const SettingsWrapper = styled.View`
   align-items: flex-end;
   width: 100%;
-  height: 48px;
 `
 
 export const ProfileWrapper = styled.View`
@@ -44,11 +76,29 @@ export const UserNameWrapper = styled.View`
   flex-direction: row;
   padding-top: 16px;
 `
+export const UserNameAndEmailWrapper = styled.View`
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+`
 
 export const UserName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(22)}px;
+`
+export const EditProfileNameText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+`
+
+export const UserEmail = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(12)}px;
+  opacity: 0.5;
 `
 
 export const ProfileInfoWrapper = styled.ScrollView`
@@ -110,12 +160,14 @@ export const ToggleButton = styled.TouchableOpacity`
   margin-top: 10px;
   border: 1px solid #ccc;
 `
-
-export const ToggleButtonText = styled.Text<{ selected: boolean }>`
-  color: ${({ selected, theme }) =>
-    selected ? theme.COLORS.BLUE_STROKE : '#888'};
+export const ToggleButtonWrapper = styled.View`
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+`
+export const ToggleButtonText = styled.Text`
+  color: ${({ theme }) => theme.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
+  font-size: ${RFValue(22)}px;
   margin: 0 10px;
-  opacity: ${({ selected }) => (selected ? 1 : 0.6)};
 `

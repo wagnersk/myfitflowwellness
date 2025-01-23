@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
-  BackHandler,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -194,28 +193,18 @@ export function Login() {
   }
 
   async function handleForgotPassword() {
-    console.log(`asdsad`)
-    if (!user) return
     if (!userForm.email.value) {
       return Alert.alert(
-        user.selectedLanguage === 'pt-br'
+        selectedLanguage === 'pt-br'
           ? 'E-mail não informado'
           : 'Email not provided',
-        user.selectedLanguage === 'pt-br'
+        selectedLanguage === 'pt-br'
           ? 'Preencha o campo E-mail'
           : 'Please fill in the Email field',
       )
     }
 
     await firebaseForgotPassword(userForm.email.value)
-    Alert.alert(
-      user.selectedLanguage === 'pt-br'
-        ? 'Verifique sua caixa de Email'
-        : 'Check your Email inbox',
-      user.selectedLanguage === 'pt-br'
-        ? `Foi enviado um link para o email \n ${userForm.email.value}`
-        : `A link has been sent to the email \n ${userForm.email.value}`,
-    )
   }
 
   async function handleLanguageChange(language: 'pt-br' | 'us') {

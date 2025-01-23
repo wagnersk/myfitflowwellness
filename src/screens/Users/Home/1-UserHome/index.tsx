@@ -205,7 +205,8 @@ export function UserHome() {
               </BioInfoName>
             )}
           </BioInfo>
-          <LogoutButton onPress={handleSignOut} />
+
+          <LogoutButton style={{ paddingTop: 32 }} onPress={handleSignOut} />
         </BioInfoWrapper>
       </HeaderImageBackground>
 

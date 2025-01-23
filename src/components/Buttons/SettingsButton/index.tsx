@@ -7,7 +7,7 @@ import { Container } from './styles'
 export function SettingsButton({ ...rest }: TouchableOpacityProps) {
   return (
     <Container {...rest}>
-      <Settings width={48} height={48} />
+      <Settings width={48} height={48} stroke={'white'} strokeWidth={1.2} />
     </Container>
   )
 }

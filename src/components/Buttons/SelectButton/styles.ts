@@ -32,6 +32,15 @@ export const Container = styled(TouchableOpacity)<Props>`
       border-top-right-radius: 12px;
       border-top-left-radius: 12px;
     `}
+  ${({ type }) =>
+    type === 'middle' &&
+    css`
+      border-top-right-radius: 12px;
+      border-top-left-radius: 12px;
+
+      border-bottom-right-radius: 12px;
+      border-bottom-left-radius: 12px;
+    `}
 
   ${({ type }) =>
     type === 'last' &&

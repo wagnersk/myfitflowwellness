@@ -17,7 +17,7 @@ interface Props {
   onPress?: () => void
   enabled?: boolean
   loading?: boolean
-  type: 'first' | 'last'
+  type: 'first' | 'last' | 'middle'
 }
 
 export function SelectButton({

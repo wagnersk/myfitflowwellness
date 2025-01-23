@@ -25,6 +25,12 @@ export const SelectWrapper = styled.View`
   width: 100%;
   justify-content: flex-start;
   flex-direction: column;
+  gap: 12px;
+`
+export const ButtonWrapper = styled.View`
+  width: 100%;
+  justify-content: center;
+  flex-direction: center;
 `
 
 export const BodyImageWrapper = styled.View`
@@ -37,16 +43,13 @@ export const BodyImageWrapper = styled.View`
 export const ImageBackgroundContainer = styled.View`
   align-items: center;
   padding: 32px;
+  gap: 32px;
   flex: 1;
 `
 
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
-`
-
-export const SpaceBetweenInput = styled.View`
-  height: 32px;
 `
 
 export const FooterWrapper = styled.View`
@@ -72,8 +75,13 @@ export const SelectFilterButtonWrapper = styled.View`
   border-radius: 12px;
   justify-content: center;
 `
+export const ButtonTitle = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
+  font-size: ${RFValue(16)}px;
+`
 export const EquipamentTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(18)}px;
+  font-size: ${RFValue(22)}px;
 `

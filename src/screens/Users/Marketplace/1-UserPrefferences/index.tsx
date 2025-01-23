@@ -5,6 +5,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   BackHandler,
+  SafeAreaView,
 } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -21,17 +22,16 @@ import {
   BodyImageWrapper,
   ImageBackgroundContainer,
   SettingsWrapper,
-  SpaceBetweenInput,
   FooterWrapper,
   SelectFilterButtonWrapper,
   SelectContentWrapper,
   SelectWrapper,
   EquipamentTitle,
   FooterContainer,
+  ButtonTitle,
+  ButtonWrapper,
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
-import { ViewWithLineAndIcon } from '@components/ViewWithLineAndIcon'
-import { UserProfileCard } from '@components/Cards/UserProfileCard'
 import { SelectButton } from '@components/Buttons/SelectButton'
 import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
 import {
@@ -48,8 +48,9 @@ import {
   IMuscleGroups,
 } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
-export function UserSelectEditHomeProfile() {
+export function UserPrefferences() {
   const {
     user,
     isWaitingApiResponse,
@@ -67,10 +68,6 @@ export function UserSelectEditHomeProfile() {
 
   function handleGoBack() {
     navigation.goBack()
-  }
-
-  function handleNextStep() {
-    navigation.navigate('userFormEditProfile')
   }
 
   function handleOpenList({ dataType }: IUserSelectListNavigation) {
@@ -233,129 +230,134 @@ export function UserSelectEditHomeProfile() {
       : 'Selecione o foco muscular'
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <Container>
-        <BodyImageWrapper>
-          <ImageBackground
-            source={backgroundImg}
-            style={{ flex: 1 }}
-            resizeMode="cover"
-          >
-            <ImageBackgroundContainer>
-              <SettingsWrapper>
-                <BackButton
-                  onPress={handleGoBack}
-                  changeColor
-                  disabled={isWaitingApiResponse}
-                />
-              </SettingsWrapper>
+    <Container>
+      <BodyImageWrapper>
+        <ImageBackground
+          source={backgroundImg}
+          style={{ flex: 1 }}
+          resizeMode="cover"
+        >
+          <ImageBackgroundContainer>
+            <SafeAreaProvider style={{ width: `100%` }}>
+              <SafeAreaView style={{ flex: 1 }}>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <EquipamentTitle>Preferencias: </EquipamentTitle>
+                <Body>
+                  <SelectContentWrapper>
+                    <SelectWrapper>
+                      <ButtonWrapper>
+                        <ButtonTitle>Objetivo: </ButtonTitle>
 
-              <SpaceBetweenInput />
-
-              {user && (
-                <UserProfileCard
-                  age={userAge}
-                  email={user.email}
-                  name={user.name}
-                  photoBase64={user.photoBase64}
-                  restrictions={user.restrictions}
-                  whatsapp={user.whatsappNumber}
-                  experienceTime={experienceTime}
-                  handleNextStep={handleNextStep}
-                />
-              )}
-              <SpaceBetweenInput />
-              <ViewWithLineAndIcon changeColor={true} />
-
-              <Body>
-                <SelectContentWrapper>
-                  <SelectWrapper>
-                    <SelectButton
-                      type={`first`}
-                      title={formattedGoal}
-                      onPress={() => handleOpenList({ dataType: 'Objetivo' })}
-                      enabled={true}
-                      loading={false}
-                    />
-                    <SelectButton
-                      type={`last`}
-                      title={formattedMuscleFocus}
-                      onPress={() => handleOpenList({ dataType: 'Foco em' })}
-                      enabled={true}
-                      loading={false}
-                    />
-                  </SelectWrapper>
-
-                  <SelectWrapper>
-                    <SelectButton
-                      type={`first`}
-                      title={formattedFrequencyByWeek}
-                      onPress={() =>
-                        handleOpenList({ dataType: 'Treinos por semana' })
-                      }
-                      enabled={true}
-                      loading={false}
-                    />
-
-                    <SelectButton
-                      type={`last`}
-                      title={formattedTimeBySession}
-                      onPress={() =>
-                        handleOpenList({ dataType: 'Tempo de cada treino' })
-                      }
-                      enabled={true}
-                      loading={false}
-                    />
-                  </SelectWrapper>
-                </SelectContentWrapper>
-                {user && user.personalTrainerContractId && (
-                  <FooterWrapper>
-                    <EquipamentTitle>Equipamentos disponíveis</EquipamentTitle>
-                    <FooterContainer>
-                      <SelectFilterButtonWrapper>
-                        <SelectFilterButton
-                          title={`Livre`}
-                          onPress={() => {
-                            handleOpenFilterFreeEquipamentList({
-                              dataType: 'Livre',
-                            })
-                          }}
+                        <SelectButton
+                          type={`middle`}
+                          title={formattedGoal}
+                          onPress={() =>
+                            handleOpenList({ dataType: 'Objetivo' })
+                          }
                           enabled={true}
                           loading={false}
                         />
-                      </SelectFilterButtonWrapper>
-                      <SelectFilterButtonWrapper>
-                        <SelectFilterButton
-                          title={`Polia`}
-                          onPress={() => {
-                            handleOpenFilterPulleyEquipamentList({
-                              dataType: 'Polia',
-                            })
-                          }}
+                      </ButtonWrapper>
+                      <ButtonWrapper>
+                        <ButtonTitle>Foco em: </ButtonTitle>
+                        <SelectButton
+                          type={`middle`}
+                          title={formattedMuscleFocus}
+                          onPress={() =>
+                            handleOpenList({ dataType: 'Foco em' })
+                          }
                           enabled={true}
                           loading={false}
                         />
-                      </SelectFilterButtonWrapper>
-                      <SelectFilterButtonWrapper>
-                        <SelectFilterButton
-                          title={`Máquina`}
-                          onPress={() => {
-                            handleOpenFilterMachineEquipamentList({
-                              dataType: 'Máquina',
-                            })
-                          }}
+                      </ButtonWrapper>
+                    </SelectWrapper>
+
+                    <SelectWrapper>
+                      <ButtonWrapper>
+                        <ButtonTitle>Treinos por semana: </ButtonTitle>
+
+                        <SelectButton
+                          type={`middle`}
+                          title={formattedFrequencyByWeek}
+                          onPress={() =>
+                            handleOpenList({ dataType: 'Treinos por semana' })
+                          }
                           enabled={true}
                           loading={false}
                         />
-                      </SelectFilterButtonWrapper>
-                    </FooterContainer>
-                  </FooterWrapper>
-                )}
-              </Body>
-            </ImageBackgroundContainer>
-          </ImageBackground>
-        </BodyImageWrapper>
-      </Container>
-    </TouchableWithoutFeedback>
+                      </ButtonWrapper>
+                      <ButtonWrapper>
+                        <ButtonTitle>Tempo de cada treino: </ButtonTitle>
+
+                        <SelectButton
+                          type={`middle`}
+                          title={formattedTimeBySession}
+                          onPress={() =>
+                            handleOpenList({ dataType: 'Tempo de cada treino' })
+                          }
+                          enabled={true}
+                          loading={false}
+                        />
+                      </ButtonWrapper>
+                    </SelectWrapper>
+                  </SelectContentWrapper>
+                  {user && user.personalTrainerContractId && (
+                    <FooterWrapper>
+                      <EquipamentTitle>
+                        Equipamentos disponíveis
+                      </EquipamentTitle>
+                      <FooterContainer>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Livre`}
+                            onPress={() => {
+                              handleOpenFilterFreeEquipamentList({
+                                dataType: 'Livre',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Polia`}
+                            onPress={() => {
+                              handleOpenFilterPulleyEquipamentList({
+                                dataType: 'Polia',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Máquina`}
+                            onPress={() => {
+                              handleOpenFilterMachineEquipamentList({
+                                dataType: 'Máquina',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                      </FooterContainer>
+                    </FooterWrapper>
+                  )}
+                </Body>
+              </SafeAreaView>
+            </SafeAreaProvider>
+          </ImageBackgroundContainer>
+        </ImageBackground>
+      </BodyImageWrapper>
+    </Container>
   )
 }

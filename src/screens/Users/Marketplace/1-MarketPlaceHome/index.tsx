@@ -27,6 +27,7 @@ import {
   CallTeacherTitleWrapper,
   CallTeacherTitle,
   CallButtonWrapper,
+  MyWorkoutTittleWrapper,
 } from './styles'
 import { FlatList } from 'react-native-gesture-handler'
 import { ICachedWorkoutsWithLastUpdatedTimestamp } from '@hooks/authTypes'
@@ -34,6 +35,8 @@ import { CTAButton } from '@components/Buttons/CTAButton'
 import { Photo } from '@components/Photo'
 import { WhatsappButton } from '@components/Buttons/WhatsappButton'
 import { IWorkoutCategory } from '@src/@types/navigation'
+import { SettingsButton } from '@components/Buttons/SettingsButton'
+import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
 
 export function MarketPlaceHome() {
   const navigation = useNavigation()
@@ -132,7 +135,10 @@ export function MarketPlaceHome() {
     }
  */
   }
-
+  function handlePreferencesStep() {
+    // jogar pra dentro do meu treino
+    navigation.navigate('userPrefferences')
+  }
   function handleCallTeacherWhatsapp() {
     if (!user) return
     Alert.alert(
@@ -199,23 +205,30 @@ export function MarketPlaceHome() {
                 : `Workouts`}
             </BioInfoLetter>
           </BioInfo>
+
+          <SettingsButton
+            style={{ paddingTop: 32 }}
+            onPress={handlePreferencesStep}
+          />
         </BioInfoWrapper>
       </HeaderImageBackground>
+
       <BodyImageContainer>
         <BodyImageBackground />
-        {/*       <MyWorkoutWrapper>
-          <Tittle>Meu treino</Tittle>
-        </MyWorkoutWrapper>
+        <MyWorkoutWrapper>
+          <MyWorkoutTittleWrapper>
+            <Tittle>Meu treino</Tittle>
+          </MyWorkoutTittleWrapper>
 
-        {myWorkout && (
-          <WorkoutInfoHomeCardWrapper>
-            <WorkoutsCardItem
-              handleNextStep={() => handleWorkouts}
-              data={myWorkout}
-            />
-          </WorkoutInfoHomeCardWrapper>
-        )}
- */}
+          {myWorkout && (
+            <WorkoutInfoHomeCardWrapper>
+              <WorkoutsCardItem
+                handleNextStep={() => handleWorkouts}
+                data={myWorkout}
+              />
+            </WorkoutInfoHomeCardWrapper>
+          )}
+        </MyWorkoutWrapper>
         {!contract?.submissionApproved && (
           <View style={{ height: '100%' }}>
             <CategoriesWrapper>
