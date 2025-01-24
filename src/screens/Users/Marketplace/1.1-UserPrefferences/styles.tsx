@@ -4,6 +4,11 @@ import { RFValue } from '@utils/RFValue'
 export const Container = styled.View`
   flex: 1;
 `
+export const BodyWrapper = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`
 
 export const Body = styled.View`
   width: 100%;
@@ -75,13 +80,19 @@ export const SelectFilterButtonWrapper = styled.View`
   border-radius: 12px;
   justify-content: center;
 `
+
 export const ButtonTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(16)}px;
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  opacity: 0.5;
+  margin-top: 4px;
+
+  margin-bottom: 8px;
 `
-export const EquipamentTitle = styled.Text`
+export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(22)}px;
+  font-size: ${RFValue(24)}px;
+  margin-bottom: 48px;
 `

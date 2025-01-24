@@ -7,7 +7,21 @@ interface Props {
   children: ReactNode
   loading?: boolean
   bordertype?: 'up' | 'down' | 'up-down'
-  iconStyle?: 'email' | 'question' | 'trash' | 'none'
+  iconStyle?:
+    | 'email'
+    | 'question'
+    | 'trash'
+    | 'support'
+    | 'plan'
+    | 'terms'
+    | 'privacy'
+    | 'anamnese'
+    | 'crosshair'
+    | 'checkcicle'
+    | 'calendar'
+    | 'clock'
+    | 'person-simple'
+    | 'none'
 }
 
 export const ContentWrapper = styled.View`

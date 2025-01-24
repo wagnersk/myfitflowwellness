@@ -8,7 +8,6 @@ import {
   InfoAndButtonWrapper,
   InfoWrapper,
   WorkoutCategoryName,
-  WorkoutCategoryTotalWorkouts,
   ContainerGradient,
   PhotoImageWrapper,
   PhotoPreLoadingImageBackground,
@@ -61,8 +60,8 @@ export function WorkoutsCategoriesCardItem({
                 alt=""
                 contentFit="cover"
                 style={{
-                  width: 110,
-                  height: 104,
+                  width: 100,
+                  height: 80,
                   borderTopRightRadius: 8,
                   borderTopLeftRadius: 8,
                   backgroundColor: `gray`,

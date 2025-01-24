@@ -16,6 +16,7 @@ interface Props extends TouchableHighlightProps {
   onPress?: () => void
   enabled?: boolean
   loading?: boolean
+  workoutAlreadySelected?: boolean
 }
 
 export function CTAButton({
@@ -23,6 +24,7 @@ export function CTAButton({
   title,
   enabled = true,
   loading,
+  workoutAlreadySelected,
   ...rest
 }: Props) {
   const theme = useTheme()
@@ -32,7 +34,12 @@ export function CTAButton({
 
   return (
     <Container>
-      <CTAButtonPressable disabled={!enabled} loading={loading} {...rest}>
+      <CTAButtonPressable
+        disabled={!enabled}
+        loading={loading}
+        workoutAlreadySelected={workoutAlreadySelected}
+        {...rest}
+      >
         <LinearGradientButton
           colors={colors}
           start={{ x: 0, y: 0 }}

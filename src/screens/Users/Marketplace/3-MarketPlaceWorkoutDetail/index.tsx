@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect } from 'react'
 import { BackHandler, SafeAreaView } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
+
 import { useRoute, useFocusEffect } from '@react-navigation/native'
 
 import { useNavigation } from '@react-navigation/core'
@@ -33,52 +35,35 @@ import {
   TitleWorkout,
 } from './styles'
 import { useAuth } from '@hooks/auth'
-import { EquipamentsInfo } from '@components/EquipamentsInfo'
+import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
+
 import { Plan } from '@components/Plan'
+import { EquipamentsInfo } from '@components/EquipamentsInfo'
 import { WorkoutBoxInfo } from '@components/WorkoutBoxInfo'
-import { getIcon } from '@utils/getIcon'
 import { WorkoutMuscleComponent } from '@components/WorkoutMuscleComponent'
+
+import { getIcon } from '@utils/getIcon'
+
 import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
-import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export function MarketPlaceWorkoutDetail() {
-  const { user, isWaitingApiResponse } = useAuth()
+  const { user, isWaitingApiResponse, myWorkout } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
   const route = useRoute()
-
   const dataParam = route.params as IMarketPlaceWorkoutDetailNavigation
 
-  const { loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises } = useAuth()
+  const {
+    loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
+    deleteMyWorkoutAndmyWorkoutDataArray,
+  } = useAuth()
 
-  function handleGoBack() {
-    navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
-    navigation.goBack()
-  }
-  async function handleChoose() {
-    const response = await loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises(
-      dataParam.data,
-    )
+  const cachedWorkoutId = myWorkout?.workoutId
+  const selectedWorkoutId = dataParam.data.workoutId
 
-    if (!response) return
-    navigation.navigate('marketPlaceHome')
-  }
-
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      return true
-    })
-  }, [])
-
-  useFocusEffect(
-    useCallback(() => {
-      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
-      setStatusBarStyle('dark')
-    }, []),
-  )
+  const workoutAlreadySelected = cachedWorkoutId === selectedWorkoutId
 
   let barLabel = ''
   let benchLabel = ''
@@ -91,10 +76,7 @@ export function MarketPlaceWorkoutDetail() {
 
   loadEquipamentInfoValues()
   loadMuscleGroupInfoValues()
-  console.log(
-    `dataParam.data.workoutsUniquesMuscles`,
-    dataParam.data.workoutsUniquesMuscles,
-  )
+
   function loadEquipamentInfoValues() {
     const data = dataParam.data
     if (!user) return
@@ -143,6 +125,7 @@ export function MarketPlaceWorkoutDetail() {
       )
     }
   }
+
   function loadMuscleGroupInfoValues() {
     if (dataParam.data) {
       if (!translateMuscleGroupInfo) return
@@ -171,6 +154,37 @@ export function MarketPlaceWorkoutDetail() {
     }
   }
 
+  function handleGoBack() {
+    navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
+    navigation.goBack()
+  }
+
+  async function handleChoose() {
+    const response = await loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises(
+      dataParam.data,
+    )
+
+    if (!response) return
+    navigation.navigate('marketPlaceHome')
+  }
+  async function handleDeleteWorkout() {
+    await deleteMyWorkoutAndmyWorkoutDataArray()
+
+    navigation.navigate('marketPlaceHome')
+  }
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      return true
+    })
+  }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
+      setStatusBarStyle('dark')
+    }, []),
+  )
   return (
     <Container>
       <SafeAreaProvider style={{ width: `100%` }}>
@@ -300,19 +314,26 @@ export function MarketPlaceWorkoutDetail() {
               <CTAButton
                 enabled={!isWaitingApiResponse}
                 loading={isWaitingApiResponse}
+                workoutAlreadySelected={workoutAlreadySelected}
                 style={{
                   marginBottom: 52,
                   width: '100%',
                 }}
                 onPress={() => {
-                  handleChoose()
+                  workoutAlreadySelected
+                    ? handleDeleteWorkout()
+                    : handleChoose()
                 }}
                 /* bigSize={true} */
                 changeColor
                 title={
-                  selectedLanguage === 'pt-br'
-                    ? 'Selecionar este treino'
-                    : 'Select this workout'
+                  workoutAlreadySelected && selectedLanguage === 'pt-br'
+                    ? 'Cancelar este treino'
+                    : workoutAlreadySelected && selectedLanguage === 'us'
+                      ? 'Cancel this workout'
+                      : selectedLanguage === 'pt-br'
+                        ? 'Escolher este treino'
+                        : 'Choose this workout'
                 }
               />
             </BlurViewWrapper>

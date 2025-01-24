@@ -6,8 +6,10 @@ import { MarketPlaceWorkoutList } from '@screens/Users/Marketplace/2-MarketPlace
 import { MarketPlaceWorkoutDetail } from '@screens/Users/Marketplace/3-MarketPlaceWorkoutDetail'
 import { MarketPlacePersonalsList } from '@screens/Users/Marketplace/4-MarketPlacePersonalsList'
 import { MarketPlacePersonalsDetail } from '@screens/Users/Marketplace/5-MarketPlacePersonalsDetail'
-import { UserPrefferences } from '@screens/Users/Marketplace/1-UserPrefferences'
+import { UserPrefferences } from '@screens/Users/Marketplace/1.1-UserPrefferences'
+import { UserAllCategories } from '@screens/Users/Marketplace/1-UserAllCategories'
 
+import { UserSelectList } from '@screens/Users/Marketplace/1.2-UserSelectList'
 const { Navigator, Screen } = createStackNavigator()
 
 export function AppStackMarketPlaceHomeRoutes() {
@@ -41,6 +43,9 @@ export function AppStackMarketPlaceHomeRoutes() {
       />
 
       <Screen name="userPrefferences" component={UserPrefferences} />
+      <Screen name="userSelectList" component={UserSelectList} />
+      <Screen name="userAllCategories" component={UserAllCategories} />
+
       {/* 
       <Screen name="userWorkoutInfoList" component={UserWorkoutInfoList} /> */}
     </Navigator>

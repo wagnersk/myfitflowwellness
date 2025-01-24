@@ -26,10 +26,11 @@ import {
   SelectFilterButtonWrapper,
   SelectContentWrapper,
   SelectWrapper,
-  EquipamentTitle,
+  Title,
   FooterContainer,
   ButtonTitle,
   ButtonWrapper,
+  BodyWrapper,
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { SelectButton } from '@components/Buttons/SelectButton'
@@ -49,6 +50,8 @@ import {
 } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { WhiteButton } from '@components/Buttons/WhiteButton'
+import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 
 export function UserPrefferences() {
   const {
@@ -177,9 +180,6 @@ export function UserPrefferences() {
     })
   }, [])
 
-  const userAge = diffInAge(user?.birthdate)
-  const experienceTime = diffInAge(user?.whenStartedAtGym)
-
   const formattedGoal =
     user &&
     selectedLanguage &&
@@ -232,14 +232,12 @@ export function UserPrefferences() {
   return (
     <Container>
       <BodyImageWrapper>
-        <ImageBackground
-          source={backgroundImg}
-          style={{ flex: 1 }}
-          resizeMode="cover"
-        >
-          <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
+        <BodyImageBackground />
+
+        <ImageBackgroundContainer>
+          <SafeAreaProvider style={{ width: `100%` }}>
+            <SafeAreaView style={{ flex: 1 }}>
+              <BodyWrapper>
                 <SettingsWrapper>
                   <BackButton
                     onPress={handleGoBack}
@@ -247,71 +245,60 @@ export function UserPrefferences() {
                     disabled={isWaitingApiResponse}
                   />
                 </SettingsWrapper>
-                <EquipamentTitle>Preferencias: </EquipamentTitle>
+                <Title>Preferencias: </Title>
                 <Body>
                   <SelectContentWrapper>
                     <SelectWrapper>
                       <ButtonWrapper>
                         <ButtonTitle>Objetivo: </ButtonTitle>
-
-                        <SelectButton
-                          type={`middle`}
-                          title={formattedGoal}
+                        <WhiteButton
+                          tittle={formattedGoal}
                           onPress={() =>
                             handleOpenList({ dataType: 'Objetivo' })
                           }
-                          enabled={true}
-                          loading={false}
+                          bordertype="up"
+                          iconStyle="crosshair"
                         />
-                      </ButtonWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>Foco em: </ButtonTitle>
-                        <SelectButton
-                          type={`middle`}
-                          title={formattedMuscleFocus}
+                        <WhiteButton
+                          tittle={formattedMuscleFocus}
                           onPress={() =>
                             handleOpenList({ dataType: 'Foco em' })
                           }
-                          enabled={true}
-                          loading={false}
+                          bordertype="down"
+                          iconStyle="person-simple"
                         />
+                        <ButtonTitle>Foco em: </ButtonTitle>
                       </ButtonWrapper>
                     </SelectWrapper>
 
                     <SelectWrapper>
                       <ButtonWrapper>
                         <ButtonTitle>Treinos por semana: </ButtonTitle>
-
-                        <SelectButton
-                          type={`middle`}
-                          title={formattedFrequencyByWeek}
+                        <WhiteButton
+                          tittle={formattedFrequencyByWeek}
                           onPress={() =>
                             handleOpenList({ dataType: 'Treinos por semana' })
                           }
-                          enabled={true}
-                          loading={false}
+                          bordertype="up"
+                          iconStyle="checkcicle"
                         />
-                      </ButtonWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>Tempo de cada treino: </ButtonTitle>
-
-                        <SelectButton
-                          type={`middle`}
-                          title={formattedTimeBySession}
+                        <WhiteButton
+                          tittle={formattedTimeBySession}
                           onPress={() =>
-                            handleOpenList({ dataType: 'Tempo de cada treino' })
+                            handleOpenList({
+                              dataType: 'Tempo de cada treino',
+                            })
                           }
-                          enabled={true}
-                          loading={false}
+                          bordertype="down"
+                          iconStyle="clock"
                         />
+                        <ButtonTitle>Tempo de cada treino: </ButtonTitle>
                       </ButtonWrapper>
                     </SelectWrapper>
                   </SelectContentWrapper>
                   {user && user.personalTrainerContractId && (
                     <FooterWrapper>
-                      <EquipamentTitle>
-                        Equipamentos disponíveis
-                      </EquipamentTitle>
+                      <Title>Equipamentos disponíveis</Title>
                       <FooterContainer>
                         <SelectFilterButtonWrapper>
                           <SelectFilterButton
@@ -353,10 +340,10 @@ export function UserPrefferences() {
                     </FooterWrapper>
                   )}
                 </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </ImageBackgroundContainer>
-        </ImageBackground>
+              </BodyWrapper>
+            </SafeAreaView>
+          </SafeAreaProvider>
+        </ImageBackgroundContainer>
       </BodyImageWrapper>
     </Container>
   )

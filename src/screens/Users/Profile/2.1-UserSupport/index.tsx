@@ -120,7 +120,7 @@ export function UserSupport() {
                           }
                           onPress={() => {}}
                           bordertype="up"
-                          iconStyle="question"
+                          iconStyle="terms"
                         />
                         <WhiteButton
                           tittle={
@@ -129,7 +129,7 @@ export function UserSupport() {
                               : 'Privacy Policy'
                           }
                           onPress={() => {}}
-                          iconStyle="question"
+                          iconStyle="privacy"
                         />
                         <WhiteButton
                           tittle={
@@ -139,7 +139,7 @@ export function UserSupport() {
                           }
                           onPress={() => {}}
                           bordertype="down"
-                          iconStyle="question"
+                          iconStyle="anamnese"
                         />
                       </ContainerWrapper>
                     </ListWrapper>

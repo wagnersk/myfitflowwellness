@@ -7,10 +7,8 @@ export const Container = styled.View`
 `
 
 export const InfoAndButtonAndBottomLineWrapper = styled.View`
-  padding: 8px;
   justify-content: center;
   align-items: center;
-  width: 110px;
 `
 
 export const InfoAndButtonWrapper = styled.View`
@@ -29,31 +27,22 @@ export const WorkoutCategoryNameWrapper = styled.View`
 
 export const WorkoutCategoryName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-family: ${({ theme }) => theme.FONTS.H1};
   font-size: ${RFValue(12)}px;
   margin-bottom: 8px;
   justify-content: center;
   align-items: center;
 `
 
-export const WorkoutCategoryTotalWorkouts = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  opacity: 0.5;
-  margin-bottom: 4px;
-  font-size: 14px;
-`
-
 export const PhotoImageWrapper = styled.View`
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 104px;
+  height: 80px;
 `
 
 export const PhotoPreLoadingImageBackground = styled.View`
-  height: 104px;
+  height: 80px;
 
   border-top-right-radius: 12px;
   border-top-left-radius: 12px;
@@ -64,7 +53,10 @@ export const PhotoPreLoadingImageBackground = styled.View`
 `
 
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
-  colors: theme.COLORS.GRADIENT_CARD_SERIE,
+  colors: [
+    theme.COLORS.GRADIENT_CARD_SERIE[0],
+    theme.COLORS.GRADIENT_CARD_SERIE[1],
+  ],
   start: { x: 0, y: 1 },
   end: { x: 1, y: 0 },
 }))`

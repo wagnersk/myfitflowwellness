@@ -684,6 +684,7 @@ export interface AuthContextData {
   loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises: (
     data: IMyfitflowWorkoutInUse,
   ) => Promise<boolean>
+  deleteMyWorkoutAndmyWorkoutDataArray: () => Promise<void>
   premiumUserUpdateProfileUpdatedAt: (workoutsId: string) => Promise<void>
 
   loadWorkoutsCategories: () => Promise<void>

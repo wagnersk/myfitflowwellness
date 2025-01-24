@@ -59,6 +59,7 @@ export function UserPlan() {
       return true
     })
   }, [])
+
   return (
     <Container>
       <BodyImageWrapper>

@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import {
-  Alert,
-  BackHandler,
-  View,
-  Text,
-  Touchable,
-  TouchableOpacity,
-} from 'react-native'
+import { Alert, BackHandler, View } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
@@ -28,28 +21,17 @@ import {
   MyWorkoutWrapper,
   WorkoutInfoHomeCardWrapper,
   BlurViewWrapper,
-  CallTeacherButton,
-  CallTeacherButtonText,
-  CallTeacherWrapper,
-  CallTeacherTitleWrapper,
-  CallTeacherTitle,
-  CallButtonWrapper,
   MyWorkoutTittleWrapper,
-  ButtonText,
 } from './styles'
 import { FlatList } from 'react-native-gesture-handler'
-import {
-  ICachedWorkoutsWithLastUpdatedTimestamp,
-  IMyfitflowWorkoutInUse,
-} from '@hooks/authTypes'
+import { ICachedWorkoutsWithLastUpdatedTimestamp } from '@hooks/authTypes'
 import { CTAButton } from '@components/Buttons/CTAButton'
-import { Photo } from '@components/Photo'
-import { WhatsappButton } from '@components/Buttons/WhatsappButton'
 import { IWorkoutCategory } from '@src/@types/navigation'
 import { SettingsButton } from '@components/Buttons/SettingsButton'
 import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
+import { BackButton } from '@components/Buttons/BackButton'
 
-export function MarketPlaceHome() {
+export function UserAllCategories() {
   const navigation = useNavigation()
 
   const {
@@ -59,10 +41,7 @@ export function MarketPlaceHome() {
     myWorkout,
     saveWorkouts,
     loadWorkoutsCategories,
-    loadPersonalTrainerClientContract,
-    cancelNewContractWithPersonalUpdateUserClientId,
     contract,
-    personalData,
     user,
   } = useAuth()
 
@@ -131,6 +110,11 @@ export function MarketPlaceHome() {
     }
   }
 
+  function handlePreferencesStep() {
+    // jogar pra dentro do meu treino
+    navigation.navigate('userPrefferences')
+  }
+
   function handleNextScreen() {
     console.log(`Next Screen Pressed`)
     navigation.navigate('marketPlacePersonalsList')
@@ -146,33 +130,9 @@ export function MarketPlaceHome() {
     }
  */
   }
-  async function handleWorkoutDetailNextStep(data: IMyfitflowWorkoutInUse) {
-    const newDataWithCategoryNameFromProps = {
-      data,
-    }
-
-    navigation.navigate(
-      'marketPlaceWorkoutDetail',
-      newDataWithCategoryNameFromProps,
-    )
-  }
-  function handleViewAllCategoriesStep() {
-    // jogar pra dentro do meu treino
-    navigation.navigate('userAllCategories')
-  }
-  function handlePreferencesStep() {
-    // jogar pra dentro do meu treino
-    navigation.navigate('userPrefferences')
-  }
-  function handleCallTeacherWhatsapp() {
-    if (!user) return
-    Alert.alert(
-      user.selectedLanguage === 'pt-br' ? 'Opa' : 'Oops',
-      user.selectedLanguage === 'pt-br'
-        ? 'Essa funcionalidade será implementada em breve...'
-        : 'This feature will be implemented soon...',
-    )
-    console.log('Chamar Professor no whatsapp usando a API')
+  function handleGoBack() {
+    navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
+    navigation.goBack()
   }
 
   useEffect(() => {
@@ -190,7 +150,7 @@ export function MarketPlaceHome() {
   useFocusEffect(
     useCallback(() => {
       navigation.getParent()!.setOptions({
-        tabBarStyle: { display: 'flex' },
+        tabBarStyle: { display: 'none' },
         tabBarHideOnKeyboard: false,
       })
       setStatusBarStyle('light')
@@ -221,20 +181,15 @@ export function MarketPlaceHome() {
     <Container>
       <HeaderImageBackground>
         <BioInfoWrapper>
+          <BackButton
+            onPress={handleGoBack}
+            style={{ position: 'absolute', left: 32, bottom: 32 }}
+          />
           <BioInfo>
             <BioInfoLetter>
-              {contract?.submissionApproved && `Personal Trainer`}
-              {!contract?.submissionApproved &&
-              user?.selectedLanguage === 'pt-br'
-                ? `Treinos`
-                : `Workouts`}
+              {user?.selectedLanguage === 'pt-br' ? `Categorias` : `Categories`}
             </BioInfoLetter>
           </BioInfo>
-
-          <SettingsButton
-            style={{ paddingTop: 32 }}
-            onPress={handlePreferencesStep}
-          />
         </BioInfoWrapper>
       </HeaderImageBackground>
 
@@ -242,25 +197,10 @@ export function MarketPlaceHome() {
         <BodyImageBackground />
 
         {!contract?.submissionApproved && (
-          <View style={{}}>
-            <CategoriesWrapper>
-              <Tittle>
-                {user?.selectedLanguage === 'pt-br'
-                  ? `Categorias`
-                  : `Categories`}
-              </Tittle>
-
-              <TouchableOpacity onPress={handleViewAllCategoriesStep}>
-                <ButtonText>
-                  {user?.selectedLanguage === 'pt-br' ? `Ver mais` : `See more`}
-                </ButtonText>
-              </TouchableOpacity>
-            </CategoriesWrapper>
+          <View style={{ height: '100%', paddingTop: 32 }}>
             <FlatList
               contentContainerStyle={{
                 padding: 16,
-                flexDirection: 'row',
-                gap: 12,
               }}
               data={filteredByActiveWorkoutCategoriesList}
               renderItem={({ item }) => (
@@ -275,98 +215,11 @@ export function MarketPlaceHome() {
                   }
                 />
               )}
-              keyExtractor={(_, i) => i.toString()}
-              showsHorizontalScrollIndicator={false}
-              horizontal={true}
+              keyExtractor={(item, i) => i.toString()}
+              numColumns={3}
+              showsVerticalScrollIndicator={true}
+              ItemSeparatorComponent={() => <View style={{ height: 32 }} />}
             />
-            <MyWorkoutWrapper>
-              <MyWorkoutTittleWrapper>
-                <Tittle>Meu treino</Tittle>
-              </MyWorkoutTittleWrapper>
-
-              {myWorkout && (
-                <WorkoutInfoHomeCardWrapper>
-                  <WorkoutsCardItem
-                    handleNextStep={handleWorkoutDetailNextStep}
-                    data={myWorkout}
-                  />
-                </WorkoutInfoHomeCardWrapper>
-              )}
-            </MyWorkoutWrapper>
-            {false && (
-              <View>
-                <BlurViewWrapper
-                  style={{
-                    width: '100%',
-                    marginTop: 12,
-                    marginBottom: 32,
-                    paddingLeft: 32,
-                    paddingRight: 32,
-                  }}
-                  intensity={70}
-                  tint="light"
-                >
-                  <CTAButton
-                    onPress={handleNextScreen}
-                    changeColor={true}
-                    title="Quero evoluir mais rápido!"
-                    style={{
-                      width: '100%',
-                      marginTop: 12,
-                      marginBottom: 32,
-                    }}
-                  />
-                </BlurViewWrapper>
-              </View>
-            )}
-          </View>
-        )}
-
-        {contract?.submissionApproved && user?.selectedLanguage && (
-          <View
-            style={{
-              flex: 1,
-              height: '100%',
-              padding: 32,
-              gap: 32,
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <View
-              style={{
-                gap: 16,
-                alignItems: 'center',
-              }}
-            >
-              <Photo
-                defaultText={
-                  user?.selectedLanguage === 'pt-br'
-                    ? `Não há foto`
-                    : `No Photo`
-                }
-                defaultPhotoBase64={personalData ? personalData.photo : ''}
-              />
-              <Text
-                style={{
-                  fontSize: 24,
-                }}
-              >
-                {personalData?.name}, {personalData?.age}
-              </Text>
-            </View>
-
-            <View>
-              <Text>{`TEXTO DO DIA MOTIVACIONAL`}</Text>
-            </View>
-
-            <CallTeacherWrapper>
-              <CallTeacherTitleWrapper>
-                <CallTeacherTitle>Fale com o professor</CallTeacherTitle>
-              </CallTeacherTitleWrapper>
-
-              <WhatsappButton onPress={handleCallTeacherWhatsapp} />
-            </CallTeacherWrapper>
           </View>
         )}
       </BodyImageContainer>

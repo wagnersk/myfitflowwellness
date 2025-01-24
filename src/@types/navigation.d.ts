@@ -188,7 +188,6 @@ export type IMarketPlaceWorkoutListNavigation = {
 
 export type IMarketPlaceWorkoutDetailNavigation = {
   data: IMyfitflowWorkoutInUse
-  categoryName: IptBrUs
 }
 export type IMarketPlacePersonalsDetailNavigation = {
   data: IPersonal
@@ -275,6 +274,9 @@ export declare global {
       userWorkoutInfoList: NavigationUserWorkoutInfoListProps
 
       marketPlaceHome: undefined
+      userAllCategories: undefined
+      userPrefferences: undefined
+      userSelectList: IUserSelectListNavigation
       marketPlaceWorkoutList: IMarketPlaceWorkoutListNavigation
       marketPlaceWorkoutDetail: IMarketPlaceWorkoutDetailNavigation
 
@@ -288,11 +290,9 @@ export declare global {
 
       camera: undefined
 
-      userPrefferences: undefined
       userFormEditProfile: undefined
       userSupport: undefined
       userPlan: undefined
-      userSelectList: IUserSelectListNavigation
       userSelectFreeEquipamentList: IUserSelectFreeEquipamentListNavigation
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation
       userSelectMachineEquipamentList: IUserSelectMachineEquipamentListNavigation

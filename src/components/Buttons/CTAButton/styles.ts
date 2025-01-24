@@ -7,6 +7,7 @@ import { ReactNode } from 'react'
 interface Props {
   children: ReactNode
   loading?: boolean
+  workoutAlreadySelected?: boolean
 }
 
 export const Container = styled.View`
@@ -20,8 +21,8 @@ export const CTAButtonPressable = styled(TouchableOpacity)<Props>`
   border-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   height: 48px;
   width: 100%;
-  ${({ loading }) =>
-    loading &&
+  ${({ loading, workoutAlreadySelected }) =>
+    (loading || workoutAlreadySelected) &&
     css`
       opacity: 0.5;
     `}

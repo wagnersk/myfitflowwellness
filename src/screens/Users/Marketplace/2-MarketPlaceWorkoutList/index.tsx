@@ -41,7 +41,6 @@ export function MarketPlaceWorkoutList() {
   async function handleNextStep(data: IMyfitflowWorkoutInUse) {
     const newDataWithCategoryNameFromProps = {
       data,
-      categoryName: dataParams.selectedCategoryData.workoutCategoryName,
     }
 
     navigation.navigate(

@@ -1,27 +1,26 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
 import { BlurView } from 'expo-blur'
-import { ReactNode } from 'react'
-import { TouchableOpacity } from 'react-native' // Importe o TouchableOpacity
-
-type TouchableOpacityProps = {
-  children: ReactNode
-}
 
 export const Container = styled.View`
   flex: 1;
+`
+export const BodyImageContainer = styled.View`
+  flex: 1;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  top: -20px;
   background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
 `
-
 export const BioInfoWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex: 1;
+  padding: 0 32px;
 
   padding-left: 32px;
   padding-right: 32px;
-
   padding-bottom: 16px;
 `
 
@@ -41,7 +40,7 @@ export const BioInfo = styled.View`
   justify-content: center;
   align-items: center;
   gap: 4px;
-  padding-top: 24px;
+  padding-top: 48px;
 `
 
 export const BioInfoLetter = styled.Text`
@@ -73,22 +72,8 @@ export const CategoriesWrapper = styled.View`
 
 export const Tittle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
-`
-
-export const ButtonText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
-`
-
-export const BodyImageContainer = styled.View`
-  flex: 1;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  top: -20px;
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
 `
 
 export const BodyTopWrapper = styled.View`
@@ -138,43 +123,4 @@ export const BlurViewWrapper = styled(BlurView)`
   padding-top: 16px;
   padding-bottom: 50px;
   bottom: -100px;
-`
-
-export const CallTeacherWrapper = styled.View`
-  width: 100%;
-  gap: 12px;
-`
-
-export const CallTeacherTitle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  opacity: 0.5;
-  margin-bottom: 8px;
-`
-
-export const CallTeacherButton = styled(
-  TouchableOpacity,
-)<TouchableOpacityProps>`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
-`
-
-export const CallTeacherButtonText = styled.Text`
-  color: #ffffff;
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
-  padding-right: 8px;
-`
-export const CallButtonWrapper = styled.View`
-  border-radius: 8px;
-`
-
-export const CallTeacherTitleWrapper = styled.View`
-  width: 100%;
 `

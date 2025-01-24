@@ -3,8 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack'
 
 import { UserProfile } from '@screens/Users/Profile/1-UserProfile'
 
-import { UserSelectList } from '@screens/Users/Profile/2.1-UserSelectList'
-
 import { UserSelectFreeEquipamentList } from '@screens/Users/Profile/2.2-UserSelectFreeEquipamentList'
 import { UserSelectPulleyEquipamentList } from '@screens/Users/Profile/2.3-UserSelectPulleyEquipamentList'
 import { UserSelectMachineEquipamentList } from '@screens/Users/Profile/2.4-UserSelectMachineEquipamentList'
@@ -25,7 +23,6 @@ export function AppStackUserProfileRoutes() {
 
       <Screen name="userFormEditProfile" component={UserFormEditProfile} />
       <Screen name="userSupport" component={UserSupport} />
-      <Screen name="userSelectList" component={UserSelectList} />
       <Screen name="userPlan" component={UserPlan} />
 
       <Screen

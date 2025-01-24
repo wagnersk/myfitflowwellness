@@ -68,6 +68,7 @@ import {
   IMyfitflowWorkoutInUse,
   IUnconfirmedUserData,
   IPremiumUserContract,
+  IWorkoutExercisesFirebase,
 } from './authTypes'
 
 import {
@@ -2578,13 +2579,12 @@ function AuthProvider({ children }: AuthProviderProps) {
       await saveExerciseDataInCache(userId, formattedWorkoutsDataArray)
       await saveMyWorkoutInCache(userId, _workouts)
 
-      setIsWaitingApiResponse(false)
-
       Alert.alert(
         user?.selectedLanguage === 'pt-br'
           ? 'Seu treino foi adicionado com sucesso!'
           : 'Your workout was added successfully!',
       )
+      setIsWaitingApiResponse(false)
 
       return true
     } else {
@@ -2691,6 +2691,44 @@ function AuthProvider({ children }: AuthProviderProps) {
       await AsyncStorage.setItem(workoutKey, JSON.stringify(workoutData))
 
       setMyWorkout(workoutData)
+    }
+  }
+  async function deleteMyWorkoutAndmyWorkoutDataArray() {
+    const userId = user?.id
+    if (!userId) {
+      console.error('Dados necessários para carregar treino estão ausentes.')
+      return
+    }
+
+    await resetStateCache()
+    await deleteExerciseDataInCache(userId)
+    await deleteMyWorkoutInCache(userId)
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br' ? 'Opa!' : 'Oops!',
+      user?.selectedLanguage === 'pt-br'
+        ? 'Sua série foi cancelada com sucesso!'
+        : 'Your workout series has been successfully canceled!',
+    )
+    async function resetStateCache() {
+      setCachedUserWorkoutsLog(null)
+      setCachedExerciseHistoryData(null)
+    }
+
+    async function deleteExerciseDataInCache(userId: string) {
+      const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
+
+      await AsyncStorage.setItem(workoutExercisesKey, JSON.stringify(null))
+
+      setMyWorkoutArray(null)
+    }
+
+    async function deleteMyWorkoutInCache(userId: string) {
+      const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+      // salvando data de inicio do treino
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(null))
+
+      setMyWorkout(null)
     }
   }
 
@@ -3095,6 +3133,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         // VERIFICAR AQUI PRA BAIXO E ANOTAR OS CACHES
         loadLoginInitialCachedWorkoutsData,
         loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
+        deleteMyWorkoutAndmyWorkoutDataArray,
         premiumUserUpdateProfileUpdatedAt,
 
         loadPersonalsList,

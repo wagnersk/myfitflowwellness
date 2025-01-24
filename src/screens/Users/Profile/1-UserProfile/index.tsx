@@ -314,6 +314,7 @@ logout (opcao deletar conta)
                   }
                   onPress={handleMyPlanNextStep}
                   bordertype="up"
+                  iconStyle="plan"
                 />
 
                 <WhiteButton
@@ -322,6 +323,7 @@ logout (opcao deletar conta)
                   }
                   onPress={handleSuporteNextStep}
                   bordertype="down"
+                  iconStyle="support"
                 />
               </Body>
 
