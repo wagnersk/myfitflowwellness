@@ -21,10 +21,10 @@ interface PropsToReduceHeight {
   isFocused: boolean
 }
 
-const cardHeight = Dimensions.get('window').height / 1.9 // 426
+const cardHeight = Dimensions.get('window').height / 1.6 // 426
 const cardWidth = Dimensions.get('window').width * 0.8 - 20 // 294.40000000000003
 
-const bottomCardHeight = cardHeight * 0.5 // 170.4
+const bottomCardHeight = cardHeight * 0.6 // 170.4
 
 const confirmButtonHeight = 36 // 170.4
 const confirmButtonWidth = cardWidth / 1.4 // 170.4
@@ -48,10 +48,11 @@ export const WorkoutNameAndVideoWrapper = styled.View`
   flex: 1;
 `
 export const WorkoutInfoWrapper = styled.View`
-  padding: 4px 0;
+  height: 100%;
   width: 100%;
+  padding: 4px 0;
   height: ${bottomCardHeight}px;
-  justify-content: space-between;
+  gap: 8px;
 `
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
@@ -101,7 +102,9 @@ export const WorkoutInfoAndWeightWrapper = styled.View`
 export const WorkoutRepetitionAndSerieWrapper = styled.View`
   flex-direction: row;
   width: 100%;
+  height: 100%;
   align-items: flex-start;
+  flex: 1;
 `
 
 export const ButtonsWrapper = styled.View`
@@ -228,6 +231,12 @@ export const WorkoutTextBoxLetterCountWrapper = styled.View`
 `
 
 export const WorkoutTextBoxLetterCount = styled.Text``
+
+export const BulletsCronometerAndCTAButtonWrapper = styled.View`
+  justify-content: center;
+`
+
+export const WorkoutCronometerWrapper = styled.View``
 
 export const WorkoutUserNotes = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],

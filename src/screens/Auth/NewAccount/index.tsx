@@ -10,7 +10,7 @@ import {
 } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 import { useNavigation, useRoute } from '@react-navigation/core'
 import { useAuth } from '@hooks/auth'
 
@@ -91,7 +91,6 @@ export function NewAccount() {
   const navigation = useNavigation()
 
   const theme = useTheme()
-
   async function handleSignUp() {
     const letActiveErrorCheck = true
     setActiveErrorCheck(letActiveErrorCheck)

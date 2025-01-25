@@ -4,7 +4,7 @@ import Star from '../../assets/Star.svg'
 import StarFill from '../../assets/Star-fill.svg'
 
 import { Container } from './styles'
-import { DefaultTheme, useTheme } from 'styled-components'
+import { DefaultTheme, useTheme } from 'styled-components/native'
 
 interface Props {
   level: string
@@ -42,7 +42,7 @@ function transform(data: string, theme: DefaultTheme, size: number) {
   }
 }
 export function Level({ level, size }: Props) {
-  const theme = useTheme()
+  const theme = useTheme() as DefaultTheme
 
   return <Container>{transform(level, theme, size)}</Container>
 }

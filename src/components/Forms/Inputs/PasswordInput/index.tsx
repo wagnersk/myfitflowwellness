@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Keyboard, TextInputProps, TouchableOpacity } from 'react-native'
 
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 import { Container, IconContainer, InputText, ContainerWrapper } from './styles'
 

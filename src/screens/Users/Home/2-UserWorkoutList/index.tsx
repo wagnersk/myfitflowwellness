@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { ActivityIndicator, View } from 'react-native'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 import { useAuth } from '@hooks/auth'
 
 import { setStatusBarStyle } from 'expo-status-bar'

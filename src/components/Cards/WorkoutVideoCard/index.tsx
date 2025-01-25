@@ -1,12 +1,12 @@
 /* eslint-disable camelcase */
 import { View, Modal, Alert } from 'react-native'
-import React, { useState, memo, useEffect, useMemo } from 'react'
-import { useTheme } from 'styled-components'
+import React, { useState, memo, useEffect, useMemo, useRef } from 'react'
+import { useTheme } from 'styled-components/native'
 
 import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
 
-import { format, isSameDay } from 'date-fns'
+import { add, format, isSameDay } from 'date-fns'
 import { ptBR, enUS } from 'date-fns/locale'
 import * as FileSystem from 'expo-file-system'
 
@@ -52,8 +52,13 @@ import {
   BlurViewWrapper,
   TableWrapper,
   OverLayWrapper,
+  BulletsCronometerAndCTAButtonWrapper,
+  WorkoutCronometerWrapper,
 } from './styles'
 import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
+import { WorkoutCronometer } from '@components/WorkoutCronometer'
+import { AnimatedCircularProgress } from 'react-native-circular-progress'
+import { useTimer } from 'react-timer-hook'
 
 interface Props {
   item: IFormattedCardExerciseData
@@ -61,6 +66,7 @@ interface Props {
   workoutCardIndex: number // A B ou C
   workoutId: string
   isFocused: boolean
+  restTime: number
 }
 
 interface IModalStateWorkoutLogData extends IWeightDoneLog {
@@ -77,6 +83,7 @@ function WorkoutVideoCardComponent({
   exerciseIndex,
   workoutId,
   isFocused,
+  restTime,
 }: Props) {
   const theme = useTheme()
 
@@ -111,6 +118,17 @@ function WorkoutVideoCardComponent({
     completedTimestamp: 0,
     activeWeightIndex: 0,
   }
+  const time = new Date()
+  const { seconds, minutes, isRunning, pause, restart, resume, totalSeconds } =
+    useTimer({
+      expiryTimestamp: time,
+      onExpire: () => console.log('acabouu'),
+      autoStart: false,
+    })
+  const circularProgressRef = useRef<AnimatedCircularProgress>(null)
+  const elapsedTime = restTime - totalSeconds
+  const percentage = (elapsedTime / restTime) * 100
+  const invertedPercentage = 100 - percentage
 
   const initialModalState = useMemo(() => {
     let weightsDatesDone: IWeightDoneLog = {} as IWeightDoneLog
@@ -221,6 +239,9 @@ function WorkoutVideoCardComponent({
       ...prevState,
       completed: !prevState.completed,
     }))
+    const newTime = new Date()
+    newTime.setSeconds(newTime.getSeconds() + restTime)
+    restart(newTime, false)
     // TODO > ver dps q weight em saveFastCachedWorkoutData
 
     async function saveFastCachedWorkoutData(_workoutId: string) {
@@ -678,6 +699,12 @@ function WorkoutVideoCardComponent({
   }
 
   // const openedTimeRef = useRef(new Date().getTime())
+  useEffect(() => {
+    handlePause()
+    const time = new Date()
+    time.setSeconds(time.getSeconds() + restTime)
+    restart(time, false)
+  }, [restTime, 0])
 
   useEffect(() => {
     const myNote = cachedNotesTable?.find(
@@ -807,6 +834,31 @@ function WorkoutVideoCardComponent({
     }
   }, [cachedVideoTable, cachedVideoTable?.length])
 
+  function handlePause() {
+    pause()
+  }
+
+  function onPlay() {
+    resume()
+  }
+
+  function handleRestart() {
+    const time = new Date()
+    time.setSeconds(time.getSeconds() + restTime)
+    restart(time)
+  }
+
+  function add15Seconds() {
+    const time = new Date()
+    time.setSeconds(time.getSeconds() + totalSeconds + 15)
+    restart(time, isRunning)
+  }
+
+  function subtract15Seconds() {
+    const time = new Date()
+    time.setSeconds(time.getSeconds() + Math.max(totalSeconds - 15, 0))
+    restart(time, isRunning)
+  }
   return (
     <ContainerGradient colors={['#000000', '#FFFFFF']} isFocused={isFocused}>
       <WorkoutNameAndVideoWrapper>
@@ -866,9 +918,9 @@ function WorkoutVideoCardComponent({
           style={{ opacity: isFocused ? 1 : 0.2 }}
         >
           <TableWrapper
-            style={{
+          /*       style={{
               opacity: exerciseIndex === 0 && user?.anonymousUser ? 1 : 0.4,
-            }}
+            }} */
           >
             {item.workoutExerciseSets &&
               item.workoutExerciseSets.map((v, i) => (
@@ -881,7 +933,8 @@ function WorkoutVideoCardComponent({
                   <ButtonsWrapper>
                     <WorkoutWeightValueAndTextWrapper>
                       <WorkoutWeightValue
-                        disabled={exerciseIndex !== 0 && user?.anonymousUser}
+                        /*                         disabled={exerciseIndex !== 0 && user?.anonymousUser}
+                         */ disabled={exerciseIndex !== 0}
                         onPress={() => {
                           openWeight(i)
                         }}
@@ -931,13 +984,15 @@ function WorkoutVideoCardComponent({
               }}
             >
               <WorkoutButtonText>
-                {modalWeightState.completed
+                {selectedLanguage &&
+                modalWeightState.completed &&
+                invertedPercentage === 0
                   ? selectedLanguage === 'pt-br'
-                    ? 'Feito'
-                    : 'Done'
+                    ? 'Registrar serie'
+                    : 'Register set'
                   : selectedLanguage === 'pt-br'
-                    ? 'Fazer'
-                    : 'Do'}
+                    ? 'Zerar cronômetro'
+                    : 'Reset cronometer'}
               </WorkoutButtonText>
             </BlurViewWrapper>
           </WorkoutButtonConfirm>
@@ -945,6 +1000,22 @@ function WorkoutVideoCardComponent({
         {exerciseIndex !== 0 && user?.anonymousUser && (
           <OverLayWaterMarkButton onPress={handlePress} />
         )}
+        <BulletsCronometerAndCTAButtonWrapper>
+          <WorkoutCronometerWrapper>
+            <WorkoutCronometer
+              percentage={percentage}
+              circularProgressRef={circularProgressRef}
+              onRestart={handleRestart}
+              onAdd15Seconds={add15Seconds}
+              onPause={handlePause}
+              onPlay={onPlay}
+              onSubtract15Seconds={subtract15Seconds}
+              minutes={minutes}
+              seconds={seconds}
+              isRunning={isRunning}
+            />
+          </WorkoutCronometerWrapper>
+        </BulletsCronometerAndCTAButtonWrapper>
       </WorkoutInfoWrapper>
 
       <Modal

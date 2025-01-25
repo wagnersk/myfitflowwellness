@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import { BackHandler, SafeAreaView } from 'react-native'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { useTheme } from 'styled-components'
+
+import { useTheme } from 'styled-components/native'
+
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
-import backgroundImg from '../../../../../assets/back.png'
 import Check from '@assets/Check.svg'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
 

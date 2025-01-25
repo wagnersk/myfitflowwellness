@@ -2,7 +2,7 @@ import React from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { ActivityIndicator } from 'react-native'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 import { Container, Title } from './styles'
 import Whatsapp from '@assets/Whatsapp.svg'

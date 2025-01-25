@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { ImageBackground, BackHandler } from 'react-native'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import backgroundImg from '../../../../../assets/back.png'
@@ -51,7 +51,6 @@ export function UserSelectFreeEquipamentList() {
     updateUserFreePreffer,
   } = useAuth()
   const theme = useTheme()
-
   const navigation = useNavigation()
   const route = useRoute()
 

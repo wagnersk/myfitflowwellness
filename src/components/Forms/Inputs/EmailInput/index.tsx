@@ -1,7 +1,7 @@
 import React from 'react'
 import Email from '@assets/Email.svg'
 
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 import { Container, IconContainer, ContainerWrapper, InputText } from './styles'
 import { Keyboard } from 'react-native'

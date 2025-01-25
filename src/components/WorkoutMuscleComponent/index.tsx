@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Container, Description } from './styles'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 import PersonSimple from '../../assets/Person-simple.svg'
 
 interface Props {
@@ -10,7 +10,6 @@ interface Props {
 
 export function WorkoutMuscleComponent({ description }: Props) {
   const theme = useTheme()
-
   return (
     <Container>
       <PersonSimple

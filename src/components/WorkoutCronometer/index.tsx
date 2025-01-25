@@ -1,74 +1,127 @@
 /* eslint-disable camelcase */
-import React, { useEffect } from 'react'
-import { useWindowDimensions } from 'react-native'
-import { useTimer } from 'react-timer-hook'
+import React from 'react'
+import Play from '@assets/Play.svg'
+import Pause from '@assets/Pause.svg'
+import ArrowCounterClockwise from '@assets/Arrow-counter-clockwise.svg'
+import { AnimatedCircularProgress } from 'react-native-circular-progress'
 
 import {
   WorkoutCronometerWrapper,
   WorkoutCronometerButtonStart,
   WorkoutCronometerTimer,
   WorkoutCronometerText,
+  Top,
+  Middle,
+  DecrementSeconds,
+  IncrementSeconds,
+  AnimatedCircularProgressWrapper,
+  IncrementSecondsContent,
 } from './styles'
+import { useTheme } from 'styled-components/native'
+import { Circle } from 'react-native-svg'
 
 interface CronometerProps {
-  rest_time: number
-  flagToResetCronometer: number
-  startText: string
-  resetText: string
+  percentage: number
+  circularProgressRef: React.RefObject<AnimatedCircularProgress>
+  onPlay: () => void
+  onPause: () => void
+  onRestart: () => void
+  onAdd15Seconds: () => void
+  onSubtract15Seconds: () => void
+  minutes: number
+  seconds: number
+  isRunning: boolean
 }
 
 export function WorkoutCronometer({
-  rest_time,
-  flagToResetCronometer,
-  startText,
-  resetText,
+  circularProgressRef,
+  onAdd15Seconds,
+  onSubtract15Seconds,
+  onPlay,
+  onPause,
+  onRestart,
+  percentage,
+  minutes,
+  seconds,
+  isRunning,
 }: CronometerProps) {
-  const time = new Date()
-
-  time.setSeconds(time.getSeconds() + rest_time)
-
-  const { seconds, minutes, isRunning, pause, restart } = useTimer({
-    expiryTimestamp: time,
-    onExpire: () => console.log('acabouu'),
-    autoStart: false,
-  })
-  const { width } = useWindowDimensions()
-
-  useEffect(() => {
-    pause()
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + rest_time)
-    restart(time, false)
-  }, [rest_time, flagToResetCronometer])
-
   function handlePause() {
-    pause()
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + rest_time)
-    restart(time, false)
+    onPause()
+  }
+
+  function handlOnPlay() {
+    onPlay()
   }
 
   function handleRestart() {
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + rest_time)
-    restart(time)
+    onRestart()
   }
+
+  function add15Seconds() {
+    onAdd15Seconds()
+  }
+
+  function subtract15Seconds() {
+    onSubtract15Seconds()
+  }
+  const theme = useTheme()
 
   return (
     <WorkoutCronometerWrapper>
-      <WorkoutCronometerTimer style={{ left: width / 2.7 }}>
-        {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
-      </WorkoutCronometerTimer>
+      <Top>
+        <IncrementSeconds onPress={subtract15Seconds}>
+          <IncrementSecondsContent type="negative">
+            <WorkoutCronometerText type="negative">-15s</WorkoutCronometerText>
+          </IncrementSecondsContent>
+        </IncrementSeconds>
+        <DecrementSeconds onPress={add15Seconds}>
+          <IncrementSecondsContent type="positive">
+            <WorkoutCronometerText type="positive">+15s</WorkoutCronometerText>
+          </IncrementSecondsContent>
+        </DecrementSeconds>
+      </Top>
+      <Middle>
+        <AnimatedCircularProgressWrapper>
+          <AnimatedCircularProgress
+            ref={circularProgressRef}
+            size={92}
+            width={2}
+            fill={percentage}
+            tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
+            backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
+            padding={10}
+            renderCap={({ center }) => (
+              <Circle cx={center.x} cy={center.y} r="6" fill="green" />
+            )}
+            onAnimationComplete={() => console.log('onAnimationComplete')}
+            // eslint-disable-next-line react/no-children-prop
+            children={() => (
+              <WorkoutCronometerTimer>
+                {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
+              </WorkoutCronometerTimer>
+            )}
+          />
+        </AnimatedCircularProgressWrapper>
+        <WorkoutCronometerButtonStart
+          onPress={() => {
+            handleRestart()
+          }}
+        >
+          <ArrowCounterClockwise width={36} height={36} fill={'white'} />
+        </WorkoutCronometerButtonStart>
 
-      <WorkoutCronometerButtonStart
-        onPress={() => {
-          isRunning ? handlePause() : handleRestart()
-        }}
-      >
-        <WorkoutCronometerText>
-          {isRunning ? resetText : startText}
-        </WorkoutCronometerText>
-      </WorkoutCronometerButtonStart>
+        <WorkoutCronometerButtonStart
+          onPress={() => {
+            isRunning ? handlePause() : handlOnPlay()
+          }}
+        >
+          {isRunning ? (
+            <Pause width={36} height={36} fill={'white'} />
+          ) : (
+            <Play width={36} height={36} fill={'white'} />
+          )}
+        </WorkoutCronometerButtonStart>
+      </Middle>
     </WorkoutCronometerWrapper>
   )
 }

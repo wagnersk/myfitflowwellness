@@ -12,13 +12,12 @@ import { AppStackUserHomeRoutes } from './app.stackUserHome.routes'
 import { AppStackMarketPlaceHomeRoutes } from './app.stackMarketPlaceHome.routes'
 import { AppStackUserProfileRoutes } from './app.stackUserProfile.routes'
 import { AppStackUserStatisticsRoutes } from './app.stackUserStatistics.routes'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 const { Navigator, Screen, Group } = createBottomTabNavigator()
 
 export function AppTabRoutes() {
   const theme = useTheme()
-
   return (
     <Navigator
       screenOptions={{

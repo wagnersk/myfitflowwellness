@@ -9,7 +9,7 @@ import {
 } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
 import { useAuth } from '@hooks/auth'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 import { useNavigation, useRoute } from '@react-navigation/core'
 
@@ -55,7 +55,6 @@ export function Login() {
   const [activeErrorCheck, setActiveErrorCheck] = useState(false)
   const navigation = useNavigation()
   const theme = useTheme()
-
   const route = useRoute()
   const { selectedLanguage: selectedLanguageParams } =
     route.params as IOnBoading

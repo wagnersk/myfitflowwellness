@@ -209,6 +209,7 @@ export function UserWorkout() {
                     workoutCardIndex={cardIndex}
                     workoutId={workoutId}
                     isFocused={workoutCardInfo.workoutCardIndex === index}
+                    restTime={workoutCardInfo.workoutExerciseRestTimeNumber}
                   />
                 )
               }}
@@ -229,7 +230,7 @@ export function UserWorkout() {
             workoutCardIndex={workoutCardInfo.workoutCardIndex}
           />
 
-          <BulletsCronometerAndCTAButtonWrapper>
+          {/*      <BulletsCronometerAndCTAButtonWrapper>
             <WorkoutCronometer
               resetText={selectedLanguage === 'pt-br' ? 'Zerar' : 'Reset'}
               startText={selectedLanguage === 'pt-br' ? 'Iniciar' : 'Start'}
@@ -240,7 +241,7 @@ export function UserWorkout() {
               }
               flagToResetCronometer={workoutCardInfo.workoutCardIndex}
             />
-          </BulletsCronometerAndCTAButtonWrapper>
+          </BulletsCronometerAndCTAButtonWrapper> */}
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>
     </Container>

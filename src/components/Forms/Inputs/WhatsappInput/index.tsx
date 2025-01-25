@@ -1,7 +1,7 @@
 import React from 'react'
 import Whatsapp from '../../../../assets/Whatsapp.svg'
 
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 import {
   Container,

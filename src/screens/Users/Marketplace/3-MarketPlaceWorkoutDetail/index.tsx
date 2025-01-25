@@ -167,6 +167,7 @@ export function MarketPlaceWorkoutDetail() {
     if (!response) return
     navigation.navigate('marketPlaceHome')
   }
+
   async function handleDeleteWorkout() {
     await deleteMyWorkoutAndmyWorkoutDataArray()
 
@@ -185,6 +186,7 @@ export function MarketPlaceWorkoutDetail() {
       setStatusBarStyle('dark')
     }, []),
   )
+
   return (
     <Container>
       <SafeAreaProvider style={{ width: `100%` }}>

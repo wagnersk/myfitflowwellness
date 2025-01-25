@@ -1,37 +1,74 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { TouchableOpacity } from 'react-native'
-import { ReactNode } from 'react'
 
-type TouchableOpacityProps = {
-  children: ReactNode
+interface WorkoutCronometerWrapper {
+  type: 'negative' | 'positive'
 }
 
 export const WorkoutCronometerWrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 32px;
+  width: 100%;
 `
 
-export const WorkoutCronometerButtonStart = styled(
-  TouchableOpacity,
-)<TouchableOpacityProps>`
+export const Top = styled.View`
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
   height: 48px;
-  width: 96px;
+  flex-direction: row;
+`
+
+export const Middle = styled.View`
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  height: 48px;
+`
+export const AnimatedCircularProgressWrapper = styled.View`
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+  bottom: -12px;
+`
+
+export const WorkoutCronometerButtonStart = styled.TouchableOpacity`
+  height: 48px;
   justify-content: center;
   align-items: center;
 `
-
-export const WorkoutCronometerTimer = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(34)}px;
-  margin-left: -16px;
+export const IncrementSeconds = styled.TouchableOpacity`
+  height: 48px;
+  width: 48px;
+  justify-content: center;
+  align-items: center;
+`
+export const DecrementSeconds = styled.TouchableOpacity`
+  height: 48px;
+  width: 48px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
 `
 
-export const WorkoutCronometerText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+export const WorkoutCronometerTimer = styled.Text`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  font-size: ${RFValue(24)}px;
+`
+
+export const WorkoutCronometerText = styled.Text<WorkoutCronometerWrapper>`
+  color: ${({ theme, type }) =>
+    type === 'positive'
+      ? theme.COLORS.AUX_GOOGLE_GREEN
+      : theme.COLORS.AUX_GOOGLE_RED};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
+`
+export const IncrementSecondsContent = styled.View<WorkoutCronometerWrapper>`
+  width: 100%;
+  height: 48px;
+
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
 `

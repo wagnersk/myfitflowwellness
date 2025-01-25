@@ -16,7 +16,6 @@ interface DataProps {
 export function WorkoutCardList({ data, handleNextStep }: DataProps) {
   const { width } = useWindowDimensions()
   const theme = useTheme()
-
   type ListItemProps = {
     item: IFormattedCardExerciseData
     index: number

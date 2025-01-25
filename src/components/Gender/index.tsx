@@ -4,7 +4,7 @@ import GenderMale from '../../assets/Gender-male.svg'
 import GenderFemale from '../../assets/Gender-female.svg'
 
 import { Container } from './styles'
-import { DefaultTheme, useTheme } from 'styled-components'
+import { DefaultTheme, useTheme } from 'styled-components/native'
 
 interface Props {
   level: string
@@ -29,6 +29,5 @@ function transform(data: string, theme: DefaultTheme, size: number) {
 }
 export function Gender({ level, size }: Props) {
   const theme = useTheme()
-
   return <Container>{transform(level, theme, size)}</Container>
 }

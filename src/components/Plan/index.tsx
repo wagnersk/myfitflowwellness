@@ -3,7 +3,7 @@ import React from 'react'
 import Lock from '../../assets/Lock-simple-fill.svg'
 
 import { Container } from './styles'
-import { DefaultTheme, useTheme } from 'styled-components'
+import { DefaultTheme, useTheme } from 'styled-components/native'
 
 interface Props {
   level?: string
@@ -18,7 +18,7 @@ function transform(theme: DefaultTheme, size: number, data?: string) {
   }
 }
 export function Plan({ level, size }: Props) {
-  const theme = useTheme()
+  const theme = useTheme() as DefaultTheme
 
   return <Container>{transform(theme, size, level)}</Container>
 }

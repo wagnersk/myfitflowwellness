@@ -8,7 +8,7 @@ import {
   DescriptionWrapper,
 } from './styles'
 import { SvgProps } from 'react-native-svg'
-import { DefaultTheme, useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 interface Props {
   icon: React.FC<SvgProps> | ''
