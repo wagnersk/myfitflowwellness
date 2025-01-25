@@ -16,6 +16,7 @@ import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModa
 import More from '@assets/More.svg'
 import Less from '@assets/Less.svg'
 import ExclamationMark from '@assets/ExclamationMark.svg'
+import FileText from '@assets/FileText.svg'
 import PlayVideo from '@assets/PlayVideo.svg'
 
 import { getTrimmedName } from '@utils/getTrimmedName'
@@ -54,6 +55,7 @@ import {
   OverLayWrapper,
   BulletsCronometerAndCTAButtonWrapper,
   WorkoutCronometerWrapper,
+  BlurViewAddSecondsWrapper,
 } from './styles'
 import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
 import { WorkoutCronometer } from '@components/WorkoutCronometer'
@@ -687,6 +689,7 @@ function WorkoutVideoCardComponent({
       isOpenModalUserWeight: false,
     }))
   }
+
   function handlePress() {
     Alert.alert(
       selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
@@ -962,12 +965,13 @@ function WorkoutVideoCardComponent({
             enabled={isFocused}
             style={{ opacity: isFocused ? 1 : 0.4 }}
           >
-            <WorkoutUserNotes
-              style={{ opacity: modalNotesState ? 1 : 0.4 }}
-              colors={['#000000', '#FFFFFF']}
-            >
-              <ExclamationMark />
-            </WorkoutUserNotes>
+            <BlurViewAddSecondsWrapper intensity={30}>
+              <FileText
+                width={28}
+                height={28}
+                fill={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
+              />
+            </BlurViewAddSecondsWrapper>
           </WorkoutUserNotesButton>
 
           <WorkoutButtonConfirm
@@ -975,24 +979,17 @@ function WorkoutVideoCardComponent({
             onPress={handleDoneWorkout}
             workoutExerciseDone={modalWeightState.completed}
           >
-            <BlurViewWrapper
-              style={{
-                backgroundColor: modalWeightState.completed
-                  ? theme.COLORS.AUX_GOOGLE_GREEN
-                  : undefined,
-                opacity: modalWeightState.completed ? 0.7 : 0.4,
-              }}
-            >
+            <BlurViewWrapper intensity={30}>
               <WorkoutButtonText>
                 {selectedLanguage &&
                 modalWeightState.completed &&
                 invertedPercentage === 0
                   ? selectedLanguage === 'pt-br'
-                    ? 'Registrar serie'
-                    : 'Register set'
-                  : selectedLanguage === 'pt-br'
                     ? 'Zerar cronômetro'
-                    : 'Reset cronometer'}
+                    : 'Reset cronometer'
+                  : selectedLanguage === 'pt-br'
+                    ? 'Registrar serie'
+                    : 'Register set'}
               </WorkoutButtonText>
             </BlurViewWrapper>
           </WorkoutButtonConfirm>

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import {
   Dimensions,
-  TextInput,
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native'
@@ -50,9 +49,8 @@ export const WorkoutNameAndVideoWrapper = styled.View`
 export const WorkoutInfoWrapper = styled.View`
   height: 100%;
   width: 100%;
-  padding: 4px 0;
   height: ${bottomCardHeight}px;
-  gap: 8px;
+  gap: 4px;
 `
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
@@ -184,13 +182,24 @@ export const BlurViewWrapper = styled(BlurView)`
   flex-direction: row;
   height: ${confirmButtonHeight}px;
   width: ${confirmButtonWidth}px;
+  height: 48px;
+  border-radius: 12px;
+`
+export const BlurViewAddSecondsWrapper = styled(BlurView)`
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+
+  height: 48px;
+  width: 48px;
   border-radius: 12px;
 `
 
 export const WorkoutButtonText = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
+  font-size: ${RFValue(14)}px;
 `
 
 export const WorkoutUserNotesAndConfirmButtonWrapper = styled.View`
@@ -205,8 +214,8 @@ export const WorkoutUserNotesWrapper = styled.View`
 `
 
 export const WorkoutUserNotesButton = styled(TouchableOpacity)<Props>`
-  height: 36px;
-  width: 36px;
+  height: 48px;
+  width: 48px;
   align-items: center;
   justify-content: center;
 `
@@ -243,10 +252,10 @@ export const WorkoutUserNotes = styled(LinearGradient).attrs(({ theme }) => ({
   start: { x: 0, y: 0 },
   end: { x: 1, y: 1 },
 }))`
-  height: 32px;
-  width: 32px;
+  height: 48px;
+  width: 48px;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 12px;
   flex-direction: row;
 `

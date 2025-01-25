@@ -16,6 +16,7 @@ import {
   IncrementSeconds,
   AnimatedCircularProgressWrapper,
   IncrementSecondsContent,
+  BlurViewAddSecondsWrapper,
 } from './styles'
 import { useTheme } from 'styled-components/native'
 import { Circle } from 'react-native-svg'
@@ -70,22 +71,18 @@ export function WorkoutCronometer({
     <WorkoutCronometerWrapper>
       <Top>
         <IncrementSeconds onPress={subtract15Seconds}>
-          <IncrementSecondsContent type="negative">
-            <WorkoutCronometerText type="negative">-15s</WorkoutCronometerText>
-          </IncrementSecondsContent>
+          <WorkoutCronometerText type="negative">-15s</WorkoutCronometerText>
         </IncrementSeconds>
         <DecrementSeconds onPress={add15Seconds}>
-          <IncrementSecondsContent type="positive">
-            <WorkoutCronometerText type="positive">+15s</WorkoutCronometerText>
-          </IncrementSecondsContent>
+          <WorkoutCronometerText type="positive">+15s</WorkoutCronometerText>
         </DecrementSeconds>
       </Top>
       <Middle>
         <AnimatedCircularProgressWrapper>
           <AnimatedCircularProgress
             ref={circularProgressRef}
-            size={92}
-            width={2}
+            size={112}
+            width={3}
             fill={percentage}
             tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
             backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
@@ -107,7 +104,9 @@ export function WorkoutCronometer({
             handleRestart()
           }}
         >
-          <ArrowCounterClockwise width={36} height={36} fill={'white'} />
+          <BlurViewAddSecondsWrapper intensity={30}>
+            <ArrowCounterClockwise width={36} height={36} fill={'white'} />
+          </BlurViewAddSecondsWrapper>
         </WorkoutCronometerButtonStart>
 
         <WorkoutCronometerButtonStart
@@ -115,11 +114,13 @@ export function WorkoutCronometer({
             isRunning ? handlePause() : handlOnPlay()
           }}
         >
-          {isRunning ? (
-            <Pause width={36} height={36} fill={'white'} />
-          ) : (
-            <Play width={36} height={36} fill={'white'} />
-          )}
+          <BlurViewAddSecondsWrapper intensity={30}>
+            {isRunning ? (
+              <Pause width={36} height={36} fill={'white'} />
+            ) : (
+              <Play width={36} height={36} fill={'white'} />
+            )}
+          </BlurViewAddSecondsWrapper>
         </WorkoutCronometerButtonStart>
       </Middle>
     </WorkoutCronometerWrapper>

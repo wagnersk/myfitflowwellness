@@ -1,5 +1,6 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
+import { BlurView } from 'expo-blur'
 
 interface WorkoutCronometerWrapper {
   type: 'negative' | 'positive'
@@ -7,11 +8,12 @@ interface WorkoutCronometerWrapper {
 
 export const WorkoutCronometerWrapper = styled.View`
   width: 100%;
+  gap: 2px;
 `
 
 export const Top = styled.View`
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
   height: 48px;
   flex-direction: row;
@@ -28,7 +30,7 @@ export const AnimatedCircularProgressWrapper = styled.View`
   justify-content: center;
   position: absolute;
   width: 100%;
-  bottom: -12px;
+  bottom: -16px;
 `
 
 export const WorkoutCronometerButtonStart = styled.TouchableOpacity`
@@ -70,5 +72,15 @@ export const IncrementSecondsContent = styled.View<WorkoutCronometerWrapper>`
 
   justify-content: center;
   align-items: center;
+  border-radius: 12px;
+`
+export const BlurViewAddSecondsWrapper = styled(BlurView)`
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+
+  height: 48px;
+  width: 48px;
   border-radius: 12px;
 `
