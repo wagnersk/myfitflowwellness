@@ -2037,11 +2037,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
           async function updateCard() {
             const {
-              completed,
-              weight,
               exerciseId,
               exerciseIndex,
-              completedTimestamp,
+
+              repetitionData,
             } = newExercise
 
             const weightDoneLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
@@ -2068,10 +2067,8 @@ function AuthProvider({ children }: AuthProviderProps) {
 
               const newUpdatedWeightDone: IWeightDoneLog = {
                 exerciseIndex,
-                completed,
-                weight,
                 exerciseId,
-                completedTimestamp,
+                repetitionData,
               }
 
               copyCachedUserWorkoutsLog.workoutsLog[
@@ -2113,29 +2110,20 @@ function AuthProvider({ children }: AuthProviderProps) {
                   ],
                 ),
               )
-
-              /*     const totalSessionsCompleted =
-                (copyCachedUserWorkoutsLog.workoutsLog[
-                  logIndex
-                ].workoutCardsLogData[workoutLogIndex].totalSessionsCompleted =
-                  copyCachedUserWorkoutsLog.workoutsLog[
-                    logIndex
-                  ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
-                    (count, obj) => {
-                      // Se o completed for true, adiciona 1 ao contador, senão adiciona 0
-                      return count + (obj.completed === true ? 1 : 0)
-                    },
-                    0,
-                  )) */
+              /* testar se o codig abaixo ta certo */
               const totalSessionsCompleted =
                 copyCachedUserWorkoutsLog.workoutsLog[
                   logIndex
                 ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
-                  (count, obj) => {
-                    return count + (obj.completed === true ? 1 : 0)
+                  (count, log) => {
+                    return (
+                      count +
+                      log.repetitionData.filter((rep) => rep.completed).length
+                    )
                   },
                   0,
                 )
+
               console.log(`totalSessionsCompleted atualizado`)
               console.log(totalSessionsCompleted)
 
@@ -2202,6 +2190,7 @@ function AuthProvider({ children }: AuthProviderProps) {
                 newExercise,
               )
               console.log(`createNewWeightDoneLog()`)
+              console.log(`testar se ta funcionando`)
               const totalSessionsCompleted =
                 (copyCachedUserWorkoutsLog.workoutsLog[
                   logIndex
@@ -2211,7 +2200,10 @@ function AuthProvider({ children }: AuthProviderProps) {
                   ].workoutCardsLogData[workoutLogIndex].weightDoneLogs.reduce(
                     (count, obj) => {
                       // Se o completed for true, adiciona 1 ao contador, senão adiciona 0
-                      return count + (obj.completed === true ? 1 : 0)
+                      return (
+                        count +
+                        obj.repetitionData.filter((rep) => rep.completed).length
+                      )
                     },
                     0,
                   ))

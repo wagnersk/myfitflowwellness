@@ -105,7 +105,7 @@ export function WorkoutCronometer({
           }}
         >
           <BlurViewAddSecondsWrapper intensity={30}>
-            <ArrowCounterClockwise width={36} height={36} fill={'white'} />
+            <ArrowCounterClockwise width={32} height={32} fill={'white'} />
           </BlurViewAddSecondsWrapper>
         </WorkoutCronometerButtonStart>
 
@@ -116,9 +116,9 @@ export function WorkoutCronometer({
         >
           <BlurViewAddSecondsWrapper intensity={30}>
             {isRunning ? (
-              <Pause width={36} height={36} fill={'white'} />
+              <Pause width={32} height={32} fill={'white'} />
             ) : (
-              <Play width={36} height={36} fill={'white'} />
+              <Play width={32} height={32} fill={'white'} />
             )}
           </BlurViewAddSecondsWrapper>
         </WorkoutCronometerButtonStart>

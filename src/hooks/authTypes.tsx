@@ -449,7 +449,7 @@ export interface ExerciseRecord {
   workoutExerciseIndex: number
   workoutExerciseId: string
   workoutExerciseDoneTimestamp: number
-  workoutExerciseWeight: number
+  workoutExerciseWeight: string
   workoutExerciseDone: boolean
 }
 
@@ -503,7 +503,43 @@ export interface MonthRecord {
 export interface YearRecord {
   [year: string]: MonthRecord
 }
+export interface IWeightRepetitionData {
+  // cada repeticao
+  weight: string
+  sets: string
+  completed: boolean
+  completedTimestamp: number
+}
 
+export interface IWeightDoneLog {
+  // dentro de cada exercicio
+  exerciseIndex: number
+  exerciseId: string
+
+  repetitionData: IWeightRepetitionData[] // repeticoes
+}
+
+export interface IWorkoutCardLogData {
+  // dentro do card A B C
+  cardIndex: number
+  weightDoneLogs: IWeightDoneLog[]
+
+  totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
+
+  lastCompletedTimestamp: number // mudar isso para algo mais descritivo com o real valor
+  lastCompletedFormattedDay: IptBrUs
+  lastCompletedFormattedDate: string
+}
+
+export interface IWorkoutLog {
+  workoutCardsLogData: IWorkoutCardLogData[] // A B C
+  nextWorkoutIndex: number // 1 ...2...3..
+  workoutId: string // id do treino que ta dentro de category no firebase
+}
+
+export interface IUserWorkoutsLog {
+  workoutsLog: IWorkoutLog[]
+}
 export type ExerciseHistoryData = YearRecord
 
 export interface ExerciseInterval {
@@ -517,10 +553,12 @@ export interface Exercise {
   workoutExerciseId: string // item para find
   workoutExerciseIndex: number // item para find
   workoutCardIndex: number // item para find
-  workoutExerciseWeight: number[] // fator para montar grafico
+
+  workoutExerciseWeight: string[] // fator para montar grafico
   workoutExerciseRestTimeNumber: number // fator para montar grafico
   workoutExerciseSets: string[] // fator para montar grafico
   workoutExerciseRepetition: string
+
   workoutExerciseMuscleGroup: IptBrUs // fator para montar grafico
   workoutExerciseName_insensitive: IptBrUs // fator para montar grafico
   updatedAt: number
@@ -590,35 +628,6 @@ export type IExercise =
 
 export type ICachedExerciseList = {
   [key in IMuscleGroups]: IExerciseType
-}
-
-export interface IWeightDoneLog {
-  exerciseIndex: number
-  exerciseId: string
-  weight: number[]
-  completed: boolean
-  completedTimestamp: number
-}
-
-export interface IWorkoutCardLogData {
-  cardIndex: number
-  weightDoneLogs: IWeightDoneLog[]
-
-  totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
-
-  lastCompletedTimestamp: number // mudar isso para algo mais descritivo com o real valor
-  lastCompletedFormattedDay: IptBrUs
-  lastCompletedFormattedDate: string
-}
-
-export interface IWorkoutLog {
-  workoutCardsLogData: IWorkoutCardLogData[] // A B C
-  nextWorkoutIndex: number // 1 ...2...3..
-  workoutId: string // id do treino que ta dentro de category no firebase
-}
-
-export interface IUserWorkoutsLog {
-  workoutsLog: IWorkoutLog[]
 }
 
 export interface INotes {

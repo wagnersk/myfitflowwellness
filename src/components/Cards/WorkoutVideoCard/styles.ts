@@ -139,6 +139,7 @@ export const WorkoutWeightValueAndTextWrapper = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  border-radius: 12px;
 `
 
 export const WorkoutWeightValueWrapper = styled.View`
@@ -151,6 +152,23 @@ export const WorkoutWeightValue = styled(TouchableOpacity)<Props>`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
+  flex-direction: row;
+  border-radius: 12px;
+  height: 36px;
+  width: 48px;
+  justify-content: center;
+  align-items: center;
+`
+export const WorkoutTimerValue = styled(TouchableOpacity)<Props>`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  flex-direction: row;
+  border-radius: 12px;
+  height: 36px;
+  width: 48px;
+  justify-content: center;
+  align-items: center;
 `
 
 export const WorkoutWeightText = styled.Text`
@@ -158,11 +176,31 @@ export const WorkoutWeightText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
 `
-
-export const WorkoutSerieValue = styled.Text`
+export const WorkoutTimerText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(12)}px;
+`
+export const WorkoutWeightMetric = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
+  font-size: ${RFValue(12)}px;
+`
+
+export const WorkoutSerieValue = styled.Text<{ activeWeightIndex: boolean }>`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
+  font-family: ${({ theme, activeWeightIndex }) =>
+    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
+
+  font-size: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `${RFValue(18)}px` : RFValue(14)};
+
+  text-decoration: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? 'underline' : 'none'};
+
+  text-decoration-color: ${({ theme, activeWeightIndex }) =>
+    activeWeightIndex ? theme.COLORS.NEUTRA_LETTER_AND_STROKE : 'transparent'};
 `
 
 export const WorkoutButtonConfirm = styled(TouchableOpacity)<Props>`

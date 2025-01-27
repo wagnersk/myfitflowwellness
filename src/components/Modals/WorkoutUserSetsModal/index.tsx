@@ -24,22 +24,22 @@ import {
 
 interface InputProps extends TextInputProps {
   closeModal: () => void
-  handleUpdateWeight: (weight: string) => void
-  weight: string
-  weightIndex: number
+  handleUpdateSets: (set: string) => void
+  sets: string
+  setsIndex: number
   exerciseName?: string
 }
 
-export function WorkoutUserWeightModal({
+export function WorkoutUserSetsModal({
   closeModal,
-  handleUpdateWeight,
-  weight,
-  weightIndex,
+  handleUpdateSets,
+  sets,
+  setsIndex,
   exerciseName,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false)
-  const [newWeight, setNewWeight] = useState(weight)
+  const [newSets, setNewSets] = useState(sets)
 
   function handleOverlayPress() {
     Keyboard.dismiss()
@@ -55,10 +55,10 @@ export function WorkoutUserWeightModal({
   }
 
   async function updateWeight() {
-    handleUpdateWeight(String(newWeight))
+    handleUpdateSets(String(newSets))
   }
 
-  function handleWeightChange(x: string) {
+  function handleSetsChange(x: string) {
     if (x === undefined) return
 
     // Permitir apenas números e pontos, mas garantir que apenas um ponto seja permitido
@@ -66,7 +66,7 @@ export function WorkoutUserWeightModal({
 
     // Permitir que o campo seja apagado completamente
     if (formattedValue === '') {
-      setNewWeight('')
+      setNewSets('')
       return
     }
 
@@ -79,7 +79,7 @@ export function WorkoutUserWeightModal({
     )
       return
 
-    setNewWeight(formattedValue)
+    setNewSets(formattedValue)
   }
 
   return (
@@ -96,12 +96,12 @@ export function WorkoutUserWeightModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TipsTitleNote>{exerciseName}</TipsTitleNote>
-                <TipsTitleNote>Peso da {weightIndex}º série</TipsTitleNote>
+                <TipsTitleNote>Rep da {setsIndex}º série</TipsTitleNote>
               </TipsTitleNoteWrapper>
 
               <TipsInputNotes
-                value={String(newWeight)}
-                onChangeText={handleWeightChange}
+                value={String(newSets)}
+                onChangeText={handleSetsChange}
                 textAlignVertical="top"
                 multiline={true}
                 isFocused={isFocused}
