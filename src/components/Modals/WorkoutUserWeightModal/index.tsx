@@ -54,15 +54,14 @@ export function WorkoutUserWeightModal({
     setIsFocused(false)
   }
 
-  async function updateWeight() {
-    handleUpdateWeight(String(newWeight))
-  }
-
   function handleWeightChange(x: string) {
     if (x === undefined) return
 
     // Permitir apenas números e pontos, mas garantir que apenas um ponto seja permitido
-    const formattedValue = x.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+    let formattedValue = x.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+
+    // Remover zeros à esquerda
+    formattedValue = formattedValue.replace(/^0+(?!$)/, '')
 
     // Permitir que o campo seja apagado completamente
     if (formattedValue === '') {
@@ -70,16 +69,30 @@ export function WorkoutUserWeightModal({
       return
     }
 
-    // Limitar o valor a 999.0, garantir que não seja negativo e que tenha no máximo duas casas decimais
-    const numberValue = Number(formattedValue)
-    if (
-      numberValue > 999.0 ||
-      numberValue < 0 ||
-      !/^\d+(\.\d{0,2})?$/.test(formattedValue)
-    )
+    // Garantir que o valor não comece com ponto ou tenha múltiplos pontos
+    if (formattedValue.startsWith('.') || formattedValue.includes('..')) {
       return
+    }
+    if (Number(formattedValue) > 999) {
+      return
+    }
+    const decimalIndex = formattedValue.indexOf('.')
+    if (decimalIndex !== -1 && formattedValue.length - decimalIndex - 1 > 2) {
+      formattedValue = formattedValue.slice(0, decimalIndex + 3)
+    }
 
     setNewWeight(formattedValue)
+  }
+
+  async function updateWeight() {
+    const formattedValue = newWeight.replace(/^0+(?!$)/, '')
+
+    // Garantir que o valor não comece com ponto ou tenha múltiplos pontos
+    if (formattedValue.startsWith('.') || formattedValue.includes('..')) {
+      return
+    }
+
+    handleUpdateWeight(formattedValue)
   }
 
   return (

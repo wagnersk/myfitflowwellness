@@ -5,6 +5,9 @@ import {
   Keyboard,
   TextInputProps,
   Platform,
+  View,
+  Button,
+  Alert,
 } from 'react-native'
 
 import {
@@ -14,12 +17,13 @@ import {
   TipsTitleNoteWrapper,
   TipsTitleNote,
   TipsInputNotes,
-  TipsButtonWrapper,
   TipsButton,
   TipsButtonText,
   TipsButtonLinearGradientSave,
   OverLayTop,
   OverLayBottom,
+  InputsWrapper,
+  TipsButtonWrapper,
 } from './styles'
 
 interface InputProps extends TextInputProps {
@@ -39,7 +43,8 @@ export function WorkoutUserSetsModal({
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false)
-  const [newSets, setNewSets] = useState(sets)
+  const [newSets, setNewSets] = useState(sets.split('-'))
+  const [showSecondInput, setShowSecondInput] = useState(newSets.length > 1)
 
   function handleOverlayPress() {
     Keyboard.dismiss()
@@ -55,31 +60,55 @@ export function WorkoutUserSetsModal({
   }
 
   async function updateWeight() {
-    handleUpdateSets(String(newSets))
+    // a diferenca entre os numeros naop pode ser maior que 4
+    const diff = Math.abs(Number(newSets[0]) - Number(newSets[1]))
+    if (diff > 4) {
+      return Alert.alert(
+        'Erro',
+        'A diferença entre os números não pode ser maior que 4',
+      )
+    }
+    const joinedSets = newSets.join('-')
+    handleUpdateSets(joinedSets)
   }
 
-  function handleSetsChange(x: string) {
+  function handleSetsFirstChange(x: string) {
     if (x === undefined) return
 
-    // Permitir apenas números e pontos, mas garantir que apenas um ponto seja permitido
-    const formattedValue = x.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+    const formattedValue = x.replace(/[^0-9]/g, '').slice(0, 2)
 
     // Permitir que o campo seja apagado completamente
     if (formattedValue === '') {
-      setNewSets('')
+      setNewSets(['', newSets[1] || ''])
       return
     }
 
-    // Limitar o valor a 999.0, garantir que não seja negativo e que tenha no máximo duas casas decimais
-    const numberValue = Number(formattedValue)
-    if (
-      numberValue > 999.0 ||
-      numberValue < 0 ||
-      !/^\d+(\.\d{0,2})?$/.test(formattedValue)
-    )
-      return
+    setNewSets([formattedValue, newSets[1] || ''])
+  }
 
-    setNewSets(formattedValue)
+  function handleSetsSecondChange(x: string) {
+    if (x === undefined) return
+
+    const formattedValue = x.replace(/[^0-9]/g, '').slice(0, 2)
+
+    // Permitir que o campo seja apagado completamente
+    if (formattedValue === '') {
+      setNewSets([newSets[0], ''])
+      return
+    }
+
+    setNewSets([newSets[0], formattedValue])
+  }
+
+  function addSecondInput() {
+    const defaultSecondValue = sets.split('-')
+    setShowSecondInput(true)
+    setNewSets([...newSets, defaultSecondValue[1] || ''])
+  }
+
+  function removeSecondInput() {
+    setShowSecondInput(false)
+    setNewSets([newSets[0]])
   }
 
   return (
@@ -98,18 +127,40 @@ export function WorkoutUserSetsModal({
                 <TipsTitleNote>{exerciseName}</TipsTitleNote>
                 <TipsTitleNote>Rep da {setsIndex}º série</TipsTitleNote>
               </TipsTitleNoteWrapper>
-
-              <TipsInputNotes
-                value={String(newSets)}
-                onChangeText={handleSetsChange}
-                textAlignVertical="top"
-                multiline={true}
-                isFocused={isFocused}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                keyboardType="numeric"
-                {...rest}
-              />
+              <InputsWrapper>
+                <TipsInputNotes
+                  value={newSets[0]}
+                  onChangeText={handleSetsFirstChange}
+                  textAlignVertical="top"
+                  multiline={true}
+                  isFocused={isFocused}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  keyboardType="numeric"
+                  {...rest}
+                />
+                {showSecondInput && <TipsTitleNote>-</TipsTitleNote>}
+                <View>
+                  {showSecondInput ? (
+                    <TipsInputNotes
+                      value={newSets[1]}
+                      onChangeText={handleSetsSecondChange}
+                      textAlignVertical="top"
+                      multiline={true}
+                      isFocused={isFocused}
+                      onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                      keyboardType="numeric"
+                      {...rest}
+                    />
+                  ) : (
+                    <Button title="Adicionar" onPress={addSecondInput} />
+                  )}
+                </View>
+                {showSecondInput && (
+                  <Button title="Remover" onPress={removeSecondInput} />
+                )}
+              </InputsWrapper>
             </TipsNoteWrapper>
 
             <TipsButtonWrapper>

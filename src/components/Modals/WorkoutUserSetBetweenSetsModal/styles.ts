@@ -26,7 +26,8 @@ export const Container = styled.View`
   background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  padding: 16px;
+  padding: 32px 16px;
+
   gap: 12px;
 `
 export const TipsNoteBodyWrapper = styled.View`
@@ -35,14 +36,16 @@ export const TipsNoteBodyWrapper = styled.View`
 
 export const TipsNoteWrapper = styled.View`
   gap: 24px;
+  align-items: center;
+  justify-content: center;
 `
 export const InputsWrapper = styled.View`
   gap: 24px;
   width: 100%;
   flex-direction: row;
-
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 `
 
 export const TipsTitleNoteWrapper = styled.View`
@@ -51,9 +54,16 @@ export const TipsTitleNoteWrapper = styled.View`
   align-items: center;
 `
 
-export const TipsTitleNote = styled.Text`
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+export const TitteText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(20)}px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const SubTitteText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(18)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
   justify-content: flex-start;
@@ -123,6 +133,21 @@ export const TipsButton = styled(TouchableOpacity)<TouchableOpacityButtonProps>`
   align-items: center;
   flex-direction: row;
   height: 48px;
+
   background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
   border-radius: 12px;
+`
+
+export const ItensButton = styled(
+  TouchableOpacity,
+)<TouchableOpacityButtonProps>`
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 48px;
+  width: 48px;
+  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `

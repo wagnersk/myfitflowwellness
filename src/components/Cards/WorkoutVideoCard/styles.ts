@@ -20,7 +20,7 @@ interface PropsToReduceHeight {
   isFocused: boolean
 }
 
-const cardHeight = Dimensions.get('window').height / 1.6 // 426
+const cardHeight = Dimensions.get('window').height / 1.5 // 426
 const cardWidth = Dimensions.get('window').width * 0.8 - 20 // 294.40000000000003
 
 const bottomCardHeight = cardHeight * 0.6 // 170.4
@@ -50,7 +50,7 @@ export const WorkoutInfoWrapper = styled.View`
   height: 100%;
   width: 100%;
   height: ${bottomCardHeight}px;
-  gap: 4px;
+  gap: 8px;
 `
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
@@ -62,7 +62,7 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   margin: 0 10px;
 
   align-items: center;
-  border-radius: 16px;
+  border-radius: 12px;
   height: ${cardHeight}px;
   width: ${cardWidth}px;
 
@@ -103,6 +103,7 @@ export const WorkoutRepetitionAndSerieWrapper = styled.View`
   height: 100%;
   align-items: flex-start;
   flex: 1;
+  padding-top: 4px;
 `
 
 export const ButtonsWrapper = styled.View`
@@ -159,7 +160,7 @@ export const WorkoutWeightValue = styled(TouchableOpacity)<Props>`
   justify-content: center;
   align-items: center;
 `
-export const WorkoutTimerValue = styled(TouchableOpacity)<Props>`
+export const WorkoutIndexButton = styled(TouchableOpacity)<Props>`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
@@ -171,20 +172,25 @@ export const WorkoutTimerValue = styled(TouchableOpacity)<Props>`
   align-items: center;
 `
 
-export const WorkoutWeightText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
+  color: ${({ theme, activedGreenColor }) =>
+    activedGreenColor
+      ? theme.COLORS.AUX_GOOGLE_GREEN
+      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
+  font-size: ${({ activedGreenColor }) =>
+    activedGreenColor ? `${RFValue(16)}px` : `${RFValue(14)}px`};
 `
-export const WorkoutTimerText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(12)}px;
-`
-export const WorkoutWeightMetric = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
+export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
+  color: ${({ theme, activedGreenColor }) =>
+    activedGreenColor
+      ? theme.COLORS.AUX_GOOGLE_GREEN
+      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
+  font-size: ${({ theme, activedGreenColor }) =>
+    activedGreenColor ? `${RFValue(18)}px` : `${RFValue(14)}px`};
 `
 
 export const WorkoutSerieValue = styled.Text<{ activeWeightIndex: boolean }>`
@@ -194,13 +200,7 @@ export const WorkoutSerieValue = styled.Text<{ activeWeightIndex: boolean }>`
     activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
 
   font-size: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? `${RFValue(18)}px` : RFValue(14)};
-
-  text-decoration: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? 'underline' : 'none'};
-
-  text-decoration-color: ${({ theme, activeWeightIndex }) =>
-    activeWeightIndex ? theme.COLORS.NEUTRA_LETTER_AND_STROKE : 'transparent'};
+    activeWeightIndex ? `${RFValue(18)}px` : `${RFValue(14)}px`};
 `
 
 export const WorkoutButtonConfirm = styled(TouchableOpacity)<Props>`
@@ -284,16 +284,3 @@ export const BulletsCronometerAndCTAButtonWrapper = styled.View`
 `
 
 export const WorkoutCronometerWrapper = styled.View``
-
-export const WorkoutUserNotes = styled(LinearGradient).attrs(({ theme }) => ({
-  colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
-  start: { x: 0, y: 0 },
-  end: { x: 1, y: 1 },
-}))`
-  height: 48px;
-  width: 48px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  flex-direction: row;
-`

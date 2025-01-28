@@ -507,6 +507,7 @@ export interface IWeightRepetitionData {
   // cada repeticao
   weight: string
   sets: string
+  setBetweenSets: string
   completed: boolean
   completedTimestamp: number
 }
