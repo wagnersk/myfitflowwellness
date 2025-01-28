@@ -178,11 +178,22 @@ export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
     activedGreenColor
       ? theme.COLORS.AUX_GOOGLE_GREEN
       : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  text-align: center;
 
   font-size: ${({ activedGreenColor }) =>
-    activedGreenColor ? `${RFValue(16)}px` : `${RFValue(14)}px`};
+    activedGreenColor ? `${RFValue(22)}px` : `${RFValue(14)}px`};
 `
 
+export const StrikethroughText = styled.Text`
+  text-decoration: line-through;
+  opacity: 0.5;
+`
+
+export const OverlayText = styled.Text`
+  position: absolute;
+  opacity: 1;
+  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+`
 export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
   color: ${({ theme, activedGreenColor }) =>
     activedGreenColor

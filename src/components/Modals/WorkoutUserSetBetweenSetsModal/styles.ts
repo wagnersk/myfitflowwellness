@@ -11,6 +11,7 @@ interface Props {
 
 type TouchableOpacityButtonProps = {
   children: ReactNode
+  selected?: boolean
 }
 
 export const OverLayTop = styled.View`
@@ -107,10 +108,13 @@ export const TipsButtonWrapper = styled.View`
   margin-bottom: 20px;
 `
 
-export const TipsButtonText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+export const TipsButtonText = styled.Text<{ selected: boolean }>`
+  color: ${({ theme, selected }) =>
+    selected
+      ? theme.COLORS.NEUTRA_LETTER_AND_STROKE
+      : theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
+  font-size: ${RFValue(18)}px;
 `
 
 export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
@@ -148,6 +152,10 @@ export const ItensButton = styled(
   width: 48px;
   background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
   border-radius: 12px;
-  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  ${({ selected }) =>
+    selected &&
+    css`
+      background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+    `}
 `

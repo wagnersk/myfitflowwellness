@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { View, StyleSheet, Button } from 'react-native'
-import { Video as ExpoVideo, ResizeMode } from 'expo-av'
+import { useVideoPlayer, VideoView } from 'expo-video'
+import { useEvent } from 'expo'
 
 interface Props {
   closeVideoPlayer: () => void
@@ -8,53 +9,60 @@ interface Props {
 }
 
 export function CachedVideoPlayerModal({ localPath, closeVideoPlayer }: Props) {
-  const videoRef = useRef<ExpoVideo>(null)
+  const player = useVideoPlayer(localPath, (player) => {
+    player.loop = true
+    player.play()
+  })
+
+  const { isPlaying } = useEvent(player, 'playingChange', {
+    isPlaying: player.playing,
+  })
   return (
-    <View style={styles.container}>
+    <View style={styles.contentContainer}>
       {localPath ? (
-        <ExpoVideo
-          ref={videoRef}
-          style={styles.video}
-          source={{ uri: localPath }}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          shouldPlay
-          //  onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-        />
+        <>
+          <VideoView
+            style={styles.video}
+            player={player}
+            allowsFullscreen
+            allowsPictureInPicture
+          />
+          <View style={styles.controlsContainer}>
+            <Button
+              title={isPlaying ? 'Pause' : 'Play'}
+              onPress={() => {
+                if (isPlaying) {
+                  player.pause()
+                } else {
+                  player.play()
+                }
+              }}
+            />
+          </View>
+        </>
       ) : (
-        <View style={styles.loadingContainer}>
+        <View style={styles.contentContainer}>
           {/* Adicione um indicador de carregamento aqui, se necessário */}
         </View>
       )}
-      <View style={styles.buttons}>
-        <Button title="Voltar" onPress={closeVideoPlayer} />
-      </View>
+      <Button title="Voltar" onPress={closeVideoPlayer} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  contentContainer: {
     flex: 1,
+    padding: 10,
+    alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
+    paddingHorizontal: 50,
   },
   video: {
-    flex: 1,
-    alignSelf: 'center',
-    width: '100%',
-    height: '100%',
+    width: 350,
+    height: 275,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 80,
+  controlsContainer: {
+    padding: 10,
   },
 })

@@ -12,7 +12,14 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+       "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",

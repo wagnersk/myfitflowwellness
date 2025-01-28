@@ -86,6 +86,7 @@ export const TipsInputNotes = styled(TextInput)<Props>`
 export const TipsButtonWrapper = styled.View`
   width: 100%;
   margin-bottom: 20px;
+  gap: 12px;
 `
 
 export const TipsButtonText = styled.Text`

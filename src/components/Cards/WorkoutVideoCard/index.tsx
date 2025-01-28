@@ -64,6 +64,8 @@ import {
   BlurViewAddSecondsWrapper,
   WorkoutWeightMetric,
   WorkoutIndexButton,
+  StrikethroughText,
+  OverlayText,
 } from './styles'
 import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
 import { WorkoutCronometer } from '@components/WorkoutCronometer'
@@ -301,6 +303,23 @@ function WorkoutVideoCardComponent({
     },
     [modalWeightState, closeSets],
   )
+  const handleUpdateSetBetweenSets = useCallback(
+    async (setBetweenSets: string) => {
+      /* 
+      setBetweenSets: 0,
+      */
+      console.log(`chegando na setBetweenSets:`, setBetweenSets)
+      const copyProgression = modalWeightState || {} // jogar state aqui
+
+      copyProgression.repetitionData[
+        modalWeightState.activeWeightIndex
+      ].setBetweenSets = setBetweenSets
+
+      setModalWeightState(copyProgression)
+      closeSets()
+    },
+    [modalWeightState, closeSets],
+  )
 
   const handleUpdateWeight = useCallback(
     async (_weight: string) => {
@@ -318,9 +337,86 @@ function WorkoutVideoCardComponent({
     [modalWeightState, closeWeight],
   )
 
+  function handleUpdateAllWeightValidate(weight: string) {
+    // se todos forem igual ao weight eu nao pergunto
+
+    const allWeightsAreEqual = modalWeightState.repetitionData.every(
+      (v) => v.weight === weight,
+    )
+    if (!allWeightsAreEqual) {
+      handleUpdateAllWeight(weight)
+    }
+    if (allWeightsAreEqual) {
+      onUpdateAll(weight)
+      closeWeight()
+    }
+  }
+
+  const handleUpdateAllWeight = useCallback(
+    async (_weight: string) => {
+      Alert.alert(
+        'Confirmação',
+        'Você realmente quer sobrescrever todos os pesos?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Confirmar',
+            onPress: () => {
+              onUpdateAll(_weight)
+              closeWeight()
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    },
+    [modalWeightState, closeWeight],
+  )
+
+  function onUpdateAll(_weight: string) {
+    const copyProgression = modalWeightState || {}
+
+    const copyProgressionRep =
+      modalWeightState?.repetitionData.map((v) => ({
+        ...v,
+        weight: _weight,
+      })) || {}
+
+    copyProgression.repetitionData = copyProgressionRep
+    setModalWeightState(copyProgression)
+  }
+
   function handleDoneWorkout() {
-    openSetBetweenSets(modalWeightState.activeWeightIndex)
-    return
+    const length =
+      modalWeightState.repetitionData[
+        modalWeightState.activeWeightIndex
+      ].sets.split('-').length
+
+    const haveTwoSets =
+      modalWeightState.repetitionData[modalWeightState.activeWeightIndex]
+        .setBetweenSets &&
+      modalWeightState.repetitionData[
+        modalWeightState.activeWeightIndex
+      ].sets.split('-').length > 1
+
+    const alreadyChoosed =
+      modalWeightState.repetitionData[modalWeightState.activeWeightIndex]
+        .setBetweenSets &&
+      modalWeightState.repetitionData[modalWeightState.activeWeightIndex]
+        .setBetweenSets !== '0'
+
+    console.log(`antes active index eh `, modalWeightState.activeWeightIndex)
+    console.log(`length`, length)
+    if (!alreadyChoosed && haveTwoSets) {
+      console.log(`modalWeightState`, modalWeightState.activeWeightIndex)
+
+      openSetBetweenSets(modalWeightState.activeWeightIndex)
+      return
+    }
+
     console.log(`acabou o treino`, modalWeightState)
     if (modalWeightState.isLastIndex) {
       console.log(`acabou o treino`)
@@ -349,14 +445,12 @@ function WorkoutVideoCardComponent({
     ].completedTimestamp = new Date().getTime()
 
     const getNextIndex = copyProgression.activeWeightIndex + 1
-    console.log(`getNextIndex`, getNextIndex)
-    console.log(
-      `copyProgression.repetitionData.length`,
-      copyProgression.repetitionData.length,
-    )
+
     if (getNextIndex < copyProgression.repetitionData.length) {
+      console.log(`entro1`)
       copyProgression.activeWeightIndex = getNextIndex
     } else {
+      console.log(`entro2`)
       copyProgression.isLastIndex = true
     }
 
@@ -730,6 +824,7 @@ function WorkoutVideoCardComponent({
   function handleSetCompletedCheck(index: number) {
     const copyModalWeightState = { ...modalWeightState }
     console.log(`tegste`, index)
+
     if (copyModalWeightState.repetitionData[index].completed) {
       const hasFollowingCompleted = copyModalWeightState.repetitionData
         .slice(index + 1)
@@ -772,32 +867,78 @@ function WorkoutVideoCardComponent({
         isLastIndex,
       }
     })
-    function desmarcarItem(index: number, copyModalWeightState: any) {
-      const completedTimestamp = new Date().getTime()
-
-      copyModalWeightState.repetitionData[index].completed = false
-      copyModalWeightState.repetitionData[index].completedTimestamp =
-        completedTimestamp
-
+    function desmarcarItem(
+      index: number,
+      copyModalWeightState: IModalStateWorkoutLogData,
+    ) {
       const reajustedCompleted = copyModalWeightState.repetitionData.map(
         (v, i) => {
-          if (i > index) {
+          const indexLimit = index - 1
+          if (i > indexLimit) {
             return {
               ...v,
               completed: false,
               completedTimestamp: 0,
+              setBetweenSets: '0',
             }
-          } else {
-            return { ...v }
           }
+          return v
         },
       )
+      /*  precisa sair nesse wformato
+ 
 
+interface IModalStateWorkoutLogData extends IWeightDoneLog {
+  isOpenModalUserNotes: boolean
+  isOpenModalVideoPlayer: boolean
+  isOpenModalUserWeight: boolean
+  isOpenModalUserSets: boolean
+  isOpenModalSetBetweenSets: boolean
+  workoutCardIndex: number
+  activeWeightIndex: number
+  isLastIndex: boolean
+
+    exerciseIndex: number
+  exerciseId: string
+
+  repetitionData: IWeightRepetitionData[] // repeticoes
+}
+ */
       copyModalWeightState.repetitionData = reajustedCompleted
       copyModalWeightState.activeWeightIndex = index
       copyModalWeightState.isLastIndex = false
-
+      console.log(`copyModalWeightState`)
+      console.log(copyModalWeightState)
       setModalWeightState(copyModalWeightState)
+
+      /* 
+  const defaultModalState: IModalStateWorkoutLogData = {
+    isOpenModalUserNotes: false,
+    isOpenModalVideoPlayer: false,
+    isOpenModalUserWeight: false,
+    isOpenModalUserSets: false,
+    isOpenModalSetBetweenSets: false,
+    isLastIndex: false,
+    workoutCardIndex: 0,
+    exerciseIndex: 0,
+    exerciseId: `0`,
+    repetitionData: item.workoutExerciseSets?.map((v) => ({
+      completed: false,
+      completedTimestamp: 0,
+      setBetweenSets: '0',
+      sets: v,
+      weight: '0',
+    })) || [
+      {
+        completed: false,
+        completedTimestamp: 0,
+        sets: '0',
+        setBetweenSets: '0',
+        weight: '0',
+      },
+    ],
+    activeWeightIndex: 0,
+  } */
     }
 
     function marcarItem(index: number, copyModalWeightState: any) {
@@ -905,6 +1046,7 @@ function WorkoutVideoCardComponent({
     if (exerciseIndex !== 0 && user?.anonymousUser) {
       return
     }
+    console.log(`aeaeaea`)
     // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
     setModalWeightState((prevState) => ({
       ...prevState,
@@ -977,9 +1119,13 @@ function WorkoutVideoCardComponent({
       return selectedLanguage === 'pt-br' ? 'Pular descanso' : 'Skip rest'
     }
 
-    return selectedLanguage === 'pt-br' ? 'Marcar série' : 'Mark set'
+    return selectedLanguage === 'pt-br'
+      ? 'Registrar repetição'
+      : 'Register repetition'
   }
+
   // const openedTimeRef = useRef(new Date().getTime())
+
   useEffect(() => {
     handlePause()
     const time = new Date()
@@ -1132,7 +1278,7 @@ function WorkoutVideoCardComponent({
         {item.workoutExerciseThumbnailUrl && (
           <WorkoutVideoPlayerButton
             disabled={exerciseIndex !== 0 && user?.anonymousUser}
-            onPress={openVideoPlayer}
+            onPress={isFocused ? openVideoPlayer : () => {}}
             enabled={isFocused}
           >
             <View
@@ -1193,7 +1339,7 @@ function WorkoutVideoCardComponent({
                             : firstIncompleteIndex < i
                         }
                         onPress={() => {
-                          updateActiveWeightIndexSets(i)
+                          isFocused && updateActiveWeightIndexSets(i)
                         }}
                       >
                         <WorkoutSerieValue
@@ -1212,17 +1358,28 @@ function WorkoutVideoCardComponent({
                         /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
                         disabled={exerciseIndex !== 0}
                         onPress={() => {
-                          openSets(i)
+                          isFocused &&
+                          modalWeightState.repetitionData[i].setBetweenSets !==
+                            `0`
+                            ? openSetBetweenSets(i)
+                            : openSets(i)
                         }}
                       >
-                        <WorkoutWeightText
-                          activedGreenColor={
-                            modalWeightState.activeWeightIndex === i &&
-                            modalWeightState.isOpenModalUserSets
-                          }
-                        >
-                          {v.sets}
-                        </WorkoutWeightText>
+                        {v.setBetweenSets === `0` ? (
+                          <WorkoutWeightText
+                            activedGreenColor={
+                              modalWeightState.activeWeightIndex === i &&
+                              modalWeightState.isOpenModalUserSets
+                            }
+                          >
+                            {v.sets}
+                          </WorkoutWeightText>
+                        ) : (
+                          <WorkoutWeightText activedGreenColor={true}>
+                            {v.setBetweenSets}
+                          </WorkoutWeightText>
+                        )}
+
                         <WorkoutWeightMetric
                           activedGreenColor={
                             modalWeightState.activeWeightIndex === i &&
@@ -1241,7 +1398,7 @@ function WorkoutVideoCardComponent({
                           /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
                           disabled={exerciseIndex !== 0}
                           onPress={() => {
-                            openWeight(i)
+                            isFocused && openWeight(i)
                           }}
                         >
                           <WorkoutWeightText
@@ -1272,7 +1429,7 @@ function WorkoutVideoCardComponent({
                             ? false
                             : firstIncompleteIndex < i
                         }
-                        onPress={() => handleSetCompletedCheck(i)}
+                        onPress={() => isFocused && handleSetCompletedCheck(i)}
                       >
                         {modalWeightState.activeWeightIndex <= i &&
                         i <= lastCompletedIndex &&
@@ -1309,53 +1466,54 @@ function WorkoutVideoCardComponent({
             </TableWrapper>
           </ScrollView>
         </WorkoutRepetitionAndSerieWrapper>
+        {isFocused && (
+          <WorkoutUserNotesAndConfirmButtonWrapper>
+            <WorkoutUserNotesButton
+              disabled={exerciseIndex !== 0 && user?.anonymousUser}
+              onPress={isFocused && openNotes}
+              enabled={isFocused}
+              style={{ opacity: isFocused ? 1 : 0.4 }}
+            >
+              <BlurViewAddSecondsWrapper intensity={30}>
+                <FileText
+                  width={28}
+                  height={28}
+                  fill={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
+                />
+              </BlurViewAddSecondsWrapper>
+            </WorkoutUserNotesButton>
 
-        <WorkoutUserNotesAndConfirmButtonWrapper>
-          <WorkoutUserNotesButton
-            disabled={exerciseIndex !== 0 && user?.anonymousUser}
-            onPress={openNotes}
-            enabled={isFocused}
-            style={{ opacity: isFocused ? 1 : 0.4 }}
-          >
-            <BlurViewAddSecondsWrapper intensity={30}>
-              <FileText
-                width={28}
-                height={28}
-                fill={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
-              />
-            </BlurViewAddSecondsWrapper>
-          </WorkoutUserNotesButton>
-
-          <WorkoutButtonConfirm
-            disabled={exerciseIndex !== 0 && user?.anonymousUser}
-            onPress={() =>
-              modalWeightState &&
-              modalWeightState.repetitionData &&
-              modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
-              ] &&
-              modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
-              ].completed
-                ? handleSetCompletedCheck(modalWeightState.activeWeightIndex)
-                : handleDoneWorkout()
-            }
-            workoutExerciseDone={
-              modalWeightState &&
-              modalWeightState.repetitionData &&
-              modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
-              ] &&
-              modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
-              ].completed
-            }
-          >
-            <BlurViewWrapper intensity={30}>
-              <WorkoutButtonText>{buttonText}</WorkoutButtonText>
-            </BlurViewWrapper>
-          </WorkoutButtonConfirm>
-        </WorkoutUserNotesAndConfirmButtonWrapper>
+            <WorkoutButtonConfirm
+              disabled={exerciseIndex !== 0 && user?.anonymousUser}
+              onPress={() =>
+                modalWeightState &&
+                modalWeightState.repetitionData &&
+                modalWeightState.repetitionData[
+                  modalWeightState.activeWeightIndex
+                ] &&
+                modalWeightState.repetitionData[
+                  modalWeightState.activeWeightIndex
+                ].completed
+                  ? handleSetCompletedCheck(modalWeightState.activeWeightIndex)
+                  : handleDoneWorkout()
+              }
+              workoutExerciseDone={
+                modalWeightState &&
+                modalWeightState.repetitionData &&
+                modalWeightState.repetitionData[
+                  modalWeightState.activeWeightIndex
+                ] &&
+                modalWeightState.repetitionData[
+                  modalWeightState.activeWeightIndex
+                ].completed
+              }
+            >
+              <BlurViewWrapper intensity={30}>
+                <WorkoutButtonText>{buttonText}</WorkoutButtonText>
+              </BlurViewWrapper>
+            </WorkoutButtonConfirm>
+          </WorkoutUserNotesAndConfirmButtonWrapper>
+        )}
 
         {exerciseIndex !== 0 && user?.anonymousUser && (
           <OverLayWaterMarkButton onPress={handlePress} />
@@ -1396,6 +1554,7 @@ function WorkoutVideoCardComponent({
         <WorkoutUserWeightModal
           closeModal={closeWeight} // Método para fechar o modal (iOS, Android)
           handleUpdateWeight={handleUpdateWeight}
+          handleUpdateAllWeight={handleUpdateAllWeightValidate}
           weight={
             (modalWeightState &&
               modalWeightState.repetitionData &&
@@ -1407,7 +1566,7 @@ function WorkoutVideoCardComponent({
               ].weight) ||
             ''
           }
-          weightIndex={modalWeightState.activeWeightIndex + 1}
+          weightIndex={modalWeightState.activeWeightIndex}
           exerciseName={
             item.workoutExerciseName
               ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
@@ -1475,7 +1634,7 @@ function WorkoutVideoCardComponent({
               : `Reps of set ${modalWeightState.activeWeightIndex + 1}`
           }
           closeModal={closeSetBetweenSets} // Método para fechar o modal (iOS, Android)
-          handleUpdateSets={handleUpdateSets}
+          handleUpdateSetBetweenSets={handleUpdateSetBetweenSets}
           sets={
             (modalWeightState &&
               modalWeightState.repetitionData &&
@@ -1487,10 +1646,16 @@ function WorkoutVideoCardComponent({
               ].sets) ||
             ''
           }
-          exerciseName={
-            item.workoutExerciseName
-              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
-              : ''
+          setBetweenSets={
+            (modalWeightState &&
+              modalWeightState.repetitionData &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ] &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ].setBetweenSets) ||
+            ''
           }
         />
       </Modal>

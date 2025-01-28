@@ -25,6 +25,7 @@ import {
 interface InputProps extends TextInputProps {
   closeModal: () => void
   handleUpdateWeight: (weight: string) => void
+  handleUpdateAllWeight: (weight: string) => void
   weight: string
   weightIndex: number
   exerciseName?: string
@@ -33,6 +34,7 @@ interface InputProps extends TextInputProps {
 export function WorkoutUserWeightModal({
   closeModal,
   handleUpdateWeight,
+  handleUpdateAllWeight,
   weight,
   weightIndex,
   exerciseName,
@@ -94,6 +96,16 @@ export function WorkoutUserWeightModal({
 
     handleUpdateWeight(formattedValue)
   }
+  async function updateAllWeight() {
+    const formattedValue = newWeight.replace(/^0+(?!$)/, '')
+
+    // Garantir que o valor não comece com ponto ou tenha múltiplos pontos
+    if (formattedValue.startsWith('.') || formattedValue.includes('..')) {
+      return
+    }
+
+    handleUpdateAllWeight(formattedValue)
+  }
 
   return (
     <KeyboardAvoidingView
@@ -109,7 +121,7 @@ export function WorkoutUserWeightModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TipsTitleNote>{exerciseName}</TipsTitleNote>
-                <TipsTitleNote>Peso da {weightIndex}º série</TipsTitleNote>
+                <TipsTitleNote>Peso da {weightIndex + 1}º série</TipsTitleNote>
               </TipsTitleNoteWrapper>
 
               <TipsInputNotes
@@ -131,6 +143,14 @@ export function WorkoutUserWeightModal({
                   <TipsButtonText>Salvar</TipsButtonText>
                 </TipsButtonLinearGradientSave>
               </TipsButton>
+
+              {weightIndex === 0 && (
+                <TipsButton onPress={updateAllWeight}>
+                  <TipsButtonLinearGradientSave colors={['#000000', '#FFFFFF']}>
+                    <TipsButtonText>Salvar para todos</TipsButtonText>
+                  </TipsButtonLinearGradientSave>
+                </TipsButton>
+              )}
             </TipsButtonWrapper>
           </TipsNoteBodyWrapper>
         </Container>
