@@ -181,7 +181,7 @@ export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
   text-align: center;
 
   font-size: ${({ activedGreenColor }) =>
-    activedGreenColor ? `${RFValue(22)}px` : `${RFValue(14)}px`};
+    activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
 `
 
 export const StrikethroughText = styled.Text`
@@ -200,8 +200,8 @@ export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
       ? theme.COLORS.AUX_GOOGLE_GREEN
       : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${({ theme, activedGreenColor }) =>
-    activedGreenColor ? `${RFValue(18)}px` : `${RFValue(14)}px`};
+  font-size: ${({ activedGreenColor }) =>
+    activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
 `
 
 export const WorkoutSerieValue = styled.Text<{ activeWeightIndex: boolean }>`
