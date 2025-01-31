@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/core'
 import { useFocusEffect, useRoute } from '@react-navigation/native'
 
 import { BackButton } from '@components/Buttons/BackButton'
-import { WorkoutVideoCard } from '@components/Cards/WorkoutVideoCard'
+import { WorkoutVideoCard } from '@screens/Users/Home/3-UserWorkout/Components/WorkoutVideoCard'
 import { WorkoutCronometer } from '@components/WorkoutCronometer'
 import { BulletList } from '@components/Bullet/BulletList'
 

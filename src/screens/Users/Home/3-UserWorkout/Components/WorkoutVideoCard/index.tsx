@@ -14,12 +14,13 @@ import { Image } from 'expo-image'
 import { useAuth } from '@hooks/auth'
 
 import { format, isSameDay } from 'date-fns'
-import { ptBR, enUS, is } from 'date-fns/locale'
+import { ptBR, enUS } from 'date-fns/locale'
 import * as FileSystem from 'expo-file-system'
 
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
 import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
 import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
+
 import Check from '@assets/Check.svg'
 import Close from '@assets/Close.svg'
 import More from '@assets/More.svg'
@@ -66,16 +67,14 @@ import {
   BlurViewAddSecondsWrapper,
   WorkoutWeightMetric,
   WorkoutIndexButton,
-  StrikethroughText,
-  OverlayText,
 } from './styles'
 import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
 import { WorkoutCronometer } from '@components/WorkoutCronometer'
 import { AnimatedCircularProgress } from 'react-native-circular-progress'
 import { useTimer } from 'react-timer-hook'
 import { WorkoutUserSetsModal } from '@components/Modals/WorkoutUserSetsModal'
-import { WorkoutUserSetBetweenSetsModal } from '@components/Modals/WorkoutUserSetBetweenSetsModal'
-import { opacity } from 'react-native-reanimated/lib/typescript/Colors'
+import { WorkoutUserRangeOfSetsModal } from '@components/Modals/WorkoutUserRangeOfSetsModal'
+import WorkoutRepetitionsData from './Components/WorkoutRepetitionsData'
 
 interface Props {
   item: IFormattedCardExerciseData
@@ -108,40 +107,18 @@ function WorkoutVideoCardComponent({
   const theme = useTheme()
   const time = new Date()
   const {
-    updateCachedNotesTable,
-    cachedNotesTable,
     updateCachedVideoTable,
     cachedVideoTable,
-    cachedUserWorkoutsLog,
-    myWorkout,
+
+    cachedUserWorkoutsLog, // log do peso pessoal do usuario, é o cache que carrega com os cards
+    myWorkout, // CACHE DO TREINO DIRETO DO FIREBASE
+
     updateCachedUserWorkoutsLog,
     saveWeightProgression,
     user,
   } = useAuth()
 
   const selectedLanguage = user?.selectedLanguage
-
-  const defaultModalState: IModalStateWorkoutLogData = {
-    isOpenModalUserNotes: false,
-    isOpenModalVideoPlayer: false,
-    isOpenModalUserWeight: false,
-    isOpenModalUserSets: false,
-    isOpenModalSetBetweenSets: false,
-
-    workoutCardIndex: 0,
-    exerciseIndex: 0,
-    exerciseId: `0`,
-    repetitionData: [
-      {
-        completed: false,
-        completedTimestamp: 0,
-        sets: '0',
-        setBetweenSets: '0',
-        weight: '0',
-      },
-    ],
-    activeWeightIndex: 0,
-  }
 
   const { seconds, minutes, isRunning, pause, restart, resume, totalSeconds } =
     useTimer({
@@ -152,94 +129,120 @@ function WorkoutVideoCardComponent({
   const [restTimeState, setRestTimeState] = useState<number | null>(null)
   const elapsedTime = (restTimeState ?? 0) - totalSeconds
   const percentage = restTimeState ? (elapsedTime / restTimeState) * 100 : 0
-  const invertedPercentage = 100 - percentage
+  // const invertedPercentage = 100 - percentage
 
   useEffect(() => {
     setRestTimeState(restTime)
   }, [restTime])
 
   // criar variavel que armazena o restTime que pode ser alterado
+  const cachedDefaultModalState: IModalStateWorkoutLogData = {
+    isOpenModalUserNotes: false,
+    isOpenModalVideoPlayer: false,
+    isOpenModalUserWeight: false,
+    isOpenModalUserSets: false,
+    isOpenModalSetBetweenSets: false,
+    activeWeightIndex: 0,
+    workoutCardIndex: 0,
+    exerciseIndex: 0,
+    exerciseId: item.workoutExerciseId || '',
+    repetitionData: [
+      {
+        completed: { isCompleted: false, createdAt: 0, updatedAt: 0 },
+        sets: {
+          value: 0,
+          isActivedRangeOfSets: false,
+          rangeOfSets: [],
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        },
+        weight: {
+          value: `0`,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        },
+        createdAt: new Date().getTime(),
+        updatedAt: new Date().getTime(),
+      },
+    ],
+    notes: {
+      value: '',
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
+    },
+    time: {
+      value: `0`,
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
+    },
+  }
 
   const initialModalState = useMemo(() => {
-    // marcar tempo inicio
-
-    let cachedCardWeightLog: IWeightDoneLog = {} as IWeightDoneLog
+    let cachedCardWeightLog = cachedDefaultModalState
 
     if (cachedUserWorkoutsLog && cachedUserWorkoutsLog.workoutsLog) {
+      if (cachedUserWorkoutsLog?.userId !== user?.id) return
       const sessionIndex = cachedUserWorkoutsLog.workoutsLog.findIndex(
         (v) => v.workoutId === workoutId,
       )
+      if (sessionIndex === -1) return
 
-      if (sessionIndex !== -1) {
-        const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
-          sessionIndex
-        ].workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
+      const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
+        sessionIndex
+      ].workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
 
-        if (findCachedCard && findCachedCard.weightDoneLogs) {
-          const weightLog = findCachedCard.weightDoneLogs.find(
-            (log) => log.exerciseIndex === exerciseIndex,
-          )
+      if (findCachedCard && findCachedCard.weightDoneLogs) {
+        const weightLog = findCachedCard.weightDoneLogs.find(
+          (log) => log.exerciseIndex === exerciseIndex,
+        )
 
-          if (weightLog) {
-            cachedCardWeightLog = weightLog
+        if (weightLog) {
+          cachedCardWeightLog = {
+            ...cachedDefaultModalState,
+            ...weightLog,
           }
         }
       }
     }
 
-    cachedCardWeightLog.repetitionData = item.workoutExerciseSets?.map((v) => ({
-      completed: false,
-      completedTimestamp: 0,
-      setBetweenSets: '0',
-      sets: v,
-      weight: '0',
-    })) || [
-      {
-        completed: false,
-        completedTimestamp: 0,
-        sets: '0',
-        setBetweenSets: '0',
-        weight: '0',
-      },
-    ]
-    console.log(`cachedCardWeightLog`, cachedCardWeightLog)
     const getLastCompletedTimestamp = cachedCardWeightLog.repetitionData.reduce(
       (latest, current) =>
-        current.completedTimestamp > latest.completedTimestamp
-          ? current
-          : latest,
-      { completedTimestamp: 0 } as IWeightRepetitionData,
+        current.updatedAt > latest.updatedAt ? current : latest,
+      { updatedAt: 0 } as IWeightRepetitionData,
     )
     const todayDate = new Date()
 
-    const areSameDay = getLastCompletedTimestamp?.completedTimestamp
-      ? isSameDay(todayDate, getLastCompletedTimestamp.completedTimestamp)
+    const areSameDay = getLastCompletedTimestamp?.updatedAt
+      ? isSameDay(todayDate, getLastCompletedTimestamp.updatedAt)
       : false
 
     if (areSameDay) {
-      const updated = cachedCardWeightLog.repetitionData.map((v) => {
-        return {
-          ...v,
-          completed: areSameDay ? v.completed : false,
-          completedTimestamp: 0,
-        }
-      })
-      cachedCardWeightLog.repetitionData = updated
-    }
-    const finalData: IModalStateWorkoutLogData = {
-      ...defaultModalState,
-      ...cachedCardWeightLog,
+      const cleanCompletedDones = cachedCardWeightLog.repetitionData.map(
+        (v) => {
+          return {
+            ...v,
+            completed: {
+              isCompleted: areSameDay ? v.completed.isCompleted : false,
+              createdAt: new Date().getTime(),
+              updatedAt: new Date().getTime(),
+            },
+          }
+        },
+      )
+      cachedCardWeightLog.repetitionData = cleanCompletedDones
     }
 
-    return finalData
+    return cachedCardWeightLog
   }, [cachedUserWorkoutsLog, workoutId, workoutCardIndex, exerciseIndex])
 
   const [modalWeightState, setModalWeightState] =
-    useState<IModalStateWorkoutLogData>(initialModalState)
+    useState<IModalStateWorkoutLogData>(
+      initialModalState || cachedDefaultModalState,
+    )
+
   const allItensCompleted = modalWeightState.repetitionData.every(
     (v) => v.completed,
   )
-  const [modalNotesState, setModalNotesState] = useState<string>('')
 
   const [modalVideoLocalPathState, setModalVideoLocalPathState] =
     useState<string>('')
@@ -251,35 +254,10 @@ function WorkoutVideoCardComponent({
   const firstIncompleteIndex = modalWeightState.repetitionData.findIndex(
     (v) => !v.completed,
   )
-  console.log(`firstIncompleteIndex`, firstIncompleteIndex)
+
   const lastCompletedIndex = modalWeightState.repetitionData.reduceRight(
     (lastIndex, v, i) => (v.completed && lastIndex === -1 ? i : lastIndex),
     -1,
-  )
-
-  const handleUpdateNotes = useCallback(
-    async (_notes: string) => {
-      if (!_notes) return
-
-      if (!item.workoutExerciseId) return
-
-      const { workoutExerciseId } = item
-
-      await updateCachedNotesTable(
-        _notes,
-        workoutExerciseId,
-        workoutCardIndex,
-        exerciseIndex,
-      )
-
-      setModalWeightState((prevState) => ({
-        ...prevState,
-        isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
-      }))
-
-      setModalNotesState(_notes)
-    },
-    [item, workoutCardIndex, exerciseIndex, updateCachedNotesTable],
   )
 
   const closeSets = useCallback(() => {
@@ -305,52 +283,92 @@ function WorkoutVideoCardComponent({
     }))
   }, [lastCompletedIndex])
 
-  const handleUpdateSets = useCallback(
-    async (rep: string) => {
-      /* 
-      setBetweenSets: 0,
-      */
-      console.log(`chegando na rep:`, rep)
-      const copyProgression = modalWeightState || {} // jogar state aqui
-
-      copyProgression.repetitionData[modalWeightState.activeWeightIndex].sets =
-        rep
-
-      setModalWeightState(copyProgression)
-      closeSets()
-    },
-    [modalWeightState, closeSets],
-  )
-
-  const handleUpdateSetBetweenSets = useCallback(
-    async (setBetweenSets: string) => {
-      console.log(`chegando na setBetweenSets:`, setBetweenSets)
-      const copyProgression = modalWeightState || {} // jogar state aqui
-
-      copyProgression.repetitionData[
-        modalWeightState.activeWeightIndex
-      ].setBetweenSets = setBetweenSets
-
-      setModalWeightState(copyProgression)
-      closeSets()
-    },
-    [modalWeightState, closeSets],
-  )
-
   const handleUpdateWeight = useCallback(
     async (_weight: string) => {
       console.log(`chegando no peso:`, _weight)
+      setModalWeightState((prevState) => ({
+        ...prevState,
+        isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
+        weight: {
+          value: _weight,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        },
+      }))
 
-      const copyProgression = modalWeightState || [] // jogar state aqui
-
-      copyProgression.repetitionData[
-        modalWeightState.activeWeightIndex
-      ].weight = _weight
-
-      setModalWeightState(copyProgression)
       closeWeight()
     },
     [modalWeightState, closeWeight],
+  )
+
+  const handleUpdateNotes = useCallback(
+    async (_notes: string) => {
+      if (!_notes) return
+
+      setModalWeightState((prevState) => ({
+        ...prevState,
+        isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
+        notes: {
+          ...prevState.notes,
+          value: _notes,
+          updatedAt: new Date().getTime(),
+        },
+      }))
+
+      closeNotes()
+    },
+    [item],
+  )
+
+  const handleUpdateSets = useCallback(
+    async (
+      value: number,
+      rangeOfSets: number[],
+      isActivedRangeOfSets: boolean,
+    ) => {
+      /* 
+      setBetweenSets: 0,
+      */
+      console.log(`chegando handleUpdateSets value:`, value)
+      const copyProgression = modalWeightState || {} // jogar state aqui
+
+      copyProgression.repetitionData[modalWeightState.activeWeightIndex].sets =
+        {
+          value,
+          rangeOfSets,
+          isActivedRangeOfSets,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        }
+
+      setModalWeightState(copyProgression)
+      closeSets()
+    },
+    [modalWeightState, closeSets],
+  )
+
+  const handleUpdateRangeOfSets = useCallback(
+    async (
+      value: number,
+      rangeOfSets: number[],
+      isActivedRangeOfSets: boolean,
+    ) => {
+      console.log(`chegando na rangeOfSets:`, rangeOfSets)
+      const copyProgression = modalWeightState || {} // jogar state aqui
+
+      copyProgression.repetitionData[modalWeightState.activeWeightIndex].sets =
+        {
+          isActivedRangeOfSets,
+          rangeOfSets,
+          value,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        }
+
+      setModalWeightState(copyProgression)
+      closeSets()
+    },
+    [modalWeightState, closeSets],
   )
 
   function handleUpdateAllWeightValidate(weight: string) {
@@ -538,30 +556,21 @@ function WorkoutVideoCardComponent({
       handleSkipRestTime()
       return
     }
+
     if (allItensCompleted) {
       alert('Todos os itens foram completados')
       // criar hook para  para proximo exercicio
       return
     }
-    let haveTwoSets = false
-    let alreadyChoosed = false
+    const isActivedRangeOfSets =
+      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
+        .isActivedRangeOfSets
 
-    if (
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex] &&
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex]
-        .setBetweenSets
-    ) {
-      haveTwoSets = !!(
-        modalWeightState.repetitionData[
-          modalWeightState.activeWeightIndex
-        ].sets.split('-').length > 1
-      )
-      alreadyChoosed =
-        modalWeightState.repetitionData[modalWeightState.activeWeightIndex]
-          .setBetweenSets !== '0'
-    }
+    const value =
+      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
+        .value
 
-    if (!alreadyChoosed && haveTwoSets) {
+    if (isActivedRangeOfSets && !value) {
       openSetBetweenSets(modalWeightState.activeWeightIndex)
       return
     }
@@ -581,18 +590,12 @@ function WorkoutVideoCardComponent({
 
     copyProgression.repetitionData[
       modalWeightState.activeWeightIndex
-    ].completed = true
-
-    copyProgression.repetitionData[
-      modalWeightState.activeWeightIndex
-    ].completedTimestamp = new Date().getTime()
-
-    const getNextIndex = copyProgression.activeWeightIndex + 1
-
-    if (getNextIndex < copyProgression.repetitionData.length) {
-      console.log(`entro1`)
-      copyProgression.activeWeightIndex = getNextIndex
+    ].completed = {
+      isCompleted: true,
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
     }
+
     setModalWeightState(copyProgression)
     saveFastCachedWorkoutData(workoutId)
 
@@ -614,6 +617,8 @@ function WorkoutVideoCardComponent({
         exerciseIndex,
         exerciseId: item.workoutExerciseId,
         repetitionData: modalWeightState.repetitionData, // salva o novo
+        notes: modalWeightState.notes,
+        time: modalWeightState.time, // tempo do cronometro setado como selecionado +15 ou -15
       }
 
       const lastCompletedTimestamp = completedTimestamp
@@ -1026,57 +1031,12 @@ function WorkoutVideoCardComponent({
           return v
         },
       )
-      /*  precisa sair nesse wformato
- 
 
-interface IModalStateWorkoutLogData extends IWeightDoneLog {
-  isOpenModalUserNotes: boolean
-  isOpenModalVideoPlayer: boolean
-  isOpenModalUserWeight: boolean
-  isOpenModalUserSets: boolean
-  isOpenModalSetBetweenSets: boolean
-  workoutCardIndex: number
-  activeWeightIndex: number
- 
-    exerciseIndex: number
-  exerciseId: string
-
-  repetitionData: IWeightRepetitionData[] // repeticoes
-}
- */
       copyModalWeightState.repetitionData = reajustedCompleted
       copyModalWeightState.activeWeightIndex = index
       console.log(`copyModalWeightState`)
       console.log(copyModalWeightState)
       setModalWeightState(copyModalWeightState)
-
-      /* 
-  const defaultModalState: IModalStateWorkoutLogData = {
-    isOpenModalUserNotes: false,
-    isOpenModalVideoPlayer: false,
-    isOpenModalUserWeight: false,
-    isOpenModalUserSets: false,
-    isOpenModalSetBetweenSets: false,
-     workoutCardIndex: 0,
-    exerciseIndex: 0,
-    exerciseId: `0`,
-    repetitionData: item.workoutExerciseSets?.map((v) => ({
-      completed: false,
-      completedTimestamp: 0,
-      setBetweenSets: '0',
-      sets: v,
-      weight: '0',
-    })) || [
-      {
-        completed: false,
-        completedTimestamp: 0,
-        sets: '0',
-        setBetweenSets: '0',
-        weight: '0',
-      },
-    ],
-    activeWeightIndex: 0,
-  } */
     }
 
     function marcarItem(index: number, copyModalWeightState: any) {
@@ -1104,7 +1064,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
     const time = new Date()
     time.setSeconds(time.getSeconds() + totalSeconds + 15)
     restart(time, isRunning)
-    setRestTimeState((prev) => prev + 15)
+    setRestTimeState((prev) => (prev !== null ? prev + 15 : 15))
   }
 
   /* alterar */
@@ -1113,15 +1073,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
     time.setSeconds(time.getSeconds() + Math.max(totalSeconds - 15, 0))
     restart(time, isRunning)
 
-    setRestTimeState((prev) => prev - 15)
-    // habilita botao para salvar o tempo default do exercicio
-    // esse botao chama hook que salva
-    // ao carregar a tela ele procuar esse cache , se nao tiver ele carrega do default do exercicio mesmo
-    // se tiver ele carrega o que ta no cache
-    // criar modal para o 8-12
-    // ao finalizar o exercicio ele clica em quantos sets ele fez
-    // e salva esse , sempre vai pergunta se ele fez mostrando
-    // o range
+    setRestTimeState((prev) => (prev !== null ? prev - 15 : 0))
   }
 
   function openVideoPlayer() {
@@ -1234,9 +1186,9 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
     )
   }
 
-  function handlePause() {
+  const handlePause = useCallback(() => {
     pause()
-  }
+  }, [pause])
 
   function onPlay() {
     resume()
@@ -1270,31 +1222,12 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
       : 'Register repetition'
   }
 
-  // const openedTimeRef = useRef(new Date().getTime())
-
   useEffect(() => {
     handlePause()
     const time = new Date()
     time.setSeconds(time.getSeconds() + restTime)
     restart(time, false)
-  }, [restTime])
-
-  useEffect(() => {
-    const myNote = cachedNotesTable?.find(
-      (v) =>
-        v.workoutExerciseId === item.workoutExerciseId &&
-        v.cardIndex === workoutCardIndex &&
-        v.exerciseIndex === exerciseIndex,
-    )
-
-    if (myNote) {
-      setModalNotesState(myNote.notes)
-    }
-
-    // Exemplo de uso do useEffect, se necessário
-    // console.log(`App opened at: ${JSON.stringify(openedTimeRef)}`)
-    // console.log(openedTimeRef)
-  }, [cachedNotesTable])
+  }, [restTime, handlePause, restart])
 
   useEffect(() => {
     if (!cachedVideoTable) {
@@ -1464,248 +1397,23 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
       </WorkoutNameAndVideoWrapper>
 
       <WorkoutInfoWrapper>
-        <WorkoutRepetitionAndSerieWrapper
-          style={{ opacity: isFocused ? 1 : 0.2 }}
-        >
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <TableWrapper
-            /*       style={{
-              opacity: exerciseIndex === 0 && user?.anonymousUser ? 1 : 0.4,
-            }} */
-            >
-              {modalWeightState.repetitionData &&
-                modalWeightState.repetitionData.map((v, i) => (
-                  <WorkoutSerieWrapper
-                    key={i}
-                    style={{
-                      opacity:
-                        modalWeightState.activeWeightIndex >= i ? 1 : 0.2,
-                    }}
-                  >
-                    <WorkoutWeightValueAndTextWrapper>
-                      <WorkoutIndexButton
-                        /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
-
-                        disabled={
-                          firstIncompleteIndex === -1 ||
-                          i === modalWeightState.activeWeightIndex
-                            ? false
-                            : firstIncompleteIndex < i
-                        }
-                        onPress={() => {
-                          isFocused && updateActiveWeightIndexSets(i)
-                        }}
-                      >
-                        <WorkoutSerieValue
-                          activeWeightIndex={
-                            modalWeightState.activeWeightIndex === i
-                          }
-                        >
-                          {selectedLanguage !== 'pt-br'
-                            ? `${i + 1}ª`
-                            : `${i + 1}th`}
-                        </WorkoutSerieValue>
-                      </WorkoutIndexButton>
-                    </WorkoutWeightValueAndTextWrapper>
-                    <WorkoutWeightValueAndTextWrapper>
-                      <WorkoutWeightValue
-                        /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
-                        disabled={exerciseIndex !== 0}
-                        onPress={() => {
-                          isFocused &&
-                          modalWeightState.repetitionData[i].setBetweenSets !==
-                            `0`
-                            ? openSetBetweenSets(i)
-                            : openSets(i)
-                        }}
-                      >
-                        {v.setBetweenSets === `0` ? (
-                          <WorkoutWeightText
-                            activedGreenColor={
-                              modalWeightState.activeWeightIndex === i &&
-                              modalWeightState.isOpenModalUserSets
-                            }
-                          >
-                            {v.sets}
-                          </WorkoutWeightText>
-                        ) : (
-                          <WorkoutWeightText activedGreenColor={true}>
-                            {v.setBetweenSets}
-                          </WorkoutWeightText>
-                        )}
-
-                        <WorkoutWeightMetric
-                          activedGreenColor={
-                            modalWeightState.activeWeightIndex === i &&
-                            modalWeightState.isOpenModalUserSets
-                          }
-                        >
-                          {' '}
-                          rep
-                        </WorkoutWeightMetric>
-                      </WorkoutWeightValue>
-                    </WorkoutWeightValueAndTextWrapper>
-                    <ButtonsWrapper>
-                      {/* weight */}
-                      <WorkoutWeightValueAndTextWrapper>
-                        <WorkoutWeightValue
-                          /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
-                          disabled={exerciseIndex !== 0}
-                          onPress={() => {
-                            isFocused && openWeight(i)
-                          }}
-                        >
-                          <WorkoutWeightText
-                            activedGreenColor={
-                              modalWeightState.activeWeightIndex === i &&
-                              modalWeightState.isOpenModalUserWeight
-                            }
-                          >
-                            {v.weight}
-                          </WorkoutWeightText>
-                          <WorkoutWeightMetric
-                            activedGreenColor={
-                              modalWeightState.activeWeightIndex === i &&
-                              modalWeightState.isOpenModalUserWeight
-                            }
-                          >
-                            {' '}
-                            kg
-                          </WorkoutWeightMetric>
-                        </WorkoutWeightValue>
-                      </WorkoutWeightValueAndTextWrapper>
-
-                      {/* V weight */}
-
-                      <WorkoutButton
-                        disabled={
-                          firstIncompleteIndex === -1
-                            ? false
-                            : firstIncompleteIndex < i
-                        }
-                        onPress={() => isFocused && handleSetCompletedCheck(i)}
-                      >
-                        {modalWeightState.activeWeightIndex <= i &&
-                        i <= lastCompletedIndex &&
-                        !allItensCompleted &&
-                        !modalWeightState.isOpenModalUserWeight &&
-                        !modalWeightState.isOpenModalUserSets ? (
-                          <Close
-                            width={26}
-                            height={26}
-                            fill={theme.COLORS.AUX_GOOGLE_RED}
-                          />
-                        ) : v.completed ? (
-                          <Check
-                            width={34}
-                            height={34}
-                            stroke={theme.COLORS.AUX_GOOGLE_GREEN}
-                          />
-                        ) : (
-                          <Check
-                            width={34}
-                            height={34}
-                            stroke={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
-                          />
-                        )}
-                      </WorkoutButton>
-                    </ButtonsWrapper>
-                  </WorkoutSerieWrapper>
-                ))}
-
-              <WorkoutSerieWrapper>
-                <WorkoutWeightValueAndTextWrapper>
-                  <WorkoutIndexButton
-                    /*    disabled={exerciseIndex !== 0 && user?.anonymousUser} */
-                    disabled={modalWeightState.repetitionData.length > 7}
-                    onPress={
-                      modalWeightState.repetitionData.length < 7
-                        ? handleAddRepetition
-                        : () => {}
-                    }
-                    style={{
-                      opacity: 0.7,
-                    }}
-                  >
-                    <WorkoutSerieValue activeWeightIndex={false}>
-                      <More
-                        width={48}
-                        height={48}
-                        stroke={theme.COLORS.AUX_GOOGLE_GREEN}
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                      />
-                    </WorkoutSerieValue>
-                  </WorkoutIndexButton>
-                </WorkoutWeightValueAndTextWrapper>
-
-                <WorkoutWeightValueAndTextWrapper>
-                  <WorkoutWeightValue
-                    disabled={true}
-                    onPress={() => {}}
-                    style={{
-                      opacity: 0.1,
-                    }}
-                  >
-                    <WorkoutWeightText activedGreenColor={false}>
-                      {
-                        modalWeightState.repetitionData[
-                          modalWeightState.repetitionData.length - 1
-                        ].sets
-                      }
-                    </WorkoutWeightText>
-                    <WorkoutWeightMetric activedGreenColor={false}>
-                      {' '}
-                      rep
-                    </WorkoutWeightMetric>
-                  </WorkoutWeightValue>
-                </WorkoutWeightValueAndTextWrapper>
-                <ButtonsWrapper>
-                  {/* weight */}
-                  <WorkoutWeightValueAndTextWrapper>
-                    <WorkoutWeightValue
-                      /* disabled={exerciseIndex !== 0 && user?.anonymousUser} */
-                      disabled={true}
-                      onPress={() => {}}
-                      style={{
-                        opacity: 0.1,
-                      }}
-                    >
-                      <WorkoutWeightText activedGreenColor={false}>
-                        {
-                          modalWeightState.repetitionData[
-                            modalWeightState.repetitionData.length - 1
-                          ].weight
-                        }
-                      </WorkoutWeightText>
-                      <WorkoutWeightMetric activedGreenColor={false}>
-                        {' '}
-                        kg
-                      </WorkoutWeightMetric>
-                    </WorkoutWeightValue>
-                  </WorkoutWeightValueAndTextWrapper>
-
-                  {/* V weight */}
-                  <WorkoutButton
-                    disabled={modalWeightState.repetitionData.length <= 1}
-                    onPress={() => {
-                      handleRemoveLastRepetition()
-                    }}
-                  >
-                    <Less
-                      width={48}
-                      height={48}
-                      stroke={theme.COLORS.AUX_GOOGLE_RED}
-                      strokeWidth={1}
-                      strokeLinecap="round"
-                    />
-                  </WorkoutButton>
-                </ButtonsWrapper>
-              </WorkoutSerieWrapper>
-            </TableWrapper>
-          </ScrollView>
-        </WorkoutRepetitionAndSerieWrapper>
-
+        <WorkoutRepetitionsData
+          isFocused={isFocused}
+          modalWeightState={modalWeightState}
+          selectedLanguage={selectedLanguage}
+          firstIncompleteIndex={firstIncompleteIndex}
+          lastCompletedIndex={lastCompletedIndex}
+          handleSetCompletedCheck={handleSetCompletedCheck}
+          openSets={openSets}
+          openWeight={openWeight}
+          updateActiveWeightIndexSets={updateActiveWeightIndexSets}
+          handleAddRepetition={handleAddRepetition}
+          handleRemoveLastRepetition={handleRemoveLastRepetition}
+          allItensCompleted={allItensCompleted}
+          exerciseIndex={exerciseIndex}
+          user={user}
+          openSetBetweenSets={openSetBetweenSets}
+        />
         {isFocused && (
           <WorkoutUserNotesAndConfirmButtonWrapper>
             <WorkoutUserNotesButton
@@ -1746,7 +1454,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
                 ] &&
                 modalWeightState.repetitionData[
                   modalWeightState.activeWeightIndex
-                ].completed
+                ].completed.isCompleted
               }
             >
               <BlurViewWrapper intensity={30}>
@@ -1804,7 +1512,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
               ] &&
               modalWeightState.repetitionData[
                 modalWeightState.activeWeightIndex
-              ].weight) ||
+              ].weight.value) ||
             ''
           }
           weightIndex={modalWeightState.activeWeightIndex}
@@ -1837,16 +1545,43 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
               modalWeightState.repetitionData[
                 modalWeightState.activeWeightIndex
               ] &&
+              modalWeightState &&
+              modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
                 modalWeightState.activeWeightIndex
-              ].sets) ||
-            ''
+              ].sets &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ].sets.value) ||
+            0
           }
           setsIndex={modalWeightState.activeWeightIndex + 1}
           exerciseName={
             item.workoutExerciseName
               ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
               : ''
+          }
+          isActivedRangeOfSets={
+            (modalWeightState &&
+              modalWeightState.repetitionData &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ] &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ].sets.isActivedRangeOfSets) ||
+            false
+          }
+          rangeOfSets={
+            (modalWeightState &&
+              modalWeightState.repetitionData &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ] &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ].sets.rangeOfSets) ||
+            []
           }
         />
       </Modal>
@@ -1863,7 +1598,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
           flex: 1,
         }}
       >
-        <WorkoutUserSetBetweenSetsModal
+        <WorkoutUserRangeOfSetsModal
           tittle={
             selectedLanguage === 'pt-br'
               ? 'Ótimo trabalho! Quantas repetições você completou?'
@@ -1875,8 +1610,8 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
               : `Reps of set ${modalWeightState.activeWeightIndex + 1}`
           }
           closeModal={closeSetBetweenSets} // Método para fechar o modal (iOS, Android)
-          handleUpdateSetBetweenSets={handleUpdateSetBetweenSets}
-          sets={
+          handleUpdateRangeOfSets={handleUpdateRangeOfSets}
+          sets={Number(
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
@@ -1884,10 +1619,21 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
               ] &&
               modalWeightState.repetitionData[
                 modalWeightState.activeWeightIndex
-              ].sets) ||
-            ''
+              ].sets.value) ||
+              0,
+          )}
+          rangeOfSets={
+            (modalWeightState &&
+              modalWeightState.repetitionData &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ] &&
+              modalWeightState.repetitionData[
+                modalWeightState.activeWeightIndex
+              ].sets.rangeOfSets) ||
+            []
           }
-          setBetweenSets={
+          isActivedRangeOfSets={
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
@@ -1895,8 +1641,8 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
               ] &&
               modalWeightState.repetitionData[
                 modalWeightState.activeWeightIndex
-              ].setBetweenSets) ||
-            ''
+              ].sets.isActivedRangeOfSets) ||
+            false
           }
         />
       </Modal>
@@ -1905,7 +1651,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
         visible={modalWeightState.isOpenModalUserNotes}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={closeWeight} // Método para fechar o modal (iOS, Android)
+        onRequestClose={closeNotes} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1916,7 +1662,7 @@ interface IModalStateWorkoutLogData extends IWeightDoneLog {
           closeModal={closeNotes} // Método para fechar o modal (iOS, Android)
           handleUpdateNotes={handleUpdateNotes}
           workoutExerciseId={item.workoutExerciseId}
-          notes={modalNotesState}
+          notes={modalWeightState.notes.value}
           exerciseName={
             item.workoutExerciseName
               ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]

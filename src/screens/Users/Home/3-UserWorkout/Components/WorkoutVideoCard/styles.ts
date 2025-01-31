@@ -184,16 +184,6 @@ export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
     activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
 `
 
-export const StrikethroughText = styled.Text`
-  text-decoration: line-through;
-  opacity: 0.5;
-`
-
-export const OverlayText = styled.Text`
-  position: absolute;
-  opacity: 1;
-  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
-`
 export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
   color: ${({ theme, activedGreenColor }) =>
     activedGreenColor

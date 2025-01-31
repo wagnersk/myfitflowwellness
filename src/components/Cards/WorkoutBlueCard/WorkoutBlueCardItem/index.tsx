@@ -46,7 +46,6 @@ export function WorkoutBlueCardItem({
   )
 
   let copyWorkoutsLog: IWorkoutLog = {
-    nextWorkoutIndex: 0,
     workoutCardsLogData: [],
     workoutId: '',
   }

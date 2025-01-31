@@ -1,12 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   TextInputProps,
   Platform,
-  View,
-  Button,
 } from 'react-native'
 
 import {
@@ -30,27 +28,32 @@ import {
 
 interface InputProps extends TextInputProps {
   closeModal: () => void
-  handleUpdateSetBetweenSets: (set: string) => void
-  sets: string
-  setBetweenSets: string
+  handleUpdateRangeOfSets: (
+    set: number,
+    rangeOfSets: number[],
+    isActivedRangeOfSets: boolean,
+  ) => void
+  sets: number
+  rangeOfSets: number[]
   tittle: string
   subTittle: string
+  isActivedRangeOfSets: boolean
 }
 
-export function WorkoutUserSetBetweenSetsModal({
+export function WorkoutUserRangeOfSetsModal({
   closeModal,
-  handleUpdateSetBetweenSets,
-  sets,
-  setBetweenSets,
+  handleUpdateRangeOfSets,
   tittle,
   subTittle,
+  sets,
+  rangeOfSets,
+  isActivedRangeOfSets,
 }: InputProps) {
-  const [start, end] = sets.split('-').map(Number)
-  const range = Array.from({ length: end - start + 1 }, (_, i) => start + i)
-  const newSet = range.map((v) => ({
-    value: v,
-    selected: String(v) === setBetweenSets,
-  }))
+  console.log(`sets`, sets)
+  console.log(`rangeOfSets`, rangeOfSets)
+  console.log(`isActivedRangeOfSets`, isActivedRangeOfSets)
+
+  const rangeOfSet = rangeOfSets.map((v) => ({ value: v, selected: false }))
 
   function handleOverlayPress() {
     Keyboard.dismiss()
@@ -60,7 +63,8 @@ export function WorkoutUserSetBetweenSetsModal({
   async function updateWeight(index: number) {
     if (index === -1) return
 
-    handleUpdateSetBetweenSets(newSet[index].value.toString())
+    const selecteSet = rangeOfSet[index].value
+    handleUpdateRangeOfSets(selecteSet, rangeOfSets, true)
     handleOverlayPress()
   }
 
@@ -83,7 +87,7 @@ export function WorkoutUserSetBetweenSetsModal({
                 <SubTitteText>{subTittle}</SubTitteText>
               </TipsTitleNoteWrapper>
               <InputsWrapper>
-                {newSet.map((v, _i) => {
+                {rangeOfSet.map((v, _i) => {
                   return (
                     <ItensButton
                       selected={v.selected}

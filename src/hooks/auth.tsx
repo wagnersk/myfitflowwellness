@@ -49,7 +49,6 @@ import {
   IWeightDoneLog,
   IWorkoutCardLogData,
   IWorkoutLog,
-  ICachedNotesTable,
   IPersonal,
   IContract,
   IUserFormProps,
@@ -117,9 +116,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [personalData, setPersonalData] = useState<IPersonal | null>(null)
   const [cachedVideoTable, setCachedVideoTable] = useState<
     ICachedVideoTable[] | null
-  >(null)
-  const [cachedNotesTable, setCachedNotesTable] = useState<
-    ICachedNotesTable[] | null
   >(null)
 
   const [cachedUserWorkoutsLog, setCachedUserWorkoutsLog] =
@@ -481,15 +477,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
             anonymousUser: false,
           }
-          console.log(`AsyncStorage a`)
           await AsyncStorage.setItem(
             USER_SIGNIN_COLLECTION,
             JSON.stringify(userData),
           )
-          console.log(`AsyncStorage d`)
 
-          console.log(`userData`)
-          console.log(userData)
           setUser(userData)
 
           loadLoginInitialCachedWorkoutsData(id)
@@ -1932,6 +1924,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  /* refatorar  toamndo como base o q o updateCachedUserWorkoutsLog usa */
   async function updateCachedExerciseHistoryData(
     data: ICachedExerciseHistoryData,
   ) {
@@ -1951,6 +1944,27 @@ function AuthProvider({ children }: AuthProviderProps) {
     setCachedExerciseHistoryData(data)
   }
   // oreciso receber o workoutId para identificar ocache
+  async function loadCachedUserWorkoutsLog(userId: string) {
+    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+
+    try {
+      const storedWeightDoneLogString = await AsyncStorage.getItem(
+        storageCachedExercisesWeightDoneLogDataKey,
+      )
+      if (storedWeightDoneLogString) {
+        const summaryInfoData = JSON.parse(
+          storedWeightDoneLogString,
+        ) as IUserWorkoutsLog
+
+        if (summaryInfoData.userId !== userId) return null
+        // console.log(JSON.stringify(summaryInfoData))
+        console.log(`loadCachedUserWorkoutsLog -> `)
+        setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
 
   async function updateCachedUserWorkoutsLog(
     newExercise: IWeightDoneLog,
@@ -2036,12 +2050,8 @@ function AuthProvider({ children }: AuthProviderProps) {
           }
 
           async function updateCard() {
-            const {
-              exerciseId,
-              exerciseIndex,
-
-              repetitionData,
-            } = newExercise
+            const { exerciseId, exerciseIndex, notes, time, repetitionData } =
+              newExercise
 
             const weightDoneLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
               logIndex
@@ -2058,17 +2068,12 @@ function AuthProvider({ children }: AuthProviderProps) {
             return _weightDoneLog
 
             async function updateWeightDoneLog() {
-              const length =
-                copyCachedUserWorkoutsLog.workoutsLog[logIndex]
-                  .workoutCardsLogData.length
-
-              let nextWorkoutIndex = 0
-              nextWorkoutIndex = cardIndex - 1 >= length ? 0 : cardIndex + 1
-
               const newUpdatedWeightDone: IWeightDoneLog = {
                 exerciseIndex,
                 exerciseId,
                 repetitionData,
+                notes, // Add appropriate value for notes
+                time, // Add appropriate value for time
               }
 
               copyCachedUserWorkoutsLog.workoutsLog[
@@ -2145,9 +2150,6 @@ function AuthProvider({ children }: AuthProviderProps) {
               copyCachedUserWorkoutsLog.workoutsLog[
                 logIndex
               ].workoutCardsLogData[workoutLogIndex] = workoutCardLogData
-
-              copyCachedUserWorkoutsLog.workoutsLog[logIndex].nextWorkoutIndex =
-                nextWorkoutIndex
 
               console.log(
                 `logIndex ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
@@ -2226,6 +2228,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         async function createNewWorkoutLog() {
           console.log('createNewWorkoutLog()')
+          if (!user) return null
 
           const newWorkoutCardLogData: IWorkoutCardLogData = {
             cardIndex, // posicao card
@@ -2240,12 +2243,12 @@ function AuthProvider({ children }: AuthProviderProps) {
 
           copyCachedUserWorkoutsLog.workoutsLog.push({
             workoutCardsLogData: [newWorkoutCardLogData],
-            nextWorkoutIndex: 0,
             workoutId,
           })
 
           const userWorkoutLog: IUserWorkoutsLog = {
             workoutsLog: copyCachedUserWorkoutsLog.workoutsLog,
+            userId: user.id,
           }
           await AsyncStorage.setItem(
             storageCachedExercisesWeightDoneLogDataKey,
@@ -2258,6 +2261,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     async function createUserWorkoutLog() {
+      if (!user) return null
       const workoutLogSession: IWorkoutCardLogData = {
         cardIndex,
         lastCompletedTimestamp,
@@ -2272,10 +2276,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         workoutsLog: [
           {
             workoutCardsLogData: [workoutLogSession],
-            nextWorkoutIndex: 0,
             workoutId,
           },
         ],
+        userId: user.id,
       }
       console.log(`JSON.stringify(newUserWorkoutLog)`)
       console.log(JSON.stringify(newUserWorkoutLog))
@@ -2369,103 +2373,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         console.log(storedCachedVideoTableString)
 
         setCachedVideoTable(cachedVideoTableData) // Atualiza o estado com os dados carregados
-      }
-    } catch (error) {
-      console.error('Erro ao carregar as informações de resumo:', error)
-    }
-  }
-
-  async function updateCachedNotesTable(
-    notes: string,
-    _exerciseId: string,
-    _cardIndex: number,
-    _exerciseIndex: number,
-  ) {
-    if (!user) return null
-    const userId = user.id
-
-    const storageCachedNotesTableKey = `@myfitflow:userlocal-cachednotestable-${userId}`
-
-    if (cachedNotesTable) {
-      const copyCachedNotesTable = [...cachedNotesTable]
-
-      const cachedNotesIndex = copyCachedNotesTable.findIndex(
-        (es) =>
-          es.workoutExerciseId === _exerciseId &&
-          es.cardIndex === _cardIndex &&
-          es.exerciseIndex === _exerciseIndex,
-      )
-
-      const isNewNote = cachedNotesIndex === -1
-
-      if (!isNewNote) {
-        copyCachedNotesTable[cachedNotesIndex] = {
-          ...copyCachedNotesTable[cachedNotesIndex],
-          updatedAt: new Date().getTime(),
-          notes,
-        }
-
-        setCachedNotesTable(copyCachedNotesTable)
-        await AsyncStorage.setItem(
-          storageCachedNotesTableKey,
-          JSON.stringify(copyCachedNotesTable),
-        )
-        return copyCachedNotesTable
-      }
-
-      if (isNewNote) {
-        copyCachedNotesTable.push({
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
-
-          workoutExerciseId: _exerciseId,
-          cardIndex: _cardIndex,
-          exerciseIndex: _exerciseIndex,
-          notes,
-        })
-
-        setCachedNotesTable(copyCachedNotesTable)
-        await AsyncStorage.setItem(
-          storageCachedNotesTableKey,
-          JSON.stringify(copyCachedNotesTable),
-        )
-        return copyCachedNotesTable
-      }
-    }
-
-    if (!cachedNotesTable) {
-      const initialVideoTable = []
-      initialVideoTable.push({
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-        workoutExerciseId: _exerciseId,
-        cardIndex: _cardIndex,
-        exerciseIndex: _exerciseIndex,
-        notes,
-      })
-
-      await AsyncStorage.setItem(
-        storageCachedNotesTableKey,
-        JSON.stringify(initialVideoTable),
-      )
-      setCachedNotesTable(initialVideoTable)
-
-      return initialVideoTable
-    }
-    return null
-  }
-
-  async function loadCachedNotesTable(userId: string) {
-    const storageCachedNotesTableKey = `@myfitflow:userlocal-cachednotestable-${userId}`
-
-    try {
-      const storedCachedNotesTableString = await AsyncStorage.getItem(
-        storageCachedNotesTableKey,
-      )
-
-      if (storedCachedNotesTableString) {
-        const cachedNotesTableData = JSON.parse(storedCachedNotesTableString)
-        setCachedNotesTable(cachedNotesTableData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
       console.error('Erro ao carregar as informações de resumo:', error)
@@ -2911,24 +2818,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function loadExerciseCachedWeightDoneLog(userId: string) {
-    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
-
-    try {
-      const storedWeightDoneLogString = await AsyncStorage.getItem(
-        storageCachedExercisesWeightDoneLogDataKey,
-      )
-      if (storedWeightDoneLogString) {
-        const summaryInfoData = JSON.parse(storedWeightDoneLogString)
-        console.log(`rendering ${summaryInfoData}`)
-        console.log(JSON.stringify(summaryInfoData))
-        setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
-      }
-    } catch (error) {
-      console.error('Erro ao carregar as informações de resumo:', error)
-    }
-  }
-
   async function loadMyWorkoutAndMyWorkoutExercises(userId: string) {
     const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
     const workoutKey = `@myfitflow:cachedworkout-${userId}`
@@ -3095,7 +2984,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function loadLoginInitialCachedWorkoutsData(userId: string) {
-    await loadExerciseCachedWeightDoneLog(userId) // precsa de workoutjId
+    await loadCachedUserWorkoutsLog(userId) // precsa de workoutjId
     await loadCachedExerciseHistoryData(userId)
 
     await loadMyWorkoutAndMyWorkoutExercises(userId)
@@ -3103,8 +2992,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     await loadGraphicsAndStatistics(userId)
 
     await loadCachedVideoTable(userId)
-
-    await loadCachedNotesTable(userId)
   }
 
   useEffect(() => {
@@ -3140,9 +3027,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateCachedExerciseHistoryData,
 
         updateCachedUserWorkoutsLog,
-
-        loadCachedNotesTable,
-        updateCachedNotesTable,
 
         loadCachedVideoTable,
         updateCachedVideoTable,
@@ -3208,10 +3092,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         cachedUserWorkoutsLog,
         weightProgression,
 
-        cachedNotesTable,
         cachedVideoTable,
         contract,
-        // loadCachedUserWorkoutsLog, /
       }}
     >
       {children}

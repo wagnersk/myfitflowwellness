@@ -29,13 +29,6 @@ export type IExerciseItems =
   | `pulleyHandles`
   | `weight`
 
-export type ICachedFiltersExercise = {
-  [key in IExerciseItems]: {
-    'pt-br': string | null
-    us: string | null
-  }
-}
-
 export type IUserFormProps = {
   anabol: string
   birthdate: string
@@ -264,7 +257,12 @@ export interface IExercisesProps {
   createdAt?: Timestamp
   updatedAt?: Timestamp
 }
-
+export type ICachedFiltersExercise = {
+  [key in IExerciseItems]: {
+    'pt-br': string | null
+    us: string | null
+  }
+}
 export interface ICardExerciseData {
   isEnabled: boolean
 
@@ -358,13 +356,7 @@ export interface IMyfitflowWorkoutInUse {
   personalTrainerName?: string
 
   referencePendingWorkoustId?: string
-  /*
-  submissionPending: boolean // Quando foi enviado
-  submissionApproved: boolean // Quando foi aceito
- */
-
   workoutActive: boolean
-
   workoutCategoryId?: string
   referenceMyfitflowWorkoutId?: string
   workoutPlanType?: string
@@ -503,20 +495,52 @@ export interface MonthRecord {
 export interface YearRecord {
   [year: string]: MonthRecord
 }
-export interface IWeightRepetitionData {
-  // cada repeticao
-  weight: string
-  sets: string
-  setBetweenSets: string
-  completed: boolean
-  completedTimestamp: number
-}
 
+export interface IWeightRepetitionData {
+  weight: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+  sets: {
+    value: number
+    isActivedRangeOfSets: boolean
+    rangeOfSets: number[]
+    createdAt: number
+    updatedAt: number
+  }
+
+  completed: {
+    isCompleted: boolean
+    createdAt: number
+    updatedAt: number
+  }
+
+  createdAt: number
+  updatedAt: number
+}
+/* export interface ICachedNotesTable {
+  workoutExerciseId: string
+  exerciseIndex: number
+  cardIndex: number
+  notes: string
+ 
+}
+ */
 export interface IWeightDoneLog {
   // dentro de cada exercicio
   exerciseIndex: number
-  exerciseId: string
-
+  exerciseId: string // id do exercicio em si
+  notes: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+  time: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
   repetitionData: IWeightRepetitionData[] // repeticoes
 }
 
@@ -534,12 +558,12 @@ export interface IWorkoutCardLogData {
 
 export interface IWorkoutLog {
   workoutCardsLogData: IWorkoutCardLogData[] // A B C
-  nextWorkoutIndex: number // 1 ...2...3..
   workoutId: string // id do treino que ta dentro de category no firebase
 }
 
 export interface IUserWorkoutsLog {
   workoutsLog: IWorkoutLog[]
+  userId: string
 }
 export type ExerciseHistoryData = YearRecord
 
@@ -644,22 +668,11 @@ export interface ICachedVideoTable {
   createdAt: number
   updatedAt: number
 }
-export interface ICachedNotesTable {
-  workoutExerciseId: string
-  exerciseIndex: number
-  cardIndex: number
-  notes: string
-  createdAt: number
-  updatedAt: number
-}
 
 export interface ICachedVideo {
   data: ICachedVideoTable[]
 }
 
-export interface ICachedNotes {
-  data: ICachedNotesTable[]
-}
 export interface AuthProviderProps {
   children: ReactNode
 }
@@ -728,14 +741,6 @@ export interface AuthContextData {
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ) => Promise<IWeightDoneLog | null>
-
-  loadCachedNotesTable: (userId: string) => Promise<void>
-  updateCachedNotesTable: (
-    notes: string,
-    _exerciseId: string,
-    _cardIndex: number,
-    _exerciseIndex: number,
-  ) => Promise<ICachedNotesTable[] | null>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (
@@ -824,7 +829,6 @@ export interface AuthContextData {
 
   cachedWorkoutsExercises: ICachedExerciseList | null
 
-  cachedNotesTable: ICachedNotesTable[] | null
   cachedVideoTable: ICachedVideoTable[] | null
 
   contract: IContract | null

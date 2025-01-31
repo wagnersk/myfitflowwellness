@@ -37,7 +37,7 @@ import {
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
-import { IWorkoutsData, IUserWorkoutsLog } from '@hooks/authTypes'
+import { IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
 
 export function UserHome() {
