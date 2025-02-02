@@ -172,7 +172,10 @@ export const WorkoutIndexButton = styled(TouchableOpacity)<Props>`
   align-items: center;
 `
 
-export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
+export const WorkoutWeightText = styled.Text<{
+  activedGreenColor: boolean
+  alreadySelected: boolean
+}>`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   color: ${({ theme, activedGreenColor }) =>
     activedGreenColor
@@ -182,6 +185,9 @@ export const WorkoutWeightText = styled.Text<{ activedGreenColor: boolean }>`
 
   font-size: ${({ activedGreenColor }) =>
     activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
+
+  font-size: ${({ alreadySelected }) =>
+    alreadySelected ? `${RFValue(17)}px` : `${RFValue(14)}px`};
 `
 
 export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`

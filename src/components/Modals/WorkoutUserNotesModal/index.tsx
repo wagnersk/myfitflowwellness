@@ -44,8 +44,6 @@ export function WorkoutUserNotesModal({
   const [newNotes, setNewNotes] = useState(notes)
   const { cachedNotesTable } = useAuth()
 
-  console.log(`chegando no Notes:`, notes)
-
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()

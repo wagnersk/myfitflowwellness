@@ -17,11 +17,13 @@ import {
   AnimatedCircularProgressWrapper,
   IncrementSecondsContent,
   BlurViewAddSecondsWrapper,
+  FakeAnimatedCircularProgressWrapper,
 } from './styles'
 import { useTheme } from 'styled-components/native'
 import { Circle } from 'react-native-svg'
 
 interface CronometerProps {
+  enabled: boolean
   percentage: number
   circularProgressRef: React.RefObject<AnimatedCircularProgress>
   onPlay: () => void
@@ -35,6 +37,7 @@ interface CronometerProps {
 }
 
 export function WorkoutCronometer({
+  enabled,
   circularProgressRef,
   onAdd15Seconds,
   onSubtract15Seconds,
@@ -70,36 +73,41 @@ export function WorkoutCronometer({
   return (
     <WorkoutCronometerWrapper>
       <Top>
-        <IncrementSeconds onPress={subtract15Seconds}>
+        <IncrementSeconds disabled={!enabled} onPress={subtract15Seconds}>
           <WorkoutCronometerText type="negative">-15s</WorkoutCronometerText>
         </IncrementSeconds>
-        <DecrementSeconds onPress={add15Seconds}>
+        <DecrementSeconds disabled={!enabled} onPress={add15Seconds}>
           <WorkoutCronometerText type="positive">+15s</WorkoutCronometerText>
         </DecrementSeconds>
       </Top>
       <Middle>
         <AnimatedCircularProgressWrapper>
-          <AnimatedCircularProgress
-            ref={circularProgressRef}
-            size={112}
-            width={3}
-            fill={percentage}
-            tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
-            backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
-            padding={10}
-            renderCap={({ center }) => (
-              <Circle cx={center.x} cy={center.y} r="6" fill="green" />
-            )}
-            onAnimationComplete={() => console.log('onAnimationComplete')}
-            // eslint-disable-next-line react/no-children-prop
-            children={() => (
-              <WorkoutCronometerTimer>
-                {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
-              </WorkoutCronometerTimer>
-            )}
-          />
+          {enabled ? (
+            <AnimatedCircularProgress
+              ref={circularProgressRef}
+              size={112}
+              width={3}
+              fill={percentage}
+              tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
+              backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
+              padding={10}
+              renderCap={({ center }) => (
+                <Circle cx={center.x} cy={center.y} r="6" fill="green" />
+              )}
+              onAnimationComplete={() => console.log('onAnimationComplete')}
+              // eslint-disable-next-line react/no-children-prop
+              children={() => (
+                <WorkoutCronometerTimer>
+                  {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
+                </WorkoutCronometerTimer>
+              )} /* crie uma view com o mesmo tamamnho */
+            />
+          ) : (
+            <FakeAnimatedCircularProgressWrapper />
+          )}
         </AnimatedCircularProgressWrapper>
         <WorkoutCronometerButtonStart
+          disabled={!enabled}
           onPress={() => {
             handleRestart()
           }}
@@ -110,6 +118,7 @@ export function WorkoutCronometer({
         </WorkoutCronometerButtonStart>
 
         <WorkoutCronometerButtonStart
+          disabled={!enabled}
           onPress={() => {
             isRunning ? handlePause() : handlOnPlay()
           }}

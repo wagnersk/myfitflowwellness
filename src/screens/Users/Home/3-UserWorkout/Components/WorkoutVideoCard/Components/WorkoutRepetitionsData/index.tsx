@@ -39,7 +39,6 @@ interface WorkoutRepetitionAndSerieProps {
   lastCompletedIndex: number
   allItensCompleted: boolean
   exerciseIndex: number
-  user: any
   handleSetCompletedCheck: (index: number) => void
   handleAddRepetition: () => void
   handleRemoveLastRepetition: () => void
@@ -48,23 +47,7 @@ interface WorkoutRepetitionAndSerieProps {
   openWeight: (index: number) => void
   updateActiveWeightIndexSets: (index: number) => void
 }
-const asd = {
-  completed: {
-    createdAt: 1738289532064,
-    isCompleted: false,
-    updatedAt: 1738289532064,
-  },
-  createdAt: 1738289532064,
-  sets: {
-    createdAt: 1738289532064,
-    isActivedRangeOfSets: false,
-    rangeOfSets: [],
-    updatedAt: 1738289532064,
-    value: 0,
-  },
-  updatedAt: 1738289532064,
-  weight: { createdAt: 1738289532064, updatedAt: 1738289532064, value: '0' },
-}
+
 export default function WorkoutRepetitionsData({
   isFocused,
   modalWeightState,
@@ -73,7 +56,6 @@ export default function WorkoutRepetitionsData({
   lastCompletedIndex,
   allItensCompleted,
   exerciseIndex,
-  user,
   handleSetCompletedCheck,
   handleAddRepetition,
   handleRemoveLastRepetition,
@@ -84,7 +66,10 @@ export default function WorkoutRepetitionsData({
 }: WorkoutRepetitionAndSerieProps) {
   const theme = useTheme()
   return (
-    <WorkoutRepetitionAndSerieWrapper style={{ opacity: isFocused ? 1 : 0.2 }}>
+    <WorkoutRepetitionAndSerieWrapper
+      pointerEvents={isFocused ? 'auto' : 'none'}
+      style={{ opacity: isFocused ? 1 : 0.2 }}
+    >
       <ScrollView showsVerticalScrollIndicator={false}>
         <TableWrapper>
           {modalWeightState.repetitionData &&
@@ -92,7 +77,12 @@ export default function WorkoutRepetitionsData({
               <WorkoutSerieWrapper
                 key={i}
                 style={{
-                  opacity: modalWeightState.activeWeightIndex >= i ? 1 : 0.2,
+                  opacity:
+                    modalWeightState.activeWeightIndex + 1 >= i &&
+                    i <= lastCompletedIndex + 1 &&
+                    modalWeightState.repetitionData.length > 1
+                      ? 1
+                      : 0.5,
                 }}
               >
                 <WorkoutWeightValueAndTextWrapper>
@@ -122,13 +112,25 @@ export default function WorkoutRepetitionsData({
                   <WorkoutWeightValue
                     disabled={exerciseIndex !== 0}
                     onPress={() => {
-                      isFocused && modalWeightState.repetitionData[i].sets.value
+                      isFocused &&
+                      modalWeightState.repetitionData[i].sets
+                        .isActivedRangeOfSets &&
+                      !modalWeightState.repetitionData[i].sets.value &&
+                      modalWeightState.repetitionData[i].sets.rangeOfSets
+                        .length !== 0
                         ? openSetBetweenSets(i)
                         : openSets(i)
                     }}
                   >
-                    {v.sets.isActivedRangeOfSets ? (
-                      <WorkoutWeightText activedGreenColor={true}>
+                    {v.sets.isActivedRangeOfSets &&
+                    !v.sets.value &&
+                    v.sets.rangeOfSets.length !== 0 ? (
+                      <WorkoutWeightText
+                        alreadySelected={
+                          v.sets.isActivedRangeOfSets && !!v.sets.value
+                        }
+                        activedGreenColor={true}
+                      >
                         {v.sets.rangeOfSets.join(' - ')}
                       </WorkoutWeightText>
                     ) : (
@@ -136,6 +138,9 @@ export default function WorkoutRepetitionsData({
                         activedGreenColor={
                           modalWeightState.activeWeightIndex === i &&
                           modalWeightState.isOpenModalUserSets
+                        }
+                        alreadySelected={
+                          v.sets.isActivedRangeOfSets && !!v.sets.value
                         }
                       >
                         {v.sets.value}
@@ -189,6 +194,7 @@ export default function WorkoutRepetitionsData({
                   >
                     {modalWeightState.activeWeightIndex <= i &&
                     i <= lastCompletedIndex &&
+                    !modalWeightState.repetitionData[i].completed.isCompleted &&
                     !allItensCompleted &&
                     !modalWeightState.isOpenModalUserWeight &&
                     !modalWeightState.isOpenModalUserSets ? (
@@ -197,7 +203,7 @@ export default function WorkoutRepetitionsData({
                         height={26}
                         fill={theme.COLORS.AUX_GOOGLE_RED}
                       />
-                    ) : v.completed ? (
+                    ) : v.completed.isCompleted ? (
                       <Check
                         width={34}
                         height={34}
@@ -229,13 +235,15 @@ export default function WorkoutRepetitionsData({
                   <More
                     width={48}
                     height={48}
-                    stroke={theme.COLORS.AUX_GOOGLE_GREEN}
+                    stroke={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
                     strokeWidth={2}
                     strokeLinecap="round"
+                    style={{ opacity: 0.4 }}
                   />
                 </WorkoutSerieValue>
               </WorkoutIndexButton>
             </WorkoutWeightValueAndTextWrapper>
+
             <WorkoutWeightValueAndTextWrapper>
               <WorkoutWeightValue
                 disabled={true}
@@ -255,6 +263,7 @@ export default function WorkoutRepetitionsData({
                 </WorkoutWeightMetric>
               </WorkoutWeightValue>
             </WorkoutWeightValueAndTextWrapper>
+
             <ButtonsWrapper>
               <WorkoutWeightValueAndTextWrapper>
                 <WorkoutWeightValue
@@ -278,11 +287,12 @@ export default function WorkoutRepetitionsData({
               <WorkoutButton
                 disabled={modalWeightState.repetitionData.length <= 1}
                 onPress={() => handleRemoveLastRepetition()}
+                style={{ opacity: 0.3 }}
               >
                 <Less
                   width={48}
                   height={48}
-                  stroke={theme.COLORS.AUX_GOOGLE_RED}
+                  stroke={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
                   strokeWidth={1}
                   strokeLinecap="round"
                 />

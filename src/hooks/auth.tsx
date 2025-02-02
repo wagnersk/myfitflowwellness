@@ -2147,21 +2147,21 @@ function AuthProvider({ children }: AuthProviderProps) {
                 ],
               }
 
-              copyCachedUserWorkoutsLog.workoutsLog[
+              /*   copyCachedUserWorkoutsLog.workoutsLog[
                 logIndex
               ].workoutCardsLogData[workoutLogIndex] = workoutCardLogData
 
               console.log(
                 `logIndex ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
               )
-
+ */
               if (
                 copyCachedUserWorkoutsLog.workoutsLog[logIndex]
                   .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
                   weightDoneLogIndex
                 ]
               ) {
-                console.log(
+                /*  console.log(
                   JSON.stringify(
                     copyCachedUserWorkoutsLog.workoutsLog[logIndex]
                       .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
@@ -2169,16 +2169,16 @@ function AuthProvider({ children }: AuthProviderProps) {
                     ],
                   ),
                 )
-                console.log(`Salvando... copyCachedUserWorkoutsLog`)
+                console.log(`Salvando... copyCachedUserWorkoutsLog`) */
               }
 
               await AsyncStorage.setItem(
                 storageCachedExercisesWeightDoneLogDataKey,
                 JSON.stringify(copyCachedUserWorkoutsLog),
               )
-              console.log(JSON.stringify(copyCachedUserWorkoutsLog))
+              /*        console.log(JSON.stringify(copyCachedUserWorkoutsLog))
               console.log(`Salvo com sucesso... copyCachedUserWorkoutsLog`)
-
+ */
               setCachedUserWorkoutsLog(copyCachedUserWorkoutsLog)
               return newExercise as IWeightDoneLog
             }
@@ -2810,7 +2810,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         setCachedExerciseHistoryData(historyData) // Atualiza o estado com os dados carregados
       } else {
-        console.log('Nenhum histórico de exercício encontrado.')
+        // console.log('Nenhum histórico de exercício encontrado.')
         setCachedExerciseHistoryData(null) // Configura o estado como um objeto vazio se não houver dados
       }
     } catch (error) {

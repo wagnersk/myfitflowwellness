@@ -84,3 +84,14 @@ export const BlurViewAddSecondsWrapper = styled(BlurView)`
   width: 48px;
   border-radius: 12px;
 `
+const size = 92
+export const FakeAnimatedCircularProgressWrapper = styled.View`
+  width: ${size}px;
+  height: ${size}px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 56px;
+  border-width: 3px;
+  border-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
+  bottom: 16px;
+`

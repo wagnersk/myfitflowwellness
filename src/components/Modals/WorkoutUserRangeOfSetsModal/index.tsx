@@ -52,8 +52,16 @@ export function WorkoutUserRangeOfSetsModal({
   console.log(`sets`, sets)
   console.log(`rangeOfSets`, rangeOfSets)
   console.log(`isActivedRangeOfSets`, isActivedRangeOfSets)
+  function generateRange(start: number, end: number): number[] {
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+  }
+  const rangeOfSet = generateRange(rangeOfSets[0], rangeOfSets[1]).map((v) => ({
+    value: v,
+    selected: sets === v,
+  }))
 
-  const rangeOfSet = rangeOfSets.map((v) => ({ value: v, selected: false }))
+  // const rangeOfSet = rangeOfSets.map((v) => ({ value: v, selected: false }))
+  console.log(`rangeOfSet`, rangeOfSet)
 
   function handleOverlayPress() {
     Keyboard.dismiss()
