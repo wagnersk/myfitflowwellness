@@ -1992,8 +1992,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       if (!cachedUserWorkoutsLog) return null
       const copyCachedUserWorkoutsLog = { ...cachedUserWorkoutsLog }
 
-      console.log('JA EXISTE  , atualizando createCachedUserWorkoutLog()')
-
       const userWorkoutLog = await updateUserWorkoutsLog(
         copyCachedUserWorkoutsLog.workoutsLog,
       )
@@ -2001,7 +1999,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       return userWorkoutLog
 
       async function updateUserWorkoutsLog(workoutLog: IWorkoutLog[]) {
-        console.log('updateUserWorkoutsLog()')
         if (!workoutLog) return
         const logIndex = workoutLog.findIndex((v) => v.workoutId === workoutId)
         const isNewWorkoutLog = logIndex === -1
@@ -2013,8 +2010,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         return userWorkoutLog
 
         async function updateWorkoutLog() {
-          console.log('updateWorkoutLog()')
-
           const workoutLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
             logIndex
           ].workoutCardsLogData.findIndex((v) => v.cardIndex === cardIndex)
@@ -2098,15 +2093,6 @@ function AuthProvider({ children }: AuthProviderProps) {
                 weightDoneLogIndex
               ] = newUpdatedWeightDone
 
-              console.log(
-                ` logIndex$ ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
-              )
-              console.log(`adicionando isso -> `)
-              console.log(JSON.stringify(newUpdatedWeightDone))
-
-              console.log(
-                `aqui ja foi add entao tem q ser igual ao de cima -> `,
-              )
               console.log(
                 JSON.stringify(
                   copyCachedUserWorkoutsLog.workoutsLog[logIndex]

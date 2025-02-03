@@ -24,6 +24,9 @@ import {
   ItensButton,
   TitteText,
   SubTitteText,
+  SubTittleWrapper,
+  DeleteButton,
+  DeleteText,
 } from './styles'
 
 interface InputProps extends TextInputProps {
@@ -33,6 +36,7 @@ interface InputProps extends TextInputProps {
     rangeOfSets: number[],
     isActivedRangeOfSets: boolean,
   ) => void
+  handleDeleteRangeOfSets: () => void
   sets: number
   rangeOfSets: number[]
   tittle: string
@@ -43,6 +47,7 @@ interface InputProps extends TextInputProps {
 export function WorkoutUserRangeOfSetsModal({
   closeModal,
   handleUpdateRangeOfSets,
+  handleDeleteRangeOfSets,
   tittle,
   subTittle,
   sets,
@@ -75,6 +80,10 @@ export function WorkoutUserRangeOfSetsModal({
     handleUpdateRangeOfSets(selecteSet, rangeOfSets, true)
     handleOverlayPress()
   }
+  async function deleteRangeOfSets() {
+    handleDeleteRangeOfSets()
+    handleOverlayPress()
+  }
 
   return (
     <KeyboardAvoidingView
@@ -92,7 +101,15 @@ export function WorkoutUserRangeOfSetsModal({
                 <TitteText>
                   {tittle} ( {sets} )
                 </TitteText>
-                <SubTitteText>{subTittle}</SubTitteText>
+                <SubTittleWrapper>
+                  <SubTitteText>{subTittle}</SubTitteText>
+                  <DeleteButton
+                    selected={true}
+                    onPress={() => deleteRangeOfSets()}
+                  >
+                    <DeleteText>Deletar</DeleteText>
+                  </DeleteButton>
+                </SubTittleWrapper>
               </TipsTitleNoteWrapper>
               <InputsWrapper>
                 {rangeOfSet.map((v, _i) => {

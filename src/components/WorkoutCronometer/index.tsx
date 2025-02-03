@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React from 'react'
+import React, { memo, useRef } from 'react'
 import Play from '@assets/Play.svg'
 import Pause from '@assets/Pause.svg'
 import ArrowCounterClockwise from '@assets/Arrow-counter-clockwise.svg'
@@ -24,8 +24,6 @@ import { Circle } from 'react-native-svg'
 
 interface CronometerProps {
   enabled: boolean
-  percentage: number
-  circularProgressRef: React.RefObject<AnimatedCircularProgress>
   onPlay: () => void
   onPause: () => void
   onRestart: () => void
@@ -34,21 +32,28 @@ interface CronometerProps {
   minutes: number
   seconds: number
   isRunning: boolean
+  getModalTimer: number
+  totalSeconds: number
 }
 
-export function WorkoutCronometer({
+export function WorkoutCronometerComponent({
   enabled,
-  circularProgressRef,
   onAdd15Seconds,
   onSubtract15Seconds,
   onPlay,
   onPause,
   onRestart,
-  percentage,
   minutes,
   seconds,
   isRunning,
+  getModalTimer,
+  totalSeconds,
 }: CronometerProps) {
+  const circularProgressRef = useRef<AnimatedCircularProgress>(null)
+
+  const elapsedTime = getModalTimer - totalSeconds
+  const percentage = getModalTimer ? (elapsedTime / getModalTimer) * 100 : 0
+
   function handlePause() {
     onPause()
   }
@@ -100,7 +105,7 @@ export function WorkoutCronometer({
                 <WorkoutCronometerTimer>
                   {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
                 </WorkoutCronometerTimer>
-              )} /* crie uma view com o mesmo tamamnho */
+              )}
             />
           ) : (
             <FakeAnimatedCircularProgressWrapper />
@@ -135,3 +140,10 @@ export function WorkoutCronometer({
     </WorkoutCronometerWrapper>
   )
 }
+
+export const WorkoutCronometer = memo(
+  WorkoutCronometerComponent,
+  (prevProps, nextProps) => {
+    return prevProps === nextProps
+  },
+)

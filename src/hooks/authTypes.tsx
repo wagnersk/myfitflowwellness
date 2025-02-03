@@ -519,14 +519,7 @@ export interface IWeightRepetitionData {
   createdAt: number
   updatedAt: number
 }
-/* export interface ICachedNotesTable {
-  workoutExerciseId: string
-  exerciseIndex: number
-  cardIndex: number
-  notes: string
- 
-}
- */
+
 export interface IWeightDoneLog {
   // dentro de cada exercicio
   exerciseIndex: number

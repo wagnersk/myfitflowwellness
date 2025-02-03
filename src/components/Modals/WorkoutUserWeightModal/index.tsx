@@ -40,9 +40,6 @@ export function WorkoutUserWeightModal({
   exerciseName,
   ...rest
 }: InputProps) {
-  useEffect(() => {
-    setNewWeight(weight)
-  }, [weight])
   const [isFocused, setIsFocused] = useState(false)
   const [newWeight, setNewWeight] = useState(weight)
 

@@ -16,10 +16,6 @@ SOBRE O BOTÃO DE AÇÃO PRINCIPAL "REGISTAR SERIE"
 
     
 
+ O que vou fazer?
 
-
-fazeer o tempo do descanso do cronometro se desfazerpixelado e aparecer no campo de registro com o mesmo efeito 
-para dar ideia de teletransporte
-
-
-hello, please pretend you are a professional programmer with a havard degree and 10 years of experience  , create a bot to interact with the dexscreener, we need to parse , save and analyze each coin that rugged/pumped/ become tier -1 listened on DEX , etc to find the patterns 
+ arrumar a forma q o treino vem do servidor baixa , e como vem a informacao

@@ -1,24 +1,14 @@
 /* eslint-disable camelcase */
 import { Modal, Alert } from 'react-native'
-import React, {
-  useState,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from 'react'
+import React, { useState, memo, useEffect, useMemo, useCallback } from 'react'
+
 import { useTheme } from 'styled-components/native'
 
 import { useAuth } from '@hooks/auth'
 
-import { format, isSameDay } from 'date-fns'
+import { format } from 'date-fns'
 import { ptBR, enUS } from 'date-fns/locale'
-import * as FileSystem from 'expo-file-system'
-
-import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
-import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
-import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
+import { useTimer } from 'react-timer-hook'
 
 import FileText from '@assets/FileText.svg'
 
@@ -33,6 +23,15 @@ import {
   Exercise,
 } from '@hooks/authTypes'
 
+import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
+import { WorkoutCronometer } from '@components/WorkoutCronometer'
+import { WorkoutUserSetsModal } from '@components/Modals/WorkoutUserSetsModal'
+import { WorkoutUserRangeOfSetsModal } from '@components/Modals/WorkoutUserRangeOfSetsModal'
+import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
+import { WorkoutUserWeightModal } from '@components/Modals/WorkoutUserWeightModal'
+import WorkoutRepetitionsData from './Components/WorkoutRepetitionsData'
+import WorkoutNameAndVideo from './Components/WorkoutNameAndVideo'
+
 import {
   ContainerGradient,
   WorkoutInfoWrapper,
@@ -46,15 +45,15 @@ import {
   BlurViewAddSecondsWrapper,
 } from './styles'
 
-import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
-import { WorkoutCronometer } from '@components/WorkoutCronometer'
-import { AnimatedCircularProgress } from 'react-native-circular-progress'
-import { useTimer } from 'react-timer-hook'
-import { WorkoutUserSetsModal } from '@components/Modals/WorkoutUserSetsModal'
-import { WorkoutUserRangeOfSetsModal } from '@components/Modals/WorkoutUserRangeOfSetsModal'
-import WorkoutRepetitionsData from './Components/WorkoutRepetitionsData'
-import WorkoutNameAndVideo from './Components/WorkoutNameAndVideo'
-
+export interface IModalStateWorkoutLogData {
+  isOpenModalUserNotes: boolean
+  isOpenModalVideoPlayer: boolean
+  isOpenModalUserWeight: boolean
+  isOpenModalUserSets: boolean
+  isOpenModalSetBetweenSets: boolean
+  activeWeightIndex: number
+  lastActiveWeightIndex: number
+}
 interface Props {
   item: IFormattedCardExerciseData
   exerciseIndex: number // Supino reto.... exercicios
@@ -63,18 +62,6 @@ interface Props {
   isFocused: boolean
   restTime: number
 }
-
-export interface IModalStateWorkoutLogData extends IWeightDoneLog {
-  isOpenModalUserNotes: boolean
-  isOpenModalVideoPlayer: boolean
-  isOpenModalUserWeight: boolean
-  isOpenModalUserSets: boolean
-  isOpenModalSetBetweenSets: boolean
-  workoutCardIndex: number
-  activeWeightIndex: number
-  lastActiveWeightIndex: number
-}
-
 function WorkoutVideoCardComponent({
   item,
   workoutCardIndex,
@@ -83,13 +70,10 @@ function WorkoutVideoCardComponent({
   isFocused,
   restTime,
 }: Props) {
-  const circularProgressRef = useRef<AnimatedCircularProgress>(null)
   const theme = useTheme()
   const time = new Date()
-  const {
-    updateCachedVideoTable,
-    cachedVideoTable,
 
+  const {
     cachedUserWorkoutsLog, // log do peso pessoal do usuario, é o cache que carrega com os cards
     myWorkout, // CACHE DO TREINO DIRETO DO FIREBASE
 
@@ -98,173 +82,111 @@ function WorkoutVideoCardComponent({
     user,
   } = useAuth()
 
-  const selectedLanguage = user?.selectedLanguage
-
   const { seconds, minutes, isRunning, pause, restart, resume, totalSeconds } =
     useTimer({
       expiryTimestamp: time,
       onExpire: () => console.log('acabouu'),
       autoStart: false,
     })
-  const [restTimeState, setRestTimeState] = useState<number | null>(null)
-  const elapsedTime = (restTimeState ?? 0) - totalSeconds
-  const percentage = restTimeState ? (elapsedTime / restTimeState) * 100 : 0
-  // const invertedPercentage = 100 - percentage
 
-  useEffect(() => {
-    setRestTimeState(restTime)
-  }, [restTime])
+  const defaultWeightDoneLog: IWeightDoneLog = useMemo(() => {
+    const workoutExerciseRestTimeNumber =
+      item?.workoutExerciseRestTimeNumber || 0
+    const workoutExerciseSets = item?.workoutExerciseSets || [`0`]
+    const workoutExerciseId = item.workoutExerciseId || ''
+    const timeNow = new Date().getTime()
 
-  /* 
-  
-  estipular ordem de carregamento dos dados default
-  e o cache aplicado por cima
-  */
+    const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
+      .find((v) => v.workoutId === workoutId)
+      ?.workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
+      ?.weightDoneLogs[exerciseIndex]
 
-  // criar variavel que armazena o restTime que pode ser alterado
-  const cachedDefaultModalState = useMemo(
-    () => ({
-      isOpenModalUserNotes: false,
-      isOpenModalVideoPlayer: false,
-      isOpenModalUserWeight: false,
-      isOpenModalUserSets: false,
-      isOpenModalSetBetweenSets: false,
-      activeWeightIndex: 0,
-      lastActiveWeightIndex: 0,
-
-      workoutCardIndex: 0,
-      exerciseIndex: 0,
-      exerciseId: item.workoutExerciseId || '',
-      repetitionData:
-        item && item.workoutExerciseRepetition
-          ? (item.workoutExerciseSets ?? []).map(() => ({
-              completed: { isCompleted: false, createdAt: 0, updatedAt: 0 },
-              sets: {
-                value: 0,
-                isActivedRangeOfSets: false,
-                rangeOfSets: [],
-                createdAt: new Date().getTime(),
-                updatedAt: new Date().getTime(),
-              },
-              weight: {
-                value: `0`,
-                createdAt: new Date().getTime(),
-                updatedAt: new Date().getTime(),
-              },
-              createdAt: new Date().getTime(),
-              updatedAt: new Date().getTime(),
-            }))
-          : [
-              {
-                completed: { isCompleted: false, createdAt: 0, updatedAt: 0 },
-                sets: {
-                  value: 0,
-                  isActivedRangeOfSets: false,
-                  rangeOfSets: [],
-                  createdAt: new Date().getTime(),
-                  updatedAt: new Date().getTime(),
-                },
-                weight: {
-                  value: `0`,
-                  createdAt: new Date().getTime(),
-                  updatedAt: new Date().getTime(),
-                },
-                createdAt: new Date().getTime(),
-                updatedAt: new Date().getTime(),
-              },
-            ],
-      notes: {
-        value: '',
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-      },
-      time: {
-        value: `0`,
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
-      },
-    }),
-    [item],
-  )
-
-  // start
-  const initialModalState = useMemo(() => {
-    let cachedCardWeightLog = cachedDefaultModalState
-
-    if (cachedUserWorkoutsLog && cachedUserWorkoutsLog.workoutsLog) {
-      if (cachedUserWorkoutsLog?.userId !== user?.id) return
-      const sessionIndex = cachedUserWorkoutsLog.workoutsLog.findIndex(
-        (v) => v.workoutId === workoutId,
-      )
-      if (sessionIndex === -1) return
-
-      const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
-        sessionIndex
-      ].workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
-
-      if (findCachedCard && findCachedCard.weightDoneLogs) {
-        const weightLog = findCachedCard.weightDoneLogs.find(
-          (log) => log.exerciseIndex === exerciseIndex,
-        )
-
-        if (weightLog) {
-          cachedCardWeightLog = {
-            ...cachedDefaultModalState,
-            ...weightLog,
-          }
-        }
-      }
+    const formattedTime = {
+      value: String(workoutExerciseRestTimeNumber),
+      createdAt: timeNow,
+      updatedAt: timeNow,
     }
 
-    const getLastCompletedTimestamp = cachedCardWeightLog.repetitionData.reduce(
-      (latest, current) =>
-        current.updatedAt > latest.updatedAt ? current : latest,
-      { updatedAt: 0 } as IWeightRepetitionData,
-    )
+    const formattedNotes = {
+      value: '',
+      createdAt: timeNow,
+      updatedAt: timeNow,
+    }
 
-    const todayDate = new Date()
+    const formattedRepetition: IWeightRepetitionData[] =
+      workoutExerciseSets.map((v) => {
+        const rangeMatch = v.match(/^(\d+)-(\d+)$/)
 
-    const areSameDay = getLastCompletedTimestamp?.updatedAt
-      ? isSameDay(todayDate, getLastCompletedTimestamp.updatedAt)
-      : false
+        let setsValue = 0
+        let rangeOfSets: number[] = []
+        let isActivedRangeOfSets = false
 
-    const cleanCompletedDones = cachedCardWeightLog.repetitionData.map((v) => {
-      return {
-        ...v,
-        completed: {
-          isCompleted: areSameDay ? v.completed.isCompleted : false,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
-        },
-      }
-    })
-    cachedCardWeightLog.repetitionData = cleanCompletedDones
+        if (rangeMatch) {
+          const start = Number(rangeMatch[1])
+          const end = Number(rangeMatch[2])
+          rangeOfSets = [start, end]
+          isActivedRangeOfSets = true
+        } else {
+          setsValue = Number(v)
+        }
+
+        return {
+          weight: {
+            value: `0`,
+            createdAt: timeNow,
+            updatedAt: timeNow,
+          },
+          sets: {
+            value: setsValue,
+            isActivedRangeOfSets,
+            rangeOfSets,
+            createdAt: timeNow,
+            updatedAt: timeNow,
+          },
+          completed: {
+            isCompleted: false,
+            createdAt: timeNow,
+            updatedAt: timeNow,
+          },
+          createdAt: timeNow,
+          updatedAt: timeNow,
+        }
+      })
+
+    const cachedCardWeightLog: IWeightDoneLog = {
+      exerciseIndex,
+      exerciseId: workoutExerciseId,
+      notes: cachedInfo?.notes || formattedNotes,
+      time: cachedInfo?.time || formattedTime,
+      repetitionData: cachedInfo?.repetitionData || formattedRepetition,
+    }
 
     return cachedCardWeightLog
-  }, [
-    cachedDefaultModalState,
-    cachedUserWorkoutsLog,
-    user?.id,
-    workoutId,
-    workoutCardIndex,
-    exerciseIndex,
-  ])
+  }, [])
+
+  const defaultModalStateValues = {
+    isOpenModalUserNotes: false,
+    isOpenModalVideoPlayer: false,
+    isOpenModalUserWeight: false,
+    isOpenModalUserSets: false,
+    isOpenModalSetBetweenSets: false,
+    activeWeightIndex: 0,
+    lastActiveWeightIndex: 0,
+  }
 
   const [modalWeightState, setModalWeightState] =
-    useState<IModalStateWorkoutLogData>(
-      initialModalState || cachedDefaultModalState,
-    )
+    useState<IWeightDoneLog>(defaultWeightDoneLog)
 
-  const allItensCompleted = modalWeightState?.repetitionData.every(
-    (v) => v.completed.isCompleted,
-  )
-
-  const [modalVideoLocalPathState, setModalVideoLocalPathState] =
-    useState<string>('')
+  const [defaultModalState, setDefaultModalState] =
+    useState<IModalStateWorkoutLogData>(defaultModalStateValues)
 
   const [weightProgressionData, setWeightProgressionData] = useState<
     ICachedExerciseHistoryData[] | null
   >(null)
+
+  const allItensCompleted = modalWeightState?.repetitionData.every(
+    (v) => v.completed.isCompleted,
+  )
 
   const firstIncompleteIndex = modalWeightState?.repetitionData.findIndex(
     (v) => !v.completed.isCompleted,
@@ -276,184 +198,225 @@ function WorkoutVideoCardComponent({
     -1,
   )
 
-  const handleUpdateWeight = useCallback(
-    async (_weight: string) => {
+  function handleUpdateWeight(_weight: string, type: 'all' | 'single') {
+    if (type === 'single') {
+      onUpdateSingleWeight(_weight)
+    }
+
+    if (type === 'all') {
+      const allWeightsAreEqual = modalWeightState.repetitionData.every(
+        (v) => v.weight.value === _weight,
+      )
+
+      if (allWeightsAreEqual) {
+        onUpdateAllWeight(_weight)
+        closeModal('weight')
+      } else {
+        Alert.alert(
+          'Confirmação',
+          'Você realmente quer sobrescrever todos os pesos?',
+          [
+            {
+              text: 'Cancelar',
+              style: 'cancel',
+            },
+            {
+              text: 'Confirmar',
+              onPress: () => {
+                onUpdateAllWeight(_weight)
+                closeModal('weight')
+              },
+            },
+          ],
+          { cancelable: false },
+        )
+      }
+    }
+
+    function onUpdateSingleWeight(_weight: string) {
+      const copyProgression = { ...modalWeightState }
+      const timeNow = new Date().getTime()
+      const activeIndex = defaultModalState.activeWeightIndex
+
+      copyProgression.repetitionData[activeIndex] = {
+        ...copyProgression.repetitionData[activeIndex],
+        weight: {
+          value: _weight,
+          createdAt: timeNow,
+          updatedAt: timeNow,
+        },
+      }
+
+      setModalWeightState(copyProgression)
+      closeModal('weight')
+    }
+
+    function onUpdateAllWeight(_weight: string) {
+      const copyProgression = { ...modalWeightState }
       const timeNow = new Date().getTime()
 
-      console.log(`chegando no peso:`, _weight)
-
-      setModalWeightState((prevState) => ({
-        ...prevState,
-        repetitionData: prevState.repetitionData.map((v, i) => {
-          if (modalWeightState.activeWeightIndex === i) {
-            return {
-              ...v,
-              weight: {
-                value: _weight,
-                createdAt: timeNow,
-                updatedAt: timeNow,
-              },
-            }
-          }
-          return v
-        }),
-      }))
-
-      closeWeight()
-    },
-    [closeWeight],
-  )
-
-  function handleUpdateAllWeight(_weight: string) {
-    Alert.alert(
-      'Confirmação',
-      'Você realmente quer sobrescrever todos os pesos?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Confirmar',
-          onPress: () => {
-            onUpdateAll(_weight)
-            closeWeight()
-          },
-        },
-      ],
-      { cancelable: false },
-    )
-  }
-
-  const handleUpdateNotes = useCallback(
-    async (_notes: string) => {
-      if (!_notes) return
-
-      setModalWeightState((prevState) => ({
-        ...prevState,
-        isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
-        notes: {
-          ...prevState.notes,
-          value: _notes,
-          updatedAt: new Date().getTime(),
-        },
-      }))
-
-      closeNotes()
-    },
-    [item],
-  )
-
-  const handleUpdateSets = useCallback(
-    async (
-      value: number,
-      rangeOfSets: number[],
-      isActivedRangeOfSets: boolean,
-    ) => {
-      /* 
-      setBetweenSets: 0,
-      */
-      console.log(`chegando handleUpdateSets value:`, value)
-      const copyProgression = modalWeightState || {} // jogar state aqui
-
-      copyProgression.repetitionData[modalWeightState.activeWeightIndex].sets =
-        {
-          value,
-          rangeOfSets,
-          isActivedRangeOfSets,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
-        }
-
-      setModalWeightState(copyProgression)
-      closeSets()
-    },
-    [modalWeightState, closeSets],
-  )
-
-  const handleUpdateRangeOfSets = useCallback(
-    async (
-      value: number,
-      rangeOfSets: number[],
-      isActivedRangeOfSets: boolean,
-    ) => {
-      console.log(`chegando na rangeOfSets:`, rangeOfSets)
-      const copyProgression = modalWeightState || {} // jogar state aqui
-
-      copyProgression.repetitionData[modalWeightState.activeWeightIndex].sets =
-        {
-          rangeOfSets,
-          value,
-          isActivedRangeOfSets,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
-        }
-
-      setModalWeightState(copyProgression)
-      closeSets()
-    },
-    [modalWeightState],
-  )
-
-  function handleUpdateAllWeightValidate(weight: string) {
-    // se todos forem igual ao weight eu nao pergunto
-
-    const allWeightsAreEqual = modalWeightState.repetitionData.every(
-      (v) => v.weight.value === weight,
-    )
-    if (!allWeightsAreEqual) {
-      handleUpdateAllWeight(weight)
-    }
-    if (allWeightsAreEqual) {
-      onUpdateAll(weight)
-      closeWeight()
-    }
-  }
-
-  function onUpdateAll(_weight: string) {
-    const copyProgression = { ...modalWeightState }
-
-    const copyProgressionRep =
-      modalWeightState?.repetitionData.map((v) => ({
+      const copyProgressionRep = modalWeightState.repetitionData.map((v) => ({
         ...v,
         weight: {
           value: _weight,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
+          createdAt: timeNow,
+          updatedAt: timeNow,
         },
-      })) || []
+      }))
 
-    copyProgression.repetitionData = copyProgressionRep
-    setModalWeightState(copyProgression)
+      copyProgression.repetitionData = copyProgressionRep
+      setModalWeightState(copyProgression)
+      closeModal('weight')
+    }
   }
 
-  function handleAddRepetition() {
-    Alert.alert(
-      selectedLanguage === 'pt-br' ? 'Adicionar Repetição' : 'Add Repetition',
-      selectedLanguage === 'pt-br'
-        ? 'Você realmente quer adicionar mais uma repetição?'
-        : 'Do you really want to add another repetition?',
-      [
+  function handleUpdateNotes(_notes: string) {
+    if (!_notes) return
+
+    setModalWeightState((prevState) => ({
+      ...prevState,
+      notes: {
+        ...prevState.notes,
+        value: _notes,
+        updatedAt: new Date().getTime(),
+      },
+    }))
+    setDefaultModalState((prevState) => ({
+      ...prevState,
+      isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
+    }))
+
+    closeModal('notes')
+  }
+
+  function handleUpdateSets(
+    type: 'update' | 'delete',
+    value?: number,
+    rangeOfSets?: number[],
+    isActivedRangeOfSets?: boolean,
+  ) {
+    if (
+      type === 'update' &&
+      value !== undefined &&
+      rangeOfSets !== undefined &&
+      isActivedRangeOfSets !== undefined
+    ) {
+      const copyProgression = modalWeightState || {} // jogar state aqui
+
+      copyProgression.repetitionData[defaultModalState.activeWeightIndex].sets =
         {
-          text: selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
-          onPress: () => {
-            onAddRepetition()
-            closeWeight()
+          rangeOfSets,
+          value,
+          isActivedRangeOfSets,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        }
+
+      setModalWeightState(copyProgression)
+      closeModal('sets')
+    }
+
+    if (type === 'delete') {
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Remover Repetição'
+          : 'Remove Repetition',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Você realmente quer remover?'
+          : 'Do you really want to remove?',
+        [
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+            style: 'cancel',
           },
-        },
-      ],
-      { cancelable: false },
-    )
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+            onPress: () => {
+              onRemoveRangeOfSets()
+              closeModal('weight')
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+
+      function onRemoveRangeOfSets() {
+        const copyProgression = modalWeightState || {} // jogar state aqui
+        const copyValue =
+          copyProgression.repetitionData[defaultModalState.activeWeightIndex]
+            .sets.value
+        copyProgression.repetitionData[
+          defaultModalState.activeWeightIndex
+        ].sets = {
+          rangeOfSets: [],
+          value: copyValue,
+          isActivedRangeOfSets: false,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+        }
+
+        setModalWeightState(copyProgression)
+        closeModal('sets')
+      }
+    }
+  }
+
+  function handlePushOrPopRepetition(type: 'push' | 'pop') {
+    if (type === 'push') {
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Adicionar Repetição'
+          : 'Add Repetition',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Você realmente quer adicionar mais uma repetição?'
+          : 'Do you really want to add another repetition?',
+        [
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+            onPress: () => {
+              onAddRepetition()
+              closeModal('weight')
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    }
+
+    if (type === 'pop') {
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Remover Repetição'
+          : 'Remove Repetition',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Você realmente quer remover a última repetição?'
+          : 'Do you really want to remove the last repetition?',
+        [
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+            onPress: () => {
+              onRemoveRepetition()
+              closeModal('weight')
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    }
 
     function onAddRepetition() {
       if (modalWeightState.repetitionData.length > 7) {
         Alert.alert(
-          selectedLanguage === 'pt-br' ? 'Ops' : 'Oops',
-          selectedLanguage === 'pt-br'
+          user?.selectedLanguage === 'pt-br' ? 'Ops' : 'Oops',
+          user?.selectedLanguage === 'pt-br'
             ? 'Você atingiu o limite de repetições'
             : 'You have reached the repetition limit',
         )
@@ -461,34 +424,24 @@ function WorkoutVideoCardComponent({
       }
 
       const copyProgression = { ...modalWeightState }
-
-      const doNotCopyCompleted = copyProgression.repetitionData.map((v) => {
-        return {
-          completed: false,
-          completedTimestamp: 0,
-          setBetweenSets: '0',
-          sets: v.sets,
-          weight: v.weight,
-        }
-      })
+      const getTime = new Date().getTime()
 
       const newRepetitionToAdd = {
         ...copyProgression.repetitionData[
           copyProgression.repetitionData.length - 1
         ],
         setBetweenSets: '0',
-        completed: false,
+        completed: {
+          isCompleted: false,
+          createdAt: getTime,
+          updatedAt: getTime,
+        },
         completedTimestamp: 0,
       }
-      console.log(`lastCompletedIndex`, lastCompletedIndex)
-      console.log(
-        `copyProgression.activeWeightIndex`,
-        copyProgression.activeWeightIndex,
-      )
 
-      if (copyProgression.activeWeightIndex === lastCompletedIndex) {
+      if (defaultModalState.activeWeightIndex === lastCompletedIndex) {
         console.log(`primeiro`)
-        copyProgression.activeWeightIndex =
+        defaultModalState.activeWeightIndex =
           lastCompletedIndex === -1 ? 0 : lastCompletedIndex + 1
       } else {
         console.log(`segundo`)
@@ -498,35 +451,12 @@ function WorkoutVideoCardComponent({
 
       setModalWeightState(copyProgression)
     }
-  }
-
-  function handleRemoveLastRepetition() {
-    Alert.alert(
-      selectedLanguage === 'pt-br' ? 'Remover Repetição' : 'Remove Repetition',
-      selectedLanguage === 'pt-br'
-        ? 'Você realmente quer remover a última repetição?'
-        : 'Do you really want to remove the last repetition?',
-      [
-        {
-          text: selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
-          onPress: () => {
-            onRemoveRepetition()
-            closeWeight()
-          },
-        },
-      ],
-      { cancelable: false },
-    )
 
     function onRemoveRepetition() {
       if (modalWeightState.repetitionData.length <= 1) {
         Alert.alert(
-          selectedLanguage === 'pt-br' ? 'Ops' : 'Oops',
-          selectedLanguage === 'pt-br'
+          user?.selectedLanguage === 'pt-br' ? 'Ops' : 'Oops',
+          user?.selectedLanguage === 'pt-br'
             ? 'Você não pode remover todas as repetições'
             : 'You cannot remove all repetitions',
         )
@@ -534,23 +464,17 @@ function WorkoutVideoCardComponent({
       }
       const copyProgression = { ...modalWeightState }
 
-      console.log(`lastCompletedIndex`, lastCompletedIndex)
-      console.log(
-        `copyProgression.repetitionData.length`,
-        copyProgression.repetitionData.length,
-      )
-      console.log(`lastCompletedIndex`, lastCompletedIndex)
       /* 
 
 */
       copyProgression.repetitionData.pop()
-      const updatedRepLenght = copyProgression.repetitionData.length - 1
-      console.log(`updatedRepLenght`, updatedRepLenght)
 
-      copyProgression.activeWeightIndex =
+      const updatedRepLenght = copyProgression.repetitionData.length - 1
+
+      defaultModalState.activeWeightIndex =
         firstIncompleteIndex === -1 ? updatedRepLenght : lastCompletedIndex
 
-      const finalData: IModalStateWorkoutLogData = {
+      const finalData: IWeightDoneLog = {
         ...copyProgression,
       }
 
@@ -560,42 +484,52 @@ function WorkoutVideoCardComponent({
 
   function handleDoneWorkout() {
     if (isRunning) {
-      handleSkipRestTime()
+      onTimerManage('skip')
       return
     }
 
-    if (
-      !modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .isActivedRangeOfSets &&
-      !modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
+    const getIsActivedRangeOfSets =
+      modalWeightState.repetitionData[defaultModalState.activeWeightIndex].sets
+        .isActivedRangeOfSets
+
+    const getSetValue =
+      modalWeightState.repetitionData[defaultModalState.activeWeightIndex].sets
         .value
-    ) {
-      setModalWeightState((prevState) => ({
+    const getWeightValue =
+      modalWeightState.repetitionData[defaultModalState.activeWeightIndex]
+        .weight.value
+
+    const getRangeOfSets =
+      modalWeightState.repetitionData[defaultModalState.activeWeightIndex].sets
+        .rangeOfSets
+
+    if (!getIsActivedRangeOfSets && !getSetValue) {
+      setDefaultModalState((prevState) => ({
         ...prevState,
         isOpenModalUserSets: true,
       }))
       return
     }
 
+    if (getIsActivedRangeOfSets && !getSetValue) {
+      openModal('rangeOfSets', defaultModalState.activeWeightIndex)
+      return
+    }
+
     if (
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .isActivedRangeOfSets &&
-      !modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .value &&
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .rangeOfSets.length !== 0
+      getIsActivedRangeOfSets &&
+      !getSetValue &&
+      getRangeOfSets.length !== 0
     ) {
-      setModalWeightState((prevState) => ({
+      setDefaultModalState((prevState) => ({
         ...prevState,
         isOpenModalSetBetweenSets: true,
       }))
       return
     }
-    if (
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].weight
-        .value === `0`
-    ) {
-      setModalWeightState((prevState) => ({
+
+    if (getWeightValue === `0`) {
+      setDefaultModalState((prevState) => ({
         ...prevState,
         isOpenModalUserWeight: true,
       }))
@@ -606,66 +540,60 @@ function WorkoutVideoCardComponent({
       alert('Todos os itens foram completados')
       return
     }
-    const isActivedRangeOfSets =
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .isActivedRangeOfSets
 
-    const value =
-      modalWeightState.repetitionData[modalWeightState.activeWeightIndex].sets
-        .value
-
-    if (isActivedRangeOfSets && !value) {
-      openSetBetweenSets(modalWeightState.activeWeightIndex)
-      return
-    }
-
-    if (!workoutId) return
     if (exerciseIndex !== 0 && user?.anonymousUser) {
       return
     }
-    if (isRunning) {
-      handleSkipRestTime()
-      return
-    }
 
-    onPlay()
+    onTimerManage('play')
+
+    const date = new Date()
+    const getTime = date.getTime()
 
     const copyProgression = { ...modalWeightState } // Copiar o estado atual
 
     copyProgression.repetitionData[
-      modalWeightState.activeWeightIndex
+      defaultModalState.activeWeightIndex
     ].completed = {
       isCompleted: true,
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
+      createdAt: getTime,
+      updatedAt: getTime,
     }
 
     copyProgression.repetitionData[
-      modalWeightState.activeWeightIndex
-    ].updatedAt = new Date().getTime()
-
-    copyProgression.activeWeightIndex =
-      modalWeightState.activeWeightIndex + 1 <=
+      defaultModalState.activeWeightIndex
+    ].updatedAt = getTime
+    /* verificar o q ta aqui */
+    const getActiveWeightIndex =
+      defaultModalState.activeWeightIndex + 1 <
       modalWeightState.repetitionData.length
-        ? modalWeightState.activeWeightIndex + 1
-        : modalWeightState.activeWeightIndex
+        ? defaultModalState.activeWeightIndex + 1
+        : defaultModalState.activeWeightIndex
+    /*  verificar esse trecho pois ao dar ok ele nao  */
+    console.log(
+      `getActiveWeightIndex ->>>>>>> ->>>>>>> ->>>>>>> ->>>>>>> ->>>>>>>`,
+      modalWeightState.repetitionData.length,
+    )
 
     setModalWeightState(copyProgression)
-    saveFastCachedWorkoutData(workoutId)
+    setDefaultModalState((prev) => {
+      return {
+        ...prev,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+        activeWeightIndex: getActiveWeightIndex,
+      }
+    })
+    saveFastCachedWorkoutData(workoutId, date)
 
-    async function saveFastCachedWorkoutData(_workoutId: string) {
+    async function saveFastCachedWorkoutData(_workoutId: string, date: Date) {
       if (!item.workoutExerciseId) return console.log(`vish`)
 
-      const date = new Date()
       const completedTimestamp = date.getTime()
       const lastCompletedDay = {
         'pt-br': format(date, 'EEEE', { locale: ptBR }),
         us: format(date, 'EEEE', { locale: enUS }),
       }
       const lastCompletedDate = format(date, 'dd/MM/yyyy')
-
-      console.log(`lastCompletedDay!!!!!!!!`)
-      console.log(lastCompletedDay)
 
       const newExercise: IWeightDoneLog = {
         exerciseIndex,
@@ -1016,15 +944,14 @@ function WorkoutVideoCardComponent({
     }
   }
 
-  function handleSetCompletedCheck(index: number) {
+  function handleUncheckOrCheckRepetion(index: number) {
     if (isRunning) {
       pause()
       return
     }
-    const copyModalWeightState = { ...modalWeightState }
 
-    if (copyModalWeightState.repetitionData[index].completed.isCompleted) {
-      const hasFollowingCompleted = copyModalWeightState.repetitionData
+    if (modalWeightState.repetitionData[index].completed.isCompleted) {
+      const hasFollowingCompleted = modalWeightState.repetitionData
         .slice(index + 1)
         .some((item) => item.completed.isCompleted)
 
@@ -1042,33 +969,19 @@ function WorkoutVideoCardComponent({
           {
             text: 'Confirmar',
             onPress: () => {
-              desmarcarItem(index, copyModalWeightState)
-              handleSkipRestTime()
+              desmarcarItem(index)
+              onTimerManage('skip')
             },
           },
         ],
         { cancelable: false },
       )
-      return
+    } else {
+      marcarItem(index)
     }
 
-    marcarItem(index, copyModalWeightState)
-    setModalWeightState((prevState) => {
-      const nextIndex = prevState.activeWeightIndex + 1
-      const isLastIndex = nextIndex >= prevState.repetitionData.length
-
-      return {
-        ...prevState,
-        activeWeightIndex: isLastIndex
-          ? prevState.activeWeightIndex
-          : nextIndex,
-      }
-    })
-
-    function desmarcarItem(
-      index: number,
-      copyModalWeightState: IModalStateWorkoutLogData,
-    ) {
+    function desmarcarItem(index: number) {
+      const copyModalWeightState = { ...modalWeightState }
       const completedTimestamp = new Date().getTime()
 
       copyModalWeightState.repetitionData =
@@ -1092,14 +1005,19 @@ function WorkoutVideoCardComponent({
         })
       copyModalWeightState.repetitionData[index].updatedAt = completedTimestamp
 
-      copyModalWeightState.activeWeightIndex = index
       setModalWeightState(copyModalWeightState)
+      setDefaultModalState((prev) => {
+        return {
+          ...prev,
+          lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+          activeWeightIndex: index,
+        }
+      })
     }
 
-    function marcarItem(
-      index: number,
-      copyModalWeightState: IModalStateWorkoutLogData,
-    ) {
+    function marcarItem(index: number) {
+      const copyModalWeightState = { ...modalWeightState }
+
       const completedTimestamp = new Date().getTime()
       const hasFollowingCompleted =
         copyModalWeightState.repetitionData[index].completed
@@ -1119,179 +1037,194 @@ function WorkoutVideoCardComponent({
         copyModalWeightState.repetitionData[index].completed.updatedAt =
           completedTimestamp
       }
+
       copyModalWeightState.repetitionData[index].updatedAt = completedTimestamp
 
-      /* todo l fa,ta coisa aqui */
-
-      copyModalWeightState.activeWeightIndex = index
-
       setModalWeightState(copyModalWeightState)
+      setDefaultModalState((prev) => {
+        return {
+          ...prev,
+          lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+          activeWeightIndex: index,
+        }
+      })
     }
   }
 
-  function handleSkipRestTime() {
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + restTime)
-    setRestTimeState(restTime) // Resetar o estado para o tempo inicial
-    restart(time, false)
-  }
-
-  /* alterar */
-  function add15Seconds() {
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + totalSeconds + 15)
-    restart(time, isRunning)
-    setRestTimeState((prev) => (prev !== null ? prev + 15 : 15))
-  }
-
-  /* alterar */
-  function subtract15Seconds() {
-    const time = new Date()
-    time.setSeconds(time.getSeconds() + Math.max(totalSeconds - 15, 0))
-    restart(time, isRunning)
-
-    setRestTimeState((prev) => (prev !== null ? prev - 15 : 0))
-  }
-
-  function openVideoPlayer() {
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalVideoPlayer: true,
-    }))
-  }
-
-  function closeVideoPlayer() {
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalVideoPlayer: false,
-    }))
-  }
-
-  function openNotes() {
-    if (exerciseIndex !== 0 && user?.anonymousUser) {
-      return
-    }
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserNotes: true,
-    }))
-  }
-
-  function closeNotes() {
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserNotes: false,
-      activeWeightIndex: prevState.lastActiveWeightIndex,
-    }))
-  }
-
-  function openWeight(index: number) {
-    if (exerciseIndex !== 0 && user?.anonymousUser) {
-      return
-    }
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserWeight: true,
-      activeWeightIndex: index === -1 ? 0 : index,
-      lastActiveWeightIndex: modalWeightState.activeWeightIndex,
-    }))
-  }
-
-  function openSets(index: number) {
-    if (exerciseIndex !== 0 && user?.anonymousUser) {
-      return
-    }
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalUserSets: true,
-      activeWeightIndex: index === -1 ? 0 : index,
-      lastActiveWeightIndex: modalWeightState.activeWeightIndex,
-    }))
-  }
-
-  function openSetBetweenSets(index: number) {
-    if (exerciseIndex !== 0 && user?.anonymousUser) {
-      return
-    }
-    // criar hook aqui para salvar o notes e tirar o salva dele indo pelo node se tiver
-    setModalWeightState((prevState) => ({
-      ...prevState,
-      isOpenModalSetBetweenSets: true,
-      activeWeightIndex: index === -1 ? 0 : index,
-      lastActiveWeightIndex: modalWeightState.activeWeightIndex,
-    }))
-  }
-
-  const closeSets = useCallback(() => {
-    setModalWeightState((prevState) => {
-      if (!prevState) return prevState
-      return {
+  function handleChangeRepetitionFocus(index: number) {
+    console.log(`index`, index)
+    if (index !== defaultModalState.activeWeightIndex) {
+      setDefaultModalState((prevState) => ({
         ...prevState,
-        isOpenModalUserSets: false,
-        activeWeightIndex: prevState.lastActiveWeightIndex,
-      }
-    })
-  }, [])
-
-  const closeWeight = useCallback(() => {
-    setModalWeightState((prevState) => {
-      if (!prevState) return prevState
-      return {
+        activeWeightIndex: index,
+      }))
+    } else {
+      setDefaultModalState((prevState) => ({
         ...prevState,
-        isOpenModalUserWeight: false,
-        activeWeightIndex: prevState.lastActiveWeightIndex,
-      }
-    })
-  }, [])
+        activeWeightIndex: index,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+      }))
+    }
+  }
 
-  const closeSetBetweenSets = useCallback(() => {
-    setModalWeightState((prevState) => {
-      if (!prevState) return prevState
-      return {
+  function openModal(
+    type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',
+    index?: number,
+  ) {
+    if (type === 'videoplayer') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalVideoPlayer: true,
+      }))
+    }
+    if (type === 'rangeOfSets' && index !== undefined) {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalSetBetweenSets: true,
+        activeWeightIndex: index === -1 ? 0 : index,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+      }))
+    }
+    if (type === 'weight' && index !== undefined) {
+      console.log(`asdasd`, type)
+
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalUserWeight: true,
+        activeWeightIndex: index === -1 ? 0 : index,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+      }))
+    }
+    if (type === 'sets' && index !== undefined) {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalUserSets: true,
+        activeWeightIndex: index === -1 ? 0 : index,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+      }))
+    }
+    if (type === 'notes') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalUserNotes: true,
+        //        activeWeightIndex: prevState.lastActiveWeightIndex,
+      }))
+    }
+  }
+
+  function closeModal(
+    type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',
+  ) {
+    if (type === 'videoplayer') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalVideoPlayer: false,
+      }))
+    }
+    if (type === 'rangeOfSets') {
+      setDefaultModalState((prevState) => ({
         ...prevState,
         isOpenModalSetBetweenSets: false,
-        activeWeightIndex: prevState.lastActiveWeightIndex,
-      }
-    })
-  }, [])
-
-  function updateActiveWeightIndexSets(index: number) {
-    if (exerciseIndex !== 0 && user?.anonymousUser) {
-      return
-    }
-    if (!modalWeightState) return
-    /* 
-    se clicar em algo diferente do que estava , se ele for menor que o ultimo completado e nao for o ultimo
-    */
-    if (index !== modalWeightState.activeWeightIndex) {
-      setModalWeightState((prevState) => ({
-        ...prevState,
-        activeWeightIndex: index,
+        //        activeWeightIndex: prevState.lastActiveWeightIndex,
       }))
     }
-
-    if (allItensCompleted) {
-      console.log(`allItensCompleted `)
-
-      setModalWeightState((prevState) => ({
+    if (type === 'weight') {
+      setDefaultModalState((prevState) => ({
         ...prevState,
-        activeWeightIndex: prevState.activeWeightIndex,
+        isOpenModalUserWeight: false,
+        //        activeWeightIndex: prevState.lastActiveWeightIndex,
       }))
-    } /* else {
-      setModalWeightState((prevState) => ({
+    }
+    if (type === 'sets') {
+      setDefaultModalState((prevState) => ({
         ...prevState,
-        activeWeightIndex: index,
+        isOpenModalUserSets: false,
+        //        activeWeightIndex: prevState.lastActiveWeightIndex,
       }))
-    } */
+    }
+    if (type === 'notes') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalUserNotes: false,
+        //        activeWeightIndex: prevState.lastActiveWeightIndex,
+      }))
+    }
   }
 
-  function handlePress() {
+  function onTimerManage(type: 'pause' | 'play' | 'skip' | 'add' | 'subtract') {
+    if (type === 'pause') {
+      pause()
+    }
+    if (type === 'play') {
+      resume()
+    }
+    if (type === 'skip') {
+      handleSkipRestTime()
+
+      function handleSkipRestTime() {
+        const time = new Date()
+        time.setSeconds(time.getSeconds() + restTime)
+
+        setModalWeightState((prev) => {
+          return {
+            ...prev,
+            time: {
+              ...prev.time,
+              value: String(restTime),
+              updatedAt: time.getTime(),
+            },
+          }
+        })
+        restart(time, false)
+      }
+    }
+
+    if (type === 'add') {
+      add15Seconds()
+    }
+    if (type === 'subtract') {
+      subtract15Seconds()
+    }
+
+    function add15Seconds() {
+      const time = new Date()
+      time.setSeconds(time.getSeconds() + totalSeconds + 15)
+      restart(time, isRunning)
+
+      setModalWeightState((prev) => {
+        return {
+          ...prev,
+          time: {
+            ...prev.time,
+            value: String(Number(prev.time.value) + 15),
+            updatedAt: time.getTime(),
+          },
+        }
+      })
+    }
+
+    function subtract15Seconds() {
+      const time = new Date()
+      time.setSeconds(time.getSeconds() + Math.max(totalSeconds - 15, 0))
+      restart(time, isRunning)
+
+      setModalWeightState((prev) => {
+        return {
+          ...prev,
+          time: {
+            ...prev.time,
+            value: String(Number(prev.time.value) - 15),
+            updatedAt: time.getTime(),
+          },
+        }
+      })
+    }
+  }
+
+  function handlePressGuessUser() {
     Alert.alert(
-      selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
-      selectedLanguage === 'pt-br'
+      user?.selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
+      user?.selectedLanguage === 'pt-br'
         ? 'Disponível apenas para usuários cadastrados'
         : 'Available only for registered users',
       [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
@@ -1299,177 +1232,59 @@ function WorkoutVideoCardComponent({
     )
   }
 
-  const handlePause = useCallback(() => {
-    pause()
-  }, [pause])
-
-  function onPlay() {
-    resume()
-  }
-
-  const buttonText = useMemo(
-    () => getButtonText(),
-    [modalWeightState, isRunning, selectedLanguage, getButtonText],
-  )
-
-  function getButtonText() {
+  function buttonText() {
     if (!modalWeightState.repetitionData) return
 
-    const activeWeightIndex = modalWeightState.activeWeightIndex
+    const activeWeightIndex = defaultModalState.activeWeightIndex
     const repetitionData = modalWeightState.repetitionData[activeWeightIndex]
 
     const completed = repetitionData
       ? repetitionData.completed.isCompleted
       : false
     if (allItensCompleted) {
-      return selectedLanguage === 'pt-br' ? 'Próximo' : 'Next xercise'
+      return user?.selectedLanguage === 'pt-br' ? 'Próximo' : 'Next xercise'
     }
     if (isRunning) {
-      return selectedLanguage === 'pt-br' ? 'Pular descanso' : 'Skip rest'
+      return user?.selectedLanguage === 'pt-br' ? 'Pular descanso' : 'Skip rest'
     }
     if (completed && !allItensCompleted) {
-      return selectedLanguage === 'pt-br' ? 'Desmarcar série' : 'Unmark set'
+      return user?.selectedLanguage === 'pt-br'
+        ? 'Desmarcar série'
+        : 'Unmark set'
     }
 
-    return selectedLanguage === 'pt-br'
+    return user?.selectedLanguage === 'pt-br'
       ? 'Registrar repetição'
       : 'Register repetition'
   }
 
-  useEffect(() => {
-    handlePause()
+  const startCronometer = useCallback(() => {
+    onTimerManage('pause')
     const time = new Date()
     time.setSeconds(time.getSeconds() + restTime)
     restart(time, false)
-  }, [restTime, handlePause, restart])
+  }, [restTime, restart])
 
   useEffect(() => {
-    if (!cachedVideoTable) {
-      startDownload(
-        item.workoutExerciseVideoUrl,
-        item.workoutExerciseVideoFileName,
-        item.workoutExerciseVideoMIME,
-        item.workoutExerciseId,
-      )
-    }
-
-    const mySelectedCachedWorkoutIndex = cachedVideoTable?.findIndex(
-      (v) => v.workoutExerciseId === item.workoutExerciseId,
-    )
-
-    const isNewCachedVideo = mySelectedCachedWorkoutIndex === -1
-
-    const {
-      workoutExerciseVideoUrl,
-      workoutExerciseVideoFileName,
-      workoutExerciseVideoMIME,
-      workoutExerciseId,
-    } = item
-
-    if (isNewCachedVideo) {
-      startDownload(
-        workoutExerciseVideoUrl,
-        workoutExerciseVideoFileName,
-        workoutExerciseVideoMIME,
-        workoutExerciseId,
-      )
-    }
-
-    if (
-      !isNewCachedVideo &&
-      !!cachedVideoTable &&
-      mySelectedCachedWorkoutIndex !== undefined
-    ) {
-      const getPath =
-        cachedVideoTable[mySelectedCachedWorkoutIndex].cachedLocalPathVideo
-
-      checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists()
-
-      async function checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists() {
-        const fileExists = await checkFileExists(getPath)
-
-        if (!fileExists) {
-          startDownload(
-            workoutExerciseVideoUrl,
-            workoutExerciseVideoFileName,
-            workoutExerciseVideoMIME,
-            workoutExerciseId,
-          )
-        }
-
-        async function checkFileExists(path: string) {
-          try {
-            const fileInfo = await FileSystem.getInfoAsync(path)
-            return fileInfo.exists
-          } catch (error) {
-            console.error('Erro ao verificar arquivo:', error)
-            return false
-          }
-        }
-      }
-
-      setModalVideoLocalPathState(getPath)
-    }
-
-    async function startDownload(
-      url?: string,
-      name?: string,
-      mime?: string,
-      id?: string,
-    ) {
-      if (!url || !name || !mime || !id) return
-      const cachedVideo = await downloadAndCacheVideo(name, mime, url, id)
-
-      if (cachedVideo) {
-        setModalVideoLocalPathState(cachedVideo)
-      }
-    }
-
-    async function downloadAndCacheVideo(
-      _exerciseFileName: string,
-      _exerciseMIME: string,
-      _exerciseUrlDownload: string,
-      _exerciseId: string,
-    ) {
-      try {
-        const fileUri = `${FileSystem.documentDirectory}${_exerciseFileName}${_exerciseMIME}`
-
-        const downloadResumable = FileSystem.createDownloadResumable(
-          _exerciseUrlDownload,
-          fileUri,
-          {},
-        )
-
-        const downloadResult = await downloadResumable.downloadAsync()
-        if (!downloadResult?.uri) return
-        const cachedLocalPathVideo = downloadResult.uri
-        await updateCachedVideoTable(cachedLocalPathVideo, _exerciseId)
-
-        return cachedLocalPathVideo
-      } catch (error) {
-        console.error('Erro ao baixar o vídeo:', error)
-
-        return null
-      }
-    }
-  }, [cachedVideoTable, cachedVideoTable?.length])
-
+    startCronometer()
+  }, [startCronometer])
   return (
     <ContainerGradient colors={['#000000', '#FFFFFF']} isFocused={isFocused}>
-      {selectedLanguage && modalWeightState && (
+      {user?.selectedLanguage && modalWeightState && (
         <WorkoutNameAndVideo
+          closeModal={closeModal}
+          isOpenModalVideoPlayer={defaultModalState.isOpenModalVideoPlayer}
           isFocused={isFocused}
           item={item}
-          selectedLanguage={selectedLanguage}
-          modalWeightState={modalWeightState}
+          selectedLanguage={user?.selectedLanguage}
           exerciseIndex={exerciseIndex}
           user={user}
-          openVideoPlayer={openVideoPlayer}
+          openVideoPlayer={() => openModal('videoplayer')}
         />
       )}
 
       <WorkoutInfoWrapper>
-        {selectedLanguage &&
+        {user?.selectedLanguage &&
           modalWeightState &&
           firstIncompleteIndex !== undefined &&
           lastCompletedIndex !== undefined &&
@@ -1477,18 +1292,21 @@ function WorkoutVideoCardComponent({
             <WorkoutRepetitionsData
               isFocused={isFocused}
               modalWeightState={modalWeightState}
-              selectedLanguage={selectedLanguage}
+              defaultModalState={defaultModalState}
+              selectedLanguage={user?.selectedLanguage}
               firstIncompleteIndex={firstIncompleteIndex}
               lastCompletedIndex={lastCompletedIndex}
-              handleSetCompletedCheck={handleSetCompletedCheck}
-              openSets={openSets}
-              openWeight={openWeight}
-              updateActiveWeightIndexSets={updateActiveWeightIndexSets}
-              handleAddRepetition={handleAddRepetition}
-              handleRemoveLastRepetition={handleRemoveLastRepetition}
+              handleSetCompletedCheck={handleUncheckOrCheckRepetion}
+              openSets={(index) => openModal('sets', index)}
+              openWeight={(index) => openModal('weight', index)}
+              handleChangeRepetitionFocus={handleChangeRepetitionFocus}
+              handleAddRepetition={() => handlePushOrPopRepetition('push')}
+              handleRemoveLastRepetition={() =>
+                handlePushOrPopRepetition('pop')
+              }
               allItensCompleted={allItensCompleted}
               exerciseIndex={exerciseIndex}
-              openSetBetweenSets={openSetBetweenSets}
+              openSetBetweenSets={(index) => openModal('rangeOfSets', index)}
             />
           )}
         <WorkoutUserNotesAndConfirmButtonWrapper
@@ -1496,7 +1314,7 @@ function WorkoutVideoCardComponent({
         >
           <WorkoutUserNotesButton
             disabled={exerciseIndex !== 0 && user?.anonymousUser}
-            onPress={() => isFocused && openNotes()}
+            onPress={() => isFocused && openModal('notes')}
             enabled={isFocused}
             style={{ opacity: isFocused ? 1 : 0.4 }}
           >
@@ -1515,48 +1333,52 @@ function WorkoutVideoCardComponent({
               modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].completed &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].completed.isCompleted &&
               !allItensCompleted
-                ? handleSetCompletedCheck(modalWeightState.activeWeightIndex)
+                ? handleUncheckOrCheckRepetion(
+                    defaultModalState.activeWeightIndex,
+                  )
                 : handleDoneWorkout()
             }
             workoutExerciseDone={
               modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].completed.isCompleted
             }
           >
             <BlurViewWrapper intensity={30}>
-              <WorkoutButtonText>{buttonText}</WorkoutButtonText>
+              <WorkoutButtonText>{buttonText()}</WorkoutButtonText>
             </BlurViewWrapper>
           </WorkoutButtonConfirm>
         </WorkoutUserNotesAndConfirmButtonWrapper>
         {exerciseIndex !== 0 && user?.anonymousUser && (
-          <OverLayWaterMarkButton onPress={handlePress} />
+          <OverLayWaterMarkButton onPress={handlePressGuessUser} />
         )}
         <BulletsCronometerAndCTAButtonWrapper>
           <WorkoutCronometerWrapper>
             <WorkoutCronometer
+              totalSeconds={totalSeconds}
+              getModalTimer={Number(modalWeightState.time.value)}
               enabled={isFocused}
-              percentage={percentage}
-              circularProgressRef={circularProgressRef}
-              onRestart={handleSkipRestTime}
-              onAdd15Seconds={add15Seconds}
-              onPause={handlePause}
-              onPlay={onPlay}
-              onSubtract15Seconds={subtract15Seconds}
+              onRestart={() => {
+                onTimerManage('skip')
+              }}
+              onAdd15Seconds={() => onTimerManage('add')}
+              onPause={() => onTimerManage('pause')}
+              onPlay={() => onTimerManage('play')}
+              onSubtract15Seconds={() => onTimerManage('subtract')}
               minutes={minutes}
               seconds={seconds}
               isRunning={isRunning}
@@ -1567,10 +1389,10 @@ function WorkoutVideoCardComponent({
 
       {/*  peso */}
       <Modal
-        visible={modalWeightState?.isOpenModalUserWeight}
+        visible={defaultModalState.isOpenModalUserWeight}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={closeWeight} // Método para fechar o modal (iOS, Android)
+        onRequestClose={() => closeModal('weight')} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1578,38 +1400,42 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserWeightModal
-          closeModal={closeWeight} // Método para fechar o modal (iOS, Android)
-          handleUpdateWeight={handleUpdateWeight}
-          handleUpdateAllWeight={handleUpdateAllWeightValidate}
+          closeModal={() => closeModal('weight')} // Método para fechar o modal (iOS, Android)
+          handleUpdateWeight={(_weight) =>
+            handleUpdateWeight(_weight, 'single')
+          }
+          handleUpdateAllWeight={(_weight) =>
+            handleUpdateWeight(_weight, 'all')
+          }
           weight={
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].weight &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].weight.value) ||
             ''
           }
-          weightIndex={modalWeightState?.activeWeightIndex ?? 0}
+          weightIndex={defaultModalState?.activeWeightIndex ?? 0}
           exerciseName={
             item.workoutExerciseName
-              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
+              ? user?.selectedLanguage &&
+                item.workoutExerciseName?.[user?.selectedLanguage]
               : ''
           }
         />
       </Modal>
 
-      {/*  set */}
       <Modal
-        visible={modalWeightState?.isOpenModalUserSets}
+        visible={defaultModalState.isOpenModalUserSets}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={closeWeight} // Método para fechar o modal (iOS, Android)
+        onRequestClose={() => closeModal('sets')} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1617,38 +1443,45 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserSetsModal
-          closeModal={closeSets} // Método para fechar o modal (iOS, Android)
-          handleUpdateSets={handleUpdateSets}
+          closeModal={() => closeModal('sets')} // Método para fechar o modal (iOS, Android)
+          handleUpdateSets={(
+            set: number,
+            rangeOfSets: number[],
+            isActivedRangeOfSets: boolean,
+          ) =>
+            handleUpdateSets('update', set, rangeOfSets, isActivedRangeOfSets)
+          }
           sets={
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.value) ||
             0
           }
-          setsIndex={modalWeightState.activeWeightIndex + 1}
+          setsIndex={defaultModalState.activeWeightIndex + 1}
           exerciseName={
             item.workoutExerciseName
-              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
+              ? user?.selectedLanguage &&
+                item.workoutExerciseName?.[user?.selectedLanguage]
               : ''
           }
           isActivedRangeOfSets={
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.isActivedRangeOfSets) ||
             false
           }
@@ -1656,10 +1489,10 @@ function WorkoutVideoCardComponent({
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.rangeOfSets) ||
             []
           }
@@ -1668,10 +1501,12 @@ function WorkoutVideoCardComponent({
 
       {/*  Choose Sets Value Between */}
       <Modal
-        visible={modalWeightState.isOpenModalSetBetweenSets}
+        visible={defaultModalState.isOpenModalSetBetweenSets}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={closeSetBetweenSets} // Método para fechar o modal (iOS, Android)
+        onRequestClose={() => {
+          closeModal('rangeOfSets')
+        }} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1680,25 +1515,32 @@ function WorkoutVideoCardComponent({
       >
         <WorkoutUserRangeOfSetsModal
           tittle={
-            selectedLanguage === 'pt-br'
+            user?.selectedLanguage === 'pt-br'
               ? 'Ótimo trabalho! Quantas repetições você completou?'
               : 'Great job! How many repetitions did you complete?'
           }
           subTittle={
-            selectedLanguage === 'pt-br'
-              ? `Repetições da série ${modalWeightState.activeWeightIndex + 1}`
-              : `Reps of set ${modalWeightState.activeWeightIndex + 1}`
+            user?.selectedLanguage === 'pt-br'
+              ? `Repetições da série ${defaultModalState.activeWeightIndex + 1}`
+              : `Reps of set ${defaultModalState.activeWeightIndex + 1}`
           }
-          closeModal={closeSetBetweenSets} // Método para fechar o modal (iOS, Android)
-          handleUpdateRangeOfSets={handleUpdateRangeOfSets}
+          closeModal={() => closeModal('rangeOfSets')} // Método para fechar o modal (iOS, Android)
+          handleUpdateRangeOfSets={(
+            set: number,
+            rangeOfSets: number[],
+            isActivedRangeOfSets: boolean,
+          ) =>
+            handleUpdateSets('update', set, rangeOfSets, isActivedRangeOfSets)
+          }
+          handleDeleteRangeOfSets={() => handleUpdateSets('delete')}
           sets={Number(
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.value) ||
               0,
           )}
@@ -1706,10 +1548,10 @@ function WorkoutVideoCardComponent({
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.rangeOfSets) ||
             []
           }
@@ -1717,10 +1559,10 @@ function WorkoutVideoCardComponent({
             (modalWeightState &&
               modalWeightState.repetitionData &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ] &&
               modalWeightState.repetitionData[
-                modalWeightState.activeWeightIndex
+                defaultModalState.activeWeightIndex
               ].sets.isActivedRangeOfSets) ||
             false
           }
@@ -1728,10 +1570,10 @@ function WorkoutVideoCardComponent({
       </Modal>
 
       <Modal
-        visible={modalWeightState?.isOpenModalUserNotes ?? false}
+        visible={defaultModalState.isOpenModalUserNotes}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={closeNotes} // Método para fechar o modal (iOS, Android)
+        onRequestClose={() => closeModal('notes')} // Método para fechar o modal (iOS, Android)
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1739,25 +1581,17 @@ function WorkoutVideoCardComponent({
         }}
       >
         <WorkoutUserNotesModal
-          closeModal={closeNotes} // Método para fechar o modal (iOS, Android)
+          closeModal={() => closeModal('notes')}
           handleUpdateNotes={handleUpdateNotes}
           workoutExerciseId={item.workoutExerciseId}
           notes={modalWeightState.notes.value}
           exerciseName={
             item.workoutExerciseName
-              ? selectedLanguage && item.workoutExerciseName?.[selectedLanguage]
+              ? user?.selectedLanguage &&
+                item.workoutExerciseName?.[user?.selectedLanguage]
               : ''
           }
         />
-      </Modal>
-
-      <Modal visible={modalWeightState?.isOpenModalVideoPlayer}>
-        {modalVideoLocalPathState && (
-          <CachedVideoPlayerModal
-            closeVideoPlayer={closeVideoPlayer}
-            localPath={modalVideoLocalPathState}
-          />
-        )}
       </Modal>
     </ContainerGradient>
   )

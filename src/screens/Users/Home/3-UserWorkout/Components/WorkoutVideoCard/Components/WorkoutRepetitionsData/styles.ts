@@ -186,8 +186,13 @@ export const WorkoutWeightText = styled.Text<{
   font-size: ${({ activedGreenColor }) =>
     activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
 
-  font-size: ${({ alreadySelected }) =>
-    alreadySelected ? `${RFValue(17)}px` : `${RFValue(14)}px`};
+  ${({ alreadySelected }) =>
+    alreadySelected &&
+    css`
+      text-decoration: underline;
+      text-decoration-color: ${({ theme }) =>
+        theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+    `};
 `
 
 export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`

@@ -1,5 +1,5 @@
-import React from 'react'
-import { View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Modal, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useTheme } from 'styled-components/native'
 import {
@@ -11,28 +11,149 @@ import {
 import PlayVideo from '@assets/PlayVideo.svg'
 import { getTrimmedName } from '@utils/getTrimmedName'
 import { IFormattedCardExerciseData, SignInProps } from '@hooks/authTypes'
-import { IModalStateWorkoutLogData } from '../..'
+import { useAuth } from '@hooks/auth'
+import * as FileSystem from 'expo-file-system'
+import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
 
 interface WorkoutNameAndVideoProps {
   isFocused: boolean
+  isOpenModalVideoPlayer: boolean
   item: IFormattedCardExerciseData
   selectedLanguage: 'pt-br' | 'us'
-  modalWeightState: IModalStateWorkoutLogData
   exerciseIndex: number
   user: SignInProps
   openVideoPlayer: () => void
+  closeModal: (
+    type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',
+  ) => void
 }
 
 const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
   isFocused,
+  isOpenModalVideoPlayer,
   item,
   selectedLanguage,
-  modalWeightState,
   exerciseIndex,
   user,
   openVideoPlayer,
+  closeModal,
 }) => {
   const theme = useTheme()
+  const { updateCachedVideoTable, cachedVideoTable } = useAuth()
+
+  const [modalVideoLocalPathState, setModalVideoLocalPathState] =
+    useState<string>('')
+
+  useEffect(() => {
+    if (!cachedVideoTable) {
+      startDownload(
+        item.workoutExerciseVideoUrl,
+        item.workoutExerciseVideoFileName,
+        item.workoutExerciseVideoMIME,
+        item.workoutExerciseId,
+      )
+    }
+
+    const mySelectedCachedWorkoutIndex = cachedVideoTable?.findIndex(
+      (v) => v.workoutExerciseId === item.workoutExerciseId,
+    )
+
+    const isNewCachedVideo = mySelectedCachedWorkoutIndex === -1
+
+    const {
+      workoutExerciseVideoUrl,
+      workoutExerciseVideoFileName,
+      workoutExerciseVideoMIME,
+      workoutExerciseId,
+    } = item
+
+    if (isNewCachedVideo) {
+      startDownload(
+        workoutExerciseVideoUrl,
+        workoutExerciseVideoFileName,
+        workoutExerciseVideoMIME,
+        workoutExerciseId,
+      )
+    }
+
+    if (
+      !isNewCachedVideo &&
+      !!cachedVideoTable &&
+      mySelectedCachedWorkoutIndex !== undefined
+    ) {
+      const getPath =
+        cachedVideoTable[mySelectedCachedWorkoutIndex].cachedLocalPathVideo
+
+      checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists()
+
+      async function checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists() {
+        const fileExists = await checkFileExists(getPath)
+
+        if (!fileExists) {
+          startDownload(
+            workoutExerciseVideoUrl,
+            workoutExerciseVideoFileName,
+            workoutExerciseVideoMIME,
+            workoutExerciseId,
+          )
+        }
+
+        async function checkFileExists(path: string) {
+          try {
+            const fileInfo = await FileSystem.getInfoAsync(path)
+            return fileInfo.exists
+          } catch (error) {
+            console.error('Erro ao verificar arquivo:', error)
+            return false
+          }
+        }
+      }
+
+      setModalVideoLocalPathState(getPath)
+    }
+
+    async function startDownload(
+      url?: string,
+      name?: string,
+      mime?: string,
+      id?: string,
+    ) {
+      if (!url || !name || !mime || !id) return
+      const cachedVideo = await downloadAndCacheVideo(name, mime, url, id)
+
+      if (cachedVideo) {
+        setModalVideoLocalPathState(cachedVideo)
+      }
+    }
+
+    async function downloadAndCacheVideo(
+      _exerciseFileName: string,
+      _exerciseMIME: string,
+      _exerciseUrlDownload: string,
+      _exerciseId: string,
+    ) {
+      try {
+        const fileUri = `${FileSystem.documentDirectory}${_exerciseFileName}${_exerciseMIME}`
+
+        const downloadResumable = FileSystem.createDownloadResumable(
+          _exerciseUrlDownload,
+          fileUri,
+          {},
+        )
+
+        const downloadResult = await downloadResumable.downloadAsync()
+        if (!downloadResult?.uri) return
+        const cachedLocalPathVideo = downloadResult.uri
+        await updateCachedVideoTable(cachedLocalPathVideo, _exerciseId)
+
+        return cachedLocalPathVideo
+      } catch (error) {
+        console.error('Erro ao baixar o vídeo:', error)
+
+        return null
+      }
+    }
+  }, [cachedVideoTable, cachedVideoTable?.length])
 
   return (
     <WorkoutNameAndVideoWrapper>
@@ -87,6 +208,14 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
           />
         </WorkoutVideoPlayerButton>
       )}
+      <Modal visible={isOpenModalVideoPlayer}>
+        {modalVideoLocalPathState && (
+          <CachedVideoPlayerModal
+            closeVideoPlayer={() => closeModal('videoplayer')}
+            localPath={modalVideoLocalPathState}
+          />
+        )}
+      </Modal>
     </WorkoutNameAndVideoWrapper>
   )
 }

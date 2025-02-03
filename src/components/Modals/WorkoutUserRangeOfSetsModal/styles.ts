@@ -54,6 +54,13 @@ export const TipsTitleNoteWrapper = styled.View`
   padding: 8px;
   align-items: center;
 `
+export const SubTittleWrapper = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px;
+  align-items: center;
+`
 
 export const TitteText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};
@@ -67,6 +74,12 @@ export const SubTitteText = styled.Text`
   font-size: ${RFValue(18)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const DeleteText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
   justify-content: flex-start;
 `
 
@@ -158,4 +171,15 @@ export const ItensButton = styled(
     css`
       background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
     `}
+`
+export const DeleteButton = styled(
+  TouchableOpacity,
+)<TouchableOpacityButtonProps>`
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 36p 54x;
+  border-radius: 12px;
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+  padding: 4px;
 `
