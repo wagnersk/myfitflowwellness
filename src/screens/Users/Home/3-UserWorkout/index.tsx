@@ -222,6 +222,9 @@ export function UserWorkout() {
                 viewAreaCoveragePercentThreshold: 50,
                 minimumViewTime: 0,
               }}
+              initialNumToRender={3} // TESTE:  Número inicial de itens a serem renderizados
+              maxToRenderPerBatch={5} // TESTE:  Número máximo de itens a serem renderizados por lote
+              windowSize={10} // TESTE:  Número de itens a serem mantidos na lista virtualizada
             />
           </FlatListWrapper>
 

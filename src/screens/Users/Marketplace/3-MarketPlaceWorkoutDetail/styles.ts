@@ -63,12 +63,6 @@ export const InfoDescriptionWrapper = styled.View`
   padding: 16px;
 `
 
-export const InfoDescriptionText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
-`
-
 export const TitleWrapper = styled.View``
 export const Wrapper = styled.View`
   padding: 8px;
@@ -94,13 +88,7 @@ export const LockIconWrapper = styled.View`
   margin-left: 16px;
   bottom: 24px;
 `
-export const IconWrapper = styled.View`
-  padding: 2px 16px 2px 16px;
 
-  justify-content: space-between;
-  flex-direction: row;
-  width: 100%;
-`
 export const WorkoutBoxInfoWrapper = styled.View`
   justify-content: space-around;
 
@@ -108,11 +96,6 @@ export const WorkoutBoxInfoWrapper = styled.View`
   width: 100%;
 `
 
-export const InfoGenderTitle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
-`
 export const SubTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};

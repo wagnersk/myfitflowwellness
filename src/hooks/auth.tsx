@@ -2387,8 +2387,13 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutsData',
       'workoutsDataArray',
     )
-    /** OG  workoutId
- LOG  2B4bjSpS8ulI67l2qjMA */
+
+    /** E) LOG 
+     * 
+     *     workoutCategoryId lqJKr5N3eRd2Hp8SZguA
+           workoutId OgZtSW84QX5YZvvLTWoO
+ 
+ */
     const docSnapshot = await getDoc(workoutExercisesRef)
 
     if (docSnapshot.exists()) {

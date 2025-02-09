@@ -50,7 +50,6 @@ export function WorkoutCronometerComponent({
   totalSeconds,
 }: CronometerProps) {
   const circularProgressRef = useRef<AnimatedCircularProgress>(null)
-
   const elapsedTime = getModalTimer - totalSeconds
   const percentage = getModalTimer ? (elapsedTime / getModalTimer) * 100 : 0
 

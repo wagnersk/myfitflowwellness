@@ -16,6 +16,38 @@ export type ICachedFiltersExercise = {
     us: string | null
   }
 }
+
+export interface ISetsProps {
+  index?: number
+  sets_insensitive: string
+  isReps: boolean
+  isTime: boolean
+  timeInSeconds: number
+}
+export interface IRestTimeProps {
+  index?: number
+  restTime_insensitive: {
+    'pt-br': string
+    us: string
+  }
+  restTimeNumber: number
+}
+export interface ITchiesProps {
+  index?: number
+  description: {
+    us: string
+    'pt-br': string
+  }
+  title: {
+    'pt-br': string
+    us: string
+  }
+}
+export interface IPropsSets {
+  repetitionData: ISetsProps[]
+  restTimeData: IRestTimeProps
+  techiesData: ITchiesProps
+}
 export interface ICardExerciseData {
   isEnabled: boolean
 
@@ -24,11 +56,8 @@ export interface ICardExerciseData {
   workoutExerciseName?: IptBrUs
   workoutExerciseName_insensitive?: IptBrUs
   workoutExerciseRepetition?: string
-  workoutExerciseSets?: string[]
-  workoutExerciseRestTime?: IptBrUs
-  workoutExerciseRestTimeNumber?: number
-  workoutExerciseTechniqueTitle?: IptBrUs
-  workoutExerciseTechniqueDescription?: IptBrUs
+  workoutExerciseSets?: IPropsSets[]
+
   workoutExerciseTypes?: string
   workoutExercisePrimaryMuscleGroup?: IptBrUs
   workoutExerciseFilters?: ICachedFiltersExercise

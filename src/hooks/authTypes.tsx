@@ -263,6 +263,98 @@ export type ICachedFiltersExercise = {
     us: string | null
   }
 }
+
+export interface ISetsProps {
+  index?: number
+  sets_insensitive: string
+  isReps: boolean
+  isTime: boolean
+  timeInSeconds: number
+}
+
+export interface ICachedSetsProps extends ISetsProps {
+  createdAt: number
+  updatedAt: number
+}
+export interface IRestTimeProps {
+  index?: number
+  restTime_insensitive: {
+    'pt-br': string
+    us: string
+  }
+  restTimeNumber: number
+}
+
+export interface ICachedRestTimeProps extends IRestTimeProps {
+  createdAt: number
+  updatedAt: number
+}
+export interface ITchiesProps {
+  index?: number
+  description: {
+    us: string
+    'pt-br': string
+  }
+  title: {
+    'pt-br': string
+    us: string
+  }
+}
+
+export interface ICachedTchiesProps extends ITchiesProps {
+  createdAt: number
+  updatedAt: number
+}
+export interface IPropsSets {
+  repetitionData: ISetsProps[] // [{ sets_insensitive: string; isReps: boolean; isTime: boolean; timeInSeconds: number }]
+  restTimeData: IRestTimeProps // { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
+  techiesData: ITchiesProps // { description: { us: string; 'pt-br': string }; title: { 'pt-br': string; us: string } }
+}
+/* 
+repetitionData-> [1,2,3]
+restTimeData-> { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
+t
+
+*/
+export interface ICachedUsingWorkoutData {
+  // cada exercicio
+  repetitionData: ICachedSetsProps[] // [{ sets_insensitive: string; isReps: boolean; isTime: boolean; timeInSeconds: number }]
+  restTimeData: ICachedRestTimeProps // { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
+  techiesData: ICachedTchiesProps // { description: { us: string; 'pt-br': string }; title: { 'pt-br': string; us: string } }
+  weightData: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+  completedData: {
+    isCompleted: boolean
+    createdAt: number
+    updatedAt: number
+  }
+  /*  */
+  createdAt: number
+  updatedAt: number
+}
+export interface ICachedCardExerciseData {
+  isEnabled: boolean
+
+  workoutExerciseId?: string
+  workoutExerciseIndex?: number
+  workoutExerciseName?: IptBrUs
+  workoutExerciseName_insensitive?: IptBrUs
+  workoutExerciseSets?: ICachedUsingWorkoutData[]
+  notes: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+
+  workoutExerciseTypes?: string
+  workoutExercisePrimaryMuscleGroup?: IptBrUs
+  workoutExerciseFilters?: ICachedFiltersExercise
+  createdAt?: number
+  updatedAt?: number
+}
 export interface ICardExerciseData {
   isEnabled: boolean
 
@@ -270,17 +362,13 @@ export interface ICardExerciseData {
   workoutExerciseIndex?: number
   workoutExerciseName?: IptBrUs
   workoutExerciseName_insensitive?: IptBrUs
-  workoutExerciseRepetition?: string
-  workoutExerciseSets?: string[]
-  workoutExerciseRestTime?: IptBrUs
-  workoutExerciseRestTimeNumber?: number
-  workoutExerciseTechniqueTitle?: IptBrUs
-  workoutExerciseTechniqueDescription?: IptBrUs
+  workoutExerciseSets?: IPropsSets[]
+
   workoutExerciseTypes?: string
   workoutExercisePrimaryMuscleGroup?: IptBrUs
   workoutExerciseFilters?: ICachedFiltersExercise
-  createdAt?: ServerTimestamp
-  updatedAt?: ServerTimestamp
+  createdAt?: number
+  updatedAt?: number
 }
 
 export interface IFormattedCardExerciseData extends ICardExerciseData {
@@ -496,51 +584,10 @@ export interface YearRecord {
   [year: string]: MonthRecord
 }
 
-export interface IWeightRepetitionData {
-  weight: {
-    value: string
-    createdAt: number
-    updatedAt: number
-  }
-  sets: {
-    value: number
-    isActivedRangeOfSets: boolean
-    rangeOfSets: number[]
-    createdAt: number
-    updatedAt: number
-  }
-
-  completed: {
-    isCompleted: boolean
-    createdAt: number
-    updatedAt: number
-  }
-
-  createdAt: number
-  updatedAt: number
-}
-
-export interface IWeightDoneLog {
-  // dentro de cada exercicio
-  exerciseIndex: number
-  exerciseId: string // id do exercicio em si
-  notes: {
-    value: string
-    createdAt: number
-    updatedAt: number
-  }
-  time: {
-    value: string
-    createdAt: number
-    updatedAt: number
-  }
-  repetitionData: IWeightRepetitionData[] // repeticoes
-}
-
 export interface IWorkoutCardLogData {
   // dentro do card A B C
   cardIndex: number
-  weightDoneLogs: IWeightDoneLog[]
+  weightDoneLogs: ICachedUsingWorkoutData[]
 
   totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
 

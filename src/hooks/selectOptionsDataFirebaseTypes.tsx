@@ -113,10 +113,14 @@ export interface IRepetitionSelectData {
   data: IRepetitionSelectItem[]
 }
 
-export interface ISetsSelectItem {
+interface ISetsSelectItem {
   sets_insensitive: string
+  isReps: boolean
+  isTime: boolean
+  timeInSeconds: number | null
   setsNumberRangeStrings: string[]
 }
+
 export interface ISetsSelectData {
   data: ISetsSelectItem[]
 }
