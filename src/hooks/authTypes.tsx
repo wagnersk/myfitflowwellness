@@ -326,6 +326,11 @@ export interface ICachedUsingWorkoutData {
     createdAt: number
     updatedAt: number
   }
+  selectedRepetitionData: {
+    checkedSet: string
+    createdAt: number
+    updatedAt: number
+  }
   completedData: {
     isCompleted: boolean
     createdAt: number

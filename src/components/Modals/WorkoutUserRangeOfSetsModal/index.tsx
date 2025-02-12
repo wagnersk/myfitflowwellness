@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -28,46 +28,81 @@ import {
   DeleteButton,
   DeleteText,
 } from './styles'
+import { ICachedCardExerciseData } from '@hooks/authTypes'
 
 interface InputProps extends TextInputProps {
+  handleUpdateRangeOfSets: (selecteSet: number) => void
   closeModal: () => void
-  handleUpdateRangeOfSets: (
-    set: number,
-    rangeOfSets: number[],
-    isActivedRangeOfSets: boolean,
-  ) => void
   handleDeleteRangeOfSets: () => void
-  sets: number
-  rangeOfSets: number[]
-  tittle: string
-  subTittle: string
-  isActivedRangeOfSets: boolean
+  modalCachedCardExerciseData: ICachedCardExerciseData
+  activeIndex: number
+  selectedLanguage: 'pt-br' | 'us'
 }
 
 export function WorkoutUserRangeOfSetsModal({
   closeModal,
   handleUpdateRangeOfSets,
   handleDeleteRangeOfSets,
-  tittle,
-  subTittle,
-  sets,
-  rangeOfSets,
-  isActivedRangeOfSets,
+  selectedLanguage,
+  modalCachedCardExerciseData,
+  activeIndex,
 }: InputProps) {
-  console.log(`sets`, sets)
-  console.log(`rangeOfSets`, rangeOfSets)
-  console.log(`isActivedRangeOfSets`, isActivedRangeOfSets)
-  function generateRange(start: number, end: number): number[] {
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+  const tittle =
+    selectedLanguage === 'pt-br'
+      ? 'Ótimo trabalho! Quantas repetições você completou?'
+      : 'Great job! How many repetitions did you complete?'
+
+  const subTittle =
+    selectedLanguage === 'pt-br'
+      ? `Repetições da série ${activeIndex + 1}`
+      : `Reps of set ${activeIndex + 1}`
+
+  const activeLineSet =
+    modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+
+  const repetitionData =
+    (activeLineSet &&
+      activeLineSet.repetitionData
+        .map((v) => v.sets_insensitive)
+        .sort((a, b) => Number(a) - Number(b))) ||
+    []
+
+  const getIsActivedRangeOfSets =
+    (modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+      ?.repetitionData?.length ?? 0) > 1
+
+  const checkedSet =
+    modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+      ?.selectedRepetitionData.checkedSet
+
+  /*  
+  ver como esotu recebendo os dados
+  montar o range
+  deveolver o valor recebido
+  armazenar o valor no checkedSet que so existe no cached
+  
+  */
+  function generateRange(rangeArray: string[]) {
+    const start = Number(rangeArray[0])
+    const end = Number(rangeArray[rangeArray.length - 1])
+
+    const rangedData = Array.from(
+      { length: end - start + 1 },
+      (_, i) => start + i,
+    )
+
+    const transformedData = rangedData.map((v) => {
+      return {
+        value: v,
+        selected: false,
+      }
+    })
+
+    return transformedData
   }
-  const rangeOfSet = generateRange(rangeOfSets[0], rangeOfSets[1]).map((v) => ({
-    value: v,
-    selected: sets === v,
-  }))
 
-  // const rangeOfSet = rangeOfSets.map((v) => ({ value: v, selected: false }))
-  console.log(`rangeOfSet`, rangeOfSet)
-
+  const rangeOfSets = generateRange(repetitionData)
+  console.log(`rangeOfSets -> `, rangeOfSets)
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()
@@ -76,8 +111,9 @@ export function WorkoutUserRangeOfSetsModal({
   async function updateWeight(index: number) {
     if (index === -1) return
 
-    const selecteSet = rangeOfSet[index].value
-    handleUpdateRangeOfSets(selecteSet, rangeOfSets, true)
+    const selecteSet = rangeOfSets[index].value
+
+    handleUpdateRangeOfSets(selecteSet)
     handleOverlayPress()
   }
   async function deleteRangeOfSets() {
@@ -99,7 +135,8 @@ export function WorkoutUserRangeOfSetsModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>
-                  {tittle} ( {sets} )
+                  {tittle}{' '}
+                  {/* ( {sets.map((v) => v.sets_insensitive).join('-')} ) */}
                 </TitteText>
                 <SubTittleWrapper>
                   <SubTitteText>{subTittle}</SubTitteText>
@@ -112,7 +149,7 @@ export function WorkoutUserRangeOfSetsModal({
                 </SubTittleWrapper>
               </TipsTitleNoteWrapper>
               <InputsWrapper>
-                {rangeOfSet.map((v, _i) => {
+                {rangeOfSets.map((v, _i) => {
                   return (
                     <ItensButton
                       selected={v.selected}

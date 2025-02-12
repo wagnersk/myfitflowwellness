@@ -156,7 +156,6 @@ export const WorkoutWeightValue = styled(TouchableOpacity)<Props>`
   flex-direction: row;
   border-radius: 12px;
   height: 36px;
-  width: 48px;
   justify-content: center;
   align-items: center;
 `

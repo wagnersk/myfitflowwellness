@@ -25,7 +25,6 @@ import {
 } from '@hooks/authTypes'
 
 import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
-import { WorkoutCronometer } from '@components/WorkoutCronometer'
 import { WorkoutUserSetsModal } from '@components/Modals/WorkoutUserSetsModal'
 import { WorkoutUserRangeOfSetsModal } from '@components/Modals/WorkoutUserRangeOfSetsModal'
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
@@ -45,6 +44,7 @@ import {
   WorkoutCronometerWrapper,
   BlurViewAddSecondsWrapper,
 } from './styles'
+import { WorkoutCronometer } from '@components/WorkoutCronometer'
 
 export interface IModalStateWorkoutLogData {
   isOpenModalUserNotes: boolean
@@ -96,68 +96,16 @@ function WorkoutVideoCardComponent({
     const workoutExerciseId = item.workoutExerciseId || ''
     const defaultSets = item?.workoutExerciseSets || [] // cada repeticcao
 
-    const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
+    /* 
+  -> Recuperar o cached quando eu savlar
+
+  const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
       .find((v) => v.workoutId === workoutId)
       ?.workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
-      ?.weightDoneLogs[exerciseIndex]
-    /* 
-entra 
-*/
+      ?.weightDoneLogs[exerciseIndex] */
+
     const initialWorkoutData = transformInitialData(defaultSets, timeNow)
     const initialDataWithCachedProgress = initialWorkoutData
-
-    /*  [
-        {"completedData": 
-        {"createdAt": 1739057872404, "isCompleted": false,"updatedAt": 1739057872404},
-        "createdAt": 1739057872404,
-        "notes": {"createdAt": 1739057872404, 
-                  "updatedAt": 1739057872404, 
-                  "value": "0"}, 
-       "repetitionData": [[Object]],
-        "restTimeData": {"createdAt": 1739057872404,
-                         "restTimeNumber": 45,
-                         "restTime_insensitive": [Object], 
-                         "updatedAt": 1739057872404}, 
-        "techiesData": 
-                         {"createdAt": 1739057872404, "description": [Object],
-                            "title": [Object], 
-                            "updatedAt": 1739057872404 },
-                            "updatedAt": 1739057872404,
-         "weightData": {"createdAt": 1739057872404, "updatedAt": 1739057872404, "value": "0"}
-                        }
-         ] */
-    /* 
-    Criar os dados default -> ok
-    */
-
-    /* 
-   Carregar o cache -< Ok
-    */
-    // cachedUserWorkoutsLog?.workoutsLog[1].workoutCardsLogData[1].lastCompletedFormattedDate
-
-    /*    const cachedCardWeightLog: ICachedUsingWorkoutData = {
-      workoutExerciseId,
-      repetitionData: cachedInfo?.workoutExerciseSets || initialData,
-      notes: cachedInfo?.notes || defaultNotes,
-      completedData: { createdAt: timeNow, isCompleted: false, updatedAt: 0 },
-
-      weightData: {
-        value: '0',
-        createdAt: timeNow,
-        updatedAt: timeNow,
-      },
-      restTimeData: {
-        restTimeNumber: 1,
-        restTime_insensitive: '0',
-        createdAt: timeNow,
-        updatedAt: timeNow,
-      },
-      time: '0',
-    }
- */
-    /* 
-      Mesclar os dados
-    */
 
     return initialDataWithCachedProgress
 
@@ -177,6 +125,11 @@ entra
               updatedAt: timeNow,
             }
           }),
+          selectedRepetitionData: {
+            checkedSet: '',
+            createdAt: timeNow,
+            updatedAt: timeNow,
+          },
           restTimeData: {
             restTimeNumber: v.restTimeData.restTimeNumber,
             restTime_insensitive: v.restTimeData.restTime_insensitive,
@@ -240,10 +193,6 @@ entra
 
   const [modalCachedCardExerciseData, setModalCachedCardExerciseData] =
     useState<ICachedCardExerciseData>(mergedData)
-  console.log(
-    `inciando State , que será meu cache com  modalCachedCardExerciseData`,
-    JSON.stringify(modalCachedCardExerciseData),
-  )
 
   const [defaultModalState, setDefaultModalState] =
     useState<IModalStateWorkoutLogData>(defaultModalStateValues)
@@ -269,6 +218,7 @@ entra
       -1,
     )
 
+  // ok
   function handleUpdateWeight(_weight: string, type: 'all' | 'single') {
     if (type === 'single') {
       onUpdateSingleWeight(_weight)
@@ -344,6 +294,7 @@ entra
     }
   }
 
+  // ok
   function handleUpdateNotes(_notes: string) {
     if (!_notes) return
 
@@ -363,40 +314,26 @@ entra
     closeModal('notes')
   }
 
-  function handleUpdateSets(
-    type: 'update' | 'delete',
-    value?: number,
-    rangeOfSets?: number[],
-    isActivedRangeOfSets?: boolean,
-  ) {
-    return
-    /* 
-    
-    bug ao deletar o set , se eu criar dnv 
-    ela nao me pede para escolher mas 
-    pega o ultimo valor setado que escolhi anterioremente
-    tenho que resetar isso antes que esse loop seja executado novamente
-    */
+  // DONE
+  function handleUpdateSets(type: 'update' | 'delete', value?: number) {
+    console.log(`type -> `, type)
+    console.log(`value -> `, value)
+
     const getTime = new Date().getTime()
 
-    if (
-      type === 'update' &&
-      value !== undefined &&
-      rangeOfSets !== undefined &&
-      isActivedRangeOfSets !== undefined
-    ) {
-      const copyProgression = modalCachedCardExerciseData || {} // jogar state aqui
+    if (type === 'update' && value !== undefined) {
+      const copyProgression = { ...modalCachedCardExerciseData }
+
+      if (copyProgression.workoutExerciseSets === undefined) return
 
       copyProgression.workoutExerciseSets[
         defaultModalState.activeWeightIndex
-      ].workoutExerciseSets = {
-        sets: {
-          ...v.sets,
-          rangeOfSets,
-        },
-        value,
-        isActivedRangeOfSets,
-        createdAt: getTime,
+      ].selectedRepetitionData = {
+        checkedSet: value.toString(),
+        createdAt:
+          copyProgression.workoutExerciseSets[
+            defaultModalState.activeWeightIndex
+          ].selectedRepetitionData.createdAt || getTime,
         updatedAt: getTime,
       }
 
@@ -429,18 +366,18 @@ entra
       )
 
       function onRemoveRangeOfSets() {
-        return
-        const copyProgression = modalCachedCardExerciseData || {} // jogar state aqui
+        const copyProgression = { ...modalCachedCardExerciseData }
+        if (copyProgression.workoutExerciseSets === undefined) return
 
         copyProgression.workoutExerciseSets[
           defaultModalState.activeWeightIndex
-        ].workoutExerciseSets = {
-          ...copyProgression.workoutExerciseSets[
-            defaultModalState.activeWeightIndex
-          ].workoutExerciseSets,
-          rangeOfSets: [],
-          isActivedRangeOfSets: false,
-          createdAt: getTime,
+        ].selectedRepetitionData = {
+          checkedSet: '',
+          createdAt:
+            copyProgression.workoutExerciseSets[
+              defaultModalState.activeWeightIndex
+            ].selectedRepetitionData.createdAt || getTime,
+          updatedAt: getTime,
         }
 
         setModalCachedCardExerciseData(copyProgression)
@@ -449,6 +386,7 @@ entra
     }
   }
 
+  // adicionar ou remover repeticao exta 4x..5x..6x
   function handlePushOrPopRepetition(type: 'push' | 'pop') {
     return
     if (type === 'push') {
@@ -575,58 +513,41 @@ entra
     }
   }
 
+  // ok , falta so cronometro
   function handleDoneWorkout() {
-    return
     if (isRunning) {
       onTimerManage('skip')
       return
     }
+    const activeIndex = defaultModalState.activeWeightIndex
 
     const getIsActivedRangeOfSets =
-      modalWeightState.workoutExerciseSets[defaultModalState.activeWeightIndex]
-        .sets.isActivedRangeOfSets
+      (modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+        ?.repetitionData?.length ?? 0) > 1
 
-    const getSetValue =
-      modalWeightState.workoutExerciseSets[defaultModalState.activeWeightIndex]
-        .sets.value
+    const checkedSet =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+        ?.selectedRepetitionData.checkedSet
+
     const getWeightValue =
-      modalWeightState.workoutExerciseSets[defaultModalState.activeWeightIndex]
-        .weight.value
+      modalCachedCardExerciseData.workoutExerciseSets?.[activeIndex].weightData
+        .value
+    const firstRep =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+        ?.repetitionData?.[0].isReps
 
-    const getRangeOfSets =
-      modalWeightState.workoutExerciseSets[defaultModalState.activeWeightIndex]
-        .sets.rangeOfSets
+    const secondRep =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+        ?.repetitionData?.[1].isReps
 
-    if (!getIsActivedRangeOfSets && !getSetValue) {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalUserSets: true,
-      }))
+    if (getIsActivedRangeOfSets && !checkedSet && firstRep && secondRep) {
+      console.log(`getIsActivedRangeOfSets ATIVO`)
+      // abrir modal para escolher o range
+      openModal('rangeOfSets', activeIndex)
       return
     }
-
-    if (getIsActivedRangeOfSets && !getSetValue) {
-      openModal('rangeOfSets', defaultModalState.activeWeightIndex)
-      return
-    }
-
-    if (
-      getIsActivedRangeOfSets &&
-      !getSetValue &&
-      getRangeOfSets.length !== 0
-    ) {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalSetBetweenSets: true,
-      }))
-      return
-    }
-
     if (getWeightValue === `0`) {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalUserWeight: true,
-      }))
+      openModal('weight', activeIndex)
       return
     }
 
@@ -644,30 +565,25 @@ entra
     const date = new Date()
     const getTime = date.getTime()
 
-    const copyProgression = { ...modalWeightState } // Copiar o estado atual
-
-    copyProgression.repetitionData[
+    const copyProgression = { ...modalCachedCardExerciseData } // Copiar o estado atual
+    if (copyProgression.workoutExerciseSets === undefined) return
+    copyProgression.workoutExerciseSets[
       defaultModalState.activeWeightIndex
-    ].completed = {
+    ].completedData = {
       isCompleted: true,
       createdAt: getTime,
       updatedAt: getTime,
     }
 
-    copyProgression.repetitionData[
+    copyProgression.workoutExerciseSets[
       defaultModalState.activeWeightIndex
     ].updatedAt = getTime
     /* verificar o q ta aqui */
     const getActiveWeightIndex =
       defaultModalState.activeWeightIndex + 1 <
-      modalWeightState.repetitionData.length
+      copyProgression.workoutExerciseSets.length
         ? defaultModalState.activeWeightIndex + 1
         : defaultModalState.activeWeightIndex
-    /*  verificar esse trecho pois ao dar ok ele nao  */
-    console.log(
-      `getActiveWeightIndex ->>>>>>> ->>>>>>> ->>>>>>> ->>>>>>> ->>>>>>>`,
-      modalWeightState.repetitionData.length,
-    )
 
     setModalCachedCardExerciseData(copyProgression)
     setDefaultModalState((prev) => {
@@ -1038,17 +954,42 @@ entra
     }
   }
 
+  // DONE
   function handleUncheckOrCheckRepetion(index: number) {
-    return
+    const getIsActivedRangeOfSets =
+      (modalCachedCardExerciseData?.workoutExerciseSets?.[index]?.repetitionData
+        ?.length ?? 0) > 1
+
+    const firstRep =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[index]
+        ?.repetitionData?.[0].isReps
+
+    const secondRep =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[index]
+        ?.repetitionData?.[1].isReps
+
+    const checkedSet =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[index]
+        ?.selectedRepetitionData.checkedSet
+
+    const getWeightValue =
+      modalCachedCardExerciseData.workoutExerciseSets?.[index].weightData.value
+
+    if (modalCachedCardExerciseData === undefined) return
+    if (modalCachedCardExerciseData.workoutExerciseSets === undefined) return
     if (isRunning) {
       pause()
       return
     }
 
-    if (modalWeightState.repetitionData[index].completed.isCompleted) {
-      const hasFollowingCompleted = modalWeightState.repetitionData
-        .slice(index + 1)
-        .some((item) => item.completed.isCompleted)
+    if (
+      modalCachedCardExerciseData.workoutExerciseSets[index].completedData
+        .isCompleted
+    ) {
+      const hasFollowingCompleted =
+        modalCachedCardExerciseData.workoutExerciseSets
+          .slice(index + 1)
+          .some((item) => item.completedData.isCompleted)
 
       const message = hasFollowingCompleted
         ? 'Você realmente quer desmarcar este item? Isso irá desmarcar todos os itens seguintes.'
@@ -1072,33 +1013,52 @@ entra
         { cancelable: false },
       )
     } else {
+      if (getIsActivedRangeOfSets && !checkedSet && firstRep && secondRep) {
+        /*  */
+        console.log(`getIsActivedRangeOfSets ATIVO`)
+        // abrir modal para escolher o range
+        openModal('rangeOfSets', index)
+        return
+      }
+
+      if (getWeightValue === `0`) {
+        openModal('weight', index)
+        return
+      }
+
       marcarItem(index)
     }
 
     function desmarcarItem(index: number) {
-      const copyModalWeightState = { ...modalWeightState }
+      if (modalCachedCardExerciseData === undefined) return
+
+      const copyModalWeightState = { ...modalCachedCardExerciseData }
+
+      if (copyModalWeightState.workoutExerciseSets === undefined) return
+
       const completedTimestamp = new Date().getTime()
 
-      copyModalWeightState.repetitionData =
-        copyModalWeightState.repetitionData.map((item, i) => {
+      copyModalWeightState.workoutExerciseSets =
+        copyModalWeightState.workoutExerciseSets.map((item, i) => {
           if (i >= index) {
-            const isExistingItem = item.completed.createdAt !== 0
+            const isExistingItem = item.completedData.createdAt !== 0
             return {
               ...item,
               updatedAt: completedTimestamp,
-              completed: {
-                ...item.completed,
+              completedData: {
+                ...item.completedData,
                 isCompleted: false,
                 updatedAt: completedTimestamp,
                 createdAt: isExistingItem
-                  ? item.completed.createdAt
+                  ? item.completedData.createdAt
                   : completedTimestamp,
               },
             }
           }
           return item
         })
-      copyModalWeightState.repetitionData[index].updatedAt = completedTimestamp
+      copyModalWeightState.workoutExerciseSets[index].updatedAt =
+        completedTimestamp
 
       setModalCachedCardExerciseData(copyModalWeightState)
       setDefaultModalState((prev) => {
@@ -1111,43 +1071,55 @@ entra
     }
 
     function marcarItem(index: number) {
-      const copyModalWeightState = { ...modalWeightState }
+      console.log(`index`, index)
+      console.log(
+        `defaultModalState.activeWeightIndex`,
+        defaultModalState.activeWeightIndex,
+      )
+      const copyModalWeightState = { ...modalCachedCardExerciseData }
+      if (copyModalWeightState.workoutExerciseSets === undefined) return
 
       const completedTimestamp = new Date().getTime()
-      const hasFollowingCompleted =
-        copyModalWeightState.repetitionData[index].completed
 
-      // se ja existir ele nao vai recriar mas sso atualizar udpatredAt e o isCOmpl.,eted , preveservando o created AT
-
-      copyModalWeightState.repetitionData[index].updatedAt = completedTimestamp
-
-      if (!hasFollowingCompleted) {
-        copyModalWeightState.repetitionData[index].completed = {
-          isCompleted: true,
-          createdAt: completedTimestamp,
-          updatedAt: completedTimestamp,
-        }
-      } else {
-        copyModalWeightState.repetitionData[index].completed.isCompleted = true
-        copyModalWeightState.repetitionData[index].completed.updatedAt =
-          completedTimestamp
-      }
-
-      copyModalWeightState.repetitionData[index].updatedAt = completedTimestamp
+      copyModalWeightState.workoutExerciseSets =
+        copyModalWeightState.workoutExerciseSets.map((item, i) => {
+          if (i <= index) {
+            const isExistingItem = item.completedData.createdAt !== 0
+            return {
+              ...item,
+              updatedAt: completedTimestamp,
+              completedData: {
+                ...item.completedData,
+                isCompleted: true,
+                updatedAt: completedTimestamp,
+                createdAt: isExistingItem
+                  ? item.completedData.createdAt
+                  : completedTimestamp,
+              },
+            }
+          }
+          return item
+        })
+      copyModalWeightState.workoutExerciseSets[index].updatedAt =
+        completedTimestamp
 
       setModalCachedCardExerciseData(copyModalWeightState)
       setDefaultModalState((prev) => {
+        if (copyModalWeightState.workoutExerciseSets === undefined) return prev
         return {
           ...prev,
           lastActiveWeightIndex: defaultModalState.activeWeightIndex,
-          activeWeightIndex: index,
+          activeWeightIndex:
+            index + 1 < copyModalWeightState.workoutExerciseSets.length
+              ? index + 1
+              : index,
         }
       })
     }
   }
 
+  // DONE
   function handleChangeRepetitionFocus(index: number) {
-    console.log(`index`, index)
     if (index !== defaultModalState.activeWeightIndex) {
       setDefaultModalState((prevState) => ({
         ...prevState,
@@ -1467,9 +1439,13 @@ entra
         )}
         <BulletsCronometerAndCTAButtonWrapper>
           <WorkoutCronometerWrapper>
-            {/*         <WorkoutCronometer
+            <WorkoutCronometer
               totalSeconds={totalSeconds}
-              getModalTimer={Number(modalCachedCardExerciseData.time.value)}
+              getModalTimer={Number(
+                modalCachedCardExerciseData?.workoutExerciseSets?.[
+                  defaultModalState.activeWeightIndex
+                ].restTimeData.restTimeNumber,
+              )}
               enabled={isFocused}
               onRestart={() => {
                 onTimerManage('skip')
@@ -1481,7 +1457,7 @@ entra
               minutes={minutes}
               seconds={seconds}
               isRunning={isRunning}
-            /> */}
+            />
           </WorkoutCronometerWrapper>
         </BulletsCronometerAndCTAButtonWrapper>
       </WorkoutInfoWrapper>
@@ -1551,7 +1527,7 @@ entra
             handleUpdateSets('update', set, rangeOfSets, isActivedRangeOfSets)
           }
           sets={
-            /*  (modalCachedCardExerciseData &&
+            (modalCachedCardExerciseData &&
               modalCachedCardExerciseData.workoutExerciseSets &&
               modalCachedCardExerciseData.workoutExerciseSets[
                 defaultModalState.activeWeightIndex
@@ -1563,8 +1539,8 @@ entra
               ].repetitionData &&
               modalCachedCardExerciseData.workoutExerciseSets[
                 defaultModalState.activeWeightIndex
-              ].repetitionData) || */
-            0
+              ].repetitionData) ||
+            []
           }
           setsIndex={defaultModalState.activeWeightIndex + 1}
           exerciseName={
@@ -1613,58 +1589,14 @@ entra
         }}
       >
         <WorkoutUserRangeOfSetsModal
-          tittle={
-            user?.selectedLanguage === 'pt-br'
-              ? 'Ótimo trabalho! Quantas repetições você completou?'
-              : 'Great job! How many repetitions did you complete?'
-          }
-          subTittle={
-            user?.selectedLanguage === 'pt-br'
-              ? `Repetições da série ${defaultModalState.activeWeightIndex + 1}`
-              : `Reps of set ${defaultModalState.activeWeightIndex + 1}`
+          handleUpdateRangeOfSets={(selecteSet: number) =>
+            handleUpdateSets('update', selecteSet)
           }
           closeModal={() => closeModal('rangeOfSets')} // Método para fechar o modal (iOS, Android)
-          handleUpdateRangeOfSets={(
-            set: number,
-            rangeOfSets: number[],
-            isActivedRangeOfSets: boolean,
-          ) =>
-            handleUpdateSets('update', set, rangeOfSets, isActivedRangeOfSets)
-          }
           handleDeleteRangeOfSets={() => handleUpdateSets('delete')}
-          sets={Number(
-            /*     (modalCachedCardExerciseData &&
-              modalCachedCardExerciseData.workoutExerciseSets &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ] &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ].sets.value) || */
-            0,
-          )}
-          rangeOfSets={
-            /*           (modalCachedCardExerciseData &&
-              modalCachedCardExerciseData.workoutExerciseSets &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ] &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ].sets.rangeOfSets) || */
-            []
-          }
-          isActivedRangeOfSets={
-            /*            (modalCachedCardExerciseData &&
-              modalCachedCardExerciseData.workoutExerciseSets &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ] &&
-              modalCachedCardExerciseData.workoutExerciseSets[
-                defaultModalState.activeWeightIndex
-              ].sets.isActivedRangeOfSets) || */
-            false
-          }
+          modalCachedCardExerciseData={modalCachedCardExerciseData}
+          activeIndex={defaultModalState.activeWeightIndex}
+          selectedLanguage={user?.selectedLanguage || 'pt-br'}
         />
       </Modal>
 
