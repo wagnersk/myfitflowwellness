@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { memo, useRef } from 'react'
+import React, { memo, useMemo, useRef } from 'react'
 import Play from '@assets/Play.svg'
 import Pause from '@assets/Pause.svg'
 import ArrowCounterClockwise from '@assets/Arrow-counter-clockwise.svg'
@@ -18,6 +18,10 @@ import {
   IncrementSecondsContent,
   BlurViewAddSecondsWrapper,
   FakeAnimatedCircularProgressWrapper,
+  SaveButtonWrapper,
+  WorkoutCronometerButton,
+  CircleAndButtonWrapper,
+  WorkoutCronometerSaveTimer,
 } from './styles'
 import { useTheme } from 'styled-components/native'
 import { Circle } from 'react-native-svg'
@@ -29,6 +33,7 @@ interface CronometerProps {
   onRestart: () => void
   onAdd15Seconds: () => void
   onSubtract15Seconds: () => void
+  onSaveNewTimer: () => void
   minutes: number
   seconds: number
   isRunning: boolean
@@ -40,6 +45,7 @@ export function WorkoutCronometerComponent({
   enabled,
   onAdd15Seconds,
   onSubtract15Seconds,
+  onSaveNewTimer,
   onPlay,
   onPause,
   onRestart,
@@ -49,11 +55,16 @@ export function WorkoutCronometerComponent({
   getModalTimer,
   totalSeconds,
 }: CronometerProps) {
-  console.log('getModalTimer', getModalTimer)
   const circularProgressRef = useRef<AnimatedCircularProgress>(null)
   const elapsedTime = getModalTimer - totalSeconds
   const percentage = getModalTimer ? (elapsedTime / getModalTimer) * 100 : 0
 
+  const timeChanged = useMemo(() => {
+    return totalSeconds !== getModalTimer
+  }, [totalSeconds, getModalTimer])
+  console.log('timeChanged', timeChanged)
+  console.log('getModalTimer', getModalTimer)
+  console.log('totalSeconds', totalSeconds)
   function handlePause() {
     onPause()
   }
@@ -68,6 +79,9 @@ export function WorkoutCronometerComponent({
 
   function add15Seconds() {
     onAdd15Seconds()
+  }
+  function handleSaveNewTimer() {
+    onSaveNewTimer()
   }
 
   function subtract15Seconds() {
@@ -88,25 +102,36 @@ export function WorkoutCronometerComponent({
       <Middle>
         <AnimatedCircularProgressWrapper>
           {enabled ? (
-            <AnimatedCircularProgress
-              ref={circularProgressRef}
-              size={112}
-              width={3}
-              fill={percentage}
-              tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
-              backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
-              padding={10}
-              renderCap={({ center }) => (
-                <Circle cx={center.x} cy={center.y} r="6" fill="green" />
-              )}
-              onAnimationComplete={() => console.log('onAnimationComplete')}
-              // eslint-disable-next-line react/no-children-prop
-              children={() => (
-                <WorkoutCronometerTimer>
-                  {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
-                </WorkoutCronometerTimer>
-              )}
-            />
+            <CircleAndButtonWrapper>
+              <AnimatedCircularProgress
+                ref={circularProgressRef}
+                size={112}
+                width={3}
+                fill={percentage}
+                tintColor={theme.COLORS.AUX_GOOGLE_GREEN}
+                backgroundColor={theme.COLORS.NEUTRA_BACKGROUND}
+                padding={10}
+                renderCap={({ center }) => (
+                  <Circle cx={center.x} cy={center.y} r="6" fill="green" />
+                )}
+                onAnimationComplete={() => console.log('onAnimationComplete')}
+                // eslint-disable-next-line react/no-children-prop
+                children={() => (
+                  <WorkoutCronometerTimer>
+                    {minutes}:{seconds <= 9 ? `0${seconds}` : seconds}
+                  </WorkoutCronometerTimer>
+                )}
+              />
+              <SaveButtonWrapper>
+                {timeChanged && (
+                  <WorkoutCronometerButton onPress={() => handleSaveNewTimer()}>
+                    <WorkoutCronometerSaveTimer>
+                      Save
+                    </WorkoutCronometerSaveTimer>
+                  </WorkoutCronometerButton>
+                )}
+              </SaveButtonWrapper>
+            </CircleAndButtonWrapper>
           ) : (
             <FakeAnimatedCircularProgressWrapper />
           )}

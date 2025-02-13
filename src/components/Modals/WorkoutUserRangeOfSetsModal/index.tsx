@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -12,15 +12,10 @@ import {
   TipsNoteBodyWrapper,
   TipsNoteWrapper,
   TipsTitleNoteWrapper,
-  TipsTitleNote,
-  TipsInputNotes,
-  TipsButton,
   TipsButtonText,
-  TipsButtonLinearGradientSave,
   OverLayTop,
   OverLayBottom,
   InputsWrapper,
-  TipsButtonWrapper,
   ItensButton,
   TitteText,
   SubTitteText,
@@ -31,7 +26,7 @@ import {
 import { ICachedCardExerciseData } from '@hooks/authTypes'
 
 interface InputProps extends TextInputProps {
-  handleUpdateRangeOfSets: (selecteSet: number) => void
+  handleUpdateRangeOfSets: (selecteSet: string) => void
   closeModal: () => void
   handleDeleteRangeOfSets: () => void
   modalCachedCardExerciseData: ICachedCardExerciseData
@@ -67,21 +62,28 @@ export function WorkoutUserRangeOfSetsModal({
         .sort((a, b) => Number(a) - Number(b))) ||
     []
 
-  const getIsActivedRangeOfSets =
-    (modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-      ?.repetitionData?.length ?? 0) > 1
+  const [rangeOfSets, setRangeOfSets] = useState(generateRange(repetitionData))
 
-  const checkedSet =
-    modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-      ?.selectedRepetitionData.checkedSet
+  async function updateWeight(index: number) {
+    if (index === -1) return
+    console.log('index', index)
 
-  /*  
-  ver como esotu recebendo os dados
-  montar o range
-  deveolver o valor recebido
-  armazenar o valor no checkedSet que so existe no cached
-  
-  */
+    const updatedRangeOfSets = rangeOfSets.map((item, i) => ({
+      ...item,
+      selected: i === index ? !item.selected : item.selected,
+    }))
+    setRangeOfSets(updatedRangeOfSets)
+
+    const selecteSet = rangeOfSets[index].value
+
+    handleUpdateRangeOfSets(selecteSet)
+    handleOverlayPress()
+  }
+
+  async function deleteRangeOfSets() {
+    handleDeleteRangeOfSets()
+  }
+
   function generateRange(rangeArray: string[]) {
     const start = Number(rangeArray[0])
     const end = Number(rangeArray[rangeArray.length - 1])
@@ -93,7 +95,7 @@ export function WorkoutUserRangeOfSetsModal({
 
     const transformedData = rangedData.map((v) => {
       return {
-        value: v,
+        value: String(v),
         selected: false,
       }
     })
@@ -101,26 +103,21 @@ export function WorkoutUserRangeOfSetsModal({
     return transformedData
   }
 
-  const rangeOfSets = generateRange(repetitionData)
-  console.log(`rangeOfSets -> `, rangeOfSets)
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()
   }
 
-  async function updateWeight(index: number) {
-    if (index === -1) return
-
-    const selecteSet = rangeOfSets[index].value
-
-    handleUpdateRangeOfSets(selecteSet)
-    handleOverlayPress()
-  }
-  async function deleteRangeOfSets() {
-    handleDeleteRangeOfSets()
-    handleOverlayPress()
-  }
-
+  useEffect(() => {
+    const updatedRangeOfSets = rangeOfSets.map((item) => ({
+      ...item,
+      selected:
+        item.value ===
+        modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+          ?.selectedRepetitionData.checkedSet,
+    }))
+    setRangeOfSets(updatedRangeOfSets)
+  }, [modalCachedCardExerciseData, activeIndex])
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}

@@ -1,10 +1,9 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { TextInput, TouchableOpacity } from 'react-native'
+import { TextInput, TouchableOpacity, Dimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { ReactNode } from 'react'
-
 interface Props {
   isFocused?: boolean
 }
@@ -33,25 +32,55 @@ export const TipsNoteBodyWrapper = styled.View`
   gap: 12px;
 `
 
-export const TipsNoteWrapper = styled.View`
-  gap: 24px;
-`
-export const InputsWrapper = styled.View`
-  gap: 24px;
+export const TipsNoteWrapper = styled.View``
+
+export const PickerContainer = styled.View`
   width: 100%;
   flex-direction: row;
-
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
+`
+export const PickerWrapper = styled.View`
+  justify-content: center;
   align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-direction: row;
+`
+export const PickerColumWrapper = styled.View`
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 `
 
-export const TipsTitleNoteWrapper = styled.View`
+export const SeparatorWrapper = styled.View`
+  left: 8px;
+`
+
+export const Header = styled.View`
   width: 100%;
-  padding: 8px;
   align-items: center;
+  flex-direction: row;
+  justify-content: center;
 `
 
-export const TipsTitleNote = styled.Text`
+export const TextHeader = styled.View`
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+`
+
+export const HeaderTittle = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(20)}px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const HeaderSubTittle = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(20)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
@@ -92,11 +121,6 @@ export const TipsInputNotes = styled(TextInput)<Props>`
     `}
 `
 
-export const TipsButtonWrapper = styled.View`
-  width: 100%;
-  margin-bottom: 20px;
-`
-
 export const TipsButtonText = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -105,7 +129,7 @@ export const TipsButtonText = styled.Text`
 
 export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
   ({ theme }) => ({
-    colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
+    colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   }),
@@ -117,12 +141,52 @@ export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
   border-radius: 12px;
   flex-direction: row;
 `
+export const SaveButtonWrapper = styled.View`
+  width: 100%;
+  margin-bottom: 20px;
+`
+export const RepOrTimeButtonWrapper = styled.View`
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+`
+const { width: screenWidth } = Dimensions.get('window')
+const buttonWidth = screenWidth * 0.25 // 25% da largura da tela
 
-export const TipsButton = styled(TouchableOpacity)<TouchableOpacityButtonProps>`
+export const ButtonBorderWrapper = styled.View<{
+  redColor?: boolean
+  disabled?: boolean
+}>`
+  width: ${buttonWidth}px;
+
+  border: 2px solid
+    ${({ theme, redColor }) =>
+      redColor ? theme.COLORS.AUX_GOOGLE_RED : theme.COLORS.AUX_GOOGLE_BLUE};
+  border-radius: 12px;
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      opacity: 0.3;
+    `}
+`
+export const ActButton = styled(TouchableOpacity)<TouchableOpacityButtonProps>`
   justify-content: center;
   align-items: center;
   flex-direction: row;
   height: 48px;
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
   border-radius: 12px;
+`
+export const SaveButton = styled(TouchableOpacity)<TouchableOpacityButtonProps>`
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 48px;
+  border-radius: 12px;
+`
+
+export const ActText = styled.Text<{ redColor?: boolean }>`
+  color: ${({ theme, redColor }) =>
+    redColor ? theme.COLORS.AUX_GOOGLE_RED : theme.COLORS.AUX_GOOGLE_BLUE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(16)}px;
 `

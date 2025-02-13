@@ -171,29 +171,6 @@ export const WorkoutIndexButton = styled(TouchableOpacity)<Props>`
   align-items: center;
 `
 
-export const WorkoutWeightText = styled.Text<{
-  activedGreenColor: boolean
-  alreadySelected: boolean
-}>`
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  color: ${({ theme, activedGreenColor }) =>
-    activedGreenColor
-      ? theme.COLORS.AUX_GOOGLE_GREEN
-      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  text-align: center;
-
-  font-size: ${({ activedGreenColor }) =>
-    activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
-
-  ${({ alreadySelected }) =>
-    alreadySelected &&
-    css`
-      text-decoration: underline;
-      text-decoration-color: ${({ theme }) =>
-        theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-    `};
-`
-
 export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
   color: ${({ theme, activedGreenColor }) =>
     activedGreenColor
@@ -282,16 +259,35 @@ export const WorkoutUserNotesWrite = styled.Text`
   font-size: ${RFValue(14)}px;
 `
 
-export const WorkoutTextBoxTitle = styled.Text``
-
 export const WorkoutTextBoxLetterCountWrapper = styled.View`
   align-items: flex-end;
 `
 
+export const WorkoutTextBoxTitle = styled.Text``
 export const WorkoutTextBoxLetterCount = styled.Text``
+export const WorkoutCronometerWrapper = styled.View``
 
 export const BulletsCronometerAndCTAButtonWrapper = styled.View`
   justify-content: center;
 `
 
-export const WorkoutCronometerWrapper = styled.View``
+export const WorkoutWeightText = styled.Text<{
+  activedGreenColor: boolean
+  alreadySelected: boolean
+}>`
+  font-family: ${({ theme, alreadySelected }) =>
+    alreadySelected ? theme.FONTS.BUTTON : theme.FONTS.BODY};
+  color: ${({ theme, activedGreenColor }) =>
+    activedGreenColor
+      ? theme.COLORS.AUX_GOOGLE_GREEN
+      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  text-align: center;
+
+  ${({ alreadySelected }) =>
+    alreadySelected &&
+    css`
+      text-decoration: underline;
+      text-decoration-color: ${({ theme }) =>
+        theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+    `};
+`

@@ -17,6 +17,7 @@ import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModa
 
 interface WorkoutNameAndVideoProps {
   isFocused: boolean
+  disabled: boolean
   isOpenModalVideoPlayer: boolean
   item: IFormattedCardExerciseData
   selectedLanguage: 'pt-br' | 'us'
@@ -30,6 +31,7 @@ interface WorkoutNameAndVideoProps {
 
 const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
   isFocused,
+  disabled,
   isOpenModalVideoPlayer,
   item,
   selectedLanguage,
@@ -156,7 +158,7 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
   }, [cachedVideoTable, cachedVideoTable?.length])
 
   return (
-    <WorkoutNameAndVideoWrapper>
+    <WorkoutNameAndVideoWrapper pointerEvents={disabled ? 'none' : 'auto'}>
       <WorkoutNameWrapper style={{ opacity: isFocused ? 1 : 0.4 }}>
         <WorkoutName>
           {getTrimmedName(

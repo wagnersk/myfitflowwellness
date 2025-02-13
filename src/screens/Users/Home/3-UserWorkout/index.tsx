@@ -5,6 +5,7 @@ import {
   ViewToken,
   Platform,
   ScrollView,
+  Button,
 } from 'react-native'
 
 import { useNavigation } from '@react-navigation/core'
@@ -12,7 +13,6 @@ import { useFocusEffect, useRoute } from '@react-navigation/native'
 
 import { BackButton } from '@components/Buttons/BackButton'
 import { WorkoutVideoCard } from '@screens/Users/Home/3-UserWorkout/Components/WorkoutVideoCard'
-import { WorkoutCronometer } from '@components/WorkoutCronometer'
 import { BulletList } from '@components/Bullet/BulletList'
 
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
@@ -27,7 +27,6 @@ import {
   BodyImageContainer,
   BodyImageBackgroundContainerSpaceBetween,
   FlatListWrapper,
-  BulletsCronometerAndCTAButtonWrapper,
   IosBackgroundBlurViewTipsWrapper,
   AndroidBackgroundTipsWrapper,
   TipsTitleWrapper,
@@ -56,8 +55,8 @@ export function UserWorkout() {
   const {
     workoutId,
     data,
-    workoutLength,
-    selectedWorkoutExerciseIndex,
+    // workoutLength,
+    // selectedWorkoutExerciseIndex,
     muscleGroupsLabel,
     letter,
     cardIndex,
@@ -70,7 +69,6 @@ export function UserWorkout() {
     workoutCardIndex: 0,
     workoutExerciseTechniqueTitle: { 'pt-br': '', us: '' },
     workoutExerciseTechniqueDescription: { 'pt-br': '', us: '' },
-    workoutExerciseRestTimeNumber: 0,
   })
 
   const onViewableItemsChanged = useRef(
@@ -82,8 +80,6 @@ export function UserWorkout() {
             item.item.workoutExerciseTechniqueTitle,
           workoutExerciseTechniqueDescription:
             item.item.workoutExerciseTechniqueDescription,
-          workoutExerciseRestTimeNumber:
-            item.item.workoutExerciseRestTimeNumber,
         })
       })
     },
@@ -99,6 +95,17 @@ export function UserWorkout() {
         (item - 1) * MARGINBETWEENELEMENTS,
     )
   }, [])
+
+  const flatListRef = useRef<FlatList>(null)
+
+  function scrollToNextCard() {
+    if (flatListRef.current) {
+      const nextIndex = workoutCardInfo.workoutCardIndex + 1
+      if (nextIndex < data.cardExerciseData.length) {
+        flatListRef.current.scrollToIndex({ index: nextIndex, animated: true })
+      }
+    }
+  }
 
   function handleGoBack() {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
@@ -197,6 +204,7 @@ export function UserWorkout() {
 
           <FlatListWrapper>
             <FlatList
+              ref={flatListRef}
               horizontal
               data={data.cardExerciseData}
               keyExtractor={(item) => String(item.workoutExerciseIndex)}
@@ -209,7 +217,7 @@ export function UserWorkout() {
                     workoutCardIndex={cardIndex}
                     workoutId={workoutId}
                     isFocused={workoutCardInfo.workoutCardIndex === index}
-                    restTime={workoutCardInfo.workoutExerciseRestTimeNumber}
+                    scrollToNextCard={scrollToNextCard}
                   />
                 )
               }}
@@ -232,19 +240,6 @@ export function UserWorkout() {
             data={data.cardExerciseData}
             workoutCardIndex={workoutCardInfo.workoutCardIndex}
           />
-
-          {/*      <BulletsCronometerAndCTAButtonWrapper>
-            <WorkoutCronometer
-              resetText={selectedLanguage === 'pt-br' ? 'Zerar' : 'Reset'}
-              startText={selectedLanguage === 'pt-br' ? 'Iniciar' : 'Start'}
-              rest_time={
-                workoutCardInfo.workoutExerciseRestTimeNumber
-                  ? workoutCardInfo.workoutExerciseRestTimeNumber
-                  : 0
-              }
-              flagToResetCronometer={workoutCardInfo.workoutCardIndex}
-            />
-          </BulletsCronometerAndCTAButtonWrapper> */}
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>
     </Container>

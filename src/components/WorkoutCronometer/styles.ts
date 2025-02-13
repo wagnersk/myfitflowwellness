@@ -33,6 +33,24 @@ export const AnimatedCircularProgressWrapper = styled.View`
   bottom: -16px;
 `
 
+export const WorkoutCronometerButton = styled.TouchableOpacity`
+  height: 48px;
+  width: 48px;
+  justify-content: center;
+  align-items: center;
+`
+export const SaveButtonWrapper = styled.View`
+  align-items: center;
+  justify-content: center;
+  bottom: 12px;
+  position: absolute;
+`
+export const CircleAndButtonWrapper = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`
+
 export const WorkoutCronometerButtonStart = styled.TouchableOpacity`
   height: 48px;
   justify-content: center;
@@ -56,6 +74,11 @@ export const WorkoutCronometerTimer = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(24)}px;
+`
+export const WorkoutCronometerSaveTimer = styled.Text`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  font-size: ${RFValue(18)}px;
 `
 
 export const WorkoutCronometerText = styled.Text<WorkoutCronometerWrapper>`

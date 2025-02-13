@@ -29,6 +29,7 @@ interface WorkoutRepetitionAndSerieProps {
   firstIncompleteIndex: number
   lastCompletedIndex: number
   allItensCompleted: boolean
+  disabled: boolean
   exerciseIndex: number
   handleSetCompletedCheck: (index: number) => void
   handleAddRepetition: () => void
@@ -47,6 +48,7 @@ export default function WorkoutRepetitionsData({
   firstIncompleteIndex,
   lastCompletedIndex,
   allItensCompleted,
+  disabled,
   exerciseIndex,
   handleSetCompletedCheck,
   handleAddRepetition,
@@ -60,7 +62,7 @@ export default function WorkoutRepetitionsData({
 
   return (
     <WorkoutRepetitionAndSerieWrapper
-      pointerEvents={isFocused ? 'auto' : 'none'}
+      pointerEvents={isFocused && !disabled ? 'auto' : 'none'}
       style={{ opacity: isFocused ? 1 : 0.2 }}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -118,7 +120,7 @@ export default function WorkoutRepetitionsData({
                         : openSets(i)
                     }}
                   >
-                    {isFocused && // card
+                    {isFocused && // card visivel
                     v.repetitionData[0] &&
                     v.repetitionData[1] &&
                     v.repetitionData &&
@@ -140,13 +142,22 @@ export default function WorkoutRepetitionsData({
                           defaultModalState.activeWeightIndex === i && isFocused
                         }
                         activedGreenColor={
+                          v.repetitionData[0] &&
+                          v.repetitionData[1] &&
                           v.repetitionData[0].isReps &&
                           v.repetitionData[1].isReps
                         }
                       >
-                        {v.repetitionData
-                          .map((v) => v.sets_insensitive)
-                          .join('-')}
+                        {v.repetitionData[0] &&
+                        v.repetitionData[1] &&
+                        v.repetitionData[0].isReps &&
+                        v.repetitionData[1].isReps
+                          ? v.repetitionData
+                              .map((v) => v.sets_insensitive)
+                              .join('-')
+                          : v.repetitionData
+                              .map((v) => v.sets_insensitive)
+                              .join(', ')}
                       </WorkoutWeightText>
                     )}
 
@@ -237,7 +248,7 @@ export default function WorkoutRepetitionsData({
                 }
                 onPress={
                   (modalCachedCardExerciseData.workoutExerciseSets?.length ??
-                    0) < 7
+                    0) <= 6
                     ? handleAddRepetition
                     : () => {}
                 }
@@ -250,68 +261,20 @@ export default function WorkoutRepetitionsData({
                     stroke={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
                     strokeWidth={2}
                     strokeLinecap="round"
-                    style={{ opacity: 0.4 }}
+                    style={{ opacity: 0.6 }}
                   />
                 </WorkoutSerieValue>
               </WorkoutIndexButton>
             </WorkoutWeightValueAndTextWrapper>
 
-            <WorkoutWeightValueAndTextWrapper>
-              <WorkoutWeightValue
-                disabled={true}
-                onPress={() => {}}
-                style={{ opacity: 0.1 }}
-              >
-                <WorkoutWeightText
-                  alreadySelected={false}
-                  activedGreenColor={false}
-                >
-                  {/*    {
-                    modalCachedCardExerciseData.workoutExerciseSets?.[
-                      modalCachedCardExerciseData.workoutExerciseSets.length - 1
-                    ].repetitionData.value
-                  } */}
-                  {' 1231'}
-                  123
-                </WorkoutWeightText>
-                <WorkoutWeightMetric activedGreenColor={false}>
-                  {' '}
-                  rep{' '}
-                </WorkoutWeightMetric>
-              </WorkoutWeightValue>
-            </WorkoutWeightValueAndTextWrapper>
-
             <ButtonsWrapper>
-              <WorkoutWeightValueAndTextWrapper>
-                <WorkoutWeightValue
-                  disabled={true}
-                  onPress={() => {}}
-                  style={{ opacity: 0.1 }}
-                >
-                  <WorkoutWeightText
-                    alreadySelected={false}
-                    activedGreenColor={false}
-                  >
-                    {
-                      (modalCachedCardExerciseData.workoutExerciseSets ?? [])[
-                        (modalCachedCardExerciseData.workoutExerciseSets
-                          ?.length ?? 0) - 1
-                      ].weightData.value
-                    }
-                  </WorkoutWeightText>
-                  <WorkoutWeightMetric activedGreenColor={false}>
-                    {' '}
-                    kg{' '}
-                  </WorkoutWeightMetric>
-                </WorkoutWeightValue>
-              </WorkoutWeightValueAndTextWrapper>
               <WorkoutButton
                 disabled={
                   (modalCachedCardExerciseData?.workoutExerciseSets?.length ??
                     0) <= 1
                 }
                 onPress={() => handleRemoveLastRepetition()}
-                style={{ opacity: 0.3 }}
+                style={{ opacity: 0.5 }}
               >
                 <Less
                   width={48}

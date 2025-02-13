@@ -54,7 +54,8 @@
     "react-native-swipeable-item": "^2.0.9",
     "react-timer-hook": "^3.0.8",
     "styled-components": "^6.1.13",
-    "victory-native": "^37.0.2"
+    "victory-native": "^37.0.2",
+    "@react-native-picker/picker": "2.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

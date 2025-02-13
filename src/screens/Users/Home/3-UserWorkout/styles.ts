@@ -53,12 +53,6 @@ export const BodyImageBackgroundContainerSpaceBetween = styled.View`
 
 export const FlatListWrapper = styled.View``
 
-export const BulletsCronometerAndCTAButtonWrapper = styled.View`
-  flex: 1;
-  justify-content: center;
-  margin-top: 24px;
-`
-
 export const IosBackgroundBlurViewTipsWrapper = styled(BlurView)`
   justify-content: center;
   align-items: flex-start;
