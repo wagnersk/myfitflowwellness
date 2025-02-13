@@ -75,12 +75,11 @@ export function WorkoutCardItem({ item, index, isEnd, ...rest }: Props) {
             <WorkoutCardRepeatAndQuantity>
               {item &&
                 item.workoutExerciseSets &&
-                `${item && item.workoutExerciseSets && item && item.workoutExerciseSets?.length > 0 ? `${item && item.workoutExerciseRepetition} de ${item && item.workoutExerciseSets[0]}...` : null}`}
+                `${item && item.workoutExerciseSets.length} de ${item && item.workoutExerciseSets[index].repetitionData.map((v) => v.sets_insensitive).join(`-`)} `}
 
               {item &&
                 selectedLanguage &&
                 !item.workoutExerciseSets &&
-                !item.workoutExerciseRepetition &&
                 item.workoutExerciseInfo &&
                 getTrimmedName(23, item.workoutExerciseInfo[selectedLanguage])}
             </WorkoutCardRepeatAndQuantity>

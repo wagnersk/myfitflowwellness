@@ -34,6 +34,8 @@ import {
   FavoriteIconContainer,
   LinearGradientButton,
   NoWorkoutFoundWrapper,
+  FavIconCameraButton,
+  CameraText,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
@@ -187,7 +189,6 @@ export function UserHome() {
     }, []),
   )
 
-  const colors = theme.COLORS.GRADIENT_CARD
   const svgColor = theme.COLORS.BLUE_STROKE
 
   return (
@@ -267,12 +268,8 @@ export function UserHome() {
             )
           )}
           <FavoriteIconContainer onPressOut={handleOpenCamera}>
-            <LinearGradientButton
-              colors={colors}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Camera width={42} height={42} fill={'white'} />
+            <LinearGradientButton colors={['#4c669f', '#3b5998', '#192f6a']}>
+              <CameraText>Camera</CameraText>
             </LinearGradientButton>
           </FavoriteIconContainer>
         </BodyImageBackgroundContainerSpaceBetween>

@@ -85,12 +85,28 @@ export const FavoriteIconContainer = styled.TouchableOpacity`
   bottom: 10px;
   right: 32px;
   color: white;
-  border-radius: 999px;
-  border-color: white;
-  border-width: 4px;
+  border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `
-export const LinearGradientButton = styled(LinearGradient)`
+
+export const LinearGradientButton = styled(LinearGradient).attrs(
+  ({ theme }) => ({
+    colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
+    start: { x: 0, y: 1 },
+    end: { x: 1, y: 0 },
+  }),
+)`
   flex: 1;
-  padding: 8px;
   border-radius: 999px;
+  height: 90px;
+  width: 90px;
+  justify-content: center;
+  align-items: center;
+`
+export const FavIconCameraButton = styled.View`
+  flex: 1;
+`
+export const CameraText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(16)}px;
 `

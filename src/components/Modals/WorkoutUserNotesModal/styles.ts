@@ -103,7 +103,7 @@ export const TipsButtonText = styled.Text`
 
 export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
   ({ theme }) => ({
-    colors: [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
+    colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   }),
