@@ -208,8 +208,6 @@ export function WorkoutUserSetsModal({
   }
 
   function handleSetChange(value: string, rangeIndex: number) {
-    console.log(`handleSetChange`, value)
-    console.log(`rangeIndex`, rangeIndex)
     const copy = [...newSets]
 
     copy[rangeIndex].sets_insensitive = value
@@ -219,8 +217,6 @@ export function WorkoutUserSetsModal({
 
   function addNewSelector(type: 'time' | 'reps') {
     if (newSets.length >= 3) return
-    console.log(type, 'type')
-    console.log(newSets, 'newSets')
     const copy = [...newSets]
 
     const time = new Date().getTime()
@@ -237,7 +233,6 @@ export function WorkoutUserSetsModal({
     copy.push(newSet)
 
     setNewSets(copy)
-    console.log(newSets)
   }
 
   function removeLastSelector() {

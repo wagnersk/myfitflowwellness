@@ -61,7 +61,6 @@ export function WorkoutUserNotesModal({
     setNewNotes(data)
   }
   async function updateNotes() {
-    console.log(`asd`)
     handleUpdateNotes(newNotes)
   }
 

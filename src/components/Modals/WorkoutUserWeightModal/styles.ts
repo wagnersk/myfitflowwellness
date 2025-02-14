@@ -1,9 +1,11 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { TextInput, TouchableOpacity } from 'react-native'
+import { TextInput, TouchableOpacity, Dimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-
 import { ReactNode } from 'react'
+
+const { width: screenWidth } = Dimensions.get('window')
+const buttonWidth = screenWidth * 0.45 // 40% da largura da tela
 
 interface Props {
   isFocused?: boolean
@@ -87,6 +89,8 @@ export const TipsButtonWrapper = styled.View`
   width: 100%;
   margin-bottom: 20px;
   gap: 12px;
+  flex-direction: row;
+  justify-content: space-between;
 `
 
 export const TipsButtonText = styled.Text`
@@ -101,12 +105,16 @@ export const TipsButtonLinearGradientSave = styled(LinearGradient).attrs(
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   }),
-)`
+)<{ singleButton: boolean }>`
   height: 100%;
-  width: 100%;
+  width: ${({ singleButton }) => (singleButton ? '100%' : `${buttonWidth}px`)};
+
+  /* Largura do botão proporcional à tela */
+
   align-items: center;
   justify-content: center;
   border-radius: 12px;
+  padding: 0 16px;
   flex-direction: row;
 `
 

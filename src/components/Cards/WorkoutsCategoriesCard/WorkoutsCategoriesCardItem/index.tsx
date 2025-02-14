@@ -32,9 +32,6 @@ export function WorkoutsCategoriesCardItem({
   const selectedLanguage = user?.selectedLanguage
   const isAnonymousUser = !!user?.anonymousUser
 
-  console.log(`isAnonymousUser`, isAnonymousUser)
-  console.log(`isGuestCategory`, isGuestCategory)
-
   return (
     <Container>
       <CircleCounterWrapper>

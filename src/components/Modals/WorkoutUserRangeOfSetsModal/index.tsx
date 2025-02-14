@@ -66,7 +66,6 @@ export function WorkoutUserRangeOfSetsModal({
 
   async function updateWeight(index: number) {
     if (index === -1) return
-    console.log('index', index)
 
     const updatedRangeOfSets = rangeOfSets.map((item, i) => ({
       ...item,
@@ -132,7 +131,7 @@ export function WorkoutUserRangeOfSetsModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>
-                  {tittle}{' '}
+                  {tittle}
                   {/* ( {sets.map((v) => v.sets_insensitive).join('-')} ) */}
                 </TitteText>
                 <SubTittleWrapper>

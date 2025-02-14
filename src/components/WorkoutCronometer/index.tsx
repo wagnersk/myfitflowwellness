@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { memo, useMemo, useRef } from 'react'
+import React, { memo, useCallback, useRef, useState } from 'react'
 import Play from '@assets/Play.svg'
 import Pause from '@assets/Pause.svg'
 import ArrowCounterClockwise from '@assets/Arrow-counter-clockwise.svg'
@@ -15,7 +15,6 @@ import {
   DecrementSeconds,
   IncrementSeconds,
   AnimatedCircularProgressWrapper,
-  IncrementSecondsContent,
   BlurViewAddSecondsWrapper,
   FakeAnimatedCircularProgressWrapper,
   SaveButtonWrapper,
@@ -59,43 +58,44 @@ export function WorkoutCronometerComponent({
   const elapsedTime = getModalTimer - totalSeconds
   const percentage = getModalTimer ? (elapsedTime / getModalTimer) * 100 : 0
 
-  const timeChanged = useMemo(() => {
-    return totalSeconds !== getModalTimer
-  }, [totalSeconds, getModalTimer])
-  console.log('timeChanged', timeChanged)
-  console.log('getModalTimer', getModalTimer)
-  console.log('totalSeconds', totalSeconds)
-  function handlePause() {
+  const [showSaveButton, setShowSaveButton] = useState(false)
+
+  const handlePause = useCallback(() => {
     onPause()
-  }
+  }, [onPause])
 
-  function handlOnPlay() {
+  const handlOnPlay = useCallback(() => {
     onPlay()
-  }
+  }, [onPlay])
 
-  function handleRestart() {
+  const handleRestart = useCallback(() => {
     onRestart()
-  }
+  }, [onRestart])
 
-  function add15Seconds() {
+  const handleAdd15Seconds = useCallback(() => {
     onAdd15Seconds()
-  }
-  function handleSaveNewTimer() {
-    onSaveNewTimer()
-  }
+    setShowSaveButton(true)
+  }, [onAdd15Seconds])
 
-  function subtract15Seconds() {
+  const handleSubtract15Seconds = useCallback(() => {
     onSubtract15Seconds()
-  }
+    setShowSaveButton(true)
+  }, [onSubtract15Seconds])
+
+  const handleSaveNewTimer = useCallback(() => {
+    onSaveNewTimer()
+    setShowSaveButton(false)
+  }, [onSaveNewTimer])
+
   const theme = useTheme()
 
   return (
     <WorkoutCronometerWrapper>
       <Top>
-        <IncrementSeconds disabled={!enabled} onPress={subtract15Seconds}>
+        <IncrementSeconds disabled={!enabled} onPress={handleSubtract15Seconds}>
           <WorkoutCronometerText type="negative">-15s</WorkoutCronometerText>
         </IncrementSeconds>
-        <DecrementSeconds disabled={!enabled} onPress={add15Seconds}>
+        <DecrementSeconds disabled={!enabled} onPress={handleAdd15Seconds}>
           <WorkoutCronometerText type="positive">+15s</WorkoutCronometerText>
         </DecrementSeconds>
       </Top>
@@ -114,7 +114,9 @@ export function WorkoutCronometerComponent({
                 renderCap={({ center }) => (
                   <Circle cx={center.x} cy={center.y} r="6" fill="green" />
                 )}
-                onAnimationComplete={() => console.log('onAnimationComplete')}
+                onAnimationComplete={
+                  () => {} /* console.log('onAnimationComplete') */
+                }
                 // eslint-disable-next-line react/no-children-prop
                 children={() => (
                   <WorkoutCronometerTimer>
@@ -123,7 +125,7 @@ export function WorkoutCronometerComponent({
                 )}
               />
               <SaveButtonWrapper>
-                {timeChanged && (
+                {showSaveButton && (
                   <WorkoutCronometerButton onPress={() => handleSaveNewTimer()}>
                     <WorkoutCronometerSaveTimer>
                       Save

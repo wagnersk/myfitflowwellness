@@ -6,7 +6,7 @@ import { useTheme } from 'styled-components/native'
 
 import { useAuth } from '@hooks/auth'
 
-import { format, set } from 'date-fns'
+import { format } from 'date-fns'
 import { ptBR, enUS } from 'date-fns/locale'
 import { useTimer } from 'react-timer-hook'
 
@@ -99,110 +99,95 @@ function WorkoutVideoCardComponent({
     const workoutExerciseId = item.workoutExerciseId || ''
     const defaultSets = item?.workoutExerciseSets || [] // cada repeticcao
 
-    /* 
-  -> Recuperar o cached quando eu savlar
-
-  const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
+    const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
       .find((v) => v.workoutId === workoutId)
       ?.workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
-      ?.weightDoneLogs[exerciseIndex] */
+      ?.weightDoneLogs.find((v) => v.workoutExerciseId === workoutExerciseId)
 
-    const initialWorkoutData = transformInitialData(defaultSets, timeNow)
-    const initialDataWithCachedProgress = initialWorkoutData
+    if (cachedInfo) {
+      return cachedInfo
+    } else {
+      const initialWorkoutData = transformInitialData(defaultSets, timeNow)
+      const initialDataWithCachedProgress = initialWorkoutData
 
-    return initialDataWithCachedProgress
-
-    function transformInitialData(
-      _defaultSets: IPropsSets[],
-      timeNow: number,
-    ): ICachedCardExerciseData {
-      const transformedDataSets = _defaultSets.map((v) => {
-        const transformedData: ICachedUsingWorkoutData = {
-          repetitionData: v.repetitionData.map((va) => {
-            return {
-              isReps: va.isReps,
-              isTime: va.isTime,
-              sets_insensitive: va.sets_insensitive,
-              timeInSeconds: va.timeInSeconds,
+      return initialDataWithCachedProgress
+      function transformInitialData(
+        _defaultSets: IPropsSets[],
+        timeNow: number,
+      ): ICachedCardExerciseData {
+        const transformedDataSets = _defaultSets.map((v) => {
+          const transformedData: ICachedUsingWorkoutData = {
+            repetitionData: v.repetitionData.map((va) => {
+              return {
+                isReps: va.isReps,
+                isTime: va.isTime,
+                sets_insensitive: va.sets_insensitive,
+                timeInSeconds: va.timeInSeconds,
+                createdAt: timeNow,
+                updatedAt: timeNow,
+              }
+            }),
+            selectedRepetitionData: {
+              checkedSet: '',
               createdAt: timeNow,
               updatedAt: timeNow,
-            }
-          }),
-          selectedRepetitionData: {
-            checkedSet: '',
+            },
+            restTimeData: {
+              restTimeNumber: v.restTimeData.restTimeNumber,
+              restTime_insensitive: v.restTimeData.restTime_insensitive,
+              createdAt: timeNow,
+              updatedAt: timeNow,
+            },
+            weightData: {
+              value: '0',
+              createdAt: timeNow,
+              updatedAt: timeNow,
+            },
+            techiesData: {
+              title: v.techiesData.title,
+              description: v.techiesData.description,
+              createdAt: timeNow,
+              updatedAt: timeNow,
+            },
+            completedData: {
+              isCompleted: false,
+              createdAt: timeNow,
+              updatedAt: timeNow,
+            },
             createdAt: timeNow,
             updatedAt: timeNow,
-          },
-          restTimeData: {
-            restTimeNumber: v.restTimeData.restTimeNumber,
-            restTime_insensitive: v.restTimeData.restTime_insensitive,
-            createdAt: timeNow,
-            updatedAt: timeNow,
-          },
-          weightData: {
-            value: '0',
-            createdAt: timeNow,
-            updatedAt: timeNow,
-          },
-          techiesData: {
-            title: v.techiesData.title,
-            description: v.techiesData.description,
-            createdAt: timeNow,
-            updatedAt: timeNow,
-          },
-          completedData: {
-            isCompleted: false,
-            createdAt: timeNow,
-            updatedAt: timeNow,
-          },
+          }
+
+          return transformedData
+        })
+        const fdata: ICachedCardExerciseData = {
+          isEnabled: true,
+          workoutExerciseId,
+          workoutExerciseSets: transformedDataSets,
+          workoutExerciseName: item.workoutExerciseName,
+          workoutExerciseName_insensitive: item.workoutExerciseName_insensitive,
+          workoutExercisePrimaryMuscleGroup:
+            item.workoutExercisePrimaryMuscleGroup,
+          workoutExerciseTypes: item.workoutExerciseTypes,
+          workoutExerciseFilters: item.workoutExerciseFilters,
+          workoutExerciseIndex: item.workoutExerciseIndex,
           createdAt: timeNow,
           updatedAt: timeNow,
+          notes: {
+            value: '',
+            createdAt: timeNow,
+            updatedAt: timeNow,
+          },
         }
 
-        return transformedData
-      })
-      const fdata: ICachedCardExerciseData = {
-        isEnabled: true,
-        workoutExerciseId,
-        workoutExerciseSets: transformedDataSets,
-        workoutExerciseName: item.workoutExerciseName,
-        workoutExerciseName_insensitive: item.workoutExerciseName_insensitive,
-        workoutExercisePrimaryMuscleGroup:
-          item.workoutExercisePrimaryMuscleGroup,
-        workoutExerciseTypes: item.workoutExerciseTypes,
-        createdAt: timeNow,
-        updatedAt: timeNow,
-        notes: {
-          value: '',
-          createdAt: timeNow,
-          updatedAt: timeNow,
-        },
+        return fdata
       }
-
-      return fdata
     }
   }, [])
-
-  const defaultModalStateValues = {
-    isOpenModalUserNotes: false,
-    isOpenModalVideoPlayer: false,
-    isOpenModalUserWeight: false,
-    isOpenModalUserSets: false,
-    isOpenModalSetBetweenSets: false,
-    activeWeightIndex: 0,
-    lastActiveWeightIndex: 0,
-  }
 
   const [modalCachedCardExerciseData, setModalCachedCardExerciseData] =
     useState<ICachedCardExerciseData>(mergedData)
 
-  const [defaultModalState, setDefaultModalState] =
-    useState<IModalStateWorkoutLogData>(defaultModalStateValues)
-
-  /*   const [weightProgressionData, setWeightProgressionData] = useState<
-    ICachedExerciseHistoryData[] | null
-  >(null)
- */
   const allItensCompleted =
     modalCachedCardExerciseData?.workoutExerciseSets?.every(
       (v) => v.completedData.isCompleted,
@@ -219,6 +204,31 @@ function WorkoutVideoCardComponent({
         v.completedData.isCompleted && lastIndex === -1 ? i : lastIndex,
       -1,
     )
+  const length = modalCachedCardExerciseData?.workoutExerciseSets?.length || 0
+
+  const activeWeightIndex =
+    firstIncompleteIndex !== -1 && firstIncompleteIndex !== undefined
+      ? firstIncompleteIndex
+      : length > 0
+        ? length - 1
+        : 0
+
+  const defaultModalStateValues = {
+    isOpenModalUserNotes: false,
+    isOpenModalVideoPlayer: false,
+    isOpenModalUserWeight: false,
+    isOpenModalUserSets: false,
+    isOpenModalSetBetweenSets: false,
+    activeWeightIndex,
+    lastActiveWeightIndex: 0,
+  }
+  const [defaultModalState, setDefaultModalState] =
+    useState<IModalStateWorkoutLogData>(defaultModalStateValues)
+
+  /*   const [weightProgressionData, setWeightProgressionData] = useState<
+    ICachedExerciseHistoryData[] | null
+  >(null)
+ */
 
   // ok
   function handleUpdateWeight(_weight: string, type: 'all' | 'single') {
@@ -297,21 +307,39 @@ function WorkoutVideoCardComponent({
   }
 
   // ok
-  function handleUpdateNotes(_notes: string) {
-    if (!_notes) return
+  function handleUpdateNotes(value: string) {
+    console.log(`notes -> `, value)
+    if (!value) return
+    const date = new Date()
+    const completedTimestamp = date.getTime()
+    /*  
 
-    setModalCachedCardExerciseData((prevState) => ({
-      ...prevState,
+modalCachedCardExerciseData.notes.value 
+
+*/
+    const copyProgression = {
+      ...modalCachedCardExerciseData,
       notes: {
-        ...prevState.notes,
-        value: _notes,
-        updatedAt: new Date().getTime(),
+        value,
+        createdAt: completedTimestamp,
+        updatedAt: completedTimestamp,
       },
-    }))
+      updatedAt: completedTimestamp,
+    }
+
+    setModalCachedCardExerciseData(copyProgression)
     setDefaultModalState((prevState) => ({
       ...prevState,
       isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
     }))
+
+    saveFastCachedWorkoutData(
+      copyProgression,
+      workoutId,
+      date,
+      completedTimestamp,
+      workoutCardIndex,
+    )
 
     closeModal('notes')
   }
@@ -514,9 +542,13 @@ function WorkoutVideoCardComponent({
         )
         return
       }
+
       const copyProgression = { ...modalCachedCardExerciseData }
+
       if (copyProgression.workoutExerciseSets === undefined) return
-      const getTime = new Date().getTime()
+
+      const date = new Date()
+      const completedTimestamp = date.getTime()
 
       const newRepetitionToAdd = {
         ...copyProgression.workoutExerciseSets[
@@ -524,14 +556,21 @@ function WorkoutVideoCardComponent({
         ],
         completedData: {
           isCompleted: false,
-          createdAt: getTime,
-          updatedAt: getTime,
+          createdAt: completedTimestamp,
+          updatedAt: completedTimestamp,
         },
         completedTimestamp: 0,
       }
       copyProgression.workoutExerciseSets.push(newRepetitionToAdd)
-
       setModalCachedCardExerciseData(copyProgression)
+
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
     }
 
     function onRemoveRepetition() {
@@ -548,24 +587,18 @@ function WorkoutVideoCardComponent({
         return
       }
       const copyProgression = { ...modalCachedCardExerciseData }
+
       if (copyProgression.workoutExerciseSets === undefined) return
 
-      console.log(
-        `antes copyProgression.workoutExerciseSets.length`,
-        copyProgression.workoutExerciseSets.length,
-      )
+      const date = new Date()
+      const completedTimestamp = date.getTime()
 
       copyProgression.workoutExerciseSets.pop()
-      console.log(
-        `dps copyProgression.workoutExerciseSets.length`,
-        copyProgression.workoutExerciseSets.length,
-      )
 
       if (
         defaultModalState.activeWeightIndex ===
         copyProgression.workoutExerciseSets.length
       ) {
-        console.log(`defaultModalState.activeWeightIndex === updatedRepLenght`)
         const updatedRepLenght = copyProgression.workoutExerciseSets.length - 1
 
         setDefaultModalState((prev) => {
@@ -574,68 +607,35 @@ function WorkoutVideoCardComponent({
       }
 
       setModalCachedCardExerciseData(copyProgression)
+
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
     }
   }
 
   // ok , falta so cronometro
   function handleDoneWorkout() {
-    if (isRunning) {
-      onTimerManage('skip')
-
-      return
-    }
-    const activeIndex = defaultModalState.activeWeightIndex
-
-    const getIsActivedRangeOfSets =
-      (modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-        ?.repetitionData?.length ?? 0) > 1
-
-    const checkedSet =
-      modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-        ?.selectedRepetitionData.checkedSet
-
-    const getWeightValue =
-      modalCachedCardExerciseData.workoutExerciseSets?.[activeIndex].weightData
-        .value
-    const firstRep =
-      modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-        ?.repetitionData?.[0].isReps
-
-    let secondRep = false
-
-    if (getIsActivedRangeOfSets) {
-      secondRep =
-        modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
-          ?.repetitionData?.[1].isReps || false
-    }
-
-    if (getIsActivedRangeOfSets && !checkedSet && firstRep && secondRep) {
-      console.log(`getIsActivedRangeOfSets ATIVO`)
-      // abrir modal para escolher o range
-      openModal('rangeOfSets', activeIndex)
-      return
-    }
-    console.log(`#Q4E4123423452342342314 ATIVO`)
-
-    if (getWeightValue === `0`) {
-      openModal('weight', activeIndex)
-      return
-    }
-
-    if (allItensCompleted) {
-      scrollToNextCard()
-      return
-    }
+    if (verifyIfCronometerIsRunning()) return
+    if (verifyAndProceed()) return
+    if (veryfyAndProceedToNextCard()) return
 
     if (exerciseIndex !== 0 && user?.anonymousUser) {
       return
     }
-    markAsCompletedGreenCheck()
+    markAsCompletedGreenCheckAndCacheSave()
     onTimerManage('play')
 
-    function markAsCompletedGreenCheck() {
+    function markAsCompletedGreenCheckAndCacheSave() {
+      /* so ta aparecendo proximo quando eu forco o render
+      
+      ver pq nao ta acojntecendo dew maneira natural */
       const date = new Date()
-      const getTime = date.getTime()
+      const completedTimestamp = date.getTime()
 
       const copyProgression = { ...modalCachedCardExerciseData } // Copiar o estado atual
       if (copyProgression.workoutExerciseSets === undefined) return
@@ -643,404 +643,422 @@ function WorkoutVideoCardComponent({
         defaultModalState.activeWeightIndex
       ].completedData = {
         isCompleted: true,
-        createdAt: getTime,
-        updatedAt: getTime,
+        createdAt: completedTimestamp,
+        updatedAt: completedTimestamp,
       }
       copyProgression.workoutExerciseSets[
         defaultModalState.activeWeightIndex
-      ].updatedAt = getTime
+      ].updatedAt = completedTimestamp
 
       setModalCachedCardExerciseData(copyProgression)
-      saveFastCachedWorkoutData(workoutId, date)
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
+    }
 
-      /* verificar o q ta aqui */
+    function verifyAndProceed() {
+      const activeIndex = defaultModalState.activeWeightIndex
 
-      return undefined
+      const getIsActivedRangeOfSets =
+        (modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+          ?.repetitionData?.length ?? 0) > 1
 
-      async function saveFastCachedWorkoutData(_workoutId: string, date: Date) {
-        return
-        if (!item.workoutExerciseId) return console.log(`vish`)
+      const checkedSet =
+        modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+          ?.selectedRepetitionData.checkedSet
 
-        const completedTimestamp = date.getTime()
-        const lastCompletedDay = {
-          'pt-br': format(date, 'EEEE', { locale: ptBR }),
-          us: format(date, 'EEEE', { locale: enUS }),
-        }
-        const lastCompletedDate = format(date, 'dd/MM/yyyy')
+      const getWeightValue =
+        modalCachedCardExerciseData.workoutExerciseSets?.[activeIndex]
+          .weightData.value
 
-        const newExercise: ICachedUsingWorkoutData = {
-          exerciseIndex,
-          exerciseId: item.workoutExerciseId,
-          repetitionData: modalWeightState.repetitionData, // salva o novo
-          notes: modalWeightState.notes,
-          time: modalWeightState.time, // tempo do cronometro setado como selecionado +15 ou -15
-        }
+      const firstRep =
+        modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+          ?.repetitionData?.[0].isReps
 
-        const lastCompletedTimestamp = completedTimestamp
+      let secondRep = false
 
-        const responseWeightDoneLogs = await updateCachedUserWorkoutsLog(
-          newExercise,
-          _workoutId,
-          lastCompletedTimestamp,
-          lastCompletedDay,
-          lastCompletedDate,
-          workoutCardIndex,
-        )
-
-        setModalCachedCardExerciseData((prev) => {
-          return {
-            ...prev,
-            ...responseWeightDoneLogs,
-          }
-        })
+      if (getIsActivedRangeOfSets) {
+        secondRep =
+          modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+            ?.repetitionData?.[1].isReps || false
       }
-      /* function saveCachedHistoricDateWorkoutData() {
+
+      if (getIsActivedRangeOfSets && !checkedSet && firstRep && secondRep) {
+        openModal('rangeOfSets', activeIndex)
+        return true
+      }
+
+      if (getWeightValue === `0`) {
+        openModal('weight', activeIndex)
+        return true
+      }
+
+      return false
+    }
+
+    function veryfyAndProceedToNextCard() {
+      if (allItensCompleted) {
+        scrollToNextCard()
+        return true
+      }
+      return false
+    }
+
+    function verifyIfCronometerIsRunning() {
+      if (isRunning) {
+        onTimerManage('skip')
+        return true
+      }
+      return false
+    }
+  }
+
+  async function saveFastCachedWorkoutData(
+    copyProgression: ICachedCardExerciseData,
+    _workoutId: string,
+    date: Date,
+    completedTimestamp: number,
+    _workoutCardIndex: number,
+  ) {
+    const lastCompletedDay = {
+      'pt-br': format(date, 'EEEE', { locale: ptBR }),
+      us: format(date, 'EEEE', { locale: enUS }),
+    }
+    const lastCompletedDate = format(date, 'dd/MM/yyyy')
+
+    await updateCachedUserWorkoutsLog(
+      copyProgression,
+      _workoutId,
+      completedTimestamp,
+      lastCompletedDay,
+      lastCompletedDate,
+      _workoutCardIndex,
+    )
+  }
+
+  /*  function saveCachedHistoricDateWorkoutData() {
+    if (user === null) return
+    if (myWorkout === null) return
+    if (item === null) return
+    // updateHistoricDateData()
+
+    updateCachedExerciseHistoryData()
+
+    function updateCachedExerciseHistoryData() {
       if (user === null) return
       if (myWorkout === null) return
-      if (item === null) return
-      // updateHistoricDateData()
 
-      updateCachedExerciseHistoryData()
+      const { id: userId } = user
 
-      function updateCachedExerciseHistoryData() {
-        if (user === null) return
-        if (myWorkout === null) return
+      const date = new Date()
+      const year = date.getFullYear() // Extrai o ano
+      const month = date.getMonth() + 1 // Extrai o mês (vale ressaltar que o mês em JavaScript começa do zero, então é necessário adicionar 1)
+      const day = date.getDate() // Extrai o dia
 
-        const { id: userId } = user
+      const {
+        workoutExerciseRestTimeNumber, // tempo descanso
+        workoutExerciseSets, // multiplicador de X series feitas com Musculo Tal
+        workoutExerciseRepetition, // multiplicador de X series feitas com Musculo Tal
+        workoutExerciseMuscleGroup,
+        workoutExerciseName_insensitive,
+        workoutExerciseId,
+        workoutExerciseIndex,
+      } = item
 
-        const date = new Date()
-        const year = date.getFullYear() // Extrai o ano
-        const month = date.getMonth() + 1 // Extrai o mês (vale ressaltar que o mês em JavaScript começa do zero, então é necessário adicionar 1)
-        const day = date.getDate() // Extrai o dia
+      const { workoutId } = myWorkout
 
-        const {
-          workoutExerciseRestTimeNumber, // tempo descanso
-          workoutExerciseSets, // multiplicador de X series feitas com Musculo Tal
-          workoutExerciseRepetition, // multiplicador de X series feitas com Musculo Tal
-          workoutExerciseMuscleGroup,
-          workoutExerciseName_insensitive,
-          workoutExerciseId,
-          workoutExerciseIndex,
-        } = item
+      // modalWeightState.completed
 
-        const { workoutId } = myWorkout
+      const copyProgression = weightProgressionData || [] // jogar state aqui
 
-        // modalWeightState.completed
+      const _dataIndex = copyProgression.findIndex(
+        (item) => item.userId === userId && item.workoutId === workoutId,
+      )
+      // achar o id do usuario e o treino q to cacheando
 
-        const copyProgression = weightProgressionData || [] // jogar state aqui
-       
-        const _dataIndex = copyProgression.findIndex(
-          (item) => item.userId === userId && item.workoutId === workoutId,
-        )
-        // achar o id do usuario e o treino q to cacheando
+      if (_dataIndex !== -1) {
+        const _yearIndex = copyProgression[
+          _dataIndex
+        ].exerciseHistory.findIndex((item) => item.year === year)
 
-        if (_dataIndex !== -1) {
-          const _yearIndex = copyProgression[
-            _dataIndex
-          ].exerciseHistory.findIndex((item) => item.year === year)
-
-          if (_yearIndex !== -1) {
-            const _monthIndex = copyProgression[_dataIndex].exerciseHistory[
-              _yearIndex
-            ].months.findIndex((item) => item.month === month)
-
-            if (_monthIndex !== -1) {
-              const _dayIndex = copyProgression[_dataIndex].exerciseHistory[
-                _yearIndex
-              ].months[_monthIndex].days.findIndex((item) => item.day === day)
-
-              if (_dayIndex !== -1) {
-                const exercisesData =
-                  copyProgression[_dataIndex].exerciseHistory[_yearIndex]
-                    .months[_monthIndex].days[_dayIndex].exercises
-
-                const _exerciseIndex = exercisesData.findIndex(
-                  (item) =>
-                    item.workoutExerciseId === workoutExerciseId &&
-                    item.workoutExerciseIndex === workoutExerciseIndex &&
-                    item.workoutCardIndex === workoutCardIndex,
-                )
-
-                if (_exerciseIndex !== -1) {
-                  updateExercise(
-                    _yearIndex,
-                    _monthIndex,
-                    _dayIndex,
-                    _exerciseIndex,
-                  )
-                } else {
-                  console.log('Entrou em createExercise()')
-                  createExercise(_yearIndex, _monthIndex, _dayIndex)
-                }
-              } else {
-                console.log('Entrou em dayDoesNotExists()')
-                dayDoesNotExists()
-              }
-            } else {
-              console.log('Entrou em monthDoesNotExists()')
-              monthDoesNotExists()
-            }
-          } else {
-            console.log('Entrou em yearDoesNotExists()')
-            yearDoesNotExists()
-          }
-        } else {
-          console.log('Entrou em dataDoesNotExists()')
-          dataDoesNotExists()
-        }
-
-        function dayDoesNotExists() {
-          createDayData()
-        }
-        function monthDoesNotExists() {
-          createMonthDayData()
-        }
-        function yearDoesNotExists() {
-          createYearMonthDayData()
-        }
-        function dataDoesNotExists() {
-          createDataYearMonthDayData()
-        }
-        function createDataYearMonthDayData() {
-          const _dataData: ICachedExerciseHistoryData = {
-            workoutId: workoutId || '',
-            userId,
-            createdAt: date.getTime(),
-            updatedAt: date.getTime(),
-            exerciseHistory: [
-              {
-                year,
-                createdAt: date.getTime(),
-                updatedAt: date.getTime(),
-                months: [
-                  {
-                    month,
-                    createdAt: date.getTime(),
-                    updatedAt: date.getTime(),
-                    days: [
-                      {
-                        day,
-                        createdAt: date.getTime(),
-                        updatedAt: date.getTime(),
-                        exerciseIntervals: [],
-                        exercises: [],
-                        exerciseTotalTime: '0',
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          }
-
-          copyProgression.push(_dataData)
-
-          updateProgressionData(copyProgression)
-        }
-        function createYearMonthDayData() {
-          const _yearData: YearData = {
-            year,
-            createdAt: date.getTime(),
-            months: [
-              {
-                month,
-                createdAt: date.getTime(),
-                days: [
-                  {
-                    day,
-                    createdAt: date.getTime(),
-                    exerciseIntervals: [],
-                    exercises: [],
-                    exerciseTotalTime: '0',
-                    updatedAt: date.getTime(),
-                  },
-                ],
-                updatedAt: date.getTime(),
-              },
-            ],
-            updatedAt: date.getTime(),
-          }
-          copyProgression[_dataIndex].exerciseHistory.push(_yearData)
-
-          updateProgressionData(copyProgression)
-        }
-        function createMonthDayData() {
-          const _yearIndex = copyProgression[
-            _dataIndex
-          ].exerciseHistory.findIndex((item) => item.year === year)
-
-          const _monthData: MonthData = {
-            month,
-            createdAt: date.getTime(),
-            days: [
-              {
-                day,
-                createdAt: date.getTime(),
-                exerciseIntervals: [],
-                exercises: [],
-                exerciseTotalTime: '0',
-                updatedAt: date.getTime(),
-              },
-            ],
-            updatedAt: date.getTime(),
-          }
-          copyProgression[_dataIndex].exerciseHistory[_yearIndex].months.push(
-            _monthData,
-          )
-
-          updateProgressionData(copyProgression)
-        }
-        function createDayData() {
-          const _yearIndex = copyProgression[
-            _dataIndex
-          ].exerciseHistory.findIndex((item) => item.year === year)
-
+        if (_yearIndex !== -1) {
           const _monthIndex = copyProgression[_dataIndex].exerciseHistory[
             _yearIndex
           ].months.findIndex((item) => item.month === month)
 
-          const exercisesData: DayData = {
-            day,
-            createdAt: date.getTime(),
-            exerciseIntervals: [],
-            exercises: [],
-            exerciseTotalTime: '0',
-            updatedAt: date.getTime(),
+          if (_monthIndex !== -1) {
+            const _dayIndex = copyProgression[_dataIndex].exerciseHistory[
+              _yearIndex
+            ].months[_monthIndex].days.findIndex((item) => item.day === day)
+
+            if (_dayIndex !== -1) {
+              const exercisesData =
+                copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
+                  _monthIndex
+                ].days[_dayIndex].exercises
+
+              const _exerciseIndex = exercisesData.findIndex(
+                (item) =>
+                  item.workoutExerciseId === workoutExerciseId &&
+                  item.workoutExerciseIndex === workoutExerciseIndex &&
+                  item.workoutCardIndex === workoutCardIndex,
+              )
+
+              if (_exerciseIndex !== -1) {
+                updateExercise(
+                  _yearIndex,
+                  _monthIndex,
+                  _dayIndex,
+                  _exerciseIndex,
+                )
+              } else {
+                console.log('Entrou em createExercise()')
+                createExercise(_yearIndex, _monthIndex, _dayIndex)
+              }
+            } else {
+              console.log('Entrou em dayDoesNotExists()')
+              dayDoesNotExists()
+            }
+          } else {
+            console.log('Entrou em monthDoesNotExists()')
+            monthDoesNotExists()
           }
-
-          copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
-            _monthIndex
-          ].days.push(exercisesData)
-
-          updateProgressionData(copyProgression)
+        } else {
+          console.log('Entrou em yearDoesNotExists()')
+          yearDoesNotExists()
         }
-        function updateProgressionData(data: ICachedExerciseHistoryData[]) {
-          setWeightProgressionData(data)
-          saveWeightProgression(data)
-        }
-        function createExercise(
-          _yearIndex: number,
-          _monthIndex: number,
-          _dayIndex: number,
-        ) {
-          if (modalWeightState.repetitionData === undefined) return
-          if (workoutExerciseRestTimeNumber === undefined) return
-          if (workoutExerciseSets === undefined) return
-          if (workoutExerciseRepetition === undefined) return
-          if (workoutExerciseMuscleGroup === undefined) return
-          if (workoutExerciseName_insensitive === undefined) return
-          if (workoutExerciseId === undefined) return
-          if (workoutExerciseIndex === undefined) return
-          if (workoutCardIndex === undefined) return
-          if (
-            !workoutExerciseMuscleGroup ||
-            workoutExerciseMuscleGroup['pt-br'] === undefined ||
-            workoutExerciseMuscleGroup.us === undefined
-          ) {
-            return
-          }
-          const updatedAt = new Date().getTime()
-          const { repetitionData } = modalWeightState
+      } else {
+        console.log('Entrou em dataDoesNotExists()')
+        dataDoesNotExists()
+      }
 
-          const exerciseData: Exercise = {
-            workoutExerciseId,
-            workoutExerciseIndex,
-            workoutCardIndex,
-            updatedAt,
-            workoutExerciseWeight: repetitionData.map((v) => v.weight.value),
-            workoutExerciseRestTimeNumber,
-            workoutExerciseSets,
-            workoutExerciseRepetition,
-            workoutExerciseMuscleGroup: {
-              'pt-br': workoutExerciseMuscleGroup['pt-br'] || '',
-              us: workoutExerciseMuscleGroup.us || '',
+      function dayDoesNotExists() {
+        createDayData()
+      }
+      function monthDoesNotExists() {
+        createMonthDayData()
+      }
+      function yearDoesNotExists() {
+        createYearMonthDayData()
+      }
+      function dataDoesNotExists() {
+        createDataYearMonthDayData()
+      }
+      function createDataYearMonthDayData() {
+        const _dataData: ICachedExerciseHistoryData = {
+          workoutId: workoutId || '',
+          userId,
+          createdAt: date.getTime(),
+          updatedAt: date.getTime(),
+          exerciseHistory: [
+            {
+              year,
+              createdAt: date.getTime(),
+              updatedAt: date.getTime(),
+              months: [
+                {
+                  month,
+                  createdAt: date.getTime(),
+                  updatedAt: date.getTime(),
+                  days: [
+                    {
+                      day,
+                      createdAt: date.getTime(),
+                      updatedAt: date.getTime(),
+                      exerciseIntervals: [],
+                      exercises: [],
+                      exerciseTotalTime: '0',
+                    },
+                  ],
+                },
+              ],
             },
-            workoutExerciseName_insensitive,
-          }
-
-          copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
-            _monthIndex
-          ].days[_dayIndex].exercises.push(exerciseData)
-
-          updateProgressionData(copyProgression)
-          setWeightProgressionData(copyProgression)
+          ],
         }
-        function updateExercise(
-          _yearIndex: number,
-          _monthIndex: number,
-          _dayIndex: number,
-          _exerciseIndex: number,
-        ) {
-          if (workoutExerciseRestTimeNumber === undefined) return
-          if (workoutExerciseSets === undefined) return
-          if (workoutExerciseRepetition === undefined) return
-          if (workoutExerciseMuscleGroup === undefined) return
-          if (workoutExerciseName_insensitive === undefined) return
-          if (
-            !workoutExerciseMuscleGroup ||
-            workoutExerciseMuscleGroup['pt-br'] === undefined ||
-            workoutExerciseMuscleGroup.us === undefined
-          ) {
-            return
-          }
-          const updatedAt = new Date().getTime()
 
-          const exerciseData =
-            copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
-              _monthIndex
-            ].days[_dayIndex].exercises[_exerciseIndex]
-          exerciseData.updatedAt = updatedAt
-          exerciseData.workoutExerciseWeight =
-            modalWeightState.repetitionData.map((v) => v.weight.value)
-          exerciseData.workoutExerciseRestTimeNumber =
-            workoutExerciseRestTimeNumber
-          exerciseData.workoutExerciseSets = workoutExerciseSets
-          exerciseData.workoutExerciseRepetition = workoutExerciseRepetition
-          exerciseData.workoutExerciseMuscleGroup = {
+        copyProgression.push(_dataData)
+
+        updateProgressionData(copyProgression)
+      }
+      function createYearMonthDayData() {
+        const _yearData: YearData = {
+          year,
+          createdAt: date.getTime(),
+          months: [
+            {
+              month,
+              createdAt: date.getTime(),
+              days: [
+                {
+                  day,
+                  createdAt: date.getTime(),
+                  exerciseIntervals: [],
+                  exercises: [],
+                  exerciseTotalTime: '0',
+                  updatedAt: date.getTime(),
+                },
+              ],
+              updatedAt: date.getTime(),
+            },
+          ],
+          updatedAt: date.getTime(),
+        }
+        copyProgression[_dataIndex].exerciseHistory.push(_yearData)
+
+        updateProgressionData(copyProgression)
+      }
+      function createMonthDayData() {
+        const _yearIndex = copyProgression[
+          _dataIndex
+        ].exerciseHistory.findIndex((item) => item.year === year)
+
+        const _monthData: MonthData = {
+          month,
+          createdAt: date.getTime(),
+          days: [
+            {
+              day,
+              createdAt: date.getTime(),
+              exerciseIntervals: [],
+              exercises: [],
+              exerciseTotalTime: '0',
+              updatedAt: date.getTime(),
+            },
+          ],
+          updatedAt: date.getTime(),
+        }
+        copyProgression[_dataIndex].exerciseHistory[_yearIndex].months.push(
+          _monthData,
+        )
+
+        updateProgressionData(copyProgression)
+      }
+      function createDayData() {
+        const _yearIndex = copyProgression[
+          _dataIndex
+        ].exerciseHistory.findIndex((item) => item.year === year)
+
+        const _monthIndex = copyProgression[_dataIndex].exerciseHistory[
+          _yearIndex
+        ].months.findIndex((item) => item.month === month)
+
+        const exercisesData: DayData = {
+          day,
+          createdAt: date.getTime(),
+          exerciseIntervals: [],
+          exercises: [],
+          exerciseTotalTime: '0',
+          updatedAt: date.getTime(),
+        }
+
+        copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
+          _monthIndex
+        ].days.push(exercisesData)
+
+        updateProgressionData(copyProgression)
+      }
+      function updateProgressionData(data: ICachedExerciseHistoryData[]) {
+        setWeightProgressionData(data)
+        saveWeightProgression(data)
+      }
+      function createExercise(
+        _yearIndex: number,
+        _monthIndex: number,
+        _dayIndex: number,
+      ) {
+        if (modalWeightState.repetitionData === undefined) return
+        if (workoutExerciseRestTimeNumber === undefined) return
+        if (workoutExerciseSets === undefined) return
+        if (workoutExerciseRepetition === undefined) return
+        if (workoutExerciseMuscleGroup === undefined) return
+        if (workoutExerciseName_insensitive === undefined) return
+        if (workoutExerciseId === undefined) return
+        if (workoutExerciseIndex === undefined) return
+        if (workoutCardIndex === undefined) return
+        if (
+          !workoutExerciseMuscleGroup ||
+          workoutExerciseMuscleGroup['pt-br'] === undefined ||
+          workoutExerciseMuscleGroup.us === undefined
+        ) {
+          return
+        }
+        const updatedAt = new Date().getTime()
+        const { repetitionData } = modalWeightState
+
+        const exerciseData: Exercise = {
+          workoutExerciseId,
+          workoutExerciseIndex,
+          workoutCardIndex,
+          updatedAt,
+          workoutExerciseWeight: repetitionData.map((v) => v.weight.value),
+          workoutExerciseRestTimeNumber,
+          workoutExerciseSets,
+          workoutExerciseRepetition,
+          workoutExerciseMuscleGroup: {
             'pt-br': workoutExerciseMuscleGroup['pt-br'] || '',
             us: workoutExerciseMuscleGroup.us || '',
-          }
-          exerciseData.workoutExerciseName_insensitive =
-            workoutExerciseName_insensitive
+          },
+          workoutExerciseName_insensitive,
+        }
 
+        copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
+          _monthIndex
+        ].days[_dayIndex].exercises.push(exerciseData)
+
+        updateProgressionData(copyProgression)
+        setWeightProgressionData(copyProgression)
+      }
+      function updateExercise(
+        _yearIndex: number,
+        _monthIndex: number,
+        _dayIndex: number,
+        _exerciseIndex: number,
+      ) {
+        if (workoutExerciseRestTimeNumber === undefined) return
+        if (workoutExerciseSets === undefined) return
+        if (workoutExerciseRepetition === undefined) return
+        if (workoutExerciseMuscleGroup === undefined) return
+        if (workoutExerciseName_insensitive === undefined) return
+        if (
+          !workoutExerciseMuscleGroup ||
+          workoutExerciseMuscleGroup['pt-br'] === undefined ||
+          workoutExerciseMuscleGroup.us === undefined
+        ) {
+          return
+        }
+        const updatedAt = new Date().getTime()
+
+        const exerciseData =
           copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
             _monthIndex
-          ].days[_dayIndex].exercises[_exerciseIndex] = exerciseData
-
-          updateProgressionData(copyProgression)
-          setWeightProgressionData(copyProgression)
+          ].days[_dayIndex].exercises[_exerciseIndex]
+        exerciseData.updatedAt = updatedAt
+        exerciseData.workoutExerciseWeight =
+          modalWeightState.repetitionData.map((v) => v.weight.value)
+        exerciseData.workoutExerciseRestTimeNumber =
+          workoutExerciseRestTimeNumber
+        exerciseData.workoutExerciseSets = workoutExerciseSets
+        exerciseData.workoutExerciseRepetition = workoutExerciseRepetition
+        exerciseData.workoutExerciseMuscleGroup = {
+          'pt-br': workoutExerciseMuscleGroup['pt-br'] || '',
+          us: workoutExerciseMuscleGroup.us || '',
         }
+        exerciseData.workoutExerciseName_insensitive =
+          workoutExerciseName_insensitive
+
+        copyProgression[_dataIndex].exerciseHistory[_yearIndex].months[
+          _monthIndex
+        ].days[_dayIndex].exercises[_exerciseIndex] = exerciseData
+
+        updateProgressionData(copyProgression)
+        setWeightProgressionData(copyProgression)
       }
-    } */
     }
-  }
-
-  // ok
-  function focusOnNextRepetititonLine() {
-    if (modalCachedCardExerciseData === undefined) return
-    if (modalCachedCardExerciseData.workoutExerciseSets === undefined) return
-
-    const getActiveWeightIndex =
-      defaultModalState.activeWeightIndex + 1 <
-      modalCachedCardExerciseData.workoutExerciseSets.length
-        ? defaultModalState.activeWeightIndex + 1
-        : defaultModalState.activeWeightIndex
-
-    setDefaultModalState((prev) => {
-      return {
-        ...prev,
-        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
-        activeWeightIndex: getActiveWeightIndex,
-      }
-    })
-  }
-
-  // ok
-  function timerOnExpire() {
-    focusOnNextRepetititonLine()
-    console.log('acabouu asd')
-  }
-
+  } */
   // ok
   function handleUncheckOrCheckRepetion(index: number) {
     const getIsActivedRangeOfSets =
@@ -1107,7 +1125,6 @@ function WorkoutVideoCardComponent({
     } else {
       if (getIsActivedRangeOfSets && !checkedSet && firstRep && secondRep) {
         /*  */
-        console.log(`getIsActivedRangeOfSets ATIVO`)
         // abrir modal para escolher o range
         openModal('rangeOfSets', index)
         return
@@ -1124,14 +1141,14 @@ function WorkoutVideoCardComponent({
     function desmarcarItem(index: number) {
       if (modalCachedCardExerciseData === undefined) return
 
-      const copyModalWeightState = { ...modalCachedCardExerciseData }
+      const copyProgression = { ...modalCachedCardExerciseData }
 
-      if (copyModalWeightState.workoutExerciseSets === undefined) return
+      if (copyProgression.workoutExerciseSets === undefined) return
 
       const completedTimestamp = new Date().getTime()
 
-      copyModalWeightState.workoutExerciseSets =
-        copyModalWeightState.workoutExerciseSets.map((item, i) => {
+      copyProgression.workoutExerciseSets =
+        copyProgression.workoutExerciseSets.map((item, i) => {
           if (i >= index) {
             const isExistingItem = item.completedData.createdAt !== 0
             return {
@@ -1149,10 +1166,9 @@ function WorkoutVideoCardComponent({
           }
           return item
         })
-      copyModalWeightState.workoutExerciseSets[index].updatedAt =
-        completedTimestamp
+      copyProgression.workoutExerciseSets[index].updatedAt = completedTimestamp
 
-      setModalCachedCardExerciseData(copyModalWeightState)
+      setModalCachedCardExerciseData(copyProgression)
       setDefaultModalState((prev) => {
         return {
           ...prev,
@@ -1160,6 +1176,15 @@ function WorkoutVideoCardComponent({
           activeWeightIndex: index,
         }
       })
+
+      const date = new Date()
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
     }
 
     function marcarItem(index: number) {
@@ -1168,13 +1193,13 @@ function WorkoutVideoCardComponent({
         `defaultModalState.activeWeightIndex`,
         defaultModalState.activeWeightIndex,
       )
-      const copyModalWeightState = { ...modalCachedCardExerciseData }
-      if (copyModalWeightState.workoutExerciseSets === undefined) return
+      const copyProgression = { ...modalCachedCardExerciseData }
+      if (copyProgression.workoutExerciseSets === undefined) return
 
       const completedTimestamp = new Date().getTime()
 
-      copyModalWeightState.workoutExerciseSets =
-        copyModalWeightState.workoutExerciseSets.map((item, i) => {
+      copyProgression.workoutExerciseSets =
+        copyProgression.workoutExerciseSets.map((item, i) => {
           if (i <= index) {
             const isExistingItem = item.completedData.createdAt !== 0
             return {
@@ -1192,22 +1217,53 @@ function WorkoutVideoCardComponent({
           }
           return item
         })
-      copyModalWeightState.workoutExerciseSets[index].updatedAt =
-        completedTimestamp
+      copyProgression.workoutExerciseSets[index].updatedAt = completedTimestamp
 
-      setModalCachedCardExerciseData(copyModalWeightState)
+      setModalCachedCardExerciseData(copyProgression)
       setDefaultModalState((prev) => {
-        if (copyModalWeightState.workoutExerciseSets === undefined) return prev
+        if (copyProgression.workoutExerciseSets === undefined) return prev
         return {
           ...prev,
           lastActiveWeightIndex: defaultModalState.activeWeightIndex,
           activeWeightIndex:
-            index + 1 < copyModalWeightState.workoutExerciseSets.length
+            index + 1 < copyProgression.workoutExerciseSets.length
               ? index + 1
               : index,
         }
       })
+      const date = new Date()
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
     }
+  }
+  // ok
+  function focusOnNextRepetititonLine() {
+    if (modalCachedCardExerciseData === undefined) return
+    if (modalCachedCardExerciseData.workoutExerciseSets === undefined) return
+
+    const getActiveWeightIndex =
+      defaultModalState.activeWeightIndex + 1 <
+      modalCachedCardExerciseData.workoutExerciseSets.length
+        ? defaultModalState.activeWeightIndex + 1
+        : defaultModalState.activeWeightIndex
+
+    setDefaultModalState((prev) => {
+      return {
+        ...prev,
+        lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+        activeWeightIndex: getActiveWeightIndex,
+      }
+    })
+  }
+
+  // ok
+  function timerOnExpire() {
+    focusOnNextRepetititonLine()
   }
 
   // ok
@@ -1246,8 +1302,6 @@ function WorkoutVideoCardComponent({
       }))
     }
     if (type === 'weight' && index !== undefined) {
-      console.log(`asdasd`, type)
-
       setDefaultModalState((prevState) => ({
         ...prevState,
         isOpenModalUserWeight: true,
@@ -1357,7 +1411,6 @@ function WorkoutVideoCardComponent({
 
   // ok
   function onTimerManage(type: 'pause' | 'play' | 'skip' | 'add' | 'subtract') {
-    console.log(` onTimerManage -> type -> `, type)
     if (type === 'pause') {
       pause()
     }
@@ -1444,18 +1497,14 @@ function WorkoutVideoCardComponent({
       })
     }
   }
+
   function onSaveNewTimer() {
     console.log(`time`, time)
 
     if (time === null) return
-    /*    
-      modalCachedCardExerciseData?.
-              workoutExerciseSets?.
-              [defaultModalState.activeWeightIndex].
-              restTimeData.
-              restTimeNumber,
-     } */
 
+    const date = new Date()
+    const completedTimestamp = date.getTime()
     const copyProgression = { ...modalCachedCardExerciseData }
     if (copyProgression.workoutExerciseSets === undefined) return
 
@@ -1469,12 +1518,17 @@ function WorkoutVideoCardComponent({
     }
 
     setModalCachedCardExerciseData(copyProgression)
+
+    saveFastCachedWorkoutData(
+      copyProgression,
+      workoutId,
+      date,
+      completedTimestamp,
+      workoutCardIndex,
+    )
     console.log(`savou`)
   }
-  // se eu for salvar , talvez eu tenha que recalcular isso
-  // por em um useMemo ou dependencia do useCallback do startcronometer
-  // caso nao role automaticamente
-  // ou o useEffect que chama o startcronometer
+
   const restTime =
     modalCachedCardExerciseData?.workoutExerciseSets?.[
       defaultModalState.activeWeightIndex
@@ -1592,13 +1646,6 @@ function WorkoutVideoCardComponent({
         )}
         <BulletsCronometerAndCTAButtonWrapper>
           <WorkoutCronometerWrapper>
-            {/* 
-            criar botao de salvar se eu alterar o tempo
-             e repassar para o state pai
-             [ FACIL]
-
-   
-            */}
             <WorkoutCronometer
               totalSeconds={totalSeconds}
               getModalTimer={Number(

@@ -89,14 +89,7 @@ export const WorkoutCronometerText = styled.Text<WorkoutCronometerWrapper>`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
 `
-export const IncrementSecondsContent = styled.View<WorkoutCronometerWrapper>`
-  width: 100%;
-  height: 48px;
 
-  justify-content: center;
-  align-items: center;
-  border-radius: 12px;
-`
 export const BlurViewAddSecondsWrapper = styled(BlurView)`
   overflow: hidden;
   justify-content: center;

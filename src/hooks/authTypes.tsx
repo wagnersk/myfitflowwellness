@@ -340,26 +340,7 @@ export interface ICachedUsingWorkoutData {
   createdAt: number
   updatedAt: number
 }
-export interface ICachedCardExerciseData {
-  isEnabled: boolean
 
-  workoutExerciseId?: string
-  workoutExerciseIndex?: number
-  workoutExerciseName?: IptBrUs
-  workoutExerciseName_insensitive?: IptBrUs
-  workoutExerciseSets?: ICachedUsingWorkoutData[]
-  notes: {
-    value: string
-    createdAt: number
-    updatedAt: number
-  }
-
-  workoutExerciseTypes?: string
-  workoutExercisePrimaryMuscleGroup?: IptBrUs
-  workoutExerciseFilters?: ICachedFiltersExercise
-  createdAt?: number
-  updatedAt?: number
-}
 export interface ICardExerciseData {
   isEnabled: boolean
 
@@ -397,6 +378,7 @@ export interface IFormattedCardExerciseData extends ICardExerciseData {
 
   workoutExerciseId: string | undefined
 }
+
 export interface IWorkoutExercisesFirebase {
   exerciseName_insensitive: IptBrUs
   exerciseInfo: IptBrUs
@@ -422,7 +404,7 @@ export interface IWorkoutExercisesFirebase {
 export interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
-  cardExerciseData: IFormattedCardExerciseData[]
+  cardExerciseData: ICardExerciseData[]
   cardExerciseUniquesMuscles: IptBrUs[]
 }
 
@@ -442,6 +424,7 @@ export type ILocalCardExerciseFilters = {
   pulleyHandles: IptBrUs[]
   weight: IptBrUs[]
 }
+
 export interface IMyfitflowWorkoutInUse {
   workoutId?: string
 
@@ -564,6 +547,7 @@ export interface IContract {
   userId: string
   userName: string
 }
+
 export interface IPremiumUserContract {
   id: string
   createdAt: FieldValue
@@ -589,10 +573,31 @@ export interface YearRecord {
   [year: string]: MonthRecord
 }
 
+export interface ICachedCardExerciseData {
+  isEnabled: boolean
+
+  workoutExerciseId?: string
+  workoutExerciseSets?: ICachedUsingWorkoutData[]
+  workoutExerciseName?: IptBrUs
+  workoutExerciseName_insensitive?: IptBrUs
+  workoutExercisePrimaryMuscleGroup?: IptBrUs
+  workoutExerciseTypes?: string
+  createdAt?: number
+  updatedAt?: number
+
+  workoutExerciseIndex?: number
+  notes: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+
+  workoutExerciseFilters?: ICachedFiltersExercise
+}
 export interface IWorkoutCardLogData {
   // dentro do card A B C
   cardIndex: number
-  weightDoneLogs: ICachedUsingWorkoutData[]
+  weightDoneLogs: ICachedCardExerciseData[]
 
   totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
 
@@ -779,13 +784,13 @@ export interface AuthContextData {
   ) => Promise<void>
 
   updateCachedUserWorkoutsLog: (
-    newExercise: IWeightDoneLog,
+    newExercise: ICachedCardExerciseData,
     workoutId: string,
     lastCompletedTimestamp: number,
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
-  ) => Promise<IWeightDoneLog | null>
+  ) => Promise<void>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (

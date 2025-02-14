@@ -97,13 +97,18 @@ export const LinearGradientButton = styled(LinearGradient).attrs(
 )`
   flex: 1;
   border-radius: 999px;
-  height: 90px;
-  width: 90px;
+  height: 52px;
+  width: 52px;
   justify-content: center;
   align-items: center;
 `
 export const FavIconCameraButton = styled.View`
   flex: 1;
+`
+export const CameraBorder = styled.View`
+  border: 2px solid ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  border-radius: 999px;
+  padding: 6px;
 `
 export const CameraText = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};

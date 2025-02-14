@@ -36,6 +36,7 @@ import {
   NoWorkoutFoundWrapper,
   FavIconCameraButton,
   CameraText,
+  CameraBorder,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
@@ -269,7 +270,9 @@ export function UserHome() {
           )}
           <FavoriteIconContainer onPressOut={handleOpenCamera}>
             <LinearGradientButton colors={['#4c669f', '#3b5998', '#192f6a']}>
-              <CameraText>Camera</CameraText>
+              <CameraBorder>
+                <Camera width={32} height={32} fill={'white'} />
+              </CameraBorder>
             </LinearGradientButton>
           </FavoriteIconContainer>
         </BodyImageBackgroundContainerSpaceBetween>

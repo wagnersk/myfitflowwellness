@@ -68,6 +68,7 @@ import {
   IUnconfirmedUserData,
   IPremiumUserContract,
   IWorkoutExercisesFirebase,
+  ICachedCardExerciseData,
 } from './authTypes'
 
 import {
@@ -250,7 +251,6 @@ function AuthProvider({ children }: AuthProviderProps) {
             firebaseAnonymousSignIn(account.user.uid)
           })
           .catch((error) => {
-            console.error(error)
             console.log(error.code)
           })
       })
@@ -392,7 +392,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     selectedLanguage: 'pt-br' | 'us',
   ) {
     setIsLogging(true)
-    console.log('firebaseSignIn teste', email)
     signInWithEmailAndPassword(auth, email, password)
       .then(async (account) => {
         const userDocRef = doc(db, 'users', account.user.uid)
@@ -626,13 +625,11 @@ function AuthProvider({ children }: AuthProviderProps) {
         ],
       },
     }
-    console.log('accountUserUid passando', accountUserUid)
 
     const premiumContractId =
       await createNewContractWithPremiumPersonalUpdateUserClientId(
         accountUserUid,
       )
-    console.log('premiumContractId retornado', premiumContractId)
 
     if (!premiumContractId) {
       Alert.alert(
@@ -642,9 +639,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
       return
     }
-    console.log('email', email)
-    console.log('password', password)
-    console.log('accountUserUid', accountUserUid)
 
     const userDataCreate = {
       anabol: null,
@@ -677,7 +671,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       personalTrainerId: null,
     }
 
-    console.log('userDataCreate', userDataCreate)
     await setDoc(doc(usersRef, accountUserUid), userDataCreate)
       .then(() => {
         Alert.alert(
@@ -1494,8 +1487,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const premiumContractId = await addDoc(contractDoc, newPremiumContract)
       .then(async (clientData) => {
-        console.log(`clientData`)
-
         const newPremiumContractWithId = {
           ...newPremiumContract,
           id: clientData.id,
@@ -1554,12 +1545,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     personalTrainerData: IPersonal,
   ) {
     setIsWaitingApiResponse(true)
-
-    console.log(`personalTrainerContractId`)
-    console.log(personalTrainerContractId)
-
-    console.log(`personalTrainerData`)
-    console.log(personalTrainerData)
 
     /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     const contractDoc = collection(
@@ -1632,7 +1617,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     clientId: string,
   ) {
     setIsWaitingApiResponse(true)
-    console.log(`cancelNewContractWithPersonalUpdateUserClientId`)
     /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     const contractDoc = doc(
       db,
@@ -1695,8 +1679,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     //    setIsWaitingApiResponse(true)
 
     /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
-    console.log(personalTrainerContractId)
-    console.log(clientId)
     try {
       const contractDoc = doc(
         db,
@@ -1715,8 +1697,6 @@ function AuthProvider({ children }: AuthProviderProps) {
           _contractData?.submissionPending === false &&
           _contractData?.submissionApproved === false
         ) {
-          console.log(`limpando ...`)
-
           await cancelNewContractWithPersonalUpdateUserClientId(
             personalTrainerContractId,
             clientId,
@@ -1957,38 +1937,236 @@ function AuthProvider({ children }: AuthProviderProps) {
         ) as IUserWorkoutsLog
 
         if (summaryInfoData.userId !== userId) return null
-        // console.log(JSON.stringify(summaryInfoData))
-        console.log(`loadCachedUserWorkoutsLog -> `)
         setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
-      console.error('Erro ao carregar as informações de resumo:', error)
+      // console.error('Erro ao carregar as informações de resumo:', error)
     }
   }
 
   async function updateCachedUserWorkoutsLog(
-    newExercise: IWeightDoneLog,
+    newExercise: ICachedCardExerciseData,
     workoutId: string,
     lastCompletedTimestamp: number,
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
-  ): Promise<IWeightDoneLog | null> {
+  ): Promise<void> {
+    const userId = getUserId()
+    if (!userId) {
+      console.error('ID do usuário não está disponível.')
+      return
+    }
+
+    const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+    const cachedLog = cachedUserWorkoutsLog || (await createUserWorkoutLog())
+
+    if (!cachedLog) return
+
+    const updatedLog = await updateUserWorkoutsLog(
+      cachedLog.workoutsLog,
+      newExercise,
+      workoutId,
+      lastCompletedTimestamp,
+      lastCompletedFormattedDay,
+      lastCompletedFormattedDate,
+      cardIndex,
+    )
+    if (updatedLog) {
+      await saveToStorage(storageKey, updatedLog)
+      setCachedUserWorkoutsLog(updatedLog)
+    }
+
+    async function createUserWorkoutLog(): Promise<IUserWorkoutsLog | null> {
+      const userId = getUserId()
+      if (!userId) return null
+
+      const newLog: IUserWorkoutsLog = {
+        workoutsLog: [],
+        userId,
+      }
+
+      return newLog
+    }
+
+    async function updateUserWorkoutsLog(
+      workoutLogs: IWorkoutLog[],
+      newExercise: ICachedCardExerciseData,
+      workoutId: string,
+      lastCompletedTimestamp: number,
+      lastCompletedFormattedDay: IptBrUs,
+      lastCompletedFormattedDate: string,
+      cardIndex: number,
+    ): Promise<IUserWorkoutsLog | null> {
+      const logIndex = workoutLogs.findIndex(
+        (log) => log.workoutId === workoutId,
+      )
+      const isNewWorkoutLog = logIndex === -1
+
+      if (isNewWorkoutLog) {
+        return await createNewWorkoutLog(
+          workoutLogs,
+          newExercise,
+          workoutId,
+          lastCompletedTimestamp,
+          lastCompletedFormattedDay,
+          lastCompletedFormattedDate,
+          cardIndex,
+        )
+      } else {
+        return await updateExistingWorkoutLog(
+          workoutLogs,
+          logIndex,
+          newExercise,
+          lastCompletedTimestamp,
+          lastCompletedFormattedDay,
+          lastCompletedFormattedDate,
+          cardIndex,
+        )
+      }
+    }
+
+    async function createNewWorkoutLog(
+      workoutLogs: IWorkoutLog[],
+      newExercise: ICachedCardExerciseData,
+      workoutId: string,
+      lastCompletedTimestamp: number,
+      lastCompletedFormattedDay: IptBrUs,
+      lastCompletedFormattedDate: string,
+      cardIndex: number,
+    ): Promise<IUserWorkoutsLog | null> {
+      const newWorkoutCardLog: IWorkoutCardLogData = {
+        cardIndex,
+        weightDoneLogs: [newExercise],
+        totalSessionsCompleted: 1,
+        lastCompletedTimestamp,
+        lastCompletedFormattedDay,
+        lastCompletedFormattedDate,
+      }
+
+      const existingWorkoutLogIndex = workoutLogs.findIndex(
+        (log) => log.workoutId === workoutId,
+      )
+
+      if (existingWorkoutLogIndex !== -1) {
+        // Preserve existing workout logs and add the new card log
+        workoutLogs[existingWorkoutLogIndex] = {
+          ...workoutLogs[existingWorkoutLogIndex],
+          workoutCardsLogData: [
+            ...workoutLogs[existingWorkoutLogIndex].workoutCardsLogData,
+            newWorkoutCardLog,
+          ],
+        }
+      } else {
+        // Create a new workout log if it doesn't exist
+        workoutLogs.push({
+          workoutCardsLogData: [newWorkoutCardLog],
+          workoutId,
+        })
+      }
+
+      const userId = getUserId()
+      if (!userId) return null
+
+      return {
+        workoutsLog: workoutLogs,
+        userId,
+      }
+    }
+    /* essa funcao ta BUGADA  refazer isso  */
+    async function updateExistingWorkoutLog(
+      workoutLogs: IWorkoutLog[],
+      logIndex: number,
+      newExercise: ICachedCardExerciseData,
+      lastCompletedTimestamp: number,
+      lastCompletedFormattedDay: IptBrUs,
+      lastCompletedFormattedDate: string,
+      cardIndex: number,
+    ): Promise<IUserWorkoutsLog | null> {
+      const workoutLog = workoutLogs[logIndex]
+      const cardLogIndex = workoutLog.workoutCardsLogData.findIndex(
+        (log) => log.cardIndex === cardIndex,
+      )
+
+      const cardLog = workoutLog.workoutCardsLogData[cardLogIndex]
+
+      // Atualizar os dados existentes sem perder os anteriores
+      const existingExerciseIndex = cardLog.weightDoneLogs.findIndex(
+        (log) =>
+          log.workoutExerciseId === newExercise.workoutExerciseId &&
+          log.workoutExerciseIndex === newExercise.workoutExerciseIndex,
+      )
+
+      if (existingExerciseIndex !== -1) {
+        // Mesclar os dados do exercício existente com os novos dados
+        cardLog.weightDoneLogs[existingExerciseIndex] = {
+          ...cardLog.weightDoneLogs[existingExerciseIndex],
+          ...newExercise,
+        }
+      } else {
+        // Adicionar o novo exercício se não existir
+        cardLog.weightDoneLogs.push(newExercise)
+      }
+
+      cardLog.totalSessionsCompleted += 1
+      cardLog.lastCompletedTimestamp = lastCompletedTimestamp
+      cardLog.lastCompletedFormattedDay = lastCompletedFormattedDay
+      cardLog.lastCompletedFormattedDate = lastCompletedFormattedDate
+
+      const userId = getUserId()
+      if (!userId) return null
+
+      return {
+        workoutsLog: workoutLogs,
+        userId,
+      }
+    }
+
+    async function saveToStorage(key: string, data: any): Promise<void> {
+      await AsyncStorage.setItem(key, JSON.stringify(data))
+    }
+
+    function getUserId(): string | null {
+      return user?.id || null
+    }
+  }
+  console.log('cachedUserWorkoutsLog()')
+  console.log(JSON.stringify(cachedUserWorkoutsLog))
+
+  // apagarCached()
+  async function apagarCached() {
+    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-hM7GEloty3dBVSsDOaD5cJHsC3R2`
+
+    await AsyncStorage.setItem(
+      storageCachedExercisesWeightDoneLogDataKey,
+      JSON.stringify(null),
+    )
+    setCachedUserWorkoutsLog(null)
+  }
+  async function updateCachedUserWorkoutsLog2(
+    newExercise: ICachedCardExerciseData,
+    workoutId: string,
+    lastCompletedTimestamp: number,
+    lastCompletedFormattedDay: IptBrUs,
+    lastCompletedFormattedDate: string,
+    cardIndex: number,
+  ): Promise<void> {
     if (!user?.id) {
       console.error('Dados necessários não estão disponíveis.')
-      return null
+      return
     }
 
     const userId = user.id
     const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
 
     const _cachedUserWorkoutLog = cachedUserWorkoutsLog
-      ? await createCachedUserWorkoutLog()
+      ? await createCachedUserWorkoutLog() // ok
       : await createUserWorkoutLog()
 
     return _cachedUserWorkoutLog || null
 
     async function createCachedUserWorkoutLog() {
+      console.log('createCachedUserWorkoutLog()')
       if (!cachedUserWorkoutsLog) return null
       const copyCachedUserWorkoutsLog = { ...cachedUserWorkoutsLog }
 
@@ -1999,6 +2177,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return userWorkoutLog
 
       async function updateUserWorkoutsLog(workoutLog: IWorkoutLog[]) {
+        console.log('updateUserWorkoutsLog()')
         if (!workoutLog) return
         const logIndex = workoutLog.findIndex((v) => v.workoutId === workoutId)
         const isNewWorkoutLog = logIndex === -1
@@ -2009,7 +2188,41 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         return userWorkoutLog
 
+        async function createNewWorkoutLog() {
+          console.log('createNewWorkoutLog()')
+
+          if (!user) return null
+
+          const newWorkoutCardLogData: IWorkoutCardLogData = {
+            cardIndex, // posicao card
+            lastCompletedTimestamp, // mudar isso para algo mais descritivo com o real valor
+            totalSessionsCompleted: 1, // mudar isso para algo mais descritivo com o real valor
+            weightDoneLogs: [newExercise],
+            lastCompletedFormattedDay,
+            lastCompletedFormattedDate,
+          }
+
+          // cachedUserWorkoutsLog?.workoutsLog[1]
+
+          copyCachedUserWorkoutsLog.workoutsLog.push({
+            workoutCardsLogData: [newWorkoutCardLogData],
+            workoutId,
+          })
+
+          const userWorkoutLog: IUserWorkoutsLog = {
+            workoutsLog: copyCachedUserWorkoutsLog.workoutsLog,
+            userId: user.id,
+          }
+          await AsyncStorage.setItem(
+            storageCachedExercisesWeightDoneLogDataKey,
+            JSON.stringify(userWorkoutLog),
+          )
+          setCachedUserWorkoutsLog(userWorkoutLog)
+          return newExercise as IWeightDoneLog
+        }
         async function updateWorkoutLog() {
+          console.log('updateWorkoutLog()')
+
           const workoutLogIndex = copyCachedUserWorkoutsLog.workoutsLog[
             logIndex
           ].workoutCardsLogData.findIndex((v) => v.cardIndex === cardIndex)
@@ -2045,6 +2258,8 @@ function AuthProvider({ children }: AuthProviderProps) {
           }
 
           async function updateCard() {
+            console.log('updateCard()')
+
             const { exerciseId, exerciseIndex, notes, time, repetitionData } =
               newExercise
 
@@ -2093,14 +2308,6 @@ function AuthProvider({ children }: AuthProviderProps) {
                 weightDoneLogIndex
               ] = newUpdatedWeightDone
 
-              console.log(
-                JSON.stringify(
-                  copyCachedUserWorkoutsLog.workoutsLog[logIndex]
-                    .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
-                    weightDoneLogIndex
-                  ],
-                ),
-              )
               /* testar se o codig abaixo ta certo */
               const totalSessionsCompleted =
                 copyCachedUserWorkoutsLog.workoutsLog[
@@ -2114,9 +2321,6 @@ function AuthProvider({ children }: AuthProviderProps) {
                   },
                   0,
                 )
-
-              console.log(`totalSessionsCompleted atualizado`)
-              console.log(totalSessionsCompleted)
 
               const workoutCardLogData: IWorkoutCardLogData = {
                 lastCompletedFormattedDate:
@@ -2134,13 +2338,13 @@ function AuthProvider({ children }: AuthProviderProps) {
               }
 
               /*   copyCachedUserWorkoutsLog.workoutsLog[
-                logIndex
-              ].workoutCardsLogData[workoutLogIndex] = workoutCardLogData
-
-              console.log(
-                `logIndex ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
-              )
- */
+                  logIndex
+                ].workoutCardsLogData[workoutLogIndex] = workoutCardLogData
+  
+                console.log(
+                  `logIndex ${logIndex} workoutLogIndex ${workoutLogIndex} weightDoneLogIndex ${weightDoneLogIndex}`,
+                )
+   */
               if (
                 copyCachedUserWorkoutsLog.workoutsLog[logIndex]
                   .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
@@ -2148,14 +2352,14 @@ function AuthProvider({ children }: AuthProviderProps) {
                 ]
               ) {
                 /*  console.log(
-                  JSON.stringify(
-                    copyCachedUserWorkoutsLog.workoutsLog[logIndex]
-                      .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
-                      weightDoneLogIndex
-                    ],
-                  ),
-                )
-                console.log(`Salvando... copyCachedUserWorkoutsLog`) */
+                    JSON.stringify(
+                      copyCachedUserWorkoutsLog.workoutsLog[logIndex]
+                        .workoutCardsLogData[workoutLogIndex].weightDoneLogs[
+                        weightDoneLogIndex
+                      ],
+                    ),
+                  )
+                  console.log(`Salvando... copyCachedUserWorkoutsLog`) */
               }
 
               await AsyncStorage.setItem(
@@ -2163,8 +2367,8 @@ function AuthProvider({ children }: AuthProviderProps) {
                 JSON.stringify(copyCachedUserWorkoutsLog),
               )
               /*        console.log(JSON.stringify(copyCachedUserWorkoutsLog))
-              console.log(`Salvo com sucesso... copyCachedUserWorkoutsLog`)
- */
+                console.log(`Salvo com sucesso... copyCachedUserWorkoutsLog`)
+   */
               setCachedUserWorkoutsLog(copyCachedUserWorkoutsLog)
               return newExercise as IWeightDoneLog
             }
@@ -2211,38 +2415,6 @@ function AuthProvider({ children }: AuthProviderProps) {
             }
           }
         }
-
-        async function createNewWorkoutLog() {
-          console.log('createNewWorkoutLog()')
-          if (!user) return null
-
-          const newWorkoutCardLogData: IWorkoutCardLogData = {
-            cardIndex, // posicao card
-            lastCompletedTimestamp, // mudar isso para algo mais descritivo com o real valor
-            totalSessionsCompleted: 1, // mudar isso para algo mais descritivo com o real valor
-            weightDoneLogs: [newExercise],
-            lastCompletedFormattedDay,
-            lastCompletedFormattedDate,
-          }
-
-          // cachedUserWorkoutsLog?.workoutsLog[1]
-
-          copyCachedUserWorkoutsLog.workoutsLog.push({
-            workoutCardsLogData: [newWorkoutCardLogData],
-            workoutId,
-          })
-
-          const userWorkoutLog: IUserWorkoutsLog = {
-            workoutsLog: copyCachedUserWorkoutsLog.workoutsLog,
-            userId: user.id,
-          }
-          await AsyncStorage.setItem(
-            storageCachedExercisesWeightDoneLogDataKey,
-            JSON.stringify(userWorkoutLog),
-          )
-          setCachedUserWorkoutsLog(userWorkoutLog)
-          return newExercise as IWeightDoneLog
-        }
       }
     }
 
@@ -2256,7 +2428,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         lastCompletedFormattedDay,
         lastCompletedFormattedDate,
       }
-      console.log('criando do 0 createUserWorkoutLog()')
 
       const newUserWorkoutLog: IUserWorkoutsLog = {
         workoutsLog: [
@@ -2267,8 +2438,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         ],
         userId: user.id,
       }
-      console.log(`JSON.stringify(newUserWorkoutLog)`)
-      console.log(JSON.stringify(newUserWorkoutLog))
 
       await AsyncStorage.setItem(
         storageCachedExercisesWeightDoneLogDataKey,
@@ -2279,7 +2448,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       return newExercise as IWeightDoneLog
     }
   }
-
   // fazer se inspirando no notes
 
   // setCachedUserWorkoutsLog
@@ -2356,12 +2524,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       if (storedCachedVideoTableString) {
         const cachedVideoTableData = JSON.parse(storedCachedVideoTableString)
-        console.log(storedCachedVideoTableString)
 
         setCachedVideoTable(cachedVideoTableData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
-      console.error('Erro ao carregar as informações de resumo:', error)
+      // console.error('Erro ao carregar as informações de resumo:', error)
     }
   }
 
@@ -2899,7 +3066,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function loadUserStorageData() {
     setIsLoadingUserStorageData(true)
-    console.log('Loading user storage data...')
 
     try {
       const storedUser = await AsyncStorage.getItem(USER_SIGNIN_COLLECTION)

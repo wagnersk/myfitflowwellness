@@ -122,17 +122,12 @@ export function MarketPlacePersonalsDetail() {
   }
 
   async function handleCancelRequest() {
-    console.log(`handleCancelRequest`)
     return
     if (!user) return
     const { clientId, personalTrainerContractId } = user
     if (!clientId) return
     if (!personalTrainerContractId) return
-    console.log(`checkIfAlreadyHavePendingRequest`)
-    console.log(`personalTrainerContractId`)
-    console.log(personalTrainerContractId)
-    console.log(`clientId`)
-    console.log(clientId)
+
     Alert.alert(
       user.selectedLanguage === 'pt-br'
         ? 'Confirmar Cancelamento de Convite'

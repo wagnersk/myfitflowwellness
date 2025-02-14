@@ -136,21 +136,25 @@ export function WorkoutUserWeightModal({
                 {...rest}
               />
             </TipsNoteWrapper>
-
             <TipsButtonWrapper>
-              <TipsButton onPress={updateWeight}>
-                <TipsButtonLinearGradientSave colors={['#000000', '#FFFFFF']}>
-                  <TipsButtonText>Salvar</TipsButtonText>
-                </TipsButtonLinearGradientSave>
-              </TipsButton>
-
               {weightIndex === 0 && (
                 <TipsButton onPress={updateAllWeight}>
-                  <TipsButtonLinearGradientSave colors={['#000000', '#FFFFFF']}>
+                  <TipsButtonLinearGradientSave
+                    singleButton={weightIndex !== 0}
+                    colors={['#000000', '#FFFFFF']}
+                  >
                     <TipsButtonText>Salvar para todos</TipsButtonText>
                   </TipsButtonLinearGradientSave>
                 </TipsButton>
               )}
+              <TipsButton onPress={updateWeight}>
+                <TipsButtonLinearGradientSave
+                  singleButton={weightIndex !== 0}
+                  colors={['#000000', '#FFFFFF']}
+                >
+                  <TipsButtonText>Salvar</TipsButtonText>
+                </TipsButtonLinearGradientSave>
+              </TipsButton>
             </TipsButtonWrapper>
           </TipsNoteBodyWrapper>
         </Container>

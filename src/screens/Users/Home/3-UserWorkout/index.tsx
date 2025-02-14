@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import {
   useWindowDimensions,
   FlatList,
@@ -48,7 +48,7 @@ interface ChangeWorkoutCardProps {
 }
 
 export function UserWorkout() {
-  const { user } = useAuth()
+  const { user, cachedUserWorkoutsLog } = useAuth()
 
   const selectedLanguage = user?.selectedLanguage
   const route = useRoute()

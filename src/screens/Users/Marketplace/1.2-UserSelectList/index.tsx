@@ -114,7 +114,6 @@ export function UserSelectList() {
     function muscleFocusChoose() {
       if (!selectedData) return
 
-      console.log(`${id} selected: ${id}`)
       const copyData = [...selectedData]
 
       const indeex = copyData.findIndex((v) => v.id === id)
@@ -195,7 +194,6 @@ export function UserSelectList() {
 
       const servertimestamp = serverTimestamp()
 
-      console.log(selectedArray)
       if (selectedArray.length === 0) return
       const fdata: IUserMuscleFocus = {
         muscleSelectedData: selectedArray,

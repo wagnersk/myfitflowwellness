@@ -221,9 +221,8 @@ export default function SkiaContent({
   const paddingLeft = 32
   const paddingRight = screenWidth - 64
 
-  const daysGroupHeight = daysData.length * rectVerticalSpacing
-  const daysGroupY = paddingTop + (logoHeight - daysGroupHeight) / 2
-  console.log('daysGroupY', daysGroupY) //   daysGroupY -187.07999999999998
+  // const daysGroupHeight = daysData.length * rectVerticalSpacing
+  // const daysGroupY = paddingTop + (logoHeight - daysGroupHeight) / 2
 
   return (
     <CanvasFullScreen ref={fowardRef} onTouchStart={handleTouch}>
