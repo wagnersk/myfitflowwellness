@@ -79,6 +79,7 @@ function WorkoutVideoCardComponent({
 
     updateCachedUserWorkoutsLog,
     saveWeightProgression,
+    updateUserWorkoutCache,
     user,
   } = useAuth()
   const time = new Date()
@@ -717,6 +718,36 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
+  /* 
+
+
+ -> IR DENTRO DE DoneWorkout ( ou tudo q atualiza algo)
+
+
+criar updatedAt e createdAt nessa estrutura baixo
+e toda vez q for atualizar qualquer item do subnivel refletir aqui tbm
+      -> cachedUserWorkoutsLog {
+       "userId": "hM7GEloty3dBVSsDOaD5cJHsC3R2", 
+      "workoutsLog": [{"workoutCardsLogData": [Array], "workoutId": "FVSytF9Cl8z3zmuxogNj"}]
+      }
+conferir se toda atualizacao reflete no updatedAt do pai
+
+ esse updaterdAt do pai q eu vou trackear no primeiro nivel do cache
+
+ e gbuscar a data desse ultimo track
+
+ comparar e deixar o botao de updated do treino Cinza ou ativo
+
+
+
+ sobre compartilhar , apenas criar alert dizendo q foi clicado
+
+
+ -> fazer tela de amigos , listar , ver treino ativo dele ( ai sim eu vejo como eu faco o botao de 
+ compartilhar , pq vou precisar do link , o mesmo q vou usar la , so q la ja vou ter 
+ amadurecido mais a ideia de como vou estruturar )
+
+*/
   async function saveFastCachedWorkoutData(
     copyProgression: ICachedCardExerciseData,
     _workoutId: string,
@@ -1060,6 +1091,7 @@ modalCachedCardExerciseData.notes.value
     }
   } */
   // ok
+
   function handleUncheckOrCheckRepetion(index: number) {
     const getIsActivedRangeOfSets =
       (modalCachedCardExerciseData?.workoutExerciseSets?.[index]?.repetitionData

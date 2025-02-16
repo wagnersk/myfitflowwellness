@@ -41,7 +41,8 @@ export function CTAButton({
         {...rest}
       >
         <LinearGradientButton
-          colors={colors}
+          colors={['#000000', '#FFFFFF']}
+          workoutAlreadySelected={workoutAlreadySelected || false}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >

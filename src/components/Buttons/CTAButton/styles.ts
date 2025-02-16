@@ -34,7 +34,13 @@ export const Title = styled.Text`
   font-size: ${RFValue(16)}px;
 `
 
-export const LinearGradientButton = styled(LinearGradient)`
+export const LinearGradientButton = styled(LinearGradient).attrs(
+  ({ theme }) => ({
+    colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
+    start: { x: 0, y: 1 },
+    end: { x: 1, y: 0 },
+  }),
+)<{ workoutAlreadySelected: boolean }>`
   height: 100%;
   width: 100%;
   align-items: center;

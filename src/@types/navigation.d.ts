@@ -217,6 +217,7 @@ export type IMarketPlaceWorkoutListNavigation = {
 
 export type IMarketPlaceWorkoutDetailNavigation = {
   data: IMyfitflowWorkoutInUse
+  enableSyncDataAndShare: boolean
 }
 export type IMarketPlacePersonalsDetailNavigation = {
   data: IPersonal
@@ -322,6 +323,8 @@ export declare global {
       userFormEditProfile: undefined
       userSupport: undefined
       userPlan: undefined
+      userFriendList: undefined
+
       userSelectFreeEquipamentList: IUserSelectFreeEquipamentListNavigation
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation
       userSelectMachineEquipamentList: IUserSelectMachineEquipamentListNavigation

@@ -6,6 +6,7 @@ import {
   Keyboard,
   Platform,
   BackHandler,
+  SafeAreaView,
 } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -45,6 +46,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { emailRegex } from '@utils/emailRegex'
 import { checkBirthdayDate } from '@utils/checkBirthdayDate'
 import { differenceInYears, isAfter, isBefore, isValid, parse } from 'date-fns'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export function UserFormEditProfile() {
   const { user, updateUserForm, isWaitingApiResponse } = useAuth()
@@ -487,139 +489,141 @@ export function UserFormEditProfile() {
             resizeMode="cover"
           >
             <ImageBackgroundContainer>
-              <SettingsWrapper>
-                <BackButton
-                  onPress={handleGoBack}
-                  changeColor
-                  disabled={isWaitingApiResponse}
-                />
-              </SettingsWrapper>
-
-              <ProfileWrapper>
-                <PhotoBorderWrapper>
-                  <Photo
-                    defaultText={
-                      user?.selectedLanguage === 'pt-br'
-                        ? `Não há foto`
-                        : `No Photo`
-                    }
-                    defaultPhotoBase64={user?.photoBase64}
-                    newDefaultPhotoBase64={userForm.photoBase64.value}
-                  />
-                  <PhotoButton onPress={handlePickImage} />
-                </PhotoBorderWrapper>
-              </ProfileWrapper>
-
-              <Body>
-                <ScrollView
-                  keyboardShouldPersistTaps="handled"
-                  contentContainerStyle={{
-                    width: '100%',
-                    gap: 16,
-                  }}
-                >
-                  <EmailInput
-                    handleChangeEmail={handleChangeEmail}
-                    value={userForm.email.value}
-                    errorBoolean={false}
-                    editable={false}
-                    onFocus={() => {
-                      return false
-                    }}
-                    type="blue"
-                    borderDesign="up-down"
-                    order="alone"
-                    topPosition={2}
-                  />
-
-                  <InputWrapper>
-                    <UserNameInput
-                      handleChangeUserName={handleChangeUserName}
-                      value={userForm.name.value}
-                      errorBoolean={userForm.name.errorBoolean}
-                      editable={!isWaitingApiResponse}
-                      onFocus={() => {}}
-                      type="blue"
-                      borderDesign="up"
-                      order="top"
-                      topPosition={4}
+              <SafeAreaProvider style={{ width: `100%` }}>
+                <SafeAreaView style={{ flex: 1 }}>
+                  <SettingsWrapper>
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={isWaitingApiResponse}
                     />
-                    <CalendarInput
-                      handleChangeBirthday={handleChangeBirthday}
-                      value={userForm.birthdate.value}
-                      errorBoolean={userForm.birthdate.errorBoolean}
-                      editable={!isWaitingApiResponse}
-                      onFocus={() => {}}
-                      type="blue"
-                      borderDesign="up-down"
-                      order="middle"
-                      topPosition={2}
-                    />
-                    <WhatsappInput
-                      mask={
-                        user?.selectedLanguage === 'pt-br'
-                          ? '(99) 99999-9999'
-                          : '(999) 99999-9999'
-                      }
-                      handleChangeWhatsapp={handleChangeWhatsappNumber}
-                      value={userForm.whatsappNumber.value}
-                      errorBoolean={userForm.whatsappNumber.errorBoolean}
-                      editable={!isWaitingApiResponse}
-                      onFocus={() => {}}
-                      type="blue"
-                      borderDesign="down"
-                      order="bottom"
-                    />
-                  </InputWrapper>
-                  {user?.personalTrainerContractId && (
-                    <InputWrapper>
-                      <GymInput
-                        handleChangeGym={handleChangeGym}
-                        value={userForm.gym.value}
+                  </SettingsWrapper>
+                  <ProfileWrapper>
+                    <PhotoBorderWrapper>
+                      <Photo
+                        defaultText={
+                          user?.selectedLanguage === 'pt-br'
+                            ? `Não há foto`
+                            : `No Photo`
+                        }
+                        defaultPhotoBase64={user?.photoBase64}
+                        newDefaultPhotoBase64={userForm.photoBase64.value}
+                      />
+                      <PhotoButton onPress={handlePickImage} />
+                    </PhotoBorderWrapper>
+                  </ProfileWrapper>
+                  <Body>
+                    <ScrollView
+                      keyboardShouldPersistTaps="handled"
+                      contentContainerStyle={{
+                        width: '100%',
+                        gap: 16,
+                      }}
+                    >
+                      <EmailInput
+                        handleChangeEmail={handleChangeEmail}
+                        value={userForm.email.value}
                         errorBoolean={false}
-                        editable={!isWaitingApiResponse}
-                        onFocus={() => {}}
+                        editable={false}
+                        onFocus={() => {
+                          return false
+                        }}
                         type="blue"
-                        borderDesign="up"
-                        order="top"
+                        borderDesign="up-down"
+                        order="alone"
+                        topPosition={2}
                       />
-                      <AnabolInput
-                        handleChangeAnabol={handleChangeAnabol}
-                        value={userForm.anabol.value}
-                        errorBoolean={false}
-                        editable={!isWaitingApiResponse}
-                        onFocus={() => {}}
-                      />
-                    </InputWrapper>
-                  )}
 
-                  {user?.personalTrainerContractId && (
-                    <InputWrapper>
-                      <WhenStartedAtGymInput
-                        handleChangeBirthday={handleChangeWhenStartedAtGym}
-                        value={userForm.whenStartedAtGym.value}
-                        errorBoolean={false}
-                        editable={!isWaitingApiResponse}
-                        onFocus={() => {}}
-                      />
-                      <RestrictionsInput
-                        handleChangeRestrictions={handleChangeRestrictions}
-                        value={userForm.restrictions.value}
-                        errorBoolean={false}
-                        editable={!isWaitingApiResponse}
-                        onFocus={() => {}}
-                      />
-                    </InputWrapper>
-                  )}
-                </ScrollView>
-              </Body>
-              <CTAButton
-                onPress={handleUpdateInfo}
-                changeColor
-                title="Salvar"
-                loading={isWaitingApiResponse}
-                enabled={!isWaitingApiResponse}
-              />
+                      <InputWrapper>
+                        <UserNameInput
+                          handleChangeUserName={handleChangeUserName}
+                          value={userForm.name.value}
+                          errorBoolean={userForm.name.errorBoolean}
+                          editable={!isWaitingApiResponse}
+                          onFocus={() => {}}
+                          type="blue"
+                          borderDesign="up"
+                          order="top"
+                          topPosition={4}
+                        />
+                        <CalendarInput
+                          handleChangeBirthday={handleChangeBirthday}
+                          value={userForm.birthdate.value}
+                          errorBoolean={userForm.birthdate.errorBoolean}
+                          editable={!isWaitingApiResponse}
+                          onFocus={() => {}}
+                          type="blue"
+                          borderDesign="up-down"
+                          order="middle"
+                          topPosition={2}
+                        />
+                        <WhatsappInput
+                          mask={
+                            user?.selectedLanguage === 'pt-br'
+                              ? '(99) 99999-9999'
+                              : '(999) 99999-9999'
+                          }
+                          handleChangeWhatsapp={handleChangeWhatsappNumber}
+                          value={userForm.whatsappNumber.value}
+                          errorBoolean={userForm.whatsappNumber.errorBoolean}
+                          editable={!isWaitingApiResponse}
+                          onFocus={() => {}}
+                          type="blue"
+                          borderDesign="down"
+                          order="bottom"
+                        />
+                      </InputWrapper>
+                      {user?.personalTrainerContractId && (
+                        <InputWrapper>
+                          <GymInput
+                            handleChangeGym={handleChangeGym}
+                            value={userForm.gym.value}
+                            errorBoolean={false}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
+                            type="blue"
+                            borderDesign="up"
+                            order="top"
+                          />
+                          <AnabolInput
+                            handleChangeAnabol={handleChangeAnabol}
+                            value={userForm.anabol.value}
+                            errorBoolean={false}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
+                          />
+                        </InputWrapper>
+                      )}
+
+                      {user?.personalTrainerContractId && (
+                        <InputWrapper>
+                          <WhenStartedAtGymInput
+                            handleChangeBirthday={handleChangeWhenStartedAtGym}
+                            value={userForm.whenStartedAtGym.value}
+                            errorBoolean={false}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
+                          />
+                          <RestrictionsInput
+                            handleChangeRestrictions={handleChangeRestrictions}
+                            value={userForm.restrictions.value}
+                            errorBoolean={false}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
+                          />
+                        </InputWrapper>
+                      )}
+                    </ScrollView>
+                  </Body>
+                  <CTAButton
+                    onPress={handleUpdateInfo}
+                    changeColor
+                    title="Salvar"
+                    loading={isWaitingApiResponse}
+                    enabled={!isWaitingApiResponse}
+                  />
+                </SafeAreaView>
+              </SafeAreaProvider>
             </ImageBackgroundContainer>
           </ImageBackground>
         </BodyImageWrapper>

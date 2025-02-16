@@ -582,8 +582,6 @@ export interface ICachedCardExerciseData {
   workoutExerciseName_insensitive?: IptBrUs
   workoutExercisePrimaryMuscleGroup?: IptBrUs
   workoutExerciseTypes?: string
-  createdAt?: number
-  updatedAt?: number
 
   workoutExerciseIndex?: number
   notes: {
@@ -591,17 +589,19 @@ export interface ICachedCardExerciseData {
     createdAt: number
     updatedAt: number
   }
-
   workoutExerciseFilters?: ICachedFiltersExercise
+
+  createdAt?: number
+  updatedAt?: number
 }
 export interface IWorkoutCardLogData {
   // dentro do card A B C
   cardIndex: number
   weightDoneLogs: ICachedCardExerciseData[]
 
-  totalSessionsCompleted: number // mudar isso para algo mais descritivo com o real valor
+  totalSessionsCompleted: number
 
-  lastCompletedTimestamp: number // mudar isso para algo mais descritivo com o real valor
+  lastCompletedTimestamp: number
   lastCompletedFormattedDay: IptBrUs
   lastCompletedFormattedDate: string
 }
@@ -609,11 +609,15 @@ export interface IWorkoutCardLogData {
 export interface IWorkoutLog {
   workoutCardsLogData: IWorkoutCardLogData[] // A B C
   workoutId: string // id do treino que ta dentro de category no firebase
+  createdAt?: number
+  updatedAt?: number
 }
 
 export interface IUserWorkoutsLog {
   workoutsLog: IWorkoutLog[]
   userId: string
+  createdAt?: number
+  updatedAt?: number
 }
 export type ExerciseHistoryData = YearRecord
 
@@ -791,6 +795,16 @@ export interface AuthContextData {
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ) => Promise<void>
+
+  // firebase
+  updateUserWorkoutCache: (
+    workoutCacheId: string,
+    data: IWorkoutLog,
+    lastCompletedTimestamp: number,
+  ) => Promise<void>
+  getLastUpdatedAtUserWorkoutCache: (
+    workoutCacheId: string,
+  ) => Promise<number | null>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (

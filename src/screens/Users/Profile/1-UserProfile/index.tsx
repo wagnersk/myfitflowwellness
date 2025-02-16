@@ -96,6 +96,9 @@ export function UserProfile() {
   function handleMyPlanNextStep() {
     navigation.navigate('userPlan')
   }
+  function handleMyFriendListNextStep() {
+    navigation.navigate('userFriendList')
+  }
 
   function handleSuporteNextStep() {
     navigation.navigate('userSupport')
@@ -310,10 +313,21 @@ logout (opcao deletar conta)
 
                 <WhiteButton
                   tittle={
+                    user?.selectedLanguage === 'pt-br'
+                      ? 'Meus Amigos'
+                      : 'My Friends'
+                  }
+                  onPress={handleMyFriendListNextStep}
+                  bordertype="up"
+                  iconStyle="friendlist"
+                />
+
+                <WhiteButton
+                  tittle={
                     user?.selectedLanguage === 'pt-br' ? 'Meu Plano' : 'My Plan'
                   }
                   onPress={handleMyPlanNextStep}
-                  bordertype="up"
+                  bordertype="none"
                   iconStyle="plan"
                 />
 

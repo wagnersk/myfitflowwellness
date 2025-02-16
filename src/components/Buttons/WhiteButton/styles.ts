@@ -6,7 +6,7 @@ import styled, { css } from 'styled-components/native'
 interface Props {
   children: ReactNode
   loading?: boolean
-  bordertype?: 'up' | 'down' | 'up-down'
+  bordertype?: 'up' | 'down' | 'up-down' | 'none'
   iconStyle?:
     | 'email'
     | 'question'
@@ -21,6 +21,7 @@ interface Props {
     | 'calendar'
     | 'clock'
     | 'person-simple'
+    | 'friendlist'
     | 'none'
 }
 

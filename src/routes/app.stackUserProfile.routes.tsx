@@ -10,6 +10,7 @@ import { UserSelectMachineEquipamentList } from '@screens/Users/Profile/2.4-User
 import { UserFormEditProfile } from '@screens/Users/Profile/3-UserFormEditProfile'
 import { UserSupport } from '@screens/Users/Profile/2.1-UserSupport'
 import { UserPlan } from '@screens/Users/Profile/2.1-UserPlan'
+import { UserFriendList } from '@screens/Users/Profile/4-UserFriendList'
 
 const { Navigator, Screen } = createStackNavigator()
 
@@ -24,6 +25,7 @@ export function AppStackUserProfileRoutes() {
       <Screen name="userFormEditProfile" component={UserFormEditProfile} />
       <Screen name="userSupport" component={UserSupport} />
       <Screen name="userPlan" component={UserPlan} />
+      <Screen name="userFriendList" component={UserFriendList} />
 
       <Screen
         name="userSelectFreeEquipamentList"

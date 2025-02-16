@@ -42,11 +42,12 @@ export function MarketPlaceWorkoutList() {
     const newDataWithCategoryNameFromProps = {
       data,
     }
+    const enableSyncDataAndShare = false
 
-    navigation.navigate(
-      'marketPlaceWorkoutDetail',
-      newDataWithCategoryNameFromProps,
-    )
+    navigation.navigate('marketPlaceWorkoutDetail', {
+      ...newDataWithCategoryNameFromProps,
+      enableSyncDataAndShare,
+    })
   }
 
   useEffect(() => {

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from 'react'
-import { BackHandler, SafeAreaView } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Alert, BackHandler, SafeAreaView } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -30,6 +30,17 @@ import {
   Wrapper,
   TitleDivision,
   TitleWorkout,
+  IconContainer,
+  BlurIconViewWrapper,
+  ContainerGradient,
+  ActionButtonsWrapper,
+  TextWrapper,
+  UpdatedAtText,
+  ButtonsWrapper,
+  InfoBoxesWrapper,
+  ActButton,
+  TittleWrapper,
+  SubTittleWrapper,
 } from './styles'
 import { useAuth } from '@hooks/auth'
 import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
@@ -44,13 +55,23 @@ import { getIcon } from '@utils/getIcon'
 import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
 import { translateMuscleGroupInfo } from '@utils/translateMuscles'
+import Arrow from '@assets/Arrow-counter-clockwise.svg'
+import Export from '@assets/Export.svg'
 
 export function MarketPlaceWorkoutDetail() {
-  const { user, isWaitingApiResponse, myWorkout } = useAuth()
+  const {
+    user,
+    isWaitingApiResponse,
+    myWorkout,
+    updateUserWorkoutCache,
+    cachedUserWorkoutsLog,
+    getLastUpdatedAtUserWorkoutCache,
+  } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
   const route = useRoute()
   const dataParam = route.params as IMarketPlaceWorkoutDetailNavigation
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
 
   const {
     loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
@@ -62,94 +83,17 @@ export function MarketPlaceWorkoutDetail() {
 
   const workoutAlreadySelected = cachedWorkoutId === selectedWorkoutId
 
-  let barLabel = ''
-  let benchLabel = ''
-  let machineLabel = ''
-  let otherLabel = ''
-  let pulleyLabel = ''
-  let pulleyHandlesLabel = ''
-  let weightLabel = ''
-  let muscleGroupsLabel = ''
-
-  loadEquipamentInfoValues()
-  loadMuscleGroupInfoValues()
-
-  function loadEquipamentInfoValues() {
-    const data = dataParam.data
-    if (!user) return
-    const selectedLanguage = user.selectedLanguage
-    if (data) {
-      barLabel = data.workoutsUniquesFilters.bar.reduce((acc, item, index) => {
-        return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-      }, '')
-      benchLabel = data.workoutsUniquesFilters.bench.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-
-      machineLabel = data.workoutsUniquesFilters.machine.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-
-      otherLabel = data.workoutsUniquesFilters.other.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-      pulleyLabel = data.workoutsUniquesFilters.pulley.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-      pulleyHandlesLabel = data.workoutsUniquesFilters.pulleyHandles.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-      weightLabel = data.workoutsUniquesFilters.weight.reduce(
-        (acc, item, index) => {
-          return acc + (index > 0 ? ', ' : '') + item[selectedLanguage]
-        },
-        '',
-      )
-    }
-  }
-
-  function loadMuscleGroupInfoValues() {
-    if (dataParam.data) {
-      if (!translateMuscleGroupInfo) return
-
-      const translattedMuscleGroupUStoPTBR =
-        dataParam.data.workoutsUniquesMuscles.map(
-          (muscleName: { 'pt-br': string; us: string }) => {
-            if (!translateMuscleGroupInfo) return { 'pt-br': '', us: '' }
-
-            return muscleName
-          },
-        )
-
-      if (!translattedMuscleGroupUStoPTBR) return
-      if (selectedLanguage === undefined) return
-      muscleGroupsLabel = translattedMuscleGroupUStoPTBR.reduce(
-        (acc: string, item: IptBrUs, index: number) => {
-          return (
-            acc +
-            (index > 0 ? ', ' : '') +
-            item[selectedLanguage as 'pt-br' | 'us']
-          )
-        },
-        '',
-      )
-    }
-  }
+  const tittle = cachedWorkoutId
+    ? workoutAlreadySelected
+      ? selectedLanguage === 'pt-br'
+        ? 'Cancelar treino'
+        : 'Cancel workout'
+      : selectedLanguage === 'pt-br'
+        ? 'Cancelar outro treino antes'
+        : 'Cancel other workout first'
+    : selectedLanguage === 'pt-br'
+      ? 'Escolher treino'
+      : 'Choose workout'
 
   function handleGoBack() {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
@@ -164,18 +108,98 @@ export function MarketPlaceWorkoutDetail() {
     if (!response) return
     navigation.navigate('marketPlaceHome')
   }
+  /* 
+criar botao que SAlvar preferencia usando  o hook updateUserWorkoutCache
 
+ e um botao de compartilhar que cria um QR code ( Faco dps)
+  e de um de compartilhar ( faco dps)
+
+em profile criar botao amigos
+-> Aqui eu consigo buscar um amigo e enviar convite e aceitar convite
+
+quando ele aceitar eu consigo pegar o treino dele atual
+
+
+   
+
+ 
+*/
   async function handleDeleteWorkout() {
-    await deleteMyWorkoutAndmyWorkoutDataArray()
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br'
+        ? 'Você realmente quer cancelar o treino?'
+        : 'Do you really want to cancel the workout?',
+      '',
+      [
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Não' : 'No',
+          style: 'cancel',
+        },
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Sim' : 'Yes',
+          onPress: async () => {
+            await deleteMyWorkoutAndmyWorkoutDataArray()
+            navigation.navigate('marketPlaceHome')
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
 
-    navigation.navigate('marketPlaceHome')
+  function shareWorkout() {
+    Alert.alert('Share ')
+  }
+
+  function syncronizePersonalizedWorkoutData() {
+    if (!selectedWorkoutId) return
+    const getWorkoutData = cachedUserWorkoutsLog?.workoutsLog.find(
+      (v) => v.workoutId === selectedWorkoutId,
+    )
+    console.log(`getWorkoutData`)
+    console.log(getWorkoutData)
+    if (!getWorkoutData) return
+
+    const lastUpdatedValue = cachedUserWorkoutsLog?.updatedAt
+
+    if (!lastUpdatedValue) return
+    updateUserWorkoutCache(selectedWorkoutId, getWorkoutData, lastUpdatedValue)
+    setLastUpdated(lastUpdatedValue)
+  }
+
+  async function start() {
+    if (!selectedWorkoutId) return
+    const lastUpdatedValue =
+      await getLastUpdatedAtUserWorkoutCache(selectedWorkoutId)
+    if (!lastUpdatedValue) return
+    setLastUpdated(lastUpdatedValue)
   }
 
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      return true
+    start()
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        return true
+      },
+    )
+
+    return () => backHandler.remove()
+  }, [selectedWorkoutId])
+
+  function formatTimestampToDate(timestamp: number | null): string {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })
-  }, [])
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -201,7 +225,7 @@ export function MarketPlaceWorkoutDetail() {
                     contentFit="cover"
                     style={{
                       width: '100%',
-                      height: '100%',
+                      height: 340,
                       borderRadius: 8,
                       backgroundColor: `gray`,
                     }}
@@ -212,7 +236,60 @@ export function MarketPlaceWorkoutDetail() {
                 <LockIconWrapper>
                   <Plan size={48} level={dataParam.data.workoutPlanType} />
                 </LockIconWrapper>
+
+                {dataParam.enableSyncDataAndShare && (
+                  <ActionButtonsWrapper
+                    pointerEvents={
+                      dataParam.enableSyncDataAndShare ? 'auto' : 'none'
+                    }
+                  >
+                    <TextWrapper>
+                      <TittleWrapper>
+                        <UpdatedAtText>Sincronizado na núvem:</UpdatedAtText>
+                      </TittleWrapper>
+
+                      <SubTittleWrapper>
+                        <UpdatedAtText>
+                          {formatTimestampToDate(lastUpdated)}
+                        </UpdatedAtText>
+                      </SubTittleWrapper>
+                    </TextWrapper>
+
+                    <ButtonsWrapper>
+                      <BlurIconViewWrapper
+                        disabled={
+                          lastUpdated === cachedUserWorkoutsLog?.updatedAt
+                        }
+                        intensity={70}
+                        tint="light"
+                      >
+                        <ContainerGradient colors={['#000000', '#FFFFFF']}>
+                          <ActButton
+                            disabled={
+                              lastUpdated === cachedUserWorkoutsLog?.updatedAt
+                            }
+                            onPress={syncronizePersonalizedWorkoutData}
+                          >
+                            <Arrow width={30} height={30} fill={'white'} />
+                          </ActButton>
+                        </ContainerGradient>
+                      </BlurIconViewWrapper>
+                      <BlurIconViewWrapper
+                        disabled={false}
+                        intensity={70}
+                        tint="light"
+                      >
+                        <ContainerGradient colors={['#000000', '#FFFFFF']}>
+                          <ActButton onPress={shareWorkout}>
+                            <Export width={30} height={30} fill={'white'} />
+                          </ActButton>
+                        </ContainerGradient>
+                      </BlurIconViewWrapper>
+                    </ButtonsWrapper>
+                  </ActionButtonsWrapper>
+                )}
               </PhotoImageWrapper>
+
               <Wrapper>
                 <TitleWrapper>
                   <TitleWorkout>
@@ -282,19 +359,17 @@ export function MarketPlaceWorkoutDetail() {
                     </SubTitle>
                   </InfoDescriptionWrapper>
                 )}
-                <EquipamentsInfo
-                  pulley={pulleyLabel}
-                  pulleyHandles={pulleyHandlesLabel}
-                  barLabel={barLabel}
-                  benchLabel={benchLabel}
-                  machineLabel={machineLabel}
-                  otherLabel={otherLabel}
-                  weightLabel={weightLabel}
-                  selectedLanguage={user?.selectedLanguage}
-                />
-                {muscleGroupsLabel && (
-                  <WorkoutMuscleComponent description={muscleGroupsLabel} />
-                )}
+
+                <InfoBoxesWrapper>
+                  <EquipamentsInfo
+                    data={dataParam.data.workoutsUniquesFilters}
+                    selectedLanguage={user?.selectedLanguage}
+                  />
+                  <WorkoutMuscleComponent
+                    data={dataParam.data.workoutsUniquesMuscles}
+                    selectedLanguage={user?.selectedLanguage}
+                  />
+                </InfoBoxesWrapper>
               </BodyInfo>
             </BodyImageContainer>
           </ScrollView>
@@ -313,27 +388,17 @@ export function MarketPlaceWorkoutDetail() {
               <CTAButton
                 enabled={!isWaitingApiResponse}
                 loading={isWaitingApiResponse}
-                workoutAlreadySelected={workoutAlreadySelected}
+                workoutAlreadySelected={!!cachedWorkoutId}
                 style={{
                   marginBottom: 52,
                   width: '100%',
                 }}
                 onPress={() => {
-                  workoutAlreadySelected
-                    ? handleDeleteWorkout()
-                    : handleChoose()
+                  cachedWorkoutId ? handleDeleteWorkout() : handleChoose()
                 }}
                 /* bigSize={true} */
                 changeColor
-                title={
-                  workoutAlreadySelected && selectedLanguage === 'pt-br'
-                    ? 'Cancelar este treino'
-                    : workoutAlreadySelected && selectedLanguage === 'us'
-                      ? 'Cancel this workout'
-                      : selectedLanguage === 'pt-br'
-                        ? 'Escolher este treino'
-                        : 'Choose this workout'
-                }
+                title={tittle}
               />
             </BlurViewWrapper>
           </BodyBottomWrapper>

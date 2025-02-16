@@ -12,87 +12,114 @@ import {
   FreeStyleWrapper,
   PoliaStyleWrapper,
   MachineStyleWrapper,
+  EquipamentItensWrapper,
+  EquipamentTitleWrapper,
+  BlurViewWrapper,
 } from './styles'
+import { ILocalCardExerciseFilters } from '@hooks/authTypes'
 
 interface Props {
-  pulley?: string
-  pulleyHandles?: string
-  barLabel?: string
-  benchLabel?: string
-  machineLabel?: string
-  otherLabel?: string
-  weightLabel?: string
+  data: ILocalCardExerciseFilters
   selectedLanguage: 'pt-br' | 'us' | undefined
 }
 
-export function EquipamentsInfo({
-  pulley,
-  pulleyHandles,
-  barLabel,
-  benchLabel,
-  machineLabel,
-  otherLabel,
-  weightLabel,
-  selectedLanguage,
-}: Props) {
+export function EquipamentsInfo({ data, selectedLanguage }: Props) {
   return (
     <Container>
       <BorderWrapper>
-        <TitleWrapper>
+        <BlurViewWrapper>
           <Title>
             {selectedLanguage === 'pt-br' ? `Equipamentos` : `Equipaments`}
           </Title>
-        </TitleWrapper>
+        </BlurViewWrapper>
 
         <FreeStyleWrapper>
-          {weightLabel && (
+          {data.weight.length > 0 && (
             <InfoWrapper>
-              <EquipamentTitle>
-                {selectedLanguage === 'pt-br' ? 'Pesos' : 'Weights'}:
-              </EquipamentTitle>
-              <EquipamentItens>{weightLabel}</EquipamentItens>
+              <EquipamentTitleWrapper>
+                <EquipamentTitle>
+                  {selectedLanguage === 'pt-br' ? 'Pesos' : 'Weights'}:
+                </EquipamentTitle>
+              </EquipamentTitleWrapper>
+
+              {data.weight
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
-          {barLabel && (
+          {data.bar.length > 0 && (
             <InfoWrapper>
               <EquipamentTitle>
                 {selectedLanguage === 'pt-br' ? 'Barras' : 'Bars'}:
               </EquipamentTitle>
-              <EquipamentItens>{barLabel}</EquipamentItens>
+
+              {data.bar
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
 
-          {benchLabel && (
+          {data.bench.length > 0 && (
+            <InfoWrapper>
+              <EquipamentTitle>
+                {selectedLanguage === 'pt-br' ? 'Banco' : 'Bench'}:
+              </EquipamentTitle>
+              {data.bench
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
+            </InfoWrapper>
+          )}
+          {data.other.length > 0 && (
             <InfoWrapper>
               <EquipamentTitle>
                 {selectedLanguage === 'pt-br' ? 'Outros' : 'Others'}:
               </EquipamentTitle>
-              <EquipamentItens>{benchLabel}</EquipamentItens>
-            </InfoWrapper>
-          )}
-          {otherLabel && (
-            <InfoWrapper>
-              <EquipamentTitle>
-                {selectedLanguage === 'pt-br' ? 'Pulley' : 'Pulley'}:
-              </EquipamentTitle>
-              <EquipamentItens>{otherLabel}</EquipamentItens>
+              {data.other
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
         </FreeStyleWrapper>
 
         <PoliaStyleWrapper>
-          {pulley && (
+          {data.pulley.length > 0 && (
             <InfoWrapper>
               <EquipamentTitle>
                 {selectedLanguage === 'pt-br'
                   ? 'Puxadores do pulley'
                   : 'Pulley handles'}
-                :
               </EquipamentTitle>
-              <EquipamentItens>{pulley}</EquipamentItens>
+              {data.pulley
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
-          {pulleyHandles && (
+          {data.pulleyHandles.length > 0 && (
             <InfoWrapper>
               <EquipamentTitle>
                 {selectedLanguage === 'pt-br'
@@ -100,17 +127,31 @@ export function EquipamentsInfo({
                   : 'Pulley handles'}
                 :
               </EquipamentTitle>
-              <EquipamentItens>{pulleyHandles}</EquipamentItens>
+              {data.pulleyHandles
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
         </PoliaStyleWrapper>
         <MachineStyleWrapper>
-          {machineLabel && (
+          {data.machine.length > 0 && (
             <InfoWrapper>
               <EquipamentTitle>
                 {selectedLanguage === 'pt-br' ? 'Máquinas' : 'Machines'}:{' '}
               </EquipamentTitle>
-              <EquipamentItens>{machineLabel}</EquipamentItens>
+              {data.machine
+                .map((v) => v[selectedLanguage || 'us'])
+                .sort((a, b) => a.localeCompare(b))
+                .map((item, index) => (
+                  <EquipamentItensWrapper key={index}>
+                    <EquipamentItens>• {item}</EquipamentItens>
+                  </EquipamentItensWrapper>
+                ))}
             </InfoWrapper>
           )}
         </MachineStyleWrapper>

@@ -19,9 +19,10 @@ import Clock from '@assets/Clock.svg'
 import CheckCircle from '@assets/Check-circle.svg'
 import Calendar from '@assets/Calendar.svg'
 import PersonSimple from '@assets/Person-simple.svg'
+import Users from '@assets/Users.svg'
 
 interface Props {
-  bordertype?: 'up' | 'down' | 'up-down'
+  bordertype?: 'up' | 'down' | 'up-down' | 'none'
   tittle: string
   onPress: (data?: string) => void
   iconStyle?:
@@ -38,6 +39,7 @@ interface Props {
     | 'calendar'
     | 'clock'
     | 'person-simple'
+    | 'friendlist'
     | 'none'
 }
 
@@ -53,6 +55,9 @@ export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
       <ContentWrapper>
         <ListTitleWrapper>
           <IconWrapper>
+            {iconStyle === 'friendlist' && (
+              <Users width={28} height={28} fill={'#0c17bb'} />
+            )}
             {iconStyle === 'person-simple' && (
               <PersonSimple width={28} height={28} fill={'#0c17bb'} />
             )}

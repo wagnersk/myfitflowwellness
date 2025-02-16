@@ -1,24 +1,44 @@
 import React from 'react'
 
-import { Container, Description } from './styles'
+import {
+  BlurViewWrapper,
+  BorderWrapper,
+  Container,
+  ContainerGradient,
+  Description,
+  DescriptionWrapper,
+  MusclesWrapper,
+  Title,
+  TitleWrapper,
+} from './styles'
 import { useTheme } from 'styled-components/native'
 import PersonSimple from '../../assets/Person-simple.svg'
+import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 
 interface Props {
-  description: string | number
+  data: IptBrUs[]
+  selectedLanguage: 'pt-br' | 'us' | undefined
 }
 
-export function WorkoutMuscleComponent({ description }: Props) {
+export function WorkoutMuscleComponent({ data, selectedLanguage }: Props) {
   const theme = useTheme()
   return (
     <Container>
-      <PersonSimple
-        width={22}
-        height={22}
-        strokeWidth={1.5}
-        fill={theme.COLORS.BLUE_STROKE}
-      />
-      <Description> {description && description}</Description>
+      <BorderWrapper>
+        <BlurViewWrapper intensity={100} tint="light">
+          <Title>{selectedLanguage === 'pt-br' ? `Músculos` : `Muscles`}</Title>
+        </BlurViewWrapper>
+        <MusclesWrapper>
+          {data
+            .map((v) => v[selectedLanguage || 'us'])
+            .sort((a, b) => a.localeCompare(b))
+            .map((item, index) => (
+              <DescriptionWrapper key={index}>
+                <Description>• {item}</Description>
+              </DescriptionWrapper>
+            ))}
+        </MusclesWrapper>
+      </BorderWrapper>
     </Container>
   )
 }

@@ -151,10 +151,11 @@ export function MarketPlaceHome() {
       data,
     }
 
-    navigation.navigate(
-      'marketPlaceWorkoutDetail',
-      newDataWithCategoryNameFromProps,
-    )
+    const enableSyncDataAndShare = true
+    navigation.navigate('marketPlaceWorkoutDetail', {
+      ...newDataWithCategoryNameFromProps,
+      enableSyncDataAndShare,
+    })
   }
   function handleViewAllCategoriesStep() {
     // jogar pra dentro do meu treino

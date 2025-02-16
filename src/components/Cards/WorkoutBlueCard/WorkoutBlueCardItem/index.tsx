@@ -48,6 +48,8 @@ export function WorkoutBlueCardItem({
   let copyWorkoutsLog: IWorkoutLog = {
     workoutCardsLogData: [],
     workoutId: '',
+    createdAt: 0,
+    updatedAt: 0,
   }
 
   let workoutsLogIndex = 9999
