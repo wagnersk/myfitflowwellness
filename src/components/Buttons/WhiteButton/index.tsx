@@ -20,6 +20,8 @@ import CheckCircle from '@assets/Check-circle.svg'
 import Calendar from '@assets/Calendar.svg'
 import PersonSimple from '@assets/Person-simple.svg'
 import Users from '@assets/Users.svg'
+import Barbell from '@assets/Barbell.svg'
+import Camera from '@assets/Camera.svg'
 
 interface Props {
   bordertype?: 'up' | 'down' | 'up-down' | 'none'
@@ -41,6 +43,8 @@ interface Props {
     | 'person-simple'
     | 'friendlist'
     | 'none'
+    | 'barbell'
+    | 'camera'
 }
 
 export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
@@ -55,6 +59,12 @@ export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
       <ContentWrapper>
         <ListTitleWrapper>
           <IconWrapper>
+            {iconStyle === 'barbell' && (
+              <Barbell width={28} height={28} fill={'#0c17bb'} />
+            )}
+            {iconStyle === 'camera' && (
+              <Camera width={28} height={28} fill={'#0c17bb'} />
+            )}
             {iconStyle === 'friendlist' && (
               <Users width={28} height={28} fill={'#0c17bb'} />
             )}

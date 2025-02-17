@@ -54,10 +54,10 @@ export const Button = styled(TouchableOpacity)`
 export const EditProfileButton = styled(TouchableOpacity)`
   justify-content: center;
   align-items: center;
-  border-radius: 12px;
   border: solid 2px ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding: 4px;
-  margin-top: 16px;
+  background-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  border-radius: 999px;
 `
 
 export const SettingsWrapper = styled.View`
@@ -138,6 +138,13 @@ export const PhotoBorderWrapper = styled.View`
   border: 2px ${({ theme }) => theme.COLORS.BLUE_STROKE};
   align-items: center;
   justify-content: center;
+  position: relative;
+`
+
+export const EditProfileButtonWraper = styled.View`
+  position: absolute;
+  bottom: 0;
+  right: 4;
 `
 export const LabelWrapper = styled.View`
   display: flex;

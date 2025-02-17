@@ -23,6 +23,8 @@ interface Props {
     | 'person-simple'
     | 'friendlist'
     | 'none'
+    | 'barbell'
+    | 'camera'
 }
 
 export const ContentWrapper = styled.View`

@@ -4,6 +4,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
+  Alert,
 } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -11,6 +12,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { BackButton } from '@components/Buttons/BackButton'
 
 import { useAuth } from '@hooks/auth'
+
 import { useTheme } from 'styled-components/native'
 
 import backgroundImg from '../../../../../assets/back.png'
@@ -37,12 +39,16 @@ import {
   FriendEmailWrapper,
   FriendPhoto,
   ActFriendButton,
+  FriendPhotoImage,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import UserPlus from '@assets/User-circle-plus.svg'
+import Search from '@assets/Search.svg'
+import { diffInAge } from '@utils/diffInAge'
+import FriendList from './Components/FriendList'
+import FriendRequest from './Components/FriendRequest'
 
 export function UserFriendList() {
   const { user, isWaitingApiResponse } = useAuth()
@@ -50,40 +56,54 @@ export function UserFriendList() {
   const theme = useTheme()
 
   const items = ['Solicitações', 'Amigos']
+
   const friendlist = [
     {
       name: 'Wagner',
       email: 'wagnereletroskateet@gmail.com',
       photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '1999-09-09',
+      birthdate: '30/10/1991',
     },
     {
       name: 'Gustavo',
       email: 'wagnereletroskateet@gmail.com',
       photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '1999-09-09',
+      birthdate: '30/10/1991',
     },
   ]
+
   const friendAcceptlist = [
     {
       name: 'Wagner',
       email: 'wagnereletroskateet@gmail.com',
       photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '1999-09-09',
+      birthdate: '30/10/1991',
     },
     {
       name: 'Gustavo',
       email: 'wagnereletroskateet@gmail.com',
       photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '1999-09-09',
+      birthdate: '30/10/1996',
     },
   ]
-  const [selectedItem, setSelectedItem] = useState<string | null>(null)
+
+  const [selectedItem, setSelectedItem] = useState<string | null>('Amigos')
 
   // funcao para conferir aqui
 
   function handleGoBack() {
     navigation.goBack()
+  }
+  function handleOpenFriendProfile(friendIndex: number) {
+    const friend = friendlist[friendIndex]
+
+    navigation.navigate('userFriendProfile', { friend })
+  }
+  function handleAcceptFriend() {
+    Alert.alert(`cliquei em aceitar`)
+  }
+  function handleDeclineFriend() {
+    Alert.alert(`cliquei em recusar`)
   }
 
   useFocusEffect(
@@ -119,7 +139,7 @@ export function UserFriendList() {
                     {/*           <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
                      */}
                     <AddFriendButton onPress={() => {}}>
-                      <UserPlus
+                      <Search
                         width={32}
                         height={32}
                         fill={theme.COLORS.BLUE_STROKE}
@@ -149,66 +169,28 @@ export function UserFriendList() {
                         gap: 16,
                       }}
                     >
-                      {/* 
-                      separar as duas listas
-
-                      crie alert para aceitar ou recusar
-
-                      em amigos criar botao para entrar no perfil do amigo
-
-                      dai copio o meu q mostro a foto 
-
-                      adiciono botao clonar treino
-
-                      fim
-                      */}
                       {selectedItem === 'Solicitações'
                         ? friendAcceptlist.map((friend, friendIndex) => (
-                            <FriendCardWrapper key={friendIndex}>
-                              <FriendPhotoWrapper>
-                                <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" />
-                              </FriendPhotoWrapper>
-                              <FriendContentWrapper>
-                                <FriendNameWrapper>
-                                  <FriendNameText>Wagner, 33</FriendNameText>
-                                </FriendNameWrapper>
-                                <FriendEmailWrapper>
-                                  <ActFriendButton
-                                    onPress={() => {}}
-                                  ></ActFriendButton>
-                                  <ActFriendButton
-                                    onPress={() => {}}
-                                  ></ActFriendButton>
-                                </FriendEmailWrapper>
-                              </FriendContentWrapper>
-                            </FriendCardWrapper>
+                            <FriendRequest
+                              key={friendIndex}
+                              friendIndex={friendIndex}
+                              friendName={friend.name}
+                              friendAge={diffInAge(friend?.birthdate)}
+                              onAccept={handleAcceptFriend}
+                              onDecline={handleDeclineFriend}
+                            />
                           ))
                         : friendlist.map((friend, friendIndex) => (
-                            <FriendCardWrapper key={friendIndex}>
-                              <FriendPhotoWrapper>
-                                <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" />
-                              </FriendPhotoWrapper>
-                              <FriendContentWrapper>
-                                <FriendNameWrapper>
-                                  <FriendNameText>Wagner, 33</FriendNameText>
-                                </FriendNameWrapper>
-                                <FriendEmailWrapper>
-                                  <FriendEmailText>
-                                    wagnereletroskateet@gmail.com
-                                  </FriendEmailText>
-                                </FriendEmailWrapper>
-                              </FriendContentWrapper>
-                            </FriendCardWrapper>
+                            <FriendList
+                              key={friendIndex}
+                              friendIndex={friendIndex}
+                              friendName={friend.name}
+                              friendAge={diffInAge(friend?.birthdate)}
+                              openFriendProfile={handleOpenFriendProfile}
+                            />
                           ))}
                     </ScrollView>
                   </Body>
-                  {/*       <CTAButton
-                    onPress={handleUpdateInfo}
-                    changeColor
-                    title="Salvar"
-                    loading={isWaitingApiResponse}
-                    enabled={!isWaitingApiResponse}
-                  /> */}
                 </SafeAreaView>
               </SafeAreaProvider>
             </ImageBackgroundContainer>

@@ -282,7 +282,7 @@ export function MarketPlaceHome() {
             />
             <MyWorkoutWrapper>
               <MyWorkoutTittleWrapper>
-                <Tittle>Meu treino</Tittle>
+                <Tittle>Meu treino ( linkar depois na screen) </Tittle>
               </MyWorkoutTittleWrapper>
 
               {myWorkout && (

@@ -274,6 +274,14 @@ export interface INewAccount {
 export interface IOnBoading {
   selectedLanguage: 'pt-br' | 'us'
 }
+export interface IUserFriendProfile {
+  friend: {
+    name: string
+    email: string
+    photo: string
+    birthdate: string
+  }
+}
 export interface IUserSelectListNavigation {
   dataType:
     | `Objetivo`
@@ -322,8 +330,11 @@ export declare global {
 
       userFormEditProfile: undefined
       userSupport: undefined
+      userFriendProfile: IUserFriendProfile
       userPlan: undefined
       userFriendList: undefined
+      userWorkouts: undefined
+      userPhotoTimeline: undefined
 
       userSelectFreeEquipamentList: IUserSelectFreeEquipamentListNavigation
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation

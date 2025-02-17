@@ -413,7 +413,6 @@ export interface IWorkoutInfo {
   workoutsData: IWorkoutsData[]
   workoutId: string
 }
-
 // Ou, se as chaves são sempre strings que representam números, você pode usar
 export type ILocalCardExerciseFilters = {
   bar: IptBrUs[]
@@ -424,7 +423,6 @@ export type ILocalCardExerciseFilters = {
   pulleyHandles: IptBrUs[]
   weight: IptBrUs[]
 }
-
 export interface IMyfitflowWorkoutInUse {
   workoutId?: string
 

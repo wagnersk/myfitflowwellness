@@ -21,13 +21,14 @@ export const PhillsRowContainer = styled.View`
   gap: 8px;
 `
 export const FriendCardWrapper = styled.View`
-  flex-direction: row;
-  justify-content: flex-start;
   align-items: center;
   width: 100%;
   gap: 16px;
+  display: flex;
+  flex-direction: row;
 `
-export const FriendPhotoWrapper = styled.View`
+export const FriendPhotoWrapper = styled.View``
+export const FriendPhotoImage = styled.View`
   width: 52px;
   height: 52px;
   border-radius: 26px;
@@ -36,10 +37,13 @@ export const FriendPhotoWrapper = styled.View`
 `
 export const FriendPhoto = styled.Image``
 export const FriendContentWrapper = styled.View`
-  border-bottom-width: 1px;
+  border-bottom-width: 0.3px;
   border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  flex: 1;
   padding-bottom: 8px;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 `
 export const FriendNameWrapper = styled.View``
 export const FriendEmailWrapper = styled.View`
@@ -83,7 +87,6 @@ export const ActFriendButton = styled.TouchableOpacity`
   align-items: center;
   height: 48px;
   width: 48px;
-  background-color: red;
 `
 
 export const PhillItem = styled.Text<{ selected: boolean }>`
@@ -121,7 +124,7 @@ export const TittleWrapper = styled.View`
 export const Tittle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(32)}px;
+  font-size: ${RFValue(28)}px;
 `
 export const AddFriendButtonText = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

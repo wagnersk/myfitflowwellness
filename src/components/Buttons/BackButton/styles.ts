@@ -6,4 +6,5 @@ export const Container = styled(TouchableOpacity)`
   justify-content: center;
   width: 48px;
   height: 48px;
+  left: -16px;
 `

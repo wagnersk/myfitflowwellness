@@ -2521,7 +2521,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       workoutData: IMyfitflowWorkoutInUse,
     ) {
       const workoutKey = `@myfitflow:cachedworkout-${userId}`
+      /* salvar ocmo arrray agora 
 
+ver onde eu preciso entender se existe ou nao , no load eu retorno a q ta ativo */
       // salvando data de inicio do treino
       await AsyncStorage.setItem(workoutKey, JSON.stringify(workoutData))
 

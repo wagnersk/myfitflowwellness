@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   ImageBackground,
+  ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native'
@@ -14,7 +15,7 @@ import { Photo } from '@components/Photo'
 
 import backgroundImg from '../../../../../assets/back.png'
 import { useAuth } from '@hooks/auth'
-import { differenceInYears } from 'date-fns'
+import PencilLine from '@assets/Pencil-line.svg'
 
 import {
   Container,
@@ -41,6 +42,7 @@ import {
   UserNameAndEmailWrapper,
   EditProfileButton,
   EditProfileNameText,
+  EditProfileButtonWraper,
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
 import {
@@ -95,6 +97,12 @@ export function UserProfile() {
   }
   function handleMyPlanNextStep() {
     navigation.navigate('userPlan')
+  }
+  function handleMyWorkoutsNextStep() {
+    navigation.navigate('userWorkouts')
+  }
+  function handleMyPhotosNextStep() {
+    navigation.navigate('userPhotoTimeline')
   }
   function handleMyFriendListNextStep() {
     navigation.navigate('userFriendList')
@@ -270,221 +278,254 @@ logout (opcao deletar conta)
               )}
             </SettingsWrapper>
 
-            <ProfileWrapper>
-              <PhotoBorderWrapper>
-                <Photo
-                  defaultPhotoBase64={user?.photoBase64}
-                  defaultText={
-                    selectedLanguage === 'pt-br' ? `Não há foto` : `No Photo`
-                  }
-                />
-              </PhotoBorderWrapper>
-
-              <UserNameWrapper>
-                {user?.anonymousUser ? (
-                  <UserName>
-                    {selectedLanguage === 'pt-br' ? `Convidado` : `Guest`}
-                  </UserName>
-                ) : (
-                  <UserNameAndEmailWrapper>
-                    <UserName>
-                      {user?.name}, {userAge}
-                    </UserName>
-                    <UserEmail>{user?.email}</UserEmail>
+            <ScrollView
+              contentContainerStyle={{
+                flexGrow: 1,
+                width: '100%',
+              }}
+              showsVerticalScrollIndicator={false}
+            >
+              <ProfileWrapper>
+                <PhotoBorderWrapper>
+                  <Photo
+                    defaultPhotoBase64={user?.photoBase64}
+                    defaultText={
+                      selectedLanguage === 'pt-br' ? `Não há foto` : `No Photo`
+                    }
+                  />
+                  <EditProfileButtonWraper>
                     <EditProfileButton onPress={handleEditProfileNextStep}>
-                      <EditProfileNameText>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Editar Perfil'
-                          : 'Edit Profile'}
-                      </EditProfileNameText>
+                      <PencilLine fill="blue" width={36} height={36} />
                     </EditProfileButton>
-                  </UserNameAndEmailWrapper>
+                  </EditProfileButtonWraper>
+                </PhotoBorderWrapper>
+
+                <UserNameWrapper>
+                  {user?.anonymousUser ? (
+                    <UserName>
+                      {selectedLanguage === 'pt-br' ? `Convidado` : `Guest`}
+                    </UserName>
+                  ) : (
+                    <UserNameAndEmailWrapper>
+                      <UserName>
+                        {user?.name}, {userAge}
+                      </UserName>
+                      <UserEmail>{user?.email}</UserEmail>
+                    </UserNameAndEmailWrapper>
+                  )}
+                </UserNameWrapper>
+              </ProfileWrapper>
+              <BodyWrapper>
+                <Body>
+                  <BodyText>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Seja bem-vindo ao seu perfil'
+                      : 'Welcome to your profile'}
+                  </BodyText>
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meus Amigos'
+                        : 'My Friends'
+                    }
+                    onPress={handleMyFriendListNextStep}
+                    bordertype="up"
+                    iconStyle="friendlist"
+                  />
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meus Treinos'
+                        : 'My Workouts'
+                    }
+                    onPress={handleMyWorkoutsNextStep}
+                    bordertype="none"
+                    iconStyle="barbell"
+                  />
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Minhas Fotos'
+                        : 'My Photos'
+                    }
+                    onPress={handleMyPhotosNextStep}
+                    bordertype="down"
+                    iconStyle="camera"
+                  />
+                </Body>
+                <Body>
+                  <BodyText>
+                    {selectedLanguage === 'pt-br' ? 'Pagamento' : 'Payment'}
+                  </BodyText>
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meu Plano'
+                        : 'My Plan'
+                    }
+                    onPress={handleMyPlanNextStep}
+                    bordertype="up"
+                    iconStyle="plan"
+                  />
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
+                    }
+                    onPress={handleSuporteNextStep}
+                    bordertype="down"
+                    iconStyle="support"
+                  />
+                </Body>
+
+                <Body>
+                  <BodyText>
+                    {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}
+                  </BodyText>
+
+                  {/* so por botao logout facil */}
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Deletar conta'
+                        : 'Delete Account'
+                    }
+                    onPress={handleDeleteAccountTimer}
+                    bordertype="up-down"
+                    iconStyle="trash"
+                  />
+                </Body>
+
+                {/* nao mostar pois vou transfromar em botoes */}
+                {user?.anonymousUser && (
+                  <ProfileInfoWrapper>
+                    <Title>
+                      {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
+                    </Title>
+                    <ProfileInfoText>
+                      {formattedGoal}
+                      {formattedGoal && ', '}
+                      {formattedMuscleFocus &&
+                        (selectedLanguage === 'pt-br'
+                          ? 'foco em: '
+                          : 'focus on: ')}
+                      {formattedMuscleFocus}
+                    </ProfileInfoText>
+
+                    {user && user.personalTrainerContractId && (
+                      <>
+                        <ProfileInfoDivisor />
+                        <Title>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Tempo de treino'
+                            : 'Training time'}
+                          :{' '}
+                        </Title>
+                        <ProfileInfoText>
+                          {experienceTime}{' '}
+                          {experienceTime &&
+                            (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
+                        </ProfileInfoText>
+                        <ProfileInfoDivisor />
+                      </>
+                    )}
+
+                    {user && user.personalTrainerContractId && (
+                      <>
+                        <Title>
+                          {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
+                        </Title>
+                        <ProfileInfoText>{user && user.gym}</ProfileInfoText>
+                      </>
+                    )}
+
+                    <ProfileInfoDivisor />
+                    <Title>
+                      {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}
+                      :{' '}
+                    </Title>
+                    <ProfileInfoText>
+                      {formattedFrequencyByWeek || ''}
+                      {formattedFrequencyByWeek &&
+                        (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
+                      {formattedTimeBySession || ''}
+                      {formattedTimeBySession &&
+                        (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
+                    </ProfileInfoText>
+                    <ProfileInfoDivisor />
+                    {user && user.personalTrainerContractId && (
+                      <>
+                        <Title>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Anabolizante'
+                            : 'Anabolic'}
+                          :
+                        </Title>
+                        <ProfileInfoText>
+                          {user && user.anabol
+                            ? user.anabol
+                            : selectedLanguage === 'pt-br'
+                              ? 'Nenhum'
+                              : 'None'}
+                        </ProfileInfoText>
+                        <ProfileInfoDivisor />
+                        <Title>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Restrições'
+                            : 'Restrictions'}
+                          :
+                        </Title>
+                        <ProfileInfoText>
+                          {user && user.restrictions
+                            ? user.restrictions
+                            : selectedLanguage === 'pt-br'
+                              ? 'Nenhuma'
+                              : 'None'}
+                        </ProfileInfoText>
+                        <ProfileInfoDivisor />
+                        <Title>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Equipamentos disponíveis'
+                            : 'Available equipment'}
+                          :
+                        </Title>
+                        <View
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 8,
+                          }}
+                        >
+                          {auxDataUnicFiltersText.map((val, i) => {
+                            return (
+                              <LabelWrapper key={i}>
+                                {val.data.length > 0 &&
+                                  val.data.map((_val, _i) => {
+                                    if (_val.value) {
+                                      return (
+                                        <LabelWrapper key={_i}>
+                                          <Label>
+                                            {_val.key}: {_val.value}
+                                          </Label>
+                                        </LabelWrapper>
+                                      )
+                                    } else {
+                                      return null
+                                    }
+                                  })}
+                              </LabelWrapper>
+                            )
+                          })}
+                        </View>
+                      </>
+                    )}
+                  </ProfileInfoWrapper>
                 )}
-              </UserNameWrapper>
-            </ProfileWrapper>
-
-            <BodyWrapper>
-              <Body>
-                <BodyText>
-                  {selectedLanguage === 'pt-br'
-                    ? 'Seja bem-vindo ao seu perfil'
-                    : 'Welcome to your profile'}
-                </BodyText>
-
-                <WhiteButton
-                  tittle={
-                    user?.selectedLanguage === 'pt-br'
-                      ? 'Meus Amigos'
-                      : 'My Friends'
-                  }
-                  onPress={handleMyFriendListNextStep}
-                  bordertype="up"
-                  iconStyle="friendlist"
-                />
-
-                <WhiteButton
-                  tittle={
-                    user?.selectedLanguage === 'pt-br' ? 'Meu Plano' : 'My Plan'
-                  }
-                  onPress={handleMyPlanNextStep}
-                  bordertype="none"
-                  iconStyle="plan"
-                />
-
-                <WhiteButton
-                  tittle={
-                    user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
-                  }
-                  onPress={handleSuporteNextStep}
-                  bordertype="down"
-                  iconStyle="support"
-                />
-              </Body>
-
-              <Body>
-                <BodyText>
-                  {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}
-                </BodyText>
-
-                {/* so por botao logout facil */}
-
-                <WhiteButton
-                  tittle={
-                    user?.selectedLanguage === 'pt-br'
-                      ? 'Deletar conta'
-                      : 'Delete Account'
-                  }
-                  onPress={handleDeleteAccountTimer}
-                  bordertype="up-down"
-                  iconStyle="trash"
-                />
-              </Body>
-
-              {/* nao mostar pois vou transfromar em botoes */}
-              {user?.anonymousUser && (
-                <ProfileInfoWrapper>
-                  <Title>
-                    {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
-                  </Title>
-                  <ProfileInfoText>
-                    {formattedGoal}
-                    {formattedGoal && ', '}
-                    {formattedMuscleFocus &&
-                      (selectedLanguage === 'pt-br'
-                        ? 'foco em: '
-                        : 'focus on: ')}
-                    {formattedMuscleFocus}
-                  </ProfileInfoText>
-
-                  {user && user.personalTrainerContractId && (
-                    <>
-                      <ProfileInfoDivisor />
-                      <Title>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Tempo de treino'
-                          : 'Training time'}
-                        :{' '}
-                      </Title>
-                      <ProfileInfoText>
-                        {experienceTime}{' '}
-                        {experienceTime &&
-                          (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
-                      </ProfileInfoText>
-                      <ProfileInfoDivisor />
-                    </>
-                  )}
-
-                  {user && user.personalTrainerContractId && (
-                    <>
-                      <Title>
-                        {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
-                      </Title>
-                      <ProfileInfoText>{user && user.gym}</ProfileInfoText>
-                    </>
-                  )}
-
-                  <ProfileInfoDivisor />
-                  <Title>
-                    {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}:{' '}
-                  </Title>
-                  <ProfileInfoText>
-                    {formattedFrequencyByWeek || ''}
-                    {formattedFrequencyByWeek &&
-                      (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
-                    {formattedTimeBySession || ''}
-                    {formattedTimeBySession &&
-                      (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
-                  </ProfileInfoText>
-                  <ProfileInfoDivisor />
-                  {user && user.personalTrainerContractId && (
-                    <>
-                      <Title>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Anabolizante'
-                          : 'Anabolic'}
-                        :
-                      </Title>
-                      <ProfileInfoText>
-                        {user && user.anabol
-                          ? user.anabol
-                          : selectedLanguage === 'pt-br'
-                            ? 'Nenhum'
-                            : 'None'}
-                      </ProfileInfoText>
-                      <ProfileInfoDivisor />
-                      <Title>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Restrições'
-                          : 'Restrictions'}
-                        :
-                      </Title>
-                      <ProfileInfoText>
-                        {user && user.restrictions
-                          ? user.restrictions
-                          : selectedLanguage === 'pt-br'
-                            ? 'Nenhuma'
-                            : 'None'}
-                      </ProfileInfoText>
-                      <ProfileInfoDivisor />
-                      <Title>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Equipamentos disponíveis'
-                          : 'Available equipment'}
-                        :
-                      </Title>
-                      <View
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 8,
-                        }}
-                      >
-                        {auxDataUnicFiltersText.map((val, i) => {
-                          return (
-                            <LabelWrapper key={i}>
-                              {val.data.length > 0 &&
-                                val.data.map((_val, _i) => {
-                                  if (_val.value) {
-                                    return (
-                                      <LabelWrapper key={_i}>
-                                        <Label>
-                                          {_val.key}: {_val.value}
-                                        </Label>
-                                      </LabelWrapper>
-                                    )
-                                  } else {
-                                    return null
-                                  }
-                                })}
-                            </LabelWrapper>
-                          )
-                        })}
-                      </View>
-                    </>
-                  )}
-                </ProfileInfoWrapper>
-              )}
-            </BodyWrapper>
+              </BodyWrapper>
+            </ScrollView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>
