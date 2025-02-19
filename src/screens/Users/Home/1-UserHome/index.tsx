@@ -60,6 +60,9 @@ export function UserHome() {
     savePersonalTrainerData,
     premiumUserContract,
   } = useAuth()
+
+  console.log(`myWorkout`, myWorkout)
+  console.log(`myWorkoutDataArray`, myWorkoutDataArray)
   const findWeightProgression = weightProgression?.find(
     (v) => v.userId === user?.id,
   )
@@ -77,11 +80,9 @@ export function UserHome() {
   async function handleNextStep(data: IWorkoutsData, cardIndex: number) {
     if (!myWorkoutDataArray) return
     navigation.navigate('userWorkoutList', {
-      workoutId: myWorkoutDataArray.workoutId,
+      workoutId: myWorkoutDataArray.data[0].id,
       data,
-      workoutLength: myWorkoutDataArray.workoutsData
-        ? myWorkoutDataArray.workoutsData.length
-        : 0,
+      workoutLength: myWorkoutDataArray.data[0].data.workoutsData.length,
       cardIndex,
     })
   }
@@ -214,7 +215,7 @@ export function UserHome() {
         <BodyImageBackground />
         <BodyImageBackgroundContainerSpaceBetween>
           <BodyTopWrapper>
-            {myWorkout?.workoutPeriod.periodNumber && (
+            {myWorkout?.data[0].data?.workoutPeriod.periodNumber && (
               <WarningWrapper>
                 <Warning>
                   {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
@@ -224,13 +225,13 @@ export function UserHome() {
                   {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}
                 </Warning>
                 <WarningGreetings>
-                  {myWorkout?.workoutPeriod.periodNumber * 7}
+                  {myWorkout?.data[0].data?.workoutPeriod.periodNumber * 7}
                 </WarningGreetings>
               </WarningWrapper>
             )}
           </BodyTopWrapper>
 
-          {!myWorkoutDataArray && (
+          {!myWorkoutDataArray?.data[0].data && (
             <View
               style={{
                 flex: 1,
@@ -255,15 +256,15 @@ export function UserHome() {
               </NoWorkoutFoundWrapper>
             </View>
           )}
-          {/*         {console.log(`JSON.stringify(myWorkoutDataArray)`)}
-          {console.log(JSON.stringify(myWorkoutDataArray))} */}
+          {/*         {console.log(`JSON.stringify(findWorkoutDataLog)`)}
+          {console.log(JSON.stringify(findWorkoutDataLog))} */}
           {isLoadingUserStorageData ? (
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
-            myWorkoutDataArray &&
-            myWorkoutDataArray.workoutsData.length > 0 && (
+            myWorkoutDataArray?.data[0].data &&
+            myWorkoutDataArray?.data[0].data.workoutsData.length > 0 && (
               <WorkoutBlueCardList
-                data={myWorkoutDataArray}
+                data={myWorkoutDataArray?.data[0].data}
                 handleNextStep={handleNextStep}
               />
             )

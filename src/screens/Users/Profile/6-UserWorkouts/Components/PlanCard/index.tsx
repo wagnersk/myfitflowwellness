@@ -2,32 +2,83 @@ import React from 'react'
 import {
   ButtonWrapper,
   ButtonContainer,
+  IconWrapper,
+  Container,
+  BottomWrapper,
+  BodyWraper,
+  ButtonBorderWrapper,
+  IconsWrapper,
   CardTitle,
-  CardSubTittle,
 } from './styles'
+import { IMyfitflowWorkoutInUse } from '@hooks/authTypes'
+import ArrowUp from '@assets/Arrow-fat-up.svg'
+import ArrowDown from '@assets/Arrow-fat-down.svg'
+import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
+import { CTAButton } from '@components/Buttons/CTAButton'
 
 interface PlanCardProps {
-  type: 'positive' | 'neutral'
-  title: string
-  description1: string
-  description2: string
-  onPress: () => void
+  data: IMyfitflowWorkoutInUse | null
+  selectedLanguage: 'pt-br' | 'us'
+  onPress: (index: number) => void
+  onMoveUp: (index: number) => void
+  onMoveDown: (index: number) => void
+  index: number
+  isOpenSettingsMode: boolean
+  length: number
 }
 
 export function PlanCard({
-  type,
-  title,
-  description1,
-  description2,
+  data,
+  selectedLanguage,
   onPress,
+  onMoveUp,
+  onMoveDown,
+  index,
+  isOpenSettingsMode,
+  length,
 }: PlanCardProps) {
   return (
-    <ButtonWrapper onPress={onPress}>
-      <ButtonContainer type={type}>
-        <CardTitle>{title}</CardTitle>
-        <CardSubTittle>{description1}</CardSubTittle>
-        <CardSubTittle>{description2}</CardSubTittle>
+    <Container pointerEvents={isOpenSettingsMode ? 'auto' : 'none'}>
+      <ButtonContainer>
+        <BodyWraper>
+          <WorkoutsCardItem
+            index={index}
+            data={data}
+            handleNextStep={() => onPress(index)}
+          />
+        </BodyWraper>
       </ButtonContainer>
-    </ButtonWrapper>
+      {isOpenSettingsMode && (
+        <BottomWrapper>
+          <IconsWrapper>
+            <IconWrapper>
+              <ButtonWrapper
+                disabled={index === 0}
+                onPress={() => onMoveUp(index)}
+              >
+                {index !== 0 && (
+                  <ButtonBorderWrapper>
+                    <ArrowUp width={32} height={32} fill={'green'} />
+                  </ButtonBorderWrapper>
+                )}
+              </ButtonWrapper>
+            </IconWrapper>
+
+            <IconWrapper>
+              <ButtonWrapper
+                disabled={index === length - 1}
+                onPress={() => onMoveDown(index)}
+              >
+                {index !== length - 1 && (
+                  <ButtonBorderWrapper>
+                    <ArrowDown width={32} height={32} fill={'red'} />
+                  </ButtonBorderWrapper>
+                )}
+              </ButtonWrapper>
+            </IconWrapper>
+          </IconsWrapper>
+        </BottomWrapper>
+      )}
+    </Container>
   )
 }

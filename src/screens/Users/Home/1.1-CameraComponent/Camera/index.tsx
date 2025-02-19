@@ -17,7 +17,7 @@ import * as Sharing from 'expo-sharing'
 import * as FileSystem from 'expo-file-system'
 import SkiaContent from '../Components/SkiaContent'
 import FlipCameraIcon from '@assets/Flip-camera.svg'
-import X from '@assets/x.svg'
+import X from '@assets/X.svg'
 
 import { format } from 'date-fns'
 import { ptBR, enUS } from 'date-fns/locale'

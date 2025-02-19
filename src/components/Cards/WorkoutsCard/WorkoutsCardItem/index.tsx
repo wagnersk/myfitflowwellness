@@ -26,17 +26,23 @@ import { IMyfitflowWorkoutInUse } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
 
 interface Props extends TouchableOpacityProps {
-  data: IMyfitflowWorkoutInUse
+  data: IMyfitflowWorkoutInUse | null
   handleNextStep: (data: IMyfitflowWorkoutInUse) => void
+  index?: number
 }
 
-export function WorkoutsCardItem({ data, handleNextStep, ...rest }: Props) {
+export function WorkoutsCardItem({
+  data,
+  handleNextStep,
+  index,
+  ...rest
+}: Props) {
   const size = 100
 
   const { user } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   return (
-    <Container {...rest} onPress={() => handleNextStep(data)}>
+    <Container {...rest} onPress={() => data && handleNextStep(data)}>
       <ContainerGradient colors={['#000000', '#FFFFFF']}>
         <PhotoImageWrapper size={size}>
           <PhotoPreLoadingImageBackground size={size} />
@@ -65,10 +71,11 @@ export function WorkoutsCardItem({ data, handleNextStep, ...rest }: Props) {
               <Title>
                 {getTrimmedName(
                   20,
-                  data &&
+                  (data &&
                     selectedLanguage &&
                     data.workoutName &&
-                    data.workoutName[selectedLanguage],
+                    data.workoutName[selectedLanguage]) ||
+                    undefined,
                 )}
               </Title>
 

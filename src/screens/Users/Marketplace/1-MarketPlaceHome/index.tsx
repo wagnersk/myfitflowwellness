@@ -146,6 +146,7 @@ export function MarketPlaceHome() {
     }
  */
   }
+
   async function handleWorkoutDetailNextStep(data: IMyfitflowWorkoutInUse) {
     const newDataWithCategoryNameFromProps = {
       data,
@@ -157,14 +158,17 @@ export function MarketPlaceHome() {
       enableSyncDataAndShare,
     })
   }
+
   function handleViewAllCategoriesStep() {
     // jogar pra dentro do meu treino
     navigation.navigate('userAllCategories')
   }
+
   function handlePreferencesStep() {
     // jogar pra dentro do meu treino
     navigation.navigate('userPrefferences')
   }
+
   function handleCallTeacherWhatsapp() {
     if (!user) return
     Alert.alert(
@@ -289,7 +293,7 @@ export function MarketPlaceHome() {
                 <WorkoutInfoHomeCardWrapper>
                   <WorkoutsCardItem
                     handleNextStep={handleWorkoutDetailNextStep}
-                    data={myWorkout}
+                    data={myWorkout.data[0].data}
                   />
                 </WorkoutInfoHomeCardWrapper>
               )}

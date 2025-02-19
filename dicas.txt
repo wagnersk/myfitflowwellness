@@ -1,0 +1,34 @@
+ferramentas tipo anki para praticar a repeticao espacada nos conceitos básicos
+
+como esta sendo a minha experiencia
+
+como o foco em conversacao , 
+
+
+talvez um feedback mensal sobre os pontos do 
+
+compartilhar video nao flui muito 
+
+
+o diferencial é realmente o contexto de tecnologia a fundo 
+
+
+
+gabriel
+
+pontos fortes a didádica a e atencão em perceber nossos pontos fracos e direcionar a aula
+
+eu entrei pois meu objetivo é trabalhar como programador fora do brasil , portugal
+e sei que o 
+
+
+First look for Ui , so i try imagine the datascructure , so with this structure in my mind , 
+i try draw it 
+
+
+first i try to understand all requisites , the main goal of app
+then i organize the goals , what every screen will do
+ , then draw it on figma , while im drawing it i think about 
+fews libs to can help it
+
+and only after finish draw i start programming

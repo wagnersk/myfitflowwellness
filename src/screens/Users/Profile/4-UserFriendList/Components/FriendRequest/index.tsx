@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTheme } from 'styled-components/native'
 import Check from '@assets/Check.svg'
-import X from '@assets/x.svg'
+import X from '@assets/X.svg'
 
 import {
   FriendCardWrapper,

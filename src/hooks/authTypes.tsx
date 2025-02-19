@@ -413,6 +413,18 @@ export interface IWorkoutInfo {
   workoutsData: IWorkoutsData[]
   workoutId: string
 }
+export interface IMyWorkoutsData {
+  userId: string
+  createdAt: number
+  updatedAt: number
+  data: {
+    id: string
+    data: IWorkoutInfo
+    createdAt: number
+    updatedAt: number
+  }[]
+}
+
 // Ou, se as chaves são sempre strings que representam números, você pode usar
 export type ILocalCardExerciseFilters = {
   bar: IptBrUs[]
@@ -502,6 +514,21 @@ export interface IMyfitflowWorkoutInUse {
   // ---
   createdAt?: ServerTimestamp
   updatedAt?: ServerTimestamp
+}
+
+export interface IMyfitflowWorkoutInUseData {
+  id: string
+  data: IMyfitflowWorkoutInUse
+  createdAt: number
+  updatedAt: number
+  workoutStartAt: number
+  workoutEndsAt: number
+}
+export interface IMyWorkouts {
+  userId: string
+  createdAt: number
+  updatedAt: number
+  data: IMyfitflowWorkoutInUseData[]
 }
 
 export type ICachedWorkoutsWithLastUpdatedTimestamp = {
@@ -874,8 +901,8 @@ export interface AuthContextData {
   personalsList: IPersonal[] | null
   workoutsCategories: IWorkoutCategory[] | null
   workouts: ICachedWorkoutsWithLastUpdatedTimestamp | null
-  myWorkoutDataArray: IWorkoutInfo | null
-  myWorkout: IMyfitflowWorkoutInUse | null
+  myWorkoutDataArray: IMyWorkoutsData | null
+  myWorkout: IMyWorkouts | null
   premiumUserContract: IPremiumUserContract | null
 
   isLogging: boolean

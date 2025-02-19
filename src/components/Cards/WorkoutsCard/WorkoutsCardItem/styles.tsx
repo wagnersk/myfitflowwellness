@@ -13,7 +13,7 @@ export const Container = styled(TouchableOpacity)``
 export const InfoAndButtonAndBottomLineWrapper = styled.View`
   flex-direction: column;
   flex: 1;
-  padding: 8px 8px 0 8px;
+  padding: 4px 4px 0 4px;
 `
 
 export const InfoAndButtonWrapper = styled.View`
@@ -30,7 +30,7 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(16)}px;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 `
 
 export const SubTitle = styled.Text`

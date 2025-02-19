@@ -69,6 +69,8 @@ import {
   IPremiumUserContract,
   IWorkoutExercisesFirebase,
   ICachedCardExerciseData,
+  IMyWorkouts,
+  IMyWorkoutsData,
 } from './authTypes'
 
 import {
@@ -100,12 +102,9 @@ function AuthProvider({ children }: AuthProviderProps) {
     IWorkoutCategory[] | null
   >([])
 
-  const [myWorkout, setMyWorkout] = useState<IMyfitflowWorkoutInUse | null>(
-    null,
-  )
-  const [myWorkoutDataArray, setMyWorkoutArray] = useState<IWorkoutInfo | null>(
-    null,
-  )
+  const [myWorkout, setMyWorkout] = useState<IMyWorkouts | null>(null)
+  const [myWorkoutDataArray, setMyWorkoutArray] =
+    useState<IMyWorkoutsData | null>(null)
 
   const [graphicsValues, setGraphicsValues] = useState<
     IGraphicsValues[] | null
@@ -2333,12 +2332,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutsDataArray',
     )
 
-    /** E) LOG 
-     * 
-     *     workoutCategoryId lqJKr5N3eRd2Hp8SZguA
-           workoutId OgZtSW84QX5YZvvLTWoO
- 
- */
     const docSnapshot = await getDoc(workoutExercisesRef)
 
     if (docSnapshot.exists()) {
@@ -2347,6 +2340,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       const allWorkoutsExercisesVideoInfo =
         await handleFetchExercisesInfo(initialData)
       if (!allWorkoutsExercisesVideoInfo) return false
+
       const formattedExerciseData = initialData.workoutsData.map(
         (_workoutsData) => {
           const formattedExerciseData = _workoutsData.cardExerciseData
@@ -2504,30 +2498,162 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     async function saveExerciseDataInCache(
       userId: string,
-      exercisesData: IWorkoutInfo,
+      exerciseData: IWorkoutInfo,
     ) {
+      console.log(`INICIO saveExerciseDataInCache`, myWorkoutDataArray)
+      if (!user) return
       const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
 
-      await AsyncStorage.setItem(
-        workoutExercisesKey,
-        JSON.stringify(exercisesData),
-      )
+      let myWorkoutDataExercises: IMyWorkoutsData | null
 
-      setMyWorkoutArray(exercisesData)
+      if (myWorkoutDataArray) {
+        myWorkoutDataExercises = updateExistingExercise(exerciseData)
+      } else {
+        myWorkoutDataExercises = createNewExerciseData(userId, exerciseData)
+      }
+
+      if (myWorkoutDataExercises) {
+        await AsyncStorage.setItem(
+          workoutExercisesKey,
+          JSON.stringify(myWorkoutDataExercises),
+        )
+        setMyWorkoutArray(myWorkoutDataExercises)
+      }
+      // Salva os exercícios atualizados no AsyncStorage
+
+      function updateExistingExercise(exerciseData: IWorkoutInfo) {
+        if (!myWorkoutDataArray) return null
+
+        const exerciseIndex = myWorkoutDataArray.data.findIndex(
+          (v) => v.id === exerciseData.workoutId,
+        )
+
+        const copyMyWorkoutDataArray = {
+          ...myWorkoutDataArray,
+        }
+        if (exerciseIndex !== -1) {
+          // Atualiza o exercício existente
+          copyMyWorkoutDataArray.data[exerciseIndex] = {
+            id: exerciseData.workoutId,
+            data: exerciseData,
+            createdAt: copyMyWorkoutDataArray.data[exerciseIndex].createdAt,
+            updatedAt: new Date().getTime(),
+          }
+        } else {
+          // Adiciona um novo exercício
+          copyMyWorkoutDataArray.data.push({
+            id: exerciseData.workoutId,
+            data: exerciseData,
+            createdAt: new Date().getTime(),
+            updatedAt: new Date().getTime(),
+          })
+        }
+
+        return copyMyWorkoutDataArray
+      }
+
+      function createNewExerciseData(
+        userId: string,
+        exerciseData: IWorkoutInfo,
+      ) {
+        console.log(`dataDoestNotExists`)
+        return {
+          userId,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+          data: [
+            {
+              id: exerciseData.workoutId,
+              data: exerciseData,
+              createdAt: new Date().getTime(),
+              updatedAt: new Date().getTime(),
+            },
+          ],
+        }
+      }
     }
 
     async function saveMyWorkoutInCache(
       userId: string,
       workoutData: IMyfitflowWorkoutInUse,
     ) {
+      console.log(`INICIO saveMyWorkoutInCache`)
+      if (!user) return
       const workoutKey = `@myfitflow:cachedworkout-${userId}`
-      /* salvar ocmo arrray agora 
 
-ver onde eu preciso entender se existe ou nao , no load eu retorno a q ta ativo */
-      // salvando data de inicio do treino
-      await AsyncStorage.setItem(workoutKey, JSON.stringify(workoutData))
+      // Tenta buscar o MyWorkouts existente
+      let myWorkoutExercises: IMyWorkouts | null
 
-      setMyWorkout(workoutData)
+      if (myWorkout) {
+        myWorkoutExercises = updateExistingWorkout(workoutData)
+      } else {
+        myWorkoutExercises = createNewWorkoutData(userId, workoutData)
+      }
+
+      if (myWorkoutExercises) {
+        await AsyncStorage.setItem(
+          workoutKey,
+          JSON.stringify(myWorkoutExercises),
+        )
+        setMyWorkout(myWorkoutExercises)
+      }
+
+      console.log(`FIM saveMyWorkoutInCache`)
+
+      function updateExistingWorkout(workoutData: IMyfitflowWorkoutInUse) {
+        if (!myWorkout) return null
+
+        const workoutIndex = myWorkout.data.findIndex(
+          (workout) => workout.id === workoutData.workoutId,
+        )
+
+        const copyMyWorkout = {
+          ...myWorkout,
+        }
+
+        if (workoutIndex !== -1) {
+          // Atualiza o workout existente
+          copyMyWorkout.data[workoutIndex] = {
+            ...copyMyWorkout.data[workoutIndex],
+            data: workoutData,
+            updatedAt: new Date().getTime(),
+          }
+        } else {
+          // Adiciona um novo workout
+          copyMyWorkout.data.push({
+            id: workoutData.workoutId || '',
+            data: workoutData,
+            createdAt: new Date().getTime(),
+            updatedAt: new Date().getTime(),
+            workoutStartAt: new Date().getTime(),
+            workoutEndsAt: new Date().getTime(),
+          })
+        }
+
+        return copyMyWorkout
+      }
+
+      function createNewWorkoutData(
+        userId: string,
+        workoutData: IMyfitflowWorkoutInUse,
+      ): IMyWorkouts {
+        console.log(`dataDoestNotExists`)
+        return {
+          userId,
+          createdAt: new Date().getTime(),
+          updatedAt: new Date().getTime(),
+          data: [
+            {
+              id: workoutData.workoutId || '',
+              data: workoutData,
+              createdAt: new Date().getTime(),
+              updatedAt: new Date().getTime(),
+              workoutStartAt: new Date().getTime(),
+              workoutEndsAt: new Date().getTime(),
+            },
+          ],
+        }
+      }
     }
   }
 
@@ -2756,32 +2882,38 @@ ver onde eu preciso entender se existe ou nao , no load eu retorno a q ta ativo 
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
-
   async function loadMyWorkoutAndMyWorkoutExercises(userId: string) {
+    console.log(`tgenho chamando`)
     const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
     const workoutKey = `@myfitflow:cachedworkout-${userId}`
 
-    const userLocalDataWorkoutExercises =
-      await AsyncStorage.getItem(workoutExercisesKey)
+    try {
+      // Carrega os exercícios do AsyncStorage
+      const userLocalDataWorkoutExercises =
+        await AsyncStorage.getItem(workoutExercisesKey)
 
-    if (userLocalDataWorkoutExercises) {
-      const cachedUserLocalDataWorkoutExercises = JSON.parse(
-        userLocalDataWorkoutExercises,
-      ) as IWorkoutInfo
-      /*       console.log(`cachedUserLocalDataWorkoutExercises`)
-      console.log(JSON.stringify(cachedUserLocalDataWorkoutExercises)) */
+      if (userLocalDataWorkoutExercises) {
+        const cachedUserLocalDataWorkoutExercises = JSON.parse(
+          userLocalDataWorkoutExercises,
+        ) as IMyWorkoutsData
+        setMyWorkoutArray(cachedUserLocalDataWorkoutExercises)
+      } else {
+        setMyWorkoutArray(null)
+      }
 
-      setMyWorkoutArray(cachedUserLocalDataWorkoutExercises)
-    }
+      // Carrega os workouts do AsyncStorage
+      const userLocalDataWorkout = await AsyncStorage.getItem(workoutKey)
 
-    const userLocalDataWorkout = await AsyncStorage.getItem(workoutKey)
-
-    if (userLocalDataWorkout) {
-      const cachedUserLocalDataWorkouts = JSON.parse(
-        userLocalDataWorkout,
-      ) as IMyfitflowWorkoutInUse
-
-      setMyWorkout(cachedUserLocalDataWorkouts)
+      if (userLocalDataWorkout) {
+        const cachedUserLocalDataWorkouts = JSON.parse(
+          userLocalDataWorkout,
+        ) as IMyWorkouts
+        setMyWorkout(cachedUserLocalDataWorkouts)
+      } else {
+        setMyWorkout(null)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar os dados do AsyncStorage:', error)
     }
   }
 
