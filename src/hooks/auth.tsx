@@ -81,6 +81,7 @@ import {
 } from './selectOptionsDataFirebaseTypes'
 import { IWorkoutCategory } from '@src/@types/navigation'
 import {
+  addDaysToTimestamp,
   addWeeksToTimestamp,
   formatDateToDDMMYYYY,
 } from '@utils/calculeEndDateWithWeeks'
@@ -2731,6 +2732,62 @@ function AuthProvider({ children }: AuthProviderProps) {
       return copyMyWorkout
     }
   }
+  async function updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList(
+    workoutData: IMyfitflowWorkoutInUse,
+  ) {
+    if (!user) return
+    if (!myWorkout) return
+    const userId = user.id
+
+    const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+    // Tenta buscar o MyWorkouts existente
+    const myWorkoutExercises = updateExistingWorkout(workoutData)
+
+    if (myWorkoutExercises) {
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(myWorkoutExercises))
+      setMyWorkout(myWorkoutExercises)
+    }
+
+    console.log(`FIM saveMyWorkoutInCache`)
+    function updateExistingWorkout(workoutData: IMyfitflowWorkoutInUse) {
+      if (!myWorkout) return null
+
+      const workoutIndex = myWorkout.data.findIndex(
+        (workout) => workout.id === workoutData.workoutId,
+      )
+
+      if (workoutIndex === -1) return null
+      const copyMyWorkout = {
+        ...myWorkout,
+      }
+      // Atualiza o workout existente
+
+      // Atualiza o workout existente
+      let previousEndDate = copyMyWorkout.data[0].workoutEndsAt
+      const newOrderedWorkouts = copyMyWorkout.data.map((workout, index) => {
+        if (index === 0) return workout
+
+        const periodInWeekNumber = workout.data.workoutPeriod.periodNumber
+
+        const newStartDate = addDaysToTimestamp(previousEndDate, 1) // proximo dia livre
+        const newEndDate = addWeeksToTimestamp(newStartDate, periodInWeekNumber)
+
+        const newWorkout = {
+          ...workout,
+          updatedAt: new Date().getTime(),
+          workoutStartAt: newStartDate,
+          workoutEndsAt: newEndDate,
+        }
+
+        previousEndDate = newEndDate
+        return newWorkout
+      })
+
+      copyMyWorkout.data = newOrderedWorkouts
+      return copyMyWorkout
+    }
+  }
   async function updateStartAndEndDateFromMyWorkoutInCache(
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
@@ -2772,7 +2829,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       let previousEndDate = startDate
       const newOrderedWorkouts = copyMyWorkout.data.map((workout, index) => {
         const periodInWeekNumber = workout.data.workoutPeriod.periodNumber
-        const newStartDate = previousEndDate
+
+        const newStartDate = addDaysToTimestamp(previousEndDate, 1) // proximo dia livre
         const newEndDate = addWeeksToTimestamp(newStartDate, periodInWeekNumber)
 
         const newWorkout = {
@@ -2790,7 +2848,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       return copyMyWorkout
     }
   }
-
   async function deleteMyWorkoutAndmyWorkoutDataArray(workoutId?: string) {
     const userId = user?.id
     if (!workoutId) return
@@ -3253,6 +3310,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
         updateStartAndEndDateFromMyWorkoutInCache,
         resetAllStartAndEndDateFromMyWorkoutInCache,
+        updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList,
 
         updateMyWorkoutInCache,
 

@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { ReactNode } from 'react'
 
 export const Container = styled.View`
   flex: 1;

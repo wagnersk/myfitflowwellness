@@ -42,7 +42,7 @@ import Gear from '@assets/Gear.svg'
 import { WorkoutUserEditWorkoutModal } from '@components/Modals/WorkoutUserEditWorkoutModal'
 import { formatTimestampToDate } from '@utils/formatTimestampToDate'
 import { CTAButton } from '@components/Buttons/CTAButton'
-import { addWeeksToTimestamp } from '@utils/calculeEndDateWithWeeks'
+import { useTheme } from 'styled-components'
 
 export interface IUserSelect {
   id: number
@@ -62,9 +62,11 @@ export function UserWorkouts() {
     isWaitingApiResponse,
     myWorkout,
     updateStartAndEndDateFromMyWorkoutInCache,
+    updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList,
     resetAllStartAndEndDateFromMyWorkoutInCache,
     updateMyWorkoutInCache,
   } = useAuth()
+
   const [isOpenSettingsMode, setIsOpenSettingsMode] = useState(false)
   const [defaultModalState, setDefaultModalState] =
     useState<IModalStateWorkoutLogData | null>(null)
@@ -78,8 +80,11 @@ export function UserWorkouts() {
   const [isDataOrderChanged, setIsDataOrderChanged] = useState(false)
   const [workouts, setWorkouts] = useState<IMyWorkouts | null>(myWorkout)
 
+  const theme = useTheme()
+
   // console.log(` myWorkout`, myWorkout?.data)
   const navigation = useNavigation()
+
   function handleGoBack() {
     if (isDataOrderChanged) {
       Alert.alert(
@@ -92,7 +97,7 @@ export function UserWorkouts() {
           },
           {
             text: 'Salvar',
-            onPress: () => [saveNewOrderModal(workouts), navigation.goBack()],
+            onPress: () => [saveNewOrderModal(workouts)],
           },
         ],
         { cancelable: false },
@@ -103,12 +108,17 @@ export function UserWorkouts() {
   }
 
   async function handleOnPressWorkout(index: number) {
-    console.log(`in`)
     setDefaultModalState((prev) => ({
       ...prev,
       isOpenModalEditWorkout: true,
       activeWeightIndex: index,
     }))
+  }
+
+  async function handleStartWorkoutCounterDate(index: number) {
+    if (index !== 0) return
+
+    startWorkoutCounterDate()
   }
 
   async function handleDeleteWorkout(index: number) {
@@ -137,15 +147,7 @@ export function UserWorkouts() {
               const getWorkoutInUse = copyWorkouts.data[0].data
               console.log(`getWorkoutInUse`, getWorkoutInUse)
               updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, 0)
-              // recomecar a contagem do treino
             }
-
-            // se o q eu deletei foi o primeiro
-            // entao eu recomeco a contagem do trein otbm
-
-            // hook que salva no cache
-            // primeiro ver se os index estao mudando corretamente
-            // caso exclua o ultimo para nao travar
 
             updateMyWorkoutInCache(copyWorkouts)
           },
@@ -156,6 +158,8 @@ export function UserWorkouts() {
   }
 
   function handleMoveUp(index: number) {
+    const isWorkoutAlreadyStarted = myWorkout?.data[0].workoutStartAt !== 0
+    if (isWorkoutAlreadyStarted && index === 1) return
     if (index === 0) return
     setWorkouts((prevWorkouts) => {
       if (!prevWorkouts) return null
@@ -174,6 +178,30 @@ export function UserWorkouts() {
     })
 
     setIsDataOrderChanged(true)
+  }
+
+  function handleResetTimerUp(index: number) {
+    Alert.alert(
+      'Reiniciar Contador',
+      'Tem certeza que deseja reiniciar o contador do treino atual?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Reiniciar',
+          onPress: () => {
+            if (!myWorkout) return
+            const getWorkoutInUse = myWorkout.data[0].data
+            resetAllStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse)
+            console.log(`Contador reiniciado para o treino no índice`, index)
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+    // setIsDataOrderChanged(true)
   }
 
   function handleMoveDown(index: number) {
@@ -205,8 +233,8 @@ export function UserWorkouts() {
     }))
   }
 
-  function deleteWorkoutCounterDate(data: IMyWorkouts | null) {
-    if (!data) return
+  function deleteWorkoutCounterDate() {
+    if (!myWorkout) return
 
     Alert.alert(
       'Aviso',
@@ -219,7 +247,7 @@ export function UserWorkouts() {
         {
           text: 'Deletar',
           onPress: () => {
-            const getWorkoutInUse = data.data[0].data
+            const getWorkoutInUse = myWorkout.data[0].data
             console.log(`getWorkoutInUse`, getWorkoutInUse)
             resetAllStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse)
           },
@@ -229,54 +257,73 @@ export function UserWorkouts() {
     )
   }
 
-  function startWorkoutCounterDate(data: IMyWorkouts | null) {
-    // apenas reorganizar a ordem dos treinos
-    // hook que starta o primeiro
-    if (!data) return
+  function startWorkoutCounterDate() {
+    if (!myWorkout) return
 
     const dateNow = new Date().getTime()
 
-    const getWorkoutInUse = data.data[0].data
+    const getWorkoutInUse = myWorkout.data[0].data
     console.log(`getWorkoutInUse`, getWorkoutInUse)
     console.log(`dateNow`, dateNow)
     updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow)
   }
 
   function saveNewOrderModal(data: IMyWorkouts | null) {
-    /* 
-    
-    quando deleta eu preciso se tiver o primario ja iniciado , zerar ele */
-    Alert.alert(
-      'Aviso',
-      'Você não pode alterar a ordem dos treinos antes de iniciar a contagem. Deseja iniciar a contagem do treino?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Iniciar',
-          onPress: () => [
-            startWorkoutCounterDate(data),
-            setIsDataOrderChanged(false),
-            setIsOpenSettingsMode(false),
-            data?.data[0].workoutStartAt !== 0 &&
-              onDeleteIfAlreadyStarted(data),
-          ],
-        },
-      ],
-      { cancelable: false },
+    if (!data) return
+    if (!myWorkout) return
+    const copyWorkouts = { ...myWorkout }
+    setIsDataOrderChanged(false)
+    setIsOpenSettingsMode(false)
+    updateMyWorkoutInCache(copyWorkouts)
+
+    const getWorkoutInUse = copyWorkouts.data[0].data
+    updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList(
+      getWorkoutInUse,
     )
+
+    // updateStartAndEndDateFromMyWorkoutInCache(data?.data[0].data, 0)
+    return
+    /* 
+    temos duas situacoes aqui
+
+    1 treino ja comecou?
+    quando deleta eu preciso se tiver o primario ja iniciado , zerar ele */
+    /*    Alert.alert('Treino', 'Treino selecionado')
+    if (!myWorkout) return
+    const copyWorkouts = { ...myWorkout }
+    updateMyWorkoutInCache(copyWorkouts) */
+    const firstWorkoutAlreadyStarted = data?.data[0].workoutStartAt !== 0
+    if (firstWorkoutAlreadyStarted) {
+      Alert.alert(
+        'Aviso',
+        'Você não pode alterar a ordem dos treinos antes de iniciar a contagem. Deseja iniciar a contagem do treino?',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Iniciar',
+            onPress: () => [onDeleteIfAlreadyStarted(data)],
+          },
+        ],
+        { cancelable: false },
+      )
+    } else {
+      setIsDataOrderChanged(false)
+      setIsOpenSettingsMode(false)
+      if (!myWorkout) return
+      const copyWorkouts = { ...myWorkout }
+      updateMyWorkoutInCache(copyWorkouts)
+    }
+
     function onDeleteIfAlreadyStarted(data: IMyWorkouts | null) {
       if (!data) return
       const getWorkoutInUse = data.data[0].data
       resetAllStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse)
+      setIsDataOrderChanged(false)
+      setIsOpenSettingsMode(false)
     }
-    setIsDataOrderChanged(false)
-    setIsOpenSettingsMode(false)
-    // updateMyWorkoutInCache(data)
-
-    // apenas reorganizar a ordem dos treinos
   }
 
   useEffect(() => {
@@ -324,7 +371,11 @@ export function UserWorkouts() {
                     <ContainerTittle>Meus Treinos</ContainerTittle>
                     <IconWrapper>
                       <OpenSettingsButton onPress={handleOpenSettingsMode}>
-                        <Gear fill={'blue'} height={32} width={32} />
+                        <Gear
+                          fill={theme.COLORS.BLUE_STROKE}
+                          height={32}
+                          width={32}
+                        />
                       </OpenSettingsButton>
                     </IconWrapper>
                   </ContainerTittleWrapper>
@@ -346,11 +397,15 @@ export function UserWorkouts() {
                         <CardsWrapper>
                           {currentWorkout && currentWorkout.data && (
                             <PlanCard
+                              isWorkoutAlreadyStarted={
+                                currentWorkout?.workoutStartAt !== 0
+                              }
                               data={currentWorkout.data}
                               selectedLanguage={
                                 user?.selectedLanguage || 'pt-br'
                               }
                               onPress={() => handleOnPressWorkout(0)}
+                              onReset={() => handleResetTimerUp(0)}
                               onMoveUp={() => handleMoveUp(0)}
                               onMoveDown={() => handleMoveDown(0)}
                               isOpenSettingsMode={isOpenSettingsMode}
@@ -367,6 +422,9 @@ export function UserWorkouts() {
                             myWorkout &&
                             nextWorkouts.map((v, i) => (
                               <PlanCard
+                                isWorkoutAlreadyStarted={
+                                  currentWorkout?.workoutStartAt !== 0
+                                }
                                 key={i + 1}
                                 data={v.data || null}
                                 selectedLanguage={
@@ -374,6 +432,7 @@ export function UserWorkouts() {
                                 }
                                 onPress={() => handleOnPressWorkout(i + 1)}
                                 onMoveUp={() => handleMoveUp(i + 1)}
+                                onReset={() => handleResetTimerUp(i + 1)}
                                 onMoveDown={() => handleMoveDown(i + 1)}
                                 index={i + 1}
                                 isOpenSettingsMode={isOpenSettingsMode}
@@ -391,26 +450,19 @@ export function UserWorkouts() {
                                 )} - ${formatTimestampToDate(
                                   currentWorkout?.workoutEndsAt ?? 0,
                                 )}`} */}
-                  {!isOpenSettingsMode && (
-                    <CTAButton
-                      changeColor={currentWorkout?.workoutStartAt === 0}
-                      style={{ marginBottom: 54 }}
-                      onPress={() =>
-                        currentWorkout?.workoutStartAt === 0
-                          ? startWorkoutCounterDate(workouts)
-                          : deleteWorkoutCounterDate(workouts)
-                      }
-                      title={
-                        currentWorkout?.workoutStartAt === 0
-                          ? 'Iniciar contagem do treino'
-                          : 'Recomeçar contagem do treino'
-                      }
-                      loading={false}
-                      enabled={!false}
-                    />
-                  )}
+                  {!isOpenSettingsMode &&
+                    currentWorkout?.workoutStartAt === 0 && (
+                      <CTAButton
+                        changeColor={currentWorkout?.workoutStartAt === 0}
+                        style={{ marginBottom: 54 }}
+                        onPress={startWorkoutCounterDate}
+                        title={'Iniciar contagem do treino'}
+                        loading={false}
+                        enabled={!false}
+                      />
+                    )}
 
-                  {isOpenSettingsMode && (
+                  {isOpenSettingsMode && isDataOrderChanged && (
                     <CTAButton
                       style={{ marginBottom: 54 }}
                       onPress={() => saveNewOrderModal(workouts)}
@@ -444,6 +496,8 @@ export function UserWorkouts() {
         {myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0] && (
           <WorkoutUserEditWorkoutModal
             handleDeleteWorkout={handleDeleteWorkout}
+            handleStartCounter={handleStartWorkoutCounterDate}
+            handleRestartCounter={deleteWorkoutCounterDate}
             closeModal={() => closeModal()}
             data={myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0]}
             activeIndex={defaultModalState?.activeWeightIndex ?? 0}

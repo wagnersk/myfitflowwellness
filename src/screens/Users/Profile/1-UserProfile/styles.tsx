@@ -143,8 +143,8 @@ export const PhotoBorderWrapper = styled.View`
 
 export const EditProfileButtonWraper = styled.View`
   position: absolute;
-  bottom: 0;
-  right: 4;
+  bottom: 0px;
+  right: 4px;
 `
 export const LabelWrapper = styled.View`
   display: flex;

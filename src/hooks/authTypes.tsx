@@ -816,6 +816,9 @@ export interface AuthContextData {
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
   ) => Promise<void>
+  updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList: (
+    workoutData: IMyfitflowWorkoutInUse,
+  ) => Promise<void>
   updateMyWorkoutInCache: (data: IMyWorkouts) => Promise<void>
 
   updateCachedExerciseHistoryData: (

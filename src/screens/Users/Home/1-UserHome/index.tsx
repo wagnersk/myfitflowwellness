@@ -198,7 +198,6 @@ export function UserHome() {
       )
       if (workoutData) {
         setGetWorkoutArrayData(workoutData.data)
-        console.log(`getWorkoutArrayData`, JSON.stringify(workoutData.data))
       }
     }
   }, [myWorkoutDataArray, myWorkout, user])

@@ -13,6 +13,7 @@ import {
 import { IMyfitflowWorkoutInUse } from '@hooks/authTypes'
 import ArrowUp from '@assets/Arrow-fat-up.svg'
 import ArrowDown from '@assets/Arrow-fat-down.svg'
+import ClockCounterClockwise from '@assets/ClockCounterClockwise.svg'
 import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
 import { CTAButton } from '@components/Buttons/CTAButton'
 
@@ -22,8 +23,10 @@ interface PlanCardProps {
   onPress: (index: number) => void
   onMoveUp: (index: number) => void
   onMoveDown: (index: number) => void
+  onReset: (index: number) => void
   index: number
   isOpenSettingsMode: boolean
+  isWorkoutAlreadyStarted: boolean
   length: number
 }
 
@@ -33,10 +36,20 @@ export function PlanCard({
   onPress,
   onMoveUp,
   onMoveDown,
+  onReset,
   index,
   isOpenSettingsMode,
+  isWorkoutAlreadyStarted,
   length,
 }: PlanCardProps) {
+  const isFirstElement = index === 0
+  const isLastElement = index === length - 1
+  const isFirstElementWithWorkoutStartedMode =
+    isWorkoutAlreadyStarted && index === 0
+
+  const isSecondElementWithWorkoutStartedMode =
+    isWorkoutAlreadyStarted && index === 1
+
   return (
     <Container pointerEvents={isOpenSettingsMode ? 'auto' : 'none'}>
       <ButtonContainer>
@@ -52,29 +65,51 @@ export function PlanCard({
         <BottomWrapper>
           <IconsWrapper>
             <IconWrapper>
-              <ButtonWrapper
-                disabled={index === 0}
-                onPress={() => onMoveUp(index)}
-              >
-                {index !== 0 && (
-                  <ButtonBorderWrapper>
-                    <ArrowUp width={32} height={32} fill={'green'} />
-                  </ButtonBorderWrapper>
-                )}
-              </ButtonWrapper>
+              {!isFirstElement && (
+                <ButtonWrapper
+                  disabled={isSecondElementWithWorkoutStartedMode}
+                  onPress={() => onMoveUp(index)}
+                >
+                  {/* isWorkoutAlreadyStarted */}
+
+                  {!isSecondElementWithWorkoutStartedMode && (
+                    <ButtonBorderWrapper>
+                      <ArrowUp width={32} height={32} fill={'green'} />
+                    </ButtonBorderWrapper>
+                  )}
+                </ButtonWrapper>
+              )}
             </IconWrapper>
 
             <IconWrapper>
-              <ButtonWrapper
-                disabled={index === length - 1}
-                onPress={() => onMoveDown(index)}
-              >
-                {index !== length - 1 && (
-                  <ButtonBorderWrapper>
-                    <ArrowDown width={32} height={32} fill={'red'} />
-                  </ButtonBorderWrapper>
-                )}
-              </ButtonWrapper>
+              {!isLastElement && (
+                <ButtonWrapper
+                  disabled={isLastElement}
+                  onPress={() =>
+                    isFirstElementWithWorkoutStartedMode
+                      ? onReset(index)
+                      : onMoveDown(index)
+                  }
+                >
+                  {/*     {index !== length - 1 && ( */}
+
+                  {isFirstElementWithWorkoutStartedMode ? (
+                    <ButtonBorderWrapper>
+                      <ClockCounterClockwise
+                        width={32}
+                        height={32}
+                        fill={'green'}
+                      />
+                    </ButtonBorderWrapper>
+                  ) : (
+                    <ButtonBorderWrapper>
+                      <ArrowDown width={32} height={32} fill={'red'} />
+                    </ButtonBorderWrapper>
+                  )}
+
+                  {/*       )} */}
+                </ButtonWrapper>
+              )}
             </IconWrapper>
           </IconsWrapper>
         </BottomWrapper>

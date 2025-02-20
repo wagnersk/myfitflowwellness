@@ -25,10 +25,13 @@ import {
   UpdateButton,
   UpdateText,
 } from './styles'
-import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData, IMyWorkouts } from '@hooks/authTypes'
 import { formatTimestampToDate } from '@utils/formatTimestampToDate'
 interface InputProps extends TextInputProps {
   handleDeleteWorkout: (index: number) => void
+  handleStartCounter: (index: number) => void
+  handleRestartCounter: (index: number) => void
+
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
   isPrimaryWorkout: boolean
@@ -37,6 +40,8 @@ interface InputProps extends TextInputProps {
 }
 export function WorkoutUserEditWorkoutModal({
   handleDeleteWorkout,
+  handleStartCounter,
+  handleRestartCounter,
   closeModal,
   isPrimaryWorkout,
   data,
@@ -62,7 +67,7 @@ export function WorkoutUserEditWorkoutModal({
     closeModal()
   }
 
-  useEffect(() => {}, [])
+  const workoutAlreadyStarted = data.workoutStartAt !== 0
 
   return (
     <KeyboardAvoidingView
@@ -96,6 +101,26 @@ export function WorkoutUserEditWorkoutModal({
                   </UpdateButton>
                 </SubTittleWrapper> */}
               </TipsTitleNoteWrapper>
+
+              <InputsWrapper>
+                {activeIndex === 0 && (
+                  <UpdateButton
+                    workoutAlreadyStarted={workoutAlreadyStarted}
+                    selected={false}
+                    onPress={() =>
+                      data.workoutStartAt === 0
+                        ? handleStartCounter(activeIndex)
+                        : handleRestartCounter(activeIndex)
+                    }
+                  >
+                    <UpdateText workoutAlreadyStarted={workoutAlreadyStarted}>
+                      {data.workoutStartAt === 0
+                        ? 'Iniciar treino'
+                        : 'Zerar contador de treino'}
+                    </UpdateText>
+                  </UpdateButton>
+                )}
+              </InputsWrapper>
               <InputsWrapper>
                 <DeleteButton
                   selected={false}

@@ -1,4 +1,4 @@
-import { format, addWeeks } from 'date-fns'
+import { format, addWeeks, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 export function formatDateToDDMMYYYY(date: Date): string {
@@ -8,5 +8,11 @@ export function formatDateToDDMMYYYY(date: Date): string {
 export function addWeeksToTimestamp(timestamp: number, weeks: number): number {
   const date = new Date(timestamp)
   const futureDate = addWeeks(date, weeks)
+  return futureDate.getTime()
+}
+
+export function addDaysToTimestamp(timestamp: number, days: number): number {
+  const date = new Date(timestamp)
+  const futureDate = addDays(date, days)
   return futureDate.getTime()
 }

@@ -5,13 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient'
 
 import { ReactNode } from 'react'
 
-interface Props {
-  isFocused?: boolean
-}
-
 type TouchableOpacityButtonProps = {
   children: ReactNode
   selected?: boolean
+  workoutAlreadyStarted?: boolean
 }
 
 export const OverLayTop = styled.View`
@@ -82,10 +79,13 @@ export const DeleteText = styled.Text`
   color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
   justify-content: flex-start;
 `
-export const UpdateText = styled.Text`
+export const UpdateText = styled.Text<{ workoutAlreadyStarted: boolean }>`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+  color: ${({ theme, workoutAlreadyStarted }) =>
+    workoutAlreadyStarted
+      ? theme.COLORS.BLUE_STROKE
+      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   justify-content: flex-start;
   padding: 4px;
 `
@@ -125,28 +125,30 @@ export const ItensButton = styled(
       background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
     `}
 `
-export const DeleteButton = styled(
-  TouchableOpacity,
-)<TouchableOpacityButtonProps>`
+const TouchableOpacityComponent = styled(TouchableOpacity)`
   justify-content: center;
   align-items: center;
   flex-direction: row;
-  height: 36px;
+  height: 48px;
   border-radius: 12px;
-  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+  width: 100%;
   padding: 4px;
 `
-export const UpdateButton = styled(
-  TouchableOpacity,
+export const DeleteButton = styled(
+  TouchableOpacityComponent,
 )<TouchableOpacityButtonProps>`
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  height: 36px;
-  border-radius: 12px;
-  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-
-  padding: 4px;
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+`
+export const UpdateButton = styled(
+  TouchableOpacityComponent,
+)<TouchableOpacityButtonProps>`
+  background-color: ${({ theme, workoutAlreadyStarted }) =>
+    workoutAlreadyStarted ? 'transparent' : theme.COLORS.AUX_GOOGLE_GREEN};
+  border: 2px solid
+    ${({ theme, workoutAlreadyStarted }) =>
+      workoutAlreadyStarted
+        ? theme.COLORS.BLUE_STROKE
+        : theme.COLORS.AUX_GOOGLE_GREEN};
 `
 
 export const DatePickerWrapper = styled.View`
