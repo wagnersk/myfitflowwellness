@@ -16,6 +16,7 @@ import {
   SubTitle,
   IconTopWrapper,
   IconBottomWrapper,
+  DateWrapper,
 } from './styles'
 
 import { getTrimmedName } from '@utils/getTrimmedName'
@@ -24,6 +25,7 @@ import { WorkoutBoxInfo } from '@components/WorkoutBoxInfo'
 import { getIcon } from '@utils/getIcon'
 import { IMyfitflowWorkoutInUse } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
+import { formatTimestampToDate } from '@utils/formatTimestampToDate'
 
 interface Props extends TouchableOpacityProps {
   data: IMyfitflowWorkoutInUse | null
@@ -39,8 +41,13 @@ export function WorkoutsCardItem({
 }: Props) {
   const size = 100
 
-  const { user } = useAuth()
+  const { user, myWorkout } = useAuth()
   const selectedLanguage = user?.selectedLanguage
+
+  const getMyWorkout = myWorkout?.data.find(
+    (workout) => workout.id === data?.workoutId,
+  )
+
   return (
     <Container {...rest} onPress={() => data && handleNextStep(data)}>
       <ContainerGradient colors={['#000000', '#FFFFFF']}>
@@ -120,6 +127,18 @@ export function WorkoutsCardItem({
                     ],
                   )}
               </SubTitle>
+              <DateWrapper>
+                {getMyWorkout?.workoutStartAt === 0 &&
+                  'Treino ainda não iniciado'}
+
+                {getMyWorkout?.workoutStartAt !== 0 &&
+                  index !== 0 &&
+                  `${formatTimestampToDate(
+                    getMyWorkout?.workoutStartAt ?? 0,
+                  )} - ${formatTimestampToDate(
+                    getMyWorkout?.workoutEndsAt ?? 0,
+                  )}`}
+              </DateWrapper>
             </InfoWrapper>
             <IconTopWrapper>
               {data && data.workoutPlanType && (

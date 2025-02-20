@@ -25,6 +25,11 @@ export const InfoAndButtonWrapper = styled.View`
 export const InfoWrapper = styled.View`
   justify-content: center;
 `
+export const DateWrapper = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(12)}px;
+`
 
 export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { TouchableHighlightProps, ActivityIndicator } from 'react-native'
-import { useTheme } from 'styled-components/native'
 
 import {
   Container,
@@ -9,6 +8,7 @@ import {
   LinearGradientButton,
   CTAButtonPressable,
 } from './styles'
+import { useTheme } from 'styled-components'
 
 interface Props extends TouchableHighlightProps {
   title: string
@@ -28,10 +28,6 @@ export function CTAButton({
   ...rest
 }: Props) {
   const theme = useTheme()
-  const colors = changeColor
-    ? theme.COLORS.GRADIENT_CARD
-    : theme.COLORS.GRADIENT_BUTTON
-
   return (
     <Container>
       <CTAButtonPressable
@@ -41,10 +37,11 @@ export function CTAButton({
         {...rest}
       >
         <LinearGradientButton
-          colors={['#000000', '#FFFFFF']}
+          changeColor={changeColor}
           workoutAlreadySelected={workoutAlreadySelected || false}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
+          colors={['#000000', '#000000']}
         >
           {loading ? (
             <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />

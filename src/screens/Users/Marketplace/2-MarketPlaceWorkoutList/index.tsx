@@ -102,8 +102,12 @@ export function MarketPlaceWorkoutList() {
         <BodyImageBackground />
         <FlatList
           data={filteredByActiveWorkoutList}
-          renderItem={({ item }) => (
-            <WorkoutsCardList item={item} handleNextStep={handleNextStep} />
+          renderItem={({ item, index }) => (
+            <WorkoutsCardList
+              index={index}
+              item={item}
+              handleNextStep={handleNextStep}
+            />
           )}
           keyExtractor={(item, i) => i.toString()}
           showsVerticalScrollIndicator={true} // Para mostrar a barra de rolagem vertical

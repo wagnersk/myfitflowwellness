@@ -40,7 +40,7 @@ import {
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
-import { IWorkoutsData } from '@hooks/authTypes'
+import { IMyWorkoutsData, IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
 
 export function UserHome() {
@@ -61,8 +61,9 @@ export function UserHome() {
     premiumUserContract,
   } = useAuth()
 
-  console.log(`myWorkout`, myWorkout)
-  console.log(`myWorkoutDataArray`, myWorkoutDataArray)
+  const [getWorkoutArrayData, setGetWorkoutArrayData] =
+    useState<IWorkoutInfo | null>(null)
+
   const findWeightProgression = weightProgression?.find(
     (v) => v.userId === user?.id,
   )
@@ -184,6 +185,24 @@ export function UserHome() {
     })
   }, [])
 
+  useEffect(() => {
+    if (
+      myWorkoutDataArray &&
+      myWorkoutDataArray.data &&
+      myWorkout &&
+      myWorkout.data[0] &&
+      user
+    ) {
+      const workoutData = myWorkoutDataArray.data.find(
+        (v) => v.id === myWorkout.data[0].id,
+      )
+      if (workoutData) {
+        setGetWorkoutArrayData(workoutData.data)
+        console.log(`getWorkoutArrayData`, JSON.stringify(workoutData.data))
+      }
+    }
+  }, [myWorkoutDataArray, myWorkout, user])
+
   useFocusEffect(
     useCallback(() => {
       navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
@@ -215,20 +234,23 @@ export function UserHome() {
         <BodyImageBackground />
         <BodyImageBackgroundContainerSpaceBetween>
           <BodyTopWrapper>
-            {myWorkout?.data[0].data?.workoutPeriod.periodNumber && (
-              <WarningWrapper>
-                <Warning>
-                  {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
-                </Warning>
-                <WarningGreetings>{daysPassed} </WarningGreetings>
-                <Warning>
-                  {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}
-                </Warning>
-                <WarningGreetings>
-                  {myWorkout?.data[0].data?.workoutPeriod.periodNumber * 7}
-                </WarningGreetings>
-              </WarningWrapper>
-            )}
+            {myWorkout &&
+              myWorkout.data &&
+              myWorkout.data[0] &&
+              myWorkout.data[0].data?.workoutPeriod.periodNumber && (
+                <WarningWrapper>
+                  <Warning>
+                    {user?.selectedLanguage === 'pt-br' ? 'Dia' : 'Day'}{' '}
+                  </Warning>
+                  <WarningGreetings>{daysPassed} </WarningGreetings>
+                  <Warning>
+                    {user?.selectedLanguage === 'pt-br' ? 'de' : 'of'}{' '}
+                  </Warning>
+                  <WarningGreetings>
+                    {myWorkout?.data[0].data?.workoutPeriod.periodNumber * 7}
+                  </WarningGreetings>
+                </WarningWrapper>
+              )}
           </BodyTopWrapper>
 
           {!myWorkoutDataArray?.data[0].data && (
@@ -261,10 +283,11 @@ export function UserHome() {
           {isLoadingUserStorageData ? (
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
-            myWorkoutDataArray?.data[0].data &&
-            myWorkoutDataArray?.data[0].data.workoutsData.length > 0 && (
+            getWorkoutArrayData &&
+            getWorkoutArrayData.workoutsData &&
+            getWorkoutArrayData.workoutsData.length > 0 && (
               <WorkoutBlueCardList
-                data={myWorkoutDataArray?.data[0].data}
+                data={getWorkoutArrayData}
                 handleNextStep={handleNextStep}
               />
             )

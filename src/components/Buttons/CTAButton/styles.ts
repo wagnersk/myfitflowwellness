@@ -8,6 +8,7 @@ interface Props {
   children: ReactNode
   loading?: boolean
   workoutAlreadySelected?: boolean
+  changeColor?: boolean
 }
 
 export const Container = styled.View`
@@ -33,14 +34,15 @@ export const Title = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(16)}px;
 `
-
-export const LinearGradientButton = styled(LinearGradient).attrs(
-  ({ theme }) => ({
-    colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
+export const LinearGradientButton = styled(LinearGradient).attrs<Props>(
+  ({ theme, changeColor }) => ({
+    colors: changeColor
+      ? [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]]
+      : [theme.COLORS.GRADIENT_BUTTON[0], theme.COLORS.GRADIENT_BUTTON[1]],
     start: { x: 0, y: 1 },
     end: { x: 1, y: 0 },
   }),
-)<{ workoutAlreadySelected: boolean }>`
+)`
   height: 100%;
   width: 100%;
   align-items: center;

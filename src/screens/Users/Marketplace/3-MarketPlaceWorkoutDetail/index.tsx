@@ -30,7 +30,6 @@ import {
   Wrapper,
   TitleDivision,
   TitleWorkout,
-  IconContainer,
   BlurIconViewWrapper,
   ContainerGradient,
   ActionButtonsWrapper,
@@ -43,7 +42,6 @@ import {
   SubTittleWrapper,
 } from './styles'
 import { useAuth } from '@hooks/auth'
-import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 
 import { Plan } from '@components/Plan'
 import { EquipamentsInfo } from '@components/EquipamentsInfo'
@@ -54,7 +52,6 @@ import { getIcon } from '@utils/getIcon'
 
 import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
-import { translateMuscleGroupInfo } from '@utils/translateMuscles'
 import Arrow from '@assets/Arrow-counter-clockwise.svg'
 import Export from '@assets/Export.svg'
 
@@ -66,6 +63,8 @@ export function MarketPlaceWorkoutDetail() {
     updateUserWorkoutCache,
     cachedUserWorkoutsLog,
     getLastUpdatedAtUserWorkoutCache,
+    loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
+    deleteMyWorkoutAndmyWorkoutDataArray,
   } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
@@ -73,27 +72,27 @@ export function MarketPlaceWorkoutDetail() {
   const dataParam = route.params as IMarketPlaceWorkoutDetailNavigation
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
 
-  const {
-    loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
-    deleteMyWorkoutAndmyWorkoutDataArray,
-  } = useAuth()
-
-  const cachedWorkoutId = myWorkout?.workoutId
   const selectedWorkoutId = dataParam.data.workoutId
 
-  const workoutAlreadySelected = cachedWorkoutId === selectedWorkoutId
+  const cachedWorkout = myWorkout?.data.find((v) => v.id === selectedWorkoutId)
 
-  const tittle = cachedWorkoutId
+  const workoutAlreadySelected = !!cachedWorkout
+
+  const tittle = cachedWorkout
     ? workoutAlreadySelected
       ? selectedLanguage === 'pt-br'
         ? 'Cancelar treino'
         : 'Cancel workout'
       : selectedLanguage === 'pt-br'
         ? 'Cancelar outro treino antes'
-        : 'Cancel other workout first'
+        : 'Cancel another workout first'
     : selectedLanguage === 'pt-br'
-      ? 'Escolher treino'
-      : 'Choose workout'
+      ? myWorkout && myWorkout.data.length >= 1
+        ? `Adicionar na fila  ${myWorkout.data.length - 1} / 2`
+        : 'Escolher treino'
+      : myWorkout && myWorkout.data.length >= 1
+        ? 'Add to queue'
+        : 'Choose workout'
 
   function handleGoBack() {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
@@ -124,7 +123,8 @@ quando ele aceitar eu consigo pegar o treino dele atual
 
  
 */
-  async function handleDeleteWorkout() {
+  async function handleDeleteWorkout(workoutId?: string) {
+    if (!workoutId) return
     Alert.alert(
       user?.selectedLanguage === 'pt-br'
         ? 'Você realmente quer cancelar o treino?'
@@ -138,7 +138,7 @@ quando ele aceitar eu consigo pegar o treino dele atual
         {
           text: user?.selectedLanguage === 'pt-br' ? 'Sim' : 'Yes',
           onPress: async () => {
-            await deleteMyWorkoutAndmyWorkoutDataArray()
+            await deleteMyWorkoutAndmyWorkoutDataArray(workoutId)
             navigation.navigate('marketPlaceHome')
           },
         },
@@ -388,13 +388,15 @@ quando ele aceitar eu consigo pegar o treino dele atual
               <CTAButton
                 enabled={!isWaitingApiResponse}
                 loading={isWaitingApiResponse}
-                workoutAlreadySelected={!!cachedWorkoutId}
+                workoutAlreadySelected={!!cachedWorkout}
                 style={{
                   marginBottom: 52,
                   width: '100%',
                 }}
                 onPress={() => {
-                  cachedWorkoutId ? handleDeleteWorkout() : handleChoose()
+                  cachedWorkout
+                    ? handleDeleteWorkout(dataParam.data.workoutId)
+                    : handleChoose()
                 }}
                 /* bigSize={true} */
                 changeColor

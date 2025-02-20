@@ -46,6 +46,7 @@ import {
   BlurViewAddSecondsWrapper,
 } from './styles'
 import { WorkoutCronometer } from '@components/WorkoutCronometer'
+import { addWeeksToTimestamp } from '@utils/calculeEndDateWithWeeks'
 
 export interface IModalStateWorkoutLogData {
   isOpenModalUserNotes: boolean
@@ -76,7 +77,7 @@ function WorkoutVideoCardComponent({
   const {
     cachedUserWorkoutsLog, // log do peso pessoal do usuario, é o cache que carrega com os cards
     myWorkout, // CACHE DO TREINO DIRETO DO FIREBASE
-
+    updateStartAndEndDateFromMyWorkoutInCache,
     updateCachedUserWorkoutsLog,
     saveWeightProgression,
     updateUserWorkoutCache,
@@ -117,6 +118,7 @@ function WorkoutVideoCardComponent({
         timeNow: number,
       ): ICachedCardExerciseData {
         const transformedDataSets = _defaultSets.map((v) => {
+          if (!v.repetitionData) return v
           const transformedData: ICachedUsingWorkoutData = {
             repetitionData: v.repetitionData.map((va) => {
               return {
@@ -188,7 +190,10 @@ function WorkoutVideoCardComponent({
 
   const [modalCachedCardExerciseData, setModalCachedCardExerciseData] =
     useState<ICachedCardExerciseData>(mergedData)
-
+  console.log(
+    ` asdadasfsdfgsadfgsd sfsdfmodalCachedCardExerciseData?.workoutExerciseSets`,
+    modalCachedCardExerciseData?.workoutExerciseSets,
+  )
   const allItensCompleted =
     modalCachedCardExerciseData?.workoutExerciseSets?.every(
       (v) => v.completedData.isCompleted,
@@ -631,6 +636,10 @@ modalCachedCardExerciseData.notes.value
     markAsCompletedGreenCheckAndCacheSave()
     onTimerManage('play')
 
+    if (myWorkout?.data[workoutCardIndex].workoutStartAt === 0) {
+      startWorkoutCounterDate()
+    }
+
     function markAsCompletedGreenCheckAndCacheSave() {
       /* so ta aparecendo proximo quando eu forco o render
       
@@ -718,6 +727,22 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
+  function startWorkoutCounterDate() {
+    if (!myWorkout) return
+
+    const dateNow = new Date().getTime()
+
+    const periodInWeekNumber =
+      myWorkout?.data[workoutCardIndex].data.workoutPeriod.periodNumber || 0
+
+    const dateEnd = addWeeksToTimestamp(dateNow, periodInWeekNumber)
+
+    const getWorkoutInUse = myWorkout.data[0].data
+    console.log(`getWorkoutInUse`, getWorkoutInUse)
+    console.log(`dateNow`, dateNow)
+    console.log(`dateEnd`, dateEnd)
+    updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow, dateEnd)
+  }
   /* 
 
 
@@ -1220,11 +1245,6 @@ conferir se toda atualizacao reflete no updatedAt do pai
     }
 
     function marcarItem(index: number) {
-      console.log(`index`, index)
-      console.log(
-        `defaultModalState.activeWeightIndex`,
-        defaultModalState.activeWeightIndex,
-      )
       const copyProgression = { ...modalCachedCardExerciseData }
       if (copyProgression.workoutExerciseSets === undefined) return
 
@@ -1271,6 +1291,10 @@ conferir se toda atualizacao reflete no updatedAt do pai
         completedTimestamp,
         workoutCardIndex,
       )
+
+      if (myWorkout?.data[workoutCardIndex].workoutStartAt === 0) {
+        startWorkoutCounterDate()
+      }
     }
   }
   // ok

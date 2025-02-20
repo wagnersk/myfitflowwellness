@@ -786,7 +786,7 @@ export interface AuthContextData {
   loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises: (
     data: IMyfitflowWorkoutInUse,
   ) => Promise<boolean>
-  deleteMyWorkoutAndmyWorkoutDataArray: () => Promise<void>
+  deleteMyWorkoutAndmyWorkoutDataArray: (workoutId?: string) => Promise<void>
   premiumUserUpdateProfileUpdatedAt: (workoutsId: string) => Promise<void>
 
   loadWorkoutsCategories: () => Promise<void>
@@ -808,6 +808,16 @@ export interface AuthContextData {
   /// eliminiar isso pois vou usar o sumary
 
   loadCachedExerciseHistoryData: (userId: string) => Promise<void>
+
+  resetAllStartAndEndDateFromMyWorkoutInCache: (
+    workoutData: IMyfitflowWorkoutInUse,
+  ) => Promise<void>
+  updateStartAndEndDateFromMyWorkoutInCache: (
+    workoutData: IMyfitflowWorkoutInUse,
+    startDate: number,
+  ) => Promise<void>
+  updateMyWorkoutInCache: (data: IMyWorkouts) => Promise<void>
+
   updateCachedExerciseHistoryData: (
     data: ICachedExerciseHistoryData,
   ) => Promise<void>
@@ -824,7 +834,7 @@ export interface AuthContextData {
   // firebase
   updateUserWorkoutCache: (
     workoutCacheId: string,
-    data: IWorkoutLog,
+    data: IWorkoutCardLogData,
     lastCompletedTimestamp: number,
   ) => Promise<void>
   getLastUpdatedAtUserWorkoutCache: (

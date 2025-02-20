@@ -53,21 +53,6 @@ export function WorkoutUserEditWorkoutModal({
       ? `${activeIndex} - Treino Reserva`
       : `${activeIndex} - Reserve Workout`
 
-  async function updateWeight(index: number) {
-    if (index === -1) return
-
-    const updatedRangeOfSets = rangeOfSets.map((item, i) => ({
-      ...item,
-      selected: i === index ? !item.selected : item.selected,
-    }))
-    setRangeOfSets(updatedRangeOfSets)
-
-    const selecteSet = rangeOfSets[index].value
-
-    handleUpdateRangeOfSets(selecteSet)
-    handleOverlayPress()
-  }
-
   async function onDelete(index: number) {
     handleDeleteWorkout(index)
   }

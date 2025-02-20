@@ -80,6 +80,10 @@ import {
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
 import { IWorkoutCategory } from '@src/@types/navigation'
+import {
+  addWeeksToTimestamp,
+  formatDateToDDMMYYYY,
+} from '@utils/calculeEndDateWithWeeks'
 
 const db = getFirestore(firebaseApp)
 
@@ -103,7 +107,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   >([])
 
   const [myWorkout, setMyWorkout] = useState<IMyWorkouts | null>(null)
-  const [myWorkoutDataArray, setMyWorkoutArray] =
+  const [myWorkoutDataArray, setMyWorkoutDataArray] =
     useState<IMyWorkoutsData | null>(null)
 
   const [graphicsValues, setGraphicsValues] = useState<
@@ -697,7 +701,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     setUser(null)
     setMyWorkout(null)
-    setMyWorkoutArray(null)
+    setMyWorkoutDataArray(null)
     setCachedUserWorkoutsLog(null)
     setCachedExerciseHistoryData(null)
     setWeightProgression(null)
@@ -2214,15 +2218,9 @@ function AuthProvider({ children }: AuthProviderProps) {
   /*   console.log('cachedUserWorkoutsLog()')
   console.log(JSON.stringify(cachedUserWorkoutsLog)) */
 
-  // apagarCached()
+  /// apagarCached()
   async function apagarCached() {
-    const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-hM7GEloty3dBVSsDOaD5cJHsC3R2`
-
-    await AsyncStorage.setItem(
-      storageCachedExercisesWeightDoneLogDataKey,
-      JSON.stringify(null),
-    )
-    setCachedUserWorkoutsLog(null)
+    AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
   }
 
   // fazer se inspirando no notes
@@ -2517,13 +2515,13 @@ function AuthProvider({ children }: AuthProviderProps) {
           workoutExercisesKey,
           JSON.stringify(myWorkoutDataExercises),
         )
-        setMyWorkoutArray(myWorkoutDataExercises)
+        setMyWorkoutDataArray(myWorkoutDataExercises)
       }
       // Salva os exercícios atualizados no AsyncStorage
 
       function updateExistingExercise(exerciseData: IWorkoutInfo) {
         if (!myWorkoutDataArray) return null
-
+        const dateTime = new Date().getTime()
         const exerciseIndex = myWorkoutDataArray.data.findIndex(
           (v) => v.id === exerciseData.workoutId,
         )
@@ -2537,15 +2535,15 @@ function AuthProvider({ children }: AuthProviderProps) {
             id: exerciseData.workoutId,
             data: exerciseData,
             createdAt: copyMyWorkoutDataArray.data[exerciseIndex].createdAt,
-            updatedAt: new Date().getTime(),
+            updatedAt: dateTime,
           }
         } else {
           // Adiciona um novo exercício
           copyMyWorkoutDataArray.data.push({
             id: exerciseData.workoutId,
             data: exerciseData,
-            createdAt: new Date().getTime(),
-            updatedAt: new Date().getTime(),
+            createdAt: dateTime,
+            updatedAt: dateTime,
           })
         }
 
@@ -2556,17 +2554,18 @@ function AuthProvider({ children }: AuthProviderProps) {
         userId: string,
         exerciseData: IWorkoutInfo,
       ) {
+        const dateTime = new Date().getTime()
         console.log(`dataDoestNotExists`)
         return {
           userId,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
+          createdAt: dateTime,
+          updatedAt: dateTime,
           data: [
             {
               id: exerciseData.workoutId,
               data: exerciseData,
-              createdAt: new Date().getTime(),
-              updatedAt: new Date().getTime(),
+              createdAt: dateTime,
+              updatedAt: dateTime,
             },
           ],
         }
@@ -2577,10 +2576,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       userId: string,
       workoutData: IMyfitflowWorkoutInUse,
     ) {
-      console.log(`INICIO saveMyWorkoutInCache`)
       if (!user) return
       const workoutKey = `@myfitflow:cachedworkout-${userId}`
-
       // Tenta buscar o MyWorkouts existente
       let myWorkoutExercises: IMyWorkouts | null
 
@@ -2610,23 +2607,25 @@ function AuthProvider({ children }: AuthProviderProps) {
         const copyMyWorkout = {
           ...myWorkout,
         }
+        const currentDate = new Date().getTime()
 
         if (workoutIndex !== -1) {
           // Atualiza o workout existente
           copyMyWorkout.data[workoutIndex] = {
             ...copyMyWorkout.data[workoutIndex],
             data: workoutData,
-            updatedAt: new Date().getTime(),
+            updatedAt: currentDate,
           }
         } else {
           // Adiciona um novo workout
+
           copyMyWorkout.data.push({
             id: workoutData.workoutId || '',
             data: workoutData,
-            createdAt: new Date().getTime(),
-            updatedAt: new Date().getTime(),
-            workoutStartAt: new Date().getTime(),
-            workoutEndsAt: new Date().getTime(),
+            createdAt: currentDate,
+            updatedAt: currentDate,
+            workoutStartAt: 0,
+            workoutEndsAt: 0,
           })
         }
 
@@ -2638,18 +2637,23 @@ function AuthProvider({ children }: AuthProviderProps) {
         workoutData: IMyfitflowWorkoutInUse,
       ): IMyWorkouts {
         console.log(`dataDoestNotExists`)
+
+        // Exemplo de uso:
+        const currentDate = new Date().getTime()
+        // const formattedCurrentDate = formatDateToDDMMYYYY(currentDate)
+
         return {
           userId,
-          createdAt: new Date().getTime(),
-          updatedAt: new Date().getTime(),
+          createdAt: currentDate,
+          updatedAt: currentDate,
           data: [
             {
               id: workoutData.workoutId || '',
               data: workoutData,
-              createdAt: new Date().getTime(),
-              updatedAt: new Date().getTime(),
-              workoutStartAt: new Date().getTime(),
-              workoutEndsAt: new Date().getTime(),
+              createdAt: currentDate,
+              updatedAt: currentDate,
+              workoutStartAt: 0,
+              workoutEndsAt: 0,
             },
           ],
         }
@@ -2657,16 +2661,148 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function deleteMyWorkoutAndmyWorkoutDataArray() {
+  async function updateMyWorkoutInCache(data: IMyWorkouts) {
+    if (!user) return
+    if (!myWorkout) return
+    const userId = user.id
+
+    console.log(`INICIO saveMyWorkoutInCache`)
+    if (!user) return
+    const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+    // Tenta buscar o MyWorkouts existente
+
+    if (data) {
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(data))
+      setMyWorkout(data)
+    }
+
+    console.log(`FIM saveMyWorkoutInCache`)
+  }
+
+  async function resetAllStartAndEndDateFromMyWorkoutInCache(
+    workoutData: IMyfitflowWorkoutInUse,
+  ) {
+    if (!user) return
+    if (!myWorkout) return
+    const userId = user.id
+
+    console.log(`INICIO saveMyWorkoutInCache`)
+    if (!user) return
+    const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+    // Tenta buscar o MyWorkouts existente
+    const myWorkoutExercises = resetallDatesFromExistingWorkout(workoutData)
+
+    if (myWorkoutExercises) {
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(myWorkoutExercises))
+      setMyWorkout(myWorkoutExercises)
+    }
+
+    console.log(`FIM saveMyWorkoutInCache`)
+    function resetallDatesFromExistingWorkout(
+      workoutData: IMyfitflowWorkoutInUse,
+    ) {
+      if (!myWorkout) return null
+
+      const workoutIndex = myWorkout.data.findIndex(
+        (workout) => workout.id === workoutData.workoutId,
+      )
+
+      if (workoutIndex === -1) return null
+      const copyMyWorkout = {
+        ...myWorkout,
+      }
+      // Atualiza o workout existente
+
+      // Atualiza o workout existente
+      const newOrderedWorkouts = copyMyWorkout.data.map((workout, index) => {
+        const newWorkout = {
+          ...workout,
+          updatedAt: new Date().getTime(),
+          workoutStartAt: 0,
+          workoutEndsAt: 0,
+        }
+
+        return newWorkout
+      })
+
+      copyMyWorkout.data = newOrderedWorkouts
+      return copyMyWorkout
+    }
+  }
+  async function updateStartAndEndDateFromMyWorkoutInCache(
+    workoutData: IMyfitflowWorkoutInUse,
+    startDate: number,
+  ) {
+    if (!user) return
+    if (!myWorkout) return
+    const userId = user.id
+
+    console.log(`INICIO saveMyWorkoutInCache`)
+    if (!user) return
+    const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+    // Tenta buscar o MyWorkouts existente
+    const myWorkoutExercises = updateExistingWorkout(workoutData, startDate)
+
+    if (myWorkoutExercises) {
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(myWorkoutExercises))
+      setMyWorkout(myWorkoutExercises)
+    }
+
+    console.log(`FIM saveMyWorkoutInCache`)
+    function updateExistingWorkout(
+      workoutData: IMyfitflowWorkoutInUse,
+      startDate: number,
+    ) {
+      if (!myWorkout) return null
+
+      const workoutIndex = myWorkout.data.findIndex(
+        (workout) => workout.id === workoutData.workoutId,
+      )
+
+      if (workoutIndex === -1) return null
+      const copyMyWorkout = {
+        ...myWorkout,
+      }
+      // Atualiza o workout existente
+
+      // Atualiza o workout existente
+      let previousEndDate = startDate
+      const newOrderedWorkouts = copyMyWorkout.data.map((workout, index) => {
+        const periodInWeekNumber = workout.data.workoutPeriod.periodNumber
+        const newStartDate = previousEndDate
+        const newEndDate = addWeeksToTimestamp(newStartDate, periodInWeekNumber)
+
+        const newWorkout = {
+          ...workout,
+          updatedAt: new Date().getTime(),
+          workoutStartAt: newStartDate,
+          workoutEndsAt: newEndDate,
+        }
+
+        previousEndDate = newEndDate
+        return newWorkout
+      })
+
+      copyMyWorkout.data = newOrderedWorkouts
+      return copyMyWorkout
+    }
+  }
+
+  async function deleteMyWorkoutAndmyWorkoutDataArray(workoutId?: string) {
     const userId = user?.id
+    if (!workoutId) return
     if (!userId) {
       console.error('Dados necessários para carregar treino estão ausentes.')
       return
     }
 
     await resetStateCache()
-    await deleteExerciseDataInCache(userId)
-    await deleteMyWorkoutInCache(userId)
+    await deleteExerciseDataInCache(userId, workoutId)
+    await deleteMyWorkoutInCache(userId, workoutId)
+
     Alert.alert(
       user?.selectedLanguage === 'pt-br' ? 'Opa!' : 'Oops!',
       user?.selectedLanguage === 'pt-br'
@@ -2678,21 +2814,54 @@ function AuthProvider({ children }: AuthProviderProps) {
       setCachedExerciseHistoryData(null)
     }
 
-    async function deleteExerciseDataInCache(userId: string) {
+    async function deleteExerciseDataInCache(
+      userId: string,
+      workoutId: string,
+    ) {
       const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
 
-      await AsyncStorage.setItem(workoutExercisesKey, JSON.stringify(null))
+      const copyMyWorkoutDataArray = {
+        ...myWorkoutDataArray,
+      } as IMyWorkoutsData
+      if (!copyMyWorkoutDataArray) return
+      if (!copyMyWorkoutDataArray.data) return
+      // quero deletar
+      const newWorkoutDataArray = copyMyWorkoutDataArray.data.filter(
+        (v) => v.id !== workoutId,
+      )
 
-      setMyWorkoutArray(null)
+      copyMyWorkoutDataArray.data = newWorkoutDataArray
+
+      await AsyncStorage.setItem(
+        workoutExercisesKey,
+        JSON.stringify(newWorkoutDataArray),
+      )
+
+      setMyWorkoutDataArray(copyMyWorkoutDataArray)
     }
 
-    async function deleteMyWorkoutInCache(userId: string) {
+    async function deleteMyWorkoutInCache(userId: string, workoutId: string) {
       const workoutKey = `@myfitflow:cachedworkout-${userId}`
 
-      // salvando data de inicio do treino
-      await AsyncStorage.setItem(workoutKey, JSON.stringify(null))
+      if (!myWorkout) return
 
-      setMyWorkout(null)
+      const copyMyWorkout = { ...myWorkout }
+
+      if (!copyMyWorkout.data) return
+
+      // Filtra os workouts para remover o workout com o workoutId fornecido
+      const newWorkoutDataArray = copyMyWorkout.data.filter(
+        (v) => v.id !== workoutId,
+      )
+
+      // Atualiza o objeto copyMyWorkout com o novo array de workouts
+      copyMyWorkout.data = newWorkoutDataArray
+
+      // Salva os dados atualizados no AsyncStorage
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(copyMyWorkout))
+
+      // Atualiza o estado com os dados atualizados
+      setMyWorkout(copyMyWorkout)
     }
   }
 
@@ -2896,9 +3065,9 @@ function AuthProvider({ children }: AuthProviderProps) {
         const cachedUserLocalDataWorkoutExercises = JSON.parse(
           userLocalDataWorkoutExercises,
         ) as IMyWorkoutsData
-        setMyWorkoutArray(cachedUserLocalDataWorkoutExercises)
+        setMyWorkoutDataArray(cachedUserLocalDataWorkoutExercises)
       } else {
-        setMyWorkoutArray(null)
+        setMyWorkoutDataArray(null)
       }
 
       // Carrega os workouts do AsyncStorage
@@ -3082,6 +3251,11 @@ function AuthProvider({ children }: AuthProviderProps) {
         // VERIFICAR AQUI PRA BAIXO E ANOTAR OS CACHES
         loadLoginInitialCachedWorkoutsData,
         loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
+        updateStartAndEndDateFromMyWorkoutInCache,
+        resetAllStartAndEndDateFromMyWorkoutInCache,
+
+        updateMyWorkoutInCache,
+
         deleteMyWorkoutAndmyWorkoutDataArray,
         premiumUserUpdateProfileUpdatedAt,
 
