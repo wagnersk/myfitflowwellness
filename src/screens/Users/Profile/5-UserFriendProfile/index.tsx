@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   ImageBackground,
@@ -19,6 +19,7 @@ import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import UserPlus from '@assets/User-circle-plus.svg'
 import UserMinus from '@assets/User-circle-minus.svg'
+import UserCheck from '@assets/User-circle-check.svg'
 
 import backgroundImg from '../../../../../assets/back.png'
 import { PhotoButton } from '@components/Buttons/PhotoButton'
@@ -43,6 +44,8 @@ import {
   UserFriendNameAndEmailWrapper,
   UserFriendNameAndEmailAndButtonWrapper,
   AddButton,
+  UserFriendRequestText,
+  NameAndEmailWrapper,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
@@ -52,90 +55,43 @@ import { IUserFriendProfile } from '@src/@types/navigation'
 import { diffInAge } from '@utils/diffInAge'
 
 export function UserFriendProfile() {
-  const { user, isWaitingApiResponse } = useAuth()
+  const {
+    user,
+    isWaitingApiResponse,
+    fetchUserProfile,
+    sendFriendRequest,
+    cancelFriendRequest,
+    deleteFriend,
+  } = useAuth()
   const route = useRoute()
   const theme = useTheme()
   const dataParams = route.params as IUserFriendProfile
-
+  const [isAlreadyFriend, setIsAlreadyFriend] = useState(false)
+  const [isPendingRequest, setIsPendingRequest] = useState(false)
+  console.log(`isAlreadyFriend`, isAlreadyFriend)
+  console.log(`isPendingRequest`, isPendingRequest)
   const navigation = useNavigation()
 
   // funcao para conferir aqui
 
-  async function handlePickImage() {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync()
-
-    if (status === 'granted') {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 4],
-        quality: 1,
-        base64: true,
-      })
-
-      if (result.assets === null) {
-        return
-      }
-
-      // const { size } = await imageResponse.blob()
-      function getBase64Size(base64: string): number {
-        // Removendo o prefixo 'data:image/jpeg;base64,' ou similar
-        const stringWithoutPrefix = base64.split(',')[1] || base64
-
-        // Calculando o tamanho em bytes
-        const sizeInBytes =
-          (stringWithoutPrefix.length * 3) / 4 -
-          (stringWithoutPrefix.endsWith('==')
-            ? 2
-            : stringWithoutPrefix.endsWith('=')
-              ? 1
-              : 0)
-
-        return sizeInBytes
-      }
-      const base64String = result.assets[0].base64
-
-      let sizeInBytes = 0
-      if (base64String) {
-        sizeInBytes = getBase64Size(base64String)
-      }
-      if (!result.canceled) {
-        if (!sizeInBytes) {
-          return Alert.alert(
-            user?.selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
-            user?.selectedLanguage === 'pt-br'
-              ? 'Tamanho da foto não encontrado.'
-              : 'Photo size not found.',
-          )
-        }
-
-        const MAXFIREBASELIMITPROPERTY = 1000000
-
-        if (sizeInBytes > MAXFIREBASELIMITPROPERTY) {
-          return Alert.alert(
-            user?.selectedLanguage === 'pt-br' ? 'Atenção' : 'Attention',
-            user?.selectedLanguage === 'pt-br'
-              ? 'Sua foto deve ter no máximo 1 mega'
-              : 'Your photo must be at most 1 megabyte',
-          )
-        }
-        if (base64String) {
-          setUserForm((prev) => {
-            return {
-              ...prev,
-              photoBase64: {
-                value: base64String,
-                errorBoolean: prev.photoBase64.errorBoolean,
-              },
-            }
-          })
-        }
-      }
-    }
-  }
-
   function handleGoBack() {
     navigation.goBack()
+  }
+
+  function handleDeleteFriend() {
+    // navigation.goBack()
+  }
+  function handleCancelFriendRequest() {
+    cancelFriendRequest(dataParams.friend.id)
+    setIsPendingRequest(false)
+    // navigation.goBack()
+  }
+  function handleSendFriendRequest() {
+    // NMRDMVRHlAeWx2BIJJWE6XOcSnm1
+    sendFriendRequest(dataParams.friend.id)
+    setIsPendingRequest(true)
+
+    // navigation.goBack()
   }
 
   useFocusEffect(
@@ -145,7 +101,28 @@ export function UserFriendProfile() {
     }, []),
   )
 
-  const isFriend = true
+  useEffect(() => {
+    async function start() {
+      const friendRequest = await fetchUserProfile(dataParams.friend.id)
+      console.log(`friendRequest`, friendRequest)
+      if (friendRequest === null) {
+        setIsAlreadyFriend(false)
+        setIsPendingRequest(false)
+        return
+      }
+
+      if (friendRequest.accepted === true) {
+        setIsAlreadyFriend(true)
+        setIsPendingRequest(false)
+      } else if (friendRequest.accepted === false) {
+        setIsAlreadyFriend(false)
+        setIsPendingRequest(true)
+      }
+    }
+
+    start()
+  }, [dataParams.friend.id, fetchUserProfile])
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Container>
@@ -180,36 +157,53 @@ export function UserFriendProfile() {
 
                     <UserFriendNameAndEmailAndButtonWrapper>
                       <UserFriendNameAndEmailWrapper>
-                        <UserFriendName>
-                          {dataParams.friend.name},{' '}
-                          {diffInAge(dataParams.friend.birthdate)}
-                        </UserFriendName>
-                        <UserFriendEmail>
-                          {dataParams.friend.email}
-                        </UserFriendEmail>
+                        <NameAndEmailWrapper>
+                          <UserFriendName>
+                            {dataParams.friend.name},{' '}
+                            {diffInAge(dataParams.friend.birthdate)}
+                          </UserFriendName>
+                          <UserFriendEmail>
+                            {dataParams.friend.email}
+                          </UserFriendEmail>
+                        </NameAndEmailWrapper>
+                        {isAlreadyFriend ? (
+                          <AddButton onPress={handleDeleteFriend}>
+                            <UserCheck
+                              width={38}
+                              height={38}
+                              fill={theme.COLORS.BLUE_STROKE}
+                            />
+                          </AddButton>
+                        ) : isPendingRequest ? (
+                          <AddButton onPress={handleCancelFriendRequest}>
+                            <UserMinus
+                              width={38}
+                              height={38}
+                              fill={theme.COLORS.AUX_GOOGLE_RED}
+                            />
+                          </AddButton>
+                        ) : (
+                          <AddButton onPress={handleSendFriendRequest}>
+                            <UserPlus
+                              width={38}
+                              height={38}
+                              fill={theme.COLORS.AUX_GOOGLE_GREEN}
+                            />
+                          </AddButton>
+                        )}
                       </UserFriendNameAndEmailWrapper>
 
-                      {isFriend ? (
-                        <AddButton>
-                          <UserMinus
-                            width={38}
-                            height={38}
-                            fill={theme.COLORS.AUX_GOOGLE_RED}
-                          />
-                        </AddButton>
-                      ) : (
-                        <AddButton>
-                          <UserPlus
-                            width={38}
-                            height={38}
-                            fill={theme.COLORS.AUX_GOOGLE_GREEN}
-                          />
-                        </AddButton>
+                      {isPendingRequest && (
+                        <UserFriendRequestText>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? `Solicitação pendente`
+                            : `Pending request`}
+                        </UserFriendRequestText>
                       )}
                     </UserFriendNameAndEmailAndButtonWrapper>
                   </ProfileWrapper>
 
-                  {isFriend && (
+                  {isAlreadyFriend && (
                     <Body>
                       <ScrollView
                         keyboardShouldPersistTaps="handled"

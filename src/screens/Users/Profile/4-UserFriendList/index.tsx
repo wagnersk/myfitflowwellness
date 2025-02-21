@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   ImageBackground,
   TouchableWithoutFeedback,
@@ -40,18 +40,31 @@ import {
   FriendPhoto,
   ActFriendButton,
   FriendPhotoImage,
+  InputWrapper,
+  InputSearchFriend,
+  CTAButtonWrapper,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Search from '@assets/Search.svg'
+import Dna from '@assets/Dna.svg'
 import { diffInAge } from '@utils/diffInAge'
 import FriendList from './Components/FriendList'
 import FriendRequest from './Components/FriendRequest'
+import { CTAButton } from '@components/Buttons/CTAButton'
+import { SignInProps } from '@hooks/authTypes'
 
 export function UserFriendList() {
-  const { user, isWaitingApiResponse } = useAuth()
+  const {
+    user,
+    isWaitingApiResponse,
+    fetchListOfUsers,
+    fetchFriendList,
+    fetchUserProfile,
+    fetchUserInfo,
+  } = useAuth()
   const navigation = useNavigation()
   const theme = useTheme()
 
@@ -88,15 +101,18 @@ export function UserFriendList() {
   ]
 
   const [selectedItem, setSelectedItem] = useState<string | null>('Amigos')
+  const [isVisibleInput, setIsVisibleInput] = useState(false)
+  const [listOfSearchUsers, setListOfSearchUsers] = useState<SignInProps[]>([])
+  const [userRequestList, setUserRequestList] = useState<SignInProps[]>([])
+  const [userFriendList, setUserFriendList] = useState<SignInProps[]>([])
+  const [search, setSearch] = useState('')
 
   // funcao para conferir aqui
 
   function handleGoBack() {
     navigation.goBack()
   }
-  function handleOpenFriendProfile(friendIndex: number) {
-    const friend = friendlist[friendIndex]
-
+  function handleOpenFriendProfile(friend: SignInProps) {
     navigation.navigate('userFriendProfile', { friend })
   }
   function handleAcceptFriend() {
@@ -105,6 +121,71 @@ export function UserFriendList() {
   function handleDeclineFriend() {
     Alert.alert(`cliquei em recusar`)
   }
+  function handleSetInputVisible() {
+    setIsVisibleInput((prev) => !prev)
+  }
+
+  /*   const [search, setSearch] = useState([{ user: 'wagner' }]) */
+
+  function handleSearchFriend(text: string) {
+    setSearch(text.toLocaleLowerCase())
+  }
+
+  async function handleFetchUsers() {
+    const getListOfUsers = await fetchListOfUsers(search)
+    if (!getListOfUsers) return
+    setListOfSearchUsers(getListOfUsers)
+  }
+
+  async function handleClickOutArea() {
+    setIsVisibleInput(false)
+    setSearch('')
+    setListOfSearchUsers([])
+    if (search === '') {
+      Keyboard.dismiss()
+    }
+  }
+
+  /*  */
+  useEffect(() => {
+    async function fetchRequests() {
+      if (userRequestList.length > 0) return
+      const acceptedFriends = false
+      const getUserRequestList = await fetchFriendList(acceptedFriends)
+      if (getUserRequestList) {
+        const userRequests = (await Promise.all(
+          getUserRequestList.map(async (request) => {
+            const userProfile = await fetchUserInfo(request.id)
+            return { ...request, ...userProfile }
+          }),
+        )) as SignInProps[]
+
+        setUserRequestList(userRequests)
+        console.log(`getUserRequestList`, userRequests)
+      }
+    }
+    fetchRequests()
+  }, [selectedItem === 'Solicitações'])
+
+  useEffect(() => {
+    async function fetchRequests() {
+      if (userFriendList.length > 0) return
+      const acceptedFriends = true
+      const getUserRequestList = await fetchFriendList(acceptedFriends)
+      if (getUserRequestList) {
+        const userRequests = (await Promise.all(
+          getUserRequestList.map(async (request) => {
+            const userProfile = await fetchUserInfo(request.id)
+            return { ...request, ...userProfile }
+          }),
+        )) as SignInProps[]
+
+        setUserFriendList(userRequests)
+        console.log(`getUserRequestList`, userRequests)
+      }
+    }
+    fetchRequests()
+  }, [selectedItem === 'Amigos'])
 
   useFocusEffect(
     useCallback(() => {
@@ -116,7 +197,7 @@ export function UserFriendList() {
   /*   const userAge = diffInAge(user?.birthdate)
    */
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={handleClickOutArea}>
       <Container>
         <BodyImageWrapper>
           <ImageBackground
@@ -138,7 +219,8 @@ export function UserFriendList() {
                     <Tittle>Amigos</Tittle>
                     {/*           <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
                      */}
-                    <AddFriendButton onPress={() => {}}>
+
+                    <AddFriendButton onPress={handleSetInputVisible}>
                       <Search
                         width={32}
                         height={32}
@@ -147,50 +229,87 @@ export function UserFriendList() {
                     </AddFriendButton>
                   </TittleWrapper>
                   <PhillsRowContainer>
-                    {items.map((item) => (
-                      <PhillsWrapper
-                        key={item}
-                        selected={selectedItem === item}
-                        onPress={() => setSelectedItem(item)}
-                      >
-                        <PhillItem selected={selectedItem === item}>
-                          {item}
-                        </PhillItem>
-                      </PhillsWrapper>
-                    ))}
+                    {isVisibleInput ? (
+                      <InputWrapper>
+                        <InputSearchFriend
+                          textAlign="left"
+                          placeholder="Procurar um amigo"
+                          placeholderTextColor="rgba(27, 7, 127, 0.5)" // Azul escuro com 0.6 de opacidade
+                          onChangeText={handleSearchFriend}
+                          value={search}
+                        />
+                      </InputWrapper>
+                    ) : (
+                      items.map((item) => (
+                        <PhillsWrapper
+                          key={item}
+                          selected={selectedItem === item}
+                          onPress={() => setSelectedItem(item)}
+                        >
+                          <PhillItem selected={selectedItem === item}>
+                            {item}
+                          </PhillItem>
+                        </PhillsWrapper>
+                      ))
+                    )}
                   </PhillsRowContainer>
+
                   <Body>
-                    <ScrollView
-                      style={{
-                        width: '100%',
-                      }}
-                      keyboardShouldPersistTaps="handled"
-                      contentContainerStyle={{
-                        gap: 16,
-                      }}
-                    >
-                      {selectedItem === 'Solicitações'
-                        ? friendAcceptlist.map((friend, friendIndex) => (
-                            <FriendRequest
-                              key={friendIndex}
-                              friendIndex={friendIndex}
-                              friendName={friend.name}
-                              friendAge={diffInAge(friend?.birthdate)}
-                              onAccept={handleAcceptFriend}
-                              onDecline={handleDeclineFriend}
-                            />
-                          ))
-                        : friendlist.map((friend, friendIndex) => (
-                            <FriendList
-                              key={friendIndex}
-                              friendIndex={friendIndex}
-                              friendName={friend.name}
-                              friendAge={diffInAge(friend?.birthdate)}
-                              openFriendProfile={handleOpenFriendProfile}
-                            />
-                          ))}
-                    </ScrollView>
+                    {!isVisibleInput ? (
+                      <ScrollView
+                        style={{
+                          width: '100%',
+                        }}
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={{
+                          gap: 16,
+                        }}
+                      >
+                        {/*! isVisibleInput && quando  search tiver algo nao mostarr o q tinha antes  */}
+
+                        {search === '' &&
+                          (selectedItem === 'Solicitações'
+                            ? userRequestList.map((friend, friendIndex) => (
+                                <FriendRequest
+                                  key={friendIndex}
+                                  friendIndex={friendIndex}
+                                  friendName={friend.name}
+                                  friendAge={diffInAge(friend?.birthdate)}
+                                  onAccept={handleAcceptFriend}
+                                  onDecline={handleDeclineFriend}
+                                />
+                              ))
+                            : userFriendList.map((friend, friendIndex) => (
+                                <FriendList
+                                  key={friendIndex}
+                                  friend={friend}
+                                  openFriendProfile={handleOpenFriendProfile}
+                                />
+                              )))}
+                      </ScrollView>
+                    ) : (
+                      listOfSearchUsers &&
+                      listOfSearchUsers.length > 0 &&
+                      listOfSearchUsers.map((friend, friendIndex) => (
+                        <FriendList
+                          key={friendIndex}
+                          friend={friend}
+                          openFriendProfile={handleOpenFriendProfile}
+                        />
+                      ))
+                    )}
                   </Body>
+
+                  {search.length > 0 && (
+                    <CTAButton
+                      changeColor={true}
+                      disabled={false}
+                      loading={false}
+                      title={'Buscar'}
+                      onPress={handleFetchUsers}
+                      style={{ bottom: 20 }}
+                    />
+                  )}
                 </SafeAreaView>
               </SafeAreaProvider>
             </ImageBackgroundContainer>

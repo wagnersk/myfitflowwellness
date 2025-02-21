@@ -56,9 +56,14 @@ export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
 `
+export const NameAndEmailWrapper = styled.View`
+  justify-content: center;
+  align-items: center;
+`
 export const UserFriendNameAndEmailWrapper = styled.View`
   justify-content: center;
   align-items: center;
+  flex-direction: row;
 `
 export const UserFriendNameAndEmailAndButtonWrapper = styled.View`
   justify-content: center;
@@ -68,6 +73,7 @@ export const UserFriendNameAndEmailAndButtonWrapper = styled.View`
   width: 100%;
 
   padding-left: 48px;
+  flex-direction: column;
 `
 export const UserFriendName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
@@ -79,6 +85,11 @@ export const UserFriendEmail = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
   opacity: 0.7;
+`
+export const UserFriendRequestText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(20)}px;
 `
 export const ProfileWrapper = styled.View`
   align-items: center;

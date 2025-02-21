@@ -816,6 +816,7 @@ export interface AuthContextData {
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
   ) => Promise<void>
+
   updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList: (
     workoutData: IMyfitflowWorkoutInUse,
   ) => Promise<void>
@@ -908,6 +909,20 @@ export interface AuthContextData {
 
   saveStatisticsItens: (data: IStatisticsItens[] | null) => Promise<void>
   loadStatisticsItens: (userId: string) => Promise<IStatisticsItens[]>
+  fetchListOfUsers: (text: string) => Promise<SignInProps[] | null>
+
+  fetchUserInfo: (id: string) => Promise<SignInProps | null>
+  fetchFriendList: (accepted: boolean) => Promise<
+    | {
+        id: string
+      }[]
+    | null
+  >
+  fetchUserProfile: (id: string) => Promise<null | {
+    accepted: boolean
+  }>
+  sendFriendRequest: (friendId: string) => Promise<{ accepted: boolean } | null>
+  cancelFriendRequest: (friendId: string) => Promise<boolean | null>
 
   user: SignInProps | null
 

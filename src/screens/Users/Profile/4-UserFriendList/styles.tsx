@@ -1,5 +1,6 @@
 import { RFValue } from '@utils/RFValue'
 import styled from 'styled-components/native'
+import { TextInput } from 'react-native'
 
 export const Container = styled.View`
   flex: 1;
@@ -19,6 +20,33 @@ export const PhillsRowContainer = styled.View`
   justify-content: flex-start;
   width: 100%;
   gap: 8px;
+`
+export const CTAButtonWrapper = styled.View`
+  padding-bottom: 20px;
+  background-color: red;
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 8px;
+`
+
+export const InputWrapper = styled.View`
+  flex-direction: row;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 8px;
+  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border-radius: 24px;
+  height: 48px;
+  padding-left: 24px;
+`
+export const InputSearchFriend = styled(TextInput)`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+  width: 100%;
+  border-radius: 24px;
+  height: 48px;
 `
 export const FriendCardWrapper = styled.View`
   align-items: center;

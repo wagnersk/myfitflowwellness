@@ -1,7 +1,5 @@
 import React from 'react'
 import { useTheme } from 'styled-components/native'
-import Check from '@assets/Check.svg'
-import X from '@assets/X.svg'
 
 import {
   FriendCardWrapper,
@@ -18,31 +16,26 @@ import {
   FriendCardInfoWrapper,
   FriendCardLineDivisor,
 } from './styles'
+import { SignInProps } from '@hooks/authTypes'
+import { diffInAge } from '@utils/diffInAge'
 
 interface FriendCardProps {
-  friendIndex: number
-  friendName: string
-  friendAge: number | undefined
-  openFriendProfile: (friendIndex: number) => void
+  friend: SignInProps
+  openFriendProfile: (friend: SignInProps) => void
 }
 
 export default function FriendList({
-  friendIndex,
-  friendName,
-  friendAge,
+  friend,
   openFriendProfile,
 }: FriendCardProps) {
-  function handleOpenFriendProfile(friendIndex: number) {
-    console.log('Friend index:', friendIndex)
-    openFriendProfile(friendIndex)
+  console.log(`friend`, friend)
+  function handleOpenFriendProfile(friend: SignInProps) {
+    openFriendProfile(friend)
   }
   const theme = useTheme()
 
   return (
-    <FriendCardWrapper
-      key={friendIndex}
-      onPress={() => handleOpenFriendProfile(friendIndex)}
-    >
+    <FriendCardWrapper onPress={() => handleOpenFriendProfile(friend)}>
       <FriendPhotoWrapper>
         <FriendPhotoImage />
         {/*         <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" />
@@ -51,10 +44,10 @@ export default function FriendList({
 
       <FriendContentWrapper>
         <FriendNameWrapper>
-          <FriendNameText>{`${friendName}, ${friendAge}`}</FriendNameText>
+          <FriendNameText>{`${friend.name}, ${diffInAge(friend?.birthdate)}`}</FriendNameText>
         </FriendNameWrapper>
         <FriendEmailWrapper>
-          <FriendEmailText>wagnereletroskateet@gmail.com</FriendEmailText>
+          <FriendEmailText>{friend.email}</FriendEmailText>
         </FriendEmailWrapper>
       </FriendContentWrapper>
     </FriendCardWrapper>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Forward from '../../../../assets/Forward.svg'
 import { TouchableOpacityProps } from 'react-native'
 import { Image } from 'expo-image'

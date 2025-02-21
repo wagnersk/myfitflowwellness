@@ -21,6 +21,7 @@ import {
   addDoc,
   deleteDoc,
   Timestamp,
+  where,
 } from 'firebase/firestore'
 
 import {
@@ -1158,7 +1159,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
-
   async function fetchMuscleOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
 
@@ -1167,6 +1167,151 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IMuscleSelectData
 
+      return initialData
+    } else {
+      return null
+    }
+  }
+
+  async function fetchUserProfile(friendId: string) {
+    if (!user) return null
+
+    const userId = user.id
+    const friendRequestStatusDataRef = doc(
+      db,
+      'users',
+      userId,
+      'friendRequest',
+      friendId,
+    )
+
+    const docSnapshot = await getDoc(friendRequestStatusDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as { accepted: boolean }
+
+      return {
+        accepted: initialData.accepted,
+      }
+    } else {
+      return null
+    }
+  }
+
+  async function fetchFriendList(accepted: boolean) {
+    if (!user) return null
+
+    const userId = user.id
+    const friendRequestCollectionRef = collection(
+      db,
+      'users',
+      userId,
+      'friendRequest',
+    )
+    const q = query(
+      friendRequestCollectionRef,
+      where('accepted', '==', accepted),
+    )
+
+    const querySnapshot = await getDocs(q)
+
+    const friendRequests = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+
+    return friendRequests
+  }
+
+  async function sendFriendRequest(friendId: string) {
+    if (!user) return null
+
+    const userId = user.id
+    const friendRequestStatusDataRef = doc(
+      db,
+      'users',
+      userId,
+      'friendRequest',
+      friendId,
+    )
+
+    try {
+      const data = {
+        accepted: false,
+      }
+      await setDoc(friendRequestStatusDataRef, data)
+
+      return data
+    } catch (error) {
+      console.error(error)
+      return null
+    }
+
+    /*   
+    updateDoc,
+  setDoc,
+  sendFriendRequest,
+    cancelFriendRequest,
+    deleteFriend, */
+  }
+  async function cancelFriendRequest(friendId: string) {
+    if (!user) return null
+
+    const userId = user.id
+    const friendRequestStatusDataRef = doc(
+      db,
+      'users',
+      userId,
+      'friendRequest',
+      friendId,
+    )
+
+    try {
+      await deleteDoc(friendRequestStatusDataRef)
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+
+    /*   
+    updateDoc,
+  setDoc,
+  sendFriendRequest,
+    cancelFriendRequest,
+    deleteFriend, */
+  }
+
+  async function fetchListOfUsers(text: string) {
+    if (!user) return null
+    const userId = user.id
+    const usersCollectionRef = collection(db, 'users')
+    const q = query(
+      usersCollectionRef,
+      where('name_insensitive', '>=', text),
+      where('name_insensitive', '<=', text + '\uf8ff'),
+    )
+
+    const querySnapshot = await getDocs(q)
+
+    const fetchUsers = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as SignInProps[]
+
+    const removeCurrentUser = fetchUsers.filter((fuser) => fuser.id !== userId)
+
+    return removeCurrentUser
+  }
+
+  async function fetchUserInfo(id: string) {
+    if (!user) return null
+    const usersCollectionRef = doc(db, 'users', id)
+
+    const docSnapshot = await getDoc(usersCollectionRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as SignInProps
       return initialData
     } else {
       return null
@@ -3352,6 +3497,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         getLastUpdatedAtUserWorkoutCache,
 
         fetchMuscleOptionData,
+        fetchUserProfile,
         fetchFrequencyByWeekOptionData,
         fetchGoalOptionData,
         fetchTimeBySessionOptionData,
@@ -3376,6 +3522,12 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         saveStatisticsItens, // premium version
         loadStatisticsItens,
+
+        fetchListOfUsers,
+        fetchUserInfo,
+        sendFriendRequest,
+        cancelFriendRequest,
+        fetchFriendList,
 
         user,
         premiumUserContract,

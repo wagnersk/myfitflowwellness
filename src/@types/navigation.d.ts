@@ -275,12 +275,7 @@ export interface IOnBoading {
   selectedLanguage: 'pt-br' | 'us'
 }
 export interface IUserFriendProfile {
-  friend: {
-    name: string
-    email: string
-    photo: string
-    birthdate: string
-  }
+  friend: SignInProps
 }
 export interface IUserSelectListNavigation {
   dataType:
