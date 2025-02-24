@@ -35,8 +35,7 @@ export const FriendEmailWrapper = styled.View`
 export const FriendNameText = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  opacity: 0.7;
+  font-size: ${RFValue(16)}px;
 `
 export const FriendEmailText = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

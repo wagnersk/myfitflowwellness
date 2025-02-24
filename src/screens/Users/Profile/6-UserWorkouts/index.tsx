@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   ImageBackground,
   BackHandler,
   SafeAreaView,
   Alert,
   Modal,
+  View,
+  Dimensions,
 } from 'react-native'
 
 import { useNavigation } from '@react-navigation/native'
@@ -29,6 +31,11 @@ import {
   CardTittle,
   OpenSettingsButton,
   CardDate,
+  SelectScreenWrapper,
+  SelectScreenButton,
+  SelectScreenButtonText,
+  Underline,
+  RowWrapper,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -43,6 +50,13 @@ import { WorkoutUserEditWorkoutModal } from '@components/Modals/WorkoutUserEditW
 import { formatTimestampToDate } from '@utils/formatTimestampToDate'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { useTheme } from 'styled-components'
+import Animated, {
+  Easing,
+  runOnUI,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
 
 export interface IUserSelect {
   id: number
@@ -68,6 +82,7 @@ export function UserWorkouts() {
   } = useAuth()
 
   const [isOpenSettingsMode, setIsOpenSettingsMode] = useState(false)
+
   const [defaultModalState, setDefaultModalState] =
     useState<IModalStateWorkoutLogData | null>(null)
 
@@ -77,7 +92,12 @@ export function UserWorkouts() {
   const [nextWorkouts, setNextWorkouts] = useState<
     IMyfitflowWorkoutInUseData[] | null
   >([])
+
   const [isDataOrderChanged, setIsDataOrderChanged] = useState(false)
+
+  const [showScreen, setShowScreen] = useState<'actives' | 'total' | 'shared'>(
+    'actives',
+  )
   const [workouts, setWorkouts] = useState<IMyWorkouts | null>(myWorkout)
 
   const theme = useTheme()
@@ -347,6 +367,42 @@ export function UserWorkouts() {
     }
   }, [workouts, myWorkout])
 
+  const screenWidth = Dimensions.get('window').width
+
+  const paddingSize = 36
+  const TAB_WIDTH = (screenWidth - paddingSize) / 3 // screenWidth / 2
+  const TABS: ('actives' | 'total' | 'shared')[] = [
+    'actives',
+    'total',
+    'shared',
+  ]
+  const offset = useSharedValue<number>(0)
+  const animatedStyles = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset.value }],
+  }))
+
+  function handlePress(tab: 'actives' | 'total' | 'shared') {
+    const newOffset = (() => {
+      switch (tab) {
+        case 'actives':
+          return 0
+        case 'total':
+          return TAB_WIDTH
+        case 'shared':
+          return TAB_WIDTH + TAB_WIDTH
+        default:
+          return 0
+      }
+    })()
+
+    setShowScreen(tab)
+
+    console.log(`newOffset`)
+    console.log(newOffset)
+
+    offset.value = withTiming(newOffset)
+  }
+
   return (
     <Container>
       <BodyImageWrapper>
@@ -381,66 +437,89 @@ export function UserWorkouts() {
                   </ContainerTittleWrapper>
                   <ScrollView showsVerticalScrollIndicator={false}>
                     <ListWrapper>
-                      <ContainerWrapper>
-                        <MonthYearACTMessage>
-                          <CardTittle>Treino atual</CardTittle>
-                          <CardDate>
-                            {currentWorkout?.workoutStartAt === 0
-                              ? 'Treino ainda não iniciado'
-                              : `${formatTimestampToDate(
-                                  currentWorkout?.workoutStartAt ?? 0,
-                                )} - ${formatTimestampToDate(
-                                  currentWorkout?.workoutEndsAt ?? 0,
-                                )}`}
-                          </CardDate>
-                        </MonthYearACTMessage>
-                        <CardsWrapper>
-                          {currentWorkout && currentWorkout.data && (
-                            <PlanCard
-                              isWorkoutAlreadyStarted={
-                                currentWorkout?.workoutStartAt !== 0
-                              }
-                              data={currentWorkout.data}
-                              selectedLanguage={
-                                user?.selectedLanguage || 'pt-br'
-                              }
-                              onPress={() => handleOnPressWorkout(0)}
-                              onReset={() => handleResetTimerUp(0)}
-                              onMoveUp={() => handleMoveUp(0)}
-                              onMoveDown={() => handleMoveDown(0)}
-                              isOpenSettingsMode={isOpenSettingsMode}
-                              index={0}
-                              length={0}
-                            />
-                          )}
-                        </CardsWrapper>
-                        <MonthYearACTMessage>
-                          <CardTittle>Próximos treinos</CardTittle>
-                        </MonthYearACTMessage>
-                        <CardsWrapper>
-                          {nextWorkouts &&
-                            myWorkout &&
-                            nextWorkouts.map((v, i) => (
+                      <SelectScreenWrapper>
+                        <RowWrapper>
+                          {TABS.map((tab) => (
+                            <SelectScreenButton
+                              key={tab}
+                              onPress={() => handlePress(tab)}
+                            >
+                              <SelectScreenButtonText
+                                isSelected={showScreen === tab}
+                              >
+                                {tab}
+                              </SelectScreenButtonText>
+                            </SelectScreenButton>
+                          ))}
+                        </RowWrapper>
+                        <Underline
+                          tabWidth={TAB_WIDTH}
+                          style={animatedStyles}
+                        />
+                      </SelectScreenWrapper>
+
+                      {showScreen === 'actives' && (
+                        <ContainerWrapper>
+                          <MonthYearACTMessage>
+                            <CardTittle>Treino atual</CardTittle>
+                            <CardDate>
+                              {currentWorkout?.workoutStartAt === 0
+                                ? 'Treino ainda não iniciado'
+                                : `${formatTimestampToDate(
+                                    currentWorkout?.workoutStartAt ?? 0,
+                                  )} - ${formatTimestampToDate(
+                                    currentWorkout?.workoutEndsAt ?? 0,
+                                  )}`}
+                            </CardDate>
+                          </MonthYearACTMessage>
+                          <CardsWrapper>
+                            {currentWorkout && currentWorkout.data && (
                               <PlanCard
                                 isWorkoutAlreadyStarted={
                                   currentWorkout?.workoutStartAt !== 0
                                 }
-                                key={i + 1}
-                                data={v.data || null}
+                                data={currentWorkout.data}
                                 selectedLanguage={
                                   user?.selectedLanguage || 'pt-br'
                                 }
-                                onPress={() => handleOnPressWorkout(i + 1)}
-                                onMoveUp={() => handleMoveUp(i + 1)}
-                                onReset={() => handleResetTimerUp(i + 1)}
-                                onMoveDown={() => handleMoveDown(i + 1)}
-                                index={i + 1}
+                                onPress={() => handleOnPressWorkout(0)}
+                                onReset={() => handleResetTimerUp(0)}
+                                onMoveUp={() => handleMoveUp(0)}
+                                onMoveDown={() => handleMoveDown(0)}
                                 isOpenSettingsMode={isOpenSettingsMode}
-                                length={myWorkout.data.length}
+                                index={0}
+                                length={0}
                               />
-                            ))}
-                        </CardsWrapper>
-                      </ContainerWrapper>
+                            )}
+                          </CardsWrapper>
+                          <MonthYearACTMessage>
+                            <CardTittle>Próximos treinos</CardTittle>
+                          </MonthYearACTMessage>
+                          <CardsWrapper>
+                            {nextWorkouts &&
+                              myWorkout &&
+                              nextWorkouts.map((v, i) => (
+                                <PlanCard
+                                  isWorkoutAlreadyStarted={
+                                    currentWorkout?.workoutStartAt !== 0
+                                  }
+                                  key={i + 1}
+                                  data={v.data || null}
+                                  selectedLanguage={
+                                    user?.selectedLanguage || 'pt-br'
+                                  }
+                                  onPress={() => handleOnPressWorkout(i + 1)}
+                                  onMoveUp={() => handleMoveUp(i + 1)}
+                                  onReset={() => handleResetTimerUp(i + 1)}
+                                  onMoveDown={() => handleMoveDown(i + 1)}
+                                  index={i + 1}
+                                  isOpenSettingsMode={isOpenSettingsMode}
+                                  length={myWorkout.data.length}
+                                />
+                              ))}
+                          </CardsWrapper>
+                        </ContainerWrapper>
+                      )}
                     </ListWrapper>
                   </ScrollView>
                   {/*    {currentWorkout?.workoutStartAt === 0

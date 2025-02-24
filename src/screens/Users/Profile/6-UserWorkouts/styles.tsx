@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
+import Animated from 'react-native-reanimated'
 
 export const Container = styled.View`
   flex: 1;
@@ -87,3 +88,36 @@ export const IconWrapper = styled.View`
 `
 
 export const OpenSettingsButton = styled.TouchableOpacity``
+export const RowWrapper = styled.View`
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+`
+export const SelectScreenWrapper = styled.View`
+  flex-direction: column;
+  margin: 16px 0;
+`
+// cria ref tbm
+export const SelectScreenButton = styled.TouchableOpacity`
+  padding: 10px 20px;
+  border-radius: 20px;
+  align-items: center;
+`
+
+export const SelectScreenButtonText = styled.Text<{ isSelected: boolean }>`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme, isSelected }) =>
+    isSelected ? theme.FONTS.BUTTON : theme.FONTS.BODY};
+  font-size: 16px;
+  opacity: ${({ isSelected }) => (isSelected ? 1 : 0.9)};
+`
+
+export const Underline = styled(Animated.View)<{ tabWidth: number }>`
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: ${({ tabWidth }) => tabWidth}px;
+  border-radius: 20px;
+
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+`

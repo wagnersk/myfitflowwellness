@@ -31,6 +31,9 @@ export default function FriendRequest({
 }: FriendCardProps) {
   const theme = useTheme()
 
+  const friendUpperFirstLetter =
+    friendName.charAt(0).toUpperCase() + friendName.slice(1)
+
   return (
     <FriendCardWrapper key={friendIndex}>
       <FriendPhotoWrapper>
@@ -39,16 +42,16 @@ export default function FriendRequest({
       </FriendPhotoWrapper>
       <FriendContentWrapper>
         <FriendNameWrapper>
-          <FriendNameText>{`${friendName}, ${friendAge}`}</FriendNameText>
+          <FriendNameText>{`${friendUpperFirstLetter}, ${friendAge}`}</FriendNameText>
         </FriendNameWrapper>
         <FriendEmailWrapper>
           <ActFriendButton onPress={onDecline}>
-            <X width={42} height={42} fill={theme.COLORS.AUX_GOOGLE_RED} />
+            <X width={36} height={36} fill={theme.COLORS.AUX_GOOGLE_RED} />
           </ActFriendButton>
           <ActFriendButton onPress={onAccept}>
             <Check
-              width={42}
-              height={42}
+              width={36}
+              height={36}
               stroke={theme.COLORS.AUX_GOOGLE_GREEN}
             />
           </ActFriendButton>

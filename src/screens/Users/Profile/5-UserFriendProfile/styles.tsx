@@ -27,7 +27,6 @@ export const ImageBackgroundContainer = styled.View`
   flex: 1;
 `
 export const InputWrapper = styled.View`
-  flex-direction: row;
   width: 100%;
   gap: 32px;
 `

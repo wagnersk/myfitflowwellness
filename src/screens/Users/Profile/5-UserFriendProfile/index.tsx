@@ -214,10 +214,10 @@ export function UserFriendProfile() {
                       >
                         <InputWrapper>
                           <CopyWorkoutButton>
-                            <ButtonText>Copiar treino</ButtonText>
+                            <ButtonText>Treinos Personalizados</ButtonText>
                           </CopyWorkoutButton>
                           <CopyWorkoutButton>
-                            <ButtonText>Copiar treino</ButtonText>
+                            <ButtonText>Frequencia</ButtonText>
                           </CopyWorkoutButton>
                         </InputWrapper>
                       </ScrollView>
