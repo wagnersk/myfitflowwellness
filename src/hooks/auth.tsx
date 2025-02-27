@@ -2770,6 +2770,13 @@ function AuthProvider({ children }: AuthProviderProps) {
             data: workoutData,
             createdAt: currentDate,
             updatedAt: currentDate,
+            isActive: false,
+            isShared: false,
+          })
+          copyMyWorkout.dataOrder.push({
+            id: workoutData.workoutId || '',
+            createdAt: currentDate,
+            updatedAt: currentDate,
             workoutStartAt: 0,
             workoutEndsAt: 0,
           })
@@ -2796,6 +2803,15 @@ function AuthProvider({ children }: AuthProviderProps) {
             {
               id: workoutData.workoutId || '',
               data: workoutData,
+              createdAt: currentDate,
+              updatedAt: currentDate,
+              isActive: false,
+              isShared: false,
+            },
+          ],
+          dataOrder: [
+            {
+              id: workoutData.workoutId || '',
               createdAt: currentDate,
               updatedAt: currentDate,
               workoutStartAt: 0,

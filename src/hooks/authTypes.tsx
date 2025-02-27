@@ -521,14 +521,24 @@ export interface IMyfitflowWorkoutInUseData {
   data: IMyfitflowWorkoutInUse
   createdAt: number
   updatedAt: number
+  isActive: boolean
+  isShared: boolean
+}
+export interface IWorkoutOrder {
+  id: string
+  createdAt: number
+  updatedAt: number
   workoutStartAt: number
   workoutEndsAt: number
 }
+// vou ter agora total , actives e shared
+// actives e shared vao ser prorpiedades
 export interface IMyWorkouts {
   userId: string
   createdAt: number
   updatedAt: number
-  data: IMyfitflowWorkoutInUseData[]
+  data: IMyfitflowWorkoutInUseData[] // total de treinos
+  dataOrder: IWorkoutOrder[] // lista de treinos ativos
 }
 
 export type ICachedWorkoutsWithLastUpdatedTimestamp = {

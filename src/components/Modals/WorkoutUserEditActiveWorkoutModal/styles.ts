@@ -158,7 +158,7 @@ export const DatePickerWrapper = styled.View`
   margin-top: 16px;
 `
 
-export const ShareButton = styled(TouchableOpacity)`
+export const ToggleSwitch = styled(TouchableOpacity)`
   justify-content: center;
   align-items: center;
   flex-direction: row;

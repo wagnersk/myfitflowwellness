@@ -26,7 +26,7 @@ interface PlanCardProps {
   onReset: (index: number) => void
   index: number
   isOpenSettingsMode: boolean
-  isWorkoutAlreadyStarted: boolean
+  isActive: boolean
   length: number
 }
 
@@ -39,16 +39,14 @@ export function PlanCard({
   onReset,
   index,
   isOpenSettingsMode,
-  isWorkoutAlreadyStarted,
+  isActive,
   length,
 }: PlanCardProps) {
   const isFirstElement = index === 0
   const isLastElement = index === length - 1
-  const isFirstElementWithWorkoutStartedMode =
-    isWorkoutAlreadyStarted && index === 0
+  const isFirstElementWithWorkoutStartedMode = isActive && index === 0
 
-  const isSecondElementWithWorkoutStartedMode =
-    isWorkoutAlreadyStarted && index === 1
+  const isSecondElementWithWorkoutStartedMode = isActive && index === 1
 
   return (
     <Container pointerEvents={isOpenSettingsMode ? 'auto' : 'none'}>
@@ -70,7 +68,7 @@ export function PlanCard({
                   disabled={isSecondElementWithWorkoutStartedMode}
                   onPress={() => onMoveUp(index)}
                 >
-                  {/* isWorkoutAlreadyStarted */}
+                  {/* isActive */}
 
                   {!isSecondElementWithWorkoutStartedMode && (
                     <ButtonBorderWrapper>
