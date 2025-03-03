@@ -521,7 +521,7 @@ export interface IMyfitflowWorkoutInUseData {
   data: IMyfitflowWorkoutInUse
   createdAt: number
   updatedAt: number
-  isActive: boolean
+  isInUse: boolean
   isShared: boolean
 }
 export interface IWorkoutOrder {
@@ -563,7 +563,7 @@ export interface IPersonal {
   createdAt: { nanoseconds: number; seconds: number }
   email: string
   id: string
-  isActive: boolean
+  isInUse: boolean
   isPersonalTrainer: boolean
   keywords: string[]
   name: string

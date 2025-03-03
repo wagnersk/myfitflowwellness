@@ -18,12 +18,15 @@ export const InfoAndButtonAndBottomLineWrapper = styled.View`
 
 export const InfoAndButtonWrapper = styled.View`
   flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  height: 100%;
 `
 
 export const InfoWrapper = styled.View`
-  justify-content: center;
+  height: 100%;
+`
+export const SubTittleWrapper = styled.View`
+  height: 100%;
+  padding-left: 2px;
 `
 export const DateWrapper = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
@@ -34,7 +37,7 @@ export const DateWrapper = styled.Text`
 export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
+  font-size: ${RFValue(14)}px;
   padding-bottom: 6px;
 `
 
@@ -42,9 +45,9 @@ export const SubTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(12)}px;
-  opacity: 0.5;
-  margin-bottom: 2px;
+  opacity: 0.6;
   width: 100%;
+  padding-bottom: 2px;
 `
 
 export const WorkoutCardForwardButton = styled.View``
@@ -63,12 +66,41 @@ export const PhotoImageWrapper = styled.View<Props>`
   height: ${({ size }) => `${size}px`};
   width: ${({ size }) => `${size}px`};
 `
-export const ActiveBall = styled.View<{ isActive: boolean }>`
+export const ActiveBall = styled.View<{ color: 'red' | 'green' | 'yellow' }>`
   position: absolute;
-  right: 12px;
+  right: 16px;
   top: 6px;
-  background-color: ${({ theme, isActive }) =>
-    isActive ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
+  background-color: ${({ theme, color }) => {
+    switch (color) {
+      case 'green':
+        return theme.COLORS.AUX_GOOGLE_GREEN
+      case 'yellow':
+        return theme.COLORS.AUX_GOOGLE_YELLOW
+      case 'red':
+      default:
+        return theme.COLORS.AUX_GOOGLE_RED
+    }
+  }};
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+`
+export const GenderIconWrapper = styled.View`
+  position: absolute;
+  right: 32px;
+
+  top: 6px;
+
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+`
+export const ShareIconWrapper = styled.View`
+  position: absolute;
+  right: 2px;
+
+  top: 6px;
+
   width: 12px;
   height: 12px;
   border-radius: 6px;
@@ -76,14 +108,13 @@ export const ActiveBall = styled.View<{ isActive: boolean }>`
 
 export const IconBottomWrapper = styled.View`
   position: absolute;
-  right: 12px;
+  right: 8px;
   bottom: 0;
 `
 
 export const PhotoPreLoadingImageBackground = styled.View<Props>`
   height: ${({ size }) => `${size}px`};
   width: ${({ size }) => `${size}px`};
-  border-radius: 12px;
   background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   opacity: 0.2;
   position: absolute;
@@ -102,6 +133,4 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   border-radius: 8px;
 
   width: 100%;
-
-  border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `

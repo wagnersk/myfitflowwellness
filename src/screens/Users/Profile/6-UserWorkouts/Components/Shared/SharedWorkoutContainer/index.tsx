@@ -5,11 +5,16 @@ import {
   CardTittle,
   CardsWrapper,
 } from './styles'
-import { IMyfitflowWorkoutInUseData, SignInProps } from '@hooks/authTypes'
+import {
+  IMyfitflowWorkoutInUseData,
+  IMyWorkouts,
+  SignInProps,
+} from '@hooks/authTypes'
 import { SharedWorkoutCard } from '../SharedWorkoutCard'
 
 interface WorkoutContainerProps {
-  data: IMyfitflowWorkoutInUseData[] | null
+  data: IMyWorkouts | null
+  sharedData: IMyfitflowWorkoutInUseData[] | null
   user: SignInProps | null
   handleOnPressSendWorkout: (id: string) => void
 }
@@ -17,24 +22,40 @@ interface WorkoutContainerProps {
 
 export default function SharedWorkoutContainer({
   data,
+  sharedData,
   user,
   handleOnPressSendWorkout,
 }: WorkoutContainerProps) {
+  let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
+  if (data) {
+    const listOfWorkouts = data.data.filter((v) => v.isInUse)
+
+    const getActiveWorkouts = listOfWorkouts
+      .map((workout) => {
+        const active = data.dataOrder.find((order) => order.id === workout.id)
+        if (!active) return false
+
+        return workout
+      })
+      .filter((workout) => workout !== false)
+
+    activeWorkouts = getActiveWorkouts
+  }
+
   return (
     <ContainerWrapper>
-      <MonthYearACTMessage>
-        <CardTittle>Compartilhados com amigos</CardTittle>
-      </MonthYearACTMessage>
       <CardsWrapper>
-        {data &&
-          data.map((v: IMyfitflowWorkoutInUseData, i: number) => (
+        {sharedData &&
+          sharedData.map((v: IMyfitflowWorkoutInUseData, i: number) => (
             <SharedWorkoutCard
               key={i}
               data={v || null}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               handleOnPressSendWorkout={handleOnPressSendWorkout}
               index={i}
-              isActive={v.isActive}
+              isActive={
+                !!activeWorkouts.find((va) => va.id === v.id && va.isInUse)
+              }
             />
           ))}
       </CardsWrapper>

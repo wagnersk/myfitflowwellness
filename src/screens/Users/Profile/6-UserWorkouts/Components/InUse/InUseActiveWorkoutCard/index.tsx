@@ -1,41 +1,38 @@
 import React from 'react'
 import { ButtonContainer, Container, BodyWraper } from './styles'
-import {
-  IMyfitflowWorkoutInUse,
-  IMyfitflowWorkoutInUseData,
-} from '@hooks/authTypes'
-import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
-import { TotalWorkoutsCardItem } from '../TotalWorkoutsCardItem'
-import { SharedWorkoutsCardItem } from '../SharedWorkoutsCardItem'
+import { IMyfitflowWorkoutInUseData, IWorkoutOrder } from '@hooks/authTypes'
+import { ItemCard } from '../../ItemCard'
 
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
+  dataOrder: IWorkoutOrder[]
   selectedLanguage: 'pt-br' | 'us'
-  handleOnPressSendWorkout: (id: string) => void
+  handleOnPressActiveWorkout: (id: string) => void
+
   index: number
-  isActive: boolean
 }
 
-export function SharedWorkoutCard({
+export function InUseActiveWorkoutCard({
   data,
+  dataOrder,
   selectedLanguage,
-  handleOnPressSendWorkout,
   index,
-  isOpenSettingsMode,
-  isActive,
+  handleOnPressActiveWorkout,
 }: PlanCardProps) {
   function handleOnPressWorkout(id: string) {
-    handleOnPressSendWorkout(id)
+    handleOnPressActiveWorkout(id)
   }
   return (
     <Container>
       <ButtonContainer>
         <BodyWraper>
-          <SharedWorkoutsCardItem
+          <ItemCard
             index={index}
             data={data}
             handleNextStep={() => data && handleOnPressWorkout(data.id)}
-            isActive={isActive}
+            isActive={true}
+            dateStart={dataOrder[index].workoutStartAt}
+            dateEnd={dataOrder[index].workoutEndsAt}
           />
         </BodyWraper>
       </ButtonContainer>

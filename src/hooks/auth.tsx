@@ -2770,15 +2770,8 @@ function AuthProvider({ children }: AuthProviderProps) {
             data: workoutData,
             createdAt: currentDate,
             updatedAt: currentDate,
-            isActive: false,
+            isInUse: false,
             isShared: false,
-          })
-          copyMyWorkout.dataOrder.push({
-            id: workoutData.workoutId || '',
-            createdAt: currentDate,
-            updatedAt: currentDate,
-            workoutStartAt: 0,
-            workoutEndsAt: 0,
           })
         }
 
@@ -2805,19 +2798,11 @@ function AuthProvider({ children }: AuthProviderProps) {
               data: workoutData,
               createdAt: currentDate,
               updatedAt: currentDate,
-              isActive: false,
+              isInUse: false,
               isShared: false,
             },
           ],
-          dataOrder: [
-            {
-              id: workoutData.workoutId || '',
-              createdAt: currentDate,
-              updatedAt: currentDate,
-              workoutStartAt: 0,
-              workoutEndsAt: 0,
-            },
-          ],
+          dataOrder: [],
         }
       }
     }
@@ -2893,6 +2878,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return copyMyWorkout
     }
   }
+
   async function updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList(
     workoutData: IMyfitflowWorkoutInUse,
   ) {
@@ -2949,6 +2935,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return copyMyWorkout
     }
   }
+
   async function updateStartAndEndDateFromMyWorkoutInCache(
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
@@ -3009,6 +2996,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return copyMyWorkout
     }
   }
+
   async function deleteMyWorkoutAndmyWorkoutDataArray(workoutId?: string) {
     const userId = user?.id
     if (!workoutId) return
@@ -3269,6 +3257,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
+
   async function loadMyWorkoutAndMyWorkoutExercises(userId: string) {
     console.log(`tgenho chamando`)
     const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`

@@ -23,11 +23,26 @@ export default function TotalWorkoutContainer({
   user,
   handleOnPressTotalWorkout,
 }: WorkoutContainerProps) {
+  // sxzaber se ativo o unao
+
+  let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
+  if (data) {
+    const listOfWorkouts = data.data.filter((v) => v.isInUse)
+
+    const getActiveWorkouts = listOfWorkouts
+      .map((workout) => {
+        const active = data.dataOrder.find((order) => order.id === workout.id)
+        if (!active) return false
+
+        return workout
+      })
+      .filter((workout) => workout !== false)
+
+    activeWorkouts = getActiveWorkouts
+  }
+
   return (
     <ContainerWrapper>
-      <MonthYearACTMessage>
-        <CardTittle>Meus treinos</CardTittle>
-      </MonthYearACTMessage>
       <CardsWrapper>
         {data &&
           data.data.map((v: IMyfitflowWorkoutInUseData, i: number) => (
@@ -37,7 +52,9 @@ export default function TotalWorkoutContainer({
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               handleOnPressTotalWorkout={() => handleOnPressTotalWorkout(v.id)}
               index={i}
-              isActive={v.isActive}
+              isActive={
+                !!activeWorkouts.find((va) => va.id === v.id && va.isInUse)
+              }
             />
           ))}
       </CardsWrapper>

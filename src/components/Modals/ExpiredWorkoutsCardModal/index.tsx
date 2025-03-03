@@ -18,15 +18,16 @@ import {
   OverLayTop,
   OverLayBottom,
   ToggleSwitch,
+  ToggleSwitchText,
+  ShareButton,
   ShareText,
   SubTitteText,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 interface InputProps {
-  handleSendWorkout: (id: string) => void
-  handleQRcodeWorkout: (id: string) => void
-  handleCancelShareWorkout: (id: string) => void
+  handleUseWorkout: (id: string) => void
+  handleCancelActiveWorkout: (id: string) => void
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
   isPrimaryWorkout: boolean
@@ -34,17 +35,16 @@ interface InputProps {
   selectedLanguage: 'pt-br' | 'us'
 }
 
-export function WorkoutUserEditActiveWorkoutModal({
-  handleQRcodeWorkout,
-  handleSendWorkout,
-  handleCancelShareWorkout,
+export function ExpiredWorkoutsCardModal({
+  handleUseWorkout,
+  handleCancelActiveWorkout,
   closeModal,
   isPrimaryWorkout,
   data,
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const isWorkoutActive = data.isActive
+  const isWorkoutActive = data.isInUse
   const isSharingActive = data.isShared
 
   const tittle = data.data.workoutName?.[selectedLanguage]
@@ -64,14 +64,11 @@ export function WorkoutUserEditActiveWorkoutModal({
   const onText = selectedLanguage === 'pt-br' ? 'Ligar' : 'ON'
   const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
 
-  async function onQRcode(id: string) {
-    handleQRcodeWorkout(id)
+  async function onUseWorkout(id: string) {
+    handleUseWorkout(id)
   }
-  async function onSend(id: string) {
-    handleSendWorkout(id)
-  }
-  async function onCancelShare(id: string) {
-    handleCancelShareWorkout(id)
+  async function onCancel(id: string) {
+    handleCancelActiveWorkout(id)
   }
 
   function handleOverlayPress() {
@@ -80,10 +77,9 @@ export function WorkoutUserEditActiveWorkoutModal({
   }
   /* 
 
-organizar código no sewntido de o q ta contando e o q nao ta contando
+compartilhar treino whatspp - gerar qrcode
 
-
-organizare para pegar apenas o q ta ativo e na ordem certa
+cancelar compartilhamento
 
 */
   return (
@@ -105,23 +101,21 @@ organizare para pegar apenas o q ta ativo e na ordem certa
 
               <InputsWrapper>
                 <ToggleSwitch
-                  selected={data.isActive}
-                  onPress={() => onCancelShare(data.id)}
+                  selected={!data.isInUse}
+                  onPress={() => onCancel(data.id)}
                 >
-                  <SubTitteText selected={data.isActive}>
-                    {data.isShared ? 'Cancelar' : 'Share'}
-                  </SubTitteText>
+                  <ToggleSwitchText selected={data.isInUse}>
+                    Deletar
+                  </ToggleSwitchText>
                 </ToggleSwitch>
+
                 <ToggleSwitch
-                  selected={!data.isActive}
-                  onPress={() => onQRcode(data.id)}
+                  selected={data.isInUse}
+                  onPress={() => onUseWorkout(data.id)}
                 >
-                  <SubTitteText selected={data.isActive}>QRcode</SubTitteText>
-                </ToggleSwitch>
-                <ToggleSwitch onPress={() => onSend(data.id)}>
-                  <ShareText selected={data.isShared}>
-                    {data.isShared ? 'Enviar' : 'Share'}
-                  </ShareText>
+                  <ToggleSwitchText selected={data.isInUse}>
+                    Ativar
+                  </ToggleSwitchText>
                 </ToggleSwitch>
               </InputsWrapper>
             </TipsNoteWrapper>

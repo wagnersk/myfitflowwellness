@@ -35,6 +35,12 @@ import {
   SelectScreenButtonText,
   Underline,
   RowWrapper,
+  SelectScreenWrapper2,
+  SelectScreenButton2,
+  SelectScreenButtonText2,
+  Underline2,
+  RowWrapper2,
+  TittleWrapper,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -43,9 +49,9 @@ import {
   IptBrUs,
   IWorkoutOrder,
 } from '@hooks/authTypes'
+
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Gear from '@assets/Gear.svg'
-import { WorkoutUserEditActiveWorkoutModal } from '@components/Modals/WorkoutUserEditActiveWorkoutModal'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { useTheme } from 'styled-components'
 import {
@@ -53,11 +59,19 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import ActivesWorkoutContainer from './Components/ActivesWorkoutContainer'
-import TotalWorkoutContainer from './Components/TotalWorkoutContainer'
+
+import TotalWorkoutContainer from './Components/Total/TotalWorkoutContainer'
+import SharedWorkoutContainer from './Components/Shared/SharedWorkoutContainer'
+import InUseWorkoutContainer from './Components/InUse/InUseWorkoutContainer'
+
 import { WorkoutUserEditTotalWorkoutModal } from '@components/Modals/WorkoutUserEditTotalWorkoutModal'
 import { SharedWorkoutsCardModal } from '@components/Modals/SharedWorkoutsCardModal'
-import SharedWorkoutContainer from './Components/SharedWorkoutContainer'
+import { ExpiredWorkoutsCardModal } from '@components/Modals/ExpiredWorkoutsCardModal'
+import {
+  addDaysToTimestamp,
+  addWeeksToTimestamp,
+} from '@utils/calculeEndDateWithWeeks'
+import { WorkoutUserActiveWorkoutModal } from '@components/Modals/WorkoutUserActiveWorkoutModal'
 
 export interface IUserSelect {
   id: number
@@ -67,9 +81,10 @@ export interface IUserSelect {
   selected: boolean
 }
 export interface IModalStateWorkoutLogData {
-  isOpenModalEditActiveWorkout: boolean
   isOpenModalEditTotalWorkout: boolean
   isOpenModalSharedWorkout: boolean
+  isOpenModalActiveWorkout: boolean
+  isOpenModalExpiredWorkout: boolean
   activeWeightIndex: number
 }
 
@@ -90,11 +105,20 @@ export function UserWorkouts() {
     useState<IModalStateWorkoutLogData | null>(null)
 
   const [isDataOrderChanged, setIsDataOrderChanged] = useState(false)
-
-  const [showScreen, setShowScreen] = useState<'actives' | 'total' | 'shared'>(
-    'actives',
+  const [showScreen, setShowScreen] = useState<
+    'Em uso' | 'Meus treinos' | 'Compartilhado'
+  >('Em uso')
+  const [showScreen2, setShowScreen2] = useState<'Ativos' | 'Expirados'>(
+    'Ativos',
   )
+
   const [workouts, setWorkouts] = useState<IMyWorkouts | null>(myWorkout)
+  const [activeworkouts, setActiveWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+  const [expiredworkouts, setExpiredWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
   const [sharedWorkouts, setSharedWorkouts] = useState<
     IMyfitflowWorkoutInUseData[] | null
   >(null)
@@ -131,33 +155,54 @@ export function UserWorkouts() {
     if (index === undefined || index === -1) return
     setDefaultModalState((prev) => ({
       ...prev,
-      isOpenModalEditActiveWorkout: false,
       isOpenModalEditTotalWorkout: true,
       isOpenModalSharedWorkout: false,
+      isOpenModalActiveWorkout: false,
+      isOpenModalExpiredWorkout: false,
+      activeWeightIndex: index,
+    }))
+  }
+
+  async function handleOnPressExpiredInUseWorkout(id: string) {
+    console.log(`handleOnPressExpiredInUseWorkout`, id)
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+    setDefaultModalState((prev) => ({
+      ...prev,
+      isOpenModalEditTotalWorkout: false,
+      isOpenModalSharedWorkout: false,
+      isOpenModalActiveWorkout: false,
+      isOpenModalExpiredWorkout: true,
+
       activeWeightIndex: index,
     }))
   }
 
   async function handleOnPressActiveWorkout(id: string) {
+    console.log(`handleOnPressActiveWorkout`, id)
+
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
     setDefaultModalState((prev) => ({
       ...prev,
-      isOpenModalEditActiveWorkout: true,
-      isOpenModalEditTotalWorkout: true,
+      isOpenModalEditTotalWorkout: false,
       isOpenModalSharedWorkout: false,
+      isOpenModalActiveWorkout: true,
+      isOpenModalExpiredWorkout: false,
 
       activeWeightIndex: index,
     }))
   }
+
   async function handleOnPressSendWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
     setDefaultModalState((prev) => ({
       ...prev,
-      isOpenModalEditActiveWorkout: false,
       isOpenModalEditTotalWorkout: false,
       isOpenModalSharedWorkout: true,
+      isOpenModalActiveWorkout: false,
+      isOpenModalExpiredWorkout: false,
       activeWeightIndex: index,
     }))
   }
@@ -168,15 +213,13 @@ export function UserWorkouts() {
     startWorkoutCounterDate()
   }
 
-  async function handleActiveWorkout(id: string) {
+  async function handleUseWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
     Alert.alert(
-      workouts?.data[index].isActive
-        ? 'Deseja desativar o treino?'
-        : 'Deseja ativar o treino?',
-      '',
+      'Deseja usar o treino?',
+      'Será adicionado ao final da lista de treinos em uso.',
       [
         {
           text: 'Cancelar',
@@ -193,13 +236,43 @@ export function UserWorkouts() {
               dataOrder: workouts?.dataOrder || [],
             }
             if (!copyWorkouts) return
+            if (!copyWorkouts.data) return
+            if (!copyWorkouts.dataOrder) return
 
-            console.log(`Ativando treino:`, copyWorkouts.data[index])
+            const dateNow = new Date().getTime()
+            let startDate = dateNow
 
-            copyWorkouts.data[index].isActive =
-              !copyWorkouts.data[index].isActive
+            if (copyWorkouts.dataOrder.length > 0) {
+              const lastWorkout =
+                copyWorkouts.dataOrder[copyWorkouts.dataOrder.length - 1]
+
+              const nextDayTimestamp = addDaysToTimestamp(
+                lastWorkout.workoutEndsAt,
+                1,
+              )
+              startDate = nextDayTimestamp
+            }
+            copyWorkouts.dataOrder.push({
+              id: copyWorkouts.data[index].id,
+              createdAt: dateNow,
+              updatedAt: dateNow,
+              workoutStartAt: startDate,
+              workoutEndsAt: addWeeksToTimestamp(
+                startDate,
+                copyWorkouts.data[index].data.workoutPeriod.periodNumber,
+              ),
+            })
 
             setWorkouts(copyWorkouts)
+
+            setDefaultModalState((prev) => ({
+              ...prev,
+              isOpenModalSharedWorkout: false,
+              isOpenModalEditTotalWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
+              activeWeightIndex: 0,
+            }))
           },
         },
       ],
@@ -279,8 +352,9 @@ export function UserWorkouts() {
             setDefaultModalState((prev) => ({
               ...prev,
               isOpenModalSharedWorkout: false,
-              isOpenModalEditActiveWorkout: false,
               isOpenModalEditTotalWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
               activeWeightIndex: 0,
             }))
           },
@@ -299,11 +373,58 @@ export function UserWorkouts() {
   async function handleSendWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
+    /* TODO 1 - verificar se o treino esta com compartilhhamento ativo , se nao estiver
+chamar alerta que apenas dando ok eu consigo ir pra tela de escolher pra onde quero compartrilhar o link
+( whatsapp ) ...
+ 
+esse link leva pro meu perfil e ao abrir ele deve chamar o app com a confirmacao de aceitar o treino copiado
 
-    console.log(
-      `usar o mesmo shared da foto para compartilar ou lib especifica, ver como fica pro insta`,
-      id,
-    )
+
+*/
+
+    console.log(`handleSendWorkout , fazer Todo send e edit  e cancel`)
+
+    const isAlreadyShared = workouts?.data[index].isShared
+
+    if (!isAlreadyShared) {
+      Alert.alert(
+        'Deseja ativar o treino?',
+        '',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Deletar',
+            onPress: () => {
+              // TODO 2 logiaca que ativa o treino
+              /*   if (!workouts) return
+              const copyWorkouts = { ...workouts }
+              copyWorkouts.data.splice(index, 1)
+
+              setDefaultModalState((prev) => ({
+                ...prev,
+                isOpenModalEditTotalWorkout: false,
+                isOpenModalSharedWorkout: false,
+                isOpenModalActiveWorkout: false,
+                isOpenModalExpiredWorkout: false,
+                activeWeightIndex: 0,
+              }))
+
+              if (index === 0) {
+                const getWorkoutInUse = copyWorkouts.data[0].data
+                console.log(`getWorkoutInUse`, getWorkoutInUse)
+                updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, 0)
+              }
+
+              updateMyWorkoutInCache(copyWorkouts) */
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    }
   }
 
   async function handleDeleteWorkout(id: string) {
@@ -327,9 +448,10 @@ export function UserWorkouts() {
 
             setDefaultModalState((prev) => ({
               ...prev,
-              isOpenModalEditActiveWorkout: false,
               isOpenModalEditTotalWorkout: false,
               isOpenModalSharedWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
               activeWeightIndex: 0,
             }))
 
@@ -423,32 +545,158 @@ export function UserWorkouts() {
     setIsOpenSettingsMode((prev) => !prev)
   }
 
-  function closeModal(type: 'active' | 'total' | 'shared') {
-    if (type === 'active') {
+  async function handleActiveWorkout(id: string) {
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+
+    const isActivedAndInUse = activeworkouts
+      ? !!activeworkouts.find((va) => va.id === id && va.isInUse)
+      : false
+
+    if (isActivedAndInUse) return
+
+    const isInUse = workouts?.data[index].isInUse
+    Alert.alert(
+      isInUse ? 'Deseja desativar o treino?' : 'Deseja ativar o treino?',
+      '',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Ativar',
+          onPress: () => {
+            const copyWorkouts = {
+              userId: workouts?.userId || '',
+              createdAt: workouts?.createdAt || 0,
+              updatedAt: workouts?.updatedAt || 0,
+              data: workouts?.data || [],
+              dataOrder: workouts?.dataOrder || [],
+            }
+            if (!copyWorkouts) return
+
+            console.log(`Ativando treino:`, copyWorkouts.data[index])
+
+            /* 
+            logica que adicionar em dataOrder
+            */
+
+            copyWorkouts.data[index].isInUse = true
+
+            setWorkouts(copyWorkouts)
+
+            setDefaultModalState((prev) => ({
+              ...prev,
+              isOpenModalSharedWorkout: false,
+              isOpenModalEditTotalWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
+              activeWeightIndex: 0,
+            }))
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+
+  async function handleCancelActiveWorkout(id: string) {
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+
+    Alert.alert(
+      'Deseja desativar o treino?',
+      '',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Desativar',
+          onPress: () => {
+            const copyWorkouts = {
+              userId: workouts?.userId || '',
+              createdAt: workouts?.createdAt || 0,
+              updatedAt: workouts?.updatedAt || 0,
+              data: workouts?.data || [],
+              dataOrder: workouts?.dataOrder || [],
+            }
+            if (!copyWorkouts) return
+
+            console.log(`Desativando treino:`, copyWorkouts.data[index])
+
+            copyWorkouts.data[index].isInUse = false
+
+            setWorkouts(copyWorkouts)
+
+            setDefaultModalState((prev) => ({
+              ...prev,
+              isOpenModalSharedWorkout: false,
+              isOpenModalEditTotalWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
+              activeWeightIndex: 0,
+            }))
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+
+  function closeModal(
+    type: 'Em uso' | 'Meus treinos' | 'Compartilhado' | 'Expired' | 'Active',
+  ) {
+    if (type === 'Em uso') {
       setDefaultModalState((prevState) => ({
         ...prevState,
-        isOpenModalEditActiveWorkout: false,
         isOpenModalEditTotalWorkout: false,
         isOpenModalSharedWorkout: false,
+        isOpenModalActiveWorkout: false,
+        isOpenModalExpiredWorkout: false,
         activeWeightIndex: prevState?.activeWeightIndex ?? 0,
       }))
     }
 
-    if (type === 'total') {
+    if (type === 'Meus treinos') {
       setDefaultModalState((prevState) => ({
         ...prevState,
-        isOpenModalEditActiveWorkout: false,
         isOpenModalEditTotalWorkout: false,
         isOpenModalSharedWorkout: false,
+        isOpenModalActiveWorkout: false,
+        isOpenModalExpiredWorkout: false,
         activeWeightIndex: prevState?.activeWeightIndex ?? 0,
       }))
     }
-    if (type === 'shared') {
+    if (type === 'Compartilhado') {
       setDefaultModalState((prevState) => ({
         ...prevState,
-        isOpenModalEditActiveWorkout: false,
         isOpenModalEditTotalWorkout: false,
         isOpenModalSharedWorkout: false,
+        isOpenModalActiveWorkout: false,
+        isOpenModalExpiredWorkout: false,
+        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
+      }))
+    }
+    if (type === 'Expired') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalEditTotalWorkout: false,
+        isOpenModalSharedWorkout: false,
+        isOpenModalActiveWorkout: false,
+        isOpenModalExpiredWorkout: false,
+        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
+      }))
+    }
+    if (type === 'Active') {
+      setDefaultModalState((prevState) => ({
+        ...prevState,
+        isOpenModalEditTotalWorkout: false,
+        isOpenModalSharedWorkout: false,
+        isOpenModalActiveWorkout: false,
+        isOpenModalExpiredWorkout: false,
         activeWeightIndex: prevState?.activeWeightIndex ?? 0,
       }))
     }
@@ -556,55 +804,65 @@ export function UserWorkouts() {
   }, [])
 
   useEffect(() => {
-    /*   if (workouts?.data && workouts?.dataOrder) {
-      const orderedWorkouts = workouts.dataOrder
-        .map((order) =>
-          workouts.data.find((workout) => workout.id === order.id),
-        )
-        .filter(
-          (workout): workout is IMyfitflowWorkoutInUseData =>
-            workout !== undefined,
-        )
-
-      if (orderedWorkouts.length > 0) {
-        console.log('orderedWorkouts', orderedWorkouts)
-
-        setCurrentWorkout(orderedWorkouts[0] || null)
-        console.log('orderedWorkouts[0]', orderedWorkouts[0])
-
-        setNextWorkouts(orderedWorkouts.slice(1) || null)
-        console.log('Next Workouts', orderedWorkouts.slice(1) || null)
-      }
-    } */
     if (workouts) {
       setWorkouts(myWorkout)
+
       const filterSharedWorkouts = workouts.data.filter((v) => v.isShared)
       setSharedWorkouts(filterSharedWorkouts)
+
+      const filterInUseWorkouts = workouts.data.filter((v) => v.isInUse)
+
+      console.log(`workouts.dataOrder`, workouts.dataOrder)
+
+      // busca o q ta contido dentro do order
+      const getActiveWorkouts: IMyfitflowWorkoutInUseData[] = []
+      const getExpiredWorkouts: IMyfitflowWorkoutInUseData[] = []
+
+      filterInUseWorkouts.forEach((workout) => {
+        const active = workouts.dataOrder.find(
+          (order) => order.id === workout.id,
+        )
+
+        if (active) return getActiveWorkouts.push(workout)
+        if (!active) return getExpiredWorkouts.push(workout)
+      })
+
+      setActiveWorkouts(getActiveWorkouts) // ou o treino para aqui inUse true + estar no dataOrder
+      setExpiredWorkouts(getExpiredWorkouts) // ou ele para aqui , inUse true + nao estar no dataOrder
     }
-  }, [workouts, myWorkout])
+  }, [workouts, myWorkout, setShowScreen2])
 
   const screenWidth = Dimensions.get('window').width
 
   const paddingSize = 36
   const TAB_WIDTH = (screenWidth - paddingSize) / 3 // screenWidth / 2
-  const TABS: ('actives' | 'total' | 'shared')[] = [
-    'actives',
-    'total',
-    'shared',
+
+  const paddingSize2 = 2
+  const TAB_WIDTH2 = (screenWidth - paddingSize2) / 3 // screenWidth / 2
+  const TABS: ('Em uso' | 'Meus treinos' | 'Compartilhado')[] = [
+    'Em uso',
+    'Meus treinos',
+    'Compartilhado',
   ]
+  const TABS2: ('Ativos' | 'Expirados')[] = ['Ativos', 'Expirados']
+
   const offset = useSharedValue<number>(0)
+  const offset2 = useSharedValue<number>(50)
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ translateX: offset.value }],
   }))
+  const animatedStyles2 = useAnimatedStyle(() => ({
+    transform: [{ translateX: offset2.value }],
+  }))
 
-  function handlePress(tab: 'actives' | 'total' | 'shared') {
+  function handlePress(tab: 'Em uso' | 'Meus treinos' | 'Compartilhado') {
     const newOffset = (() => {
       switch (tab) {
-        case 'actives':
+        case 'Em uso':
           return 0
-        case 'total':
+        case 'Meus treinos':
           return TAB_WIDTH
-        case 'shared':
+        case 'Compartilhado':
           return TAB_WIDTH + TAB_WIDTH
         default:
           return 0
@@ -619,6 +877,24 @@ export function UserWorkouts() {
     offset.value = withTiming(newOffset)
   }
 
+  function handlePress2(tab: 'Ativos' | 'Expirados') {
+    const newOffset = (() => {
+      switch (tab) {
+        case 'Ativos':
+          return 50
+        case 'Expirados':
+          return screenWidth / 2 - 16
+
+        default:
+          return 0
+      }
+    })()
+
+    setShowScreen2(tab)
+
+    offset2.value = withTiming(newOffset)
+  }
+
   return (
     <Container>
       <BodyImageWrapper>
@@ -630,17 +906,18 @@ export function UserWorkouts() {
           <ImageBackgroundContainer>
             <SafeAreaProvider style={{ width: `100%` }}>
               <SafeAreaView style={{ flex: 1 }}>
-                <SettingsWrapper>
-                  <BackButton
-                    onPress={handleGoBack}
-                    changeColor
-                    disabled={isWaitingApiResponse}
-                  />
-                </SettingsWrapper>
-
                 <Body>
                   <ContainerTittleWrapper>
-                    <ContainerTittle>Meus Treinos</ContainerTittle>
+                    <SettingsWrapper>
+                      <BackButton
+                        onPress={handleGoBack}
+                        changeColor
+                        disabled={isWaitingApiResponse}
+                      />
+                    </SettingsWrapper>
+                    <TittleWrapper>
+                      <ContainerTittle>Treinos</ContainerTittle>
+                    </TittleWrapper>
                     <IconWrapper>
                       <OpenSettingsButton onPress={handleOpenSettingsMode}>
                         <Gear
@@ -673,39 +950,66 @@ export function UserWorkouts() {
                           style={animatedStyles}
                         />
                       </SelectScreenWrapper>
+                      {showScreen === 'Em uso' && (
+                        <>
+                          <SelectScreenWrapper2>
+                            <Underline2
+                              tabWidth={screenWidth / 3}
+                              style={animatedStyles2}
+                            />
+                            <RowWrapper2>
+                              {TABS2.map((tab) => (
+                                <SelectScreenButton2
+                                  tabWidth={screenWidth / 3}
+                                  key={tab}
+                                  onPress={() => handlePress2(tab)}
+                                >
+                                  <SelectScreenButtonText2
+                                    isSelected={showScreen2 === tab}
+                                  >
+                                    {tab}
+                                  </SelectScreenButtonText2>
+                                </SelectScreenButton2>
+                              ))}
+                            </RowWrapper2>
+                          </SelectScreenWrapper2>
 
-                      {showScreen === 'actives' && (
-                        <ActivesWorkoutContainer
-                          data={workouts}
-                          user={user}
-                          isOpenSettingsMode={isOpenSettingsMode}
-                          handleOnPressActiveWorkout={
-                            handleOnPressActiveWorkout
-                          }
-                          handleResetTimerUp={handleResetTimerUp}
-                          handleMoveUp={handleMoveUp}
-                          handleMoveDown={handleMoveDown}
-                        />
+                          <InUseWorkoutContainer
+                            data={workouts}
+                            activeworkouts={activeworkouts}
+                            expiredworkouts={expiredworkouts}
+                            showScreen2={showScreen2}
+                            user={user}
+                            isOpenSettingsMode={isOpenSettingsMode}
+                            handleOnPressExpiredInUseWorkout={
+                              handleOnPressExpiredInUseWorkout
+                            }
+                            handleOnPressActiveInUseWorkout={
+                              handleOnPressActiveWorkout
+                            }
+                          />
+                        </>
                       )}
-                      {showScreen === 'total' && workouts && (
+                      {showScreen === 'Meus treinos' && workouts && (
                         <TotalWorkoutContainer
                           data={workouts}
                           user={user}
                           handleOnPressTotalWorkout={handleOnPressTotalWorkout}
                         />
                       )}
-                      {showScreen === 'shared' && workouts && (
+                      {showScreen === 'Compartilhado' && workouts && (
                         <SharedWorkoutContainer
-                          data={sharedWorkouts}
+                          data={workouts}
+                          sharedData={sharedWorkouts}
                           user={user}
                           handleOnPressSendWorkout={handleOnPressSendWorkout}
                         />
                       )}
                     </ListWrapper>
                   </ScrollView>
-
-                  {!isOpenSettingsMode &&
-                    showScreen === 'actives' &&
+                  {/*        {!isOpenSettingsMode &&
+                    showScreen === 'Em uso' &&
+                    showScreen2 === 'Ativos' &&
                     workouts &&
                     workouts.dataOrder &&
                     workouts.dataOrder[0] &&
@@ -719,7 +1023,6 @@ export function UserWorkouts() {
                         enabled={!false}
                       />
                     )}
-
                   {isOpenSettingsMode && isDataOrderChanged && (
                     <CTAButton
                       style={{ marginBottom: 54 }}
@@ -733,7 +1036,7 @@ export function UserWorkouts() {
                       loading={false}
                       enabled={!false}
                     />
-                  )}
+                  )} */}
                 </Body>
               </SafeAreaView>
             </SafeAreaProvider>
@@ -743,10 +1046,10 @@ export function UserWorkouts() {
 
       {/* active */}
       <Modal
-        visible={defaultModalState?.isOpenModalEditActiveWorkout || false}
+        visible={defaultModalState?.isOpenModalActiveWorkout || false}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={() => closeModal('active')}
+        onRequestClose={() => closeModal('Em uso')}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -754,11 +1057,36 @@ export function UserWorkouts() {
         }}
       >
         {myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0] && (
-          <WorkoutUserEditActiveWorkoutModal
+          <WorkoutUserActiveWorkoutModal
             handleCancelShareWorkout={handleCancelShareWorkout}
             handleQRcodeWorkout={handleQRcodeWorkout}
             handleSendWorkout={handleSendWorkout}
-            closeModal={() => closeModal('active')}
+            closeModal={() => closeModal('Em uso')}
+            data={myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0]}
+            activeIndex={defaultModalState?.activeWeightIndex ?? 0}
+            selectedLanguage={user?.selectedLanguage || 'pt-br'}
+            isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
+          />
+        )}
+      </Modal>
+
+      {/* expired  */}
+      <Modal
+        visible={defaultModalState?.isOpenModalExpiredWorkout || false}
+        animationType={`slide`}
+        transparent={true}
+        onRequestClose={() => closeModal('Compartilhado')}
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+          flex: 1,
+        }}
+      >
+        {myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0] && (
+          <ExpiredWorkoutsCardModal
+            handleUseWorkout={handleUseWorkout}
+            handleCancelActiveWorkout={handleCancelActiveWorkout}
+            closeModal={() => closeModal('Expired')}
             data={myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0]}
             activeIndex={defaultModalState?.activeWeightIndex ?? 0}
             selectedLanguage={user?.selectedLanguage || 'pt-br'}
@@ -772,7 +1100,7 @@ export function UserWorkouts() {
         visible={defaultModalState?.isOpenModalEditTotalWorkout || false}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={() => closeModal('total')}
+        onRequestClose={() => closeModal('Meus treinos')}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -784,7 +1112,7 @@ export function UserWorkouts() {
             handleDeleteWorkout={handleDeleteWorkout}
             handleShareWorkout={handleShareWorkout}
             handleActiveWorkout={handleActiveWorkout}
-            closeModal={() => closeModal('total')}
+            closeModal={() => closeModal('Meus treinos')}
             data={myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0]}
             activeIndex={defaultModalState?.activeWeightIndex ?? 0}
             selectedLanguage={user?.selectedLanguage || 'pt-br'}
@@ -798,7 +1126,7 @@ export function UserWorkouts() {
         visible={defaultModalState?.isOpenModalSharedWorkout || false}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={() => closeModal('shared')}
+        onRequestClose={() => closeModal('Compartilhado')}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -810,7 +1138,7 @@ export function UserWorkouts() {
             handleCancelShareWorkout={handleCancelShareWorkout}
             handleQRcodeWorkout={handleQRcodeWorkout}
             handleSendWorkout={handleSendWorkout}
-            closeModal={() => closeModal('shared')}
+            closeModal={() => closeModal('Compartilhado')}
             data={myWorkout?.data[defaultModalState?.activeWeightIndex ?? 0]}
             activeIndex={defaultModalState?.activeWeightIndex ?? 0}
             selectedLanguage={user?.selectedLanguage || 'pt-br'}

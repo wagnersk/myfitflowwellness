@@ -3,9 +3,9 @@ import { ButtonContainer, Container, BodyWraper } from './styles'
 import {
   IMyfitflowWorkoutInUse,
   IMyfitflowWorkoutInUseData,
+  IMyWorkouts,
 } from '@hooks/authTypes'
-import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
-import { TotalWorkoutsCardItem } from '../TotalWorkoutsCardItem'
+import { ItemCard } from '../../ItemCard'
 
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
@@ -26,11 +26,12 @@ export function TotalWorkoutCard({
   function handleOnPressWorkout(index: number) {
     handleOnPressTotalWorkout(index)
   }
+
   return (
     <Container>
       <ButtonContainer>
         <BodyWraper>
-          <TotalWorkoutsCardItem
+          <ItemCard
             index={index}
             data={data}
             handleNextStep={() => handleOnPressWorkout(index)}

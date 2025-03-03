@@ -19,6 +19,7 @@ import {
   OverLayBottom,
   ToggleSwitch,
   ToggleSwitchText,
+  SubTitteText,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
@@ -43,7 +44,7 @@ export function WorkoutUserEditTotalWorkoutModal({
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const isWorkoutActive = data.isActive
+  const isWorkoutActive = data.isInUse
   const isSharingActive = data.isShared
 
   const tittle = data.data.workoutName?.[selectedLanguage]
@@ -97,18 +98,19 @@ gerar qrcode
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
+                <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
                 <TitteText>
-                  {data.isActive ? 'Desativar Treino' : 'Ativar Treino'}
+                  {data.isInUse ? 'Treino em uso' : 'Usar Treino'}
                 </TitteText>
                 <ToggleSwitch
-                  selected={data.isActive}
+                  selected={data.isInUse}
                   onPress={() => onActive(data.id)}
                 >
-                  <ToggleSwitchText selected={data.isActive}>
-                    {data.isActive ? 'ON' : 'OFF'}
+                  <ToggleSwitchText selected={data.isInUse}>
+                    {data.isInUse ? 'ON' : 'OFF'}
                   </ToggleSwitchText>
                 </ToggleSwitch>
               </InputsWrapper>

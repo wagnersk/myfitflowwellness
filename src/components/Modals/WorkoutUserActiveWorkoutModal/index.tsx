@@ -22,6 +22,7 @@ import {
   ShareButton,
   ShareText,
   SubTitteText,
+  YellowToogleSwitch,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
@@ -36,7 +37,7 @@ interface InputProps {
   selectedLanguage: 'pt-br' | 'us'
 }
 
-export function SharedWorkoutsCardModal({
+export function WorkoutUserActiveWorkoutModal({
   handleQRcodeWorkout,
   handleSendWorkout,
   handleCancelShareWorkout,
@@ -105,27 +106,26 @@ cancelar compartilhamento
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
+                <YellowToogleSwitch
+                  selected={!data.isInUse}
+                  onPress={() => onQRcode(data.id)}
+                >
+                  <ToggleSwitchText selected={data.isInUse}>
+                    Desativar
+                  </ToggleSwitchText>
+                </YellowToogleSwitch>
+                <ShareButton onPress={() => onSend(data.id)}>
+                  <ShareText selected={data.isShared}>Enviar</ShareText>
+                </ShareButton>
+
                 <ToggleSwitch
                   selected={data.isInUse}
                   onPress={() => onCancelShare(data.id)}
                 >
                   <ToggleSwitchText selected={data.isInUse}>
-                    {data.isShared ? 'Cancelar' : 'Share'}
+                    {data.isShared ? 'Cancelar' : 'Editar'}
                   </ToggleSwitchText>
                 </ToggleSwitch>
-                <ToggleSwitch
-                  selected={!data.isInUse}
-                  onPress={() => onQRcode(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    QRcode
-                  </ToggleSwitchText>
-                </ToggleSwitch>
-                <ShareButton onPress={() => onSend(data.id)}>
-                  <ShareText selected={data.isShared}>
-                    {data.isShared ? 'Enviar' : 'Share'}
-                  </ShareText>
-                </ShareButton>
               </InputsWrapper>
             </TipsNoteWrapper>
           </TipsNoteBodyWrapper>

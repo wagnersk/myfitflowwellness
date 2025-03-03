@@ -49,7 +49,6 @@ export const TitteText = styled.Text`
   padding-bottom: 4px;
   justify-content: flex-start;
 `
-
 export const SubTitteText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(14)}px;
@@ -74,7 +73,7 @@ export const ToggleSwitchText = styled.Text<{ selected: boolean }>`
 export const ShareText = styled.Text<{ selected: boolean }>`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
   justify-content: flex-start;
 `
 
@@ -91,6 +90,8 @@ export const DeleteButton = styled(TouchableOpacityComponent)`
   border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
 `
 export const ShareButton = styled(TouchableOpacityComponent)`
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+
   border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding: 4px;
 `
@@ -103,4 +104,11 @@ export const ToggleSwitch = styled(TouchableOpacityComponent)<{
   border: 2px solid
     ${({ theme, selected }) =>
       selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
+`
+
+export const YellowToogleSwitch = styled(TouchableOpacityComponent)<{
+  selected?: boolean
+}>`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_YELLOW};
+  border: 2px solid ${({ theme, selected }) => theme.COLORS.AUX_GOOGLE_YELLOW};
 `
