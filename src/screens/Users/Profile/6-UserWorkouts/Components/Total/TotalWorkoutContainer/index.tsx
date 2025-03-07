@@ -26,7 +26,7 @@ export default function TotalWorkoutContainer({
   // sxzaber se ativo o unao
 
   let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
-  if (data) {
+  if (data !== null && data.data !== undefined && data.dataOrder) {
     const listOfWorkouts = data.data.filter((v) => v.isInUse)
 
     const getActiveWorkouts = listOfWorkouts
@@ -45,6 +45,7 @@ export default function TotalWorkoutContainer({
     <ContainerWrapper>
       <CardsWrapper>
         {data &&
+          data.data &&
           data.data.map((v: IMyfitflowWorkoutInUseData, i: number) => (
             <TotalWorkoutCard
               key={i}

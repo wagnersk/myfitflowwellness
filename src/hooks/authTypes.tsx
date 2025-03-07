@@ -818,18 +818,14 @@ export interface AuthContextData {
   /// eliminiar isso pois vou usar o sumary
 
   loadCachedExerciseHistoryData: (userId: string) => Promise<void>
-
   resetAllStartAndEndDateFromMyWorkoutInCache: (
-    workoutData: IMyfitflowWorkoutInUse,
+    updatedWorkouts: IMyWorkouts,
   ) => Promise<void>
   updateStartAndEndDateFromMyWorkoutInCache: (
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
   ) => Promise<void>
 
-  updateStartAndEndDateFromMyWorkoutInCacheExcludeMainWorkoutFromList: (
-    workoutData: IMyfitflowWorkoutInUse,
-  ) => Promise<void>
   updateMyWorkoutInCache: (data: IMyWorkouts) => Promise<void>
 
   updateCachedExerciseHistoryData: (

@@ -10,12 +10,6 @@ interface Props {
 
 export const Container = styled.TouchableOpacity``
 
-export const InfoAndButtonAndBottomLineWrapper = styled.View`
-  flex-direction: column;
-  flex: 1;
-  padding: 4px 4px 0 4px;
-`
-
 export const InfoAndButtonWrapper = styled.View`
   flex-direction: row;
   height: 100%;
@@ -23,10 +17,11 @@ export const InfoAndButtonWrapper = styled.View`
 
 export const InfoWrapper = styled.View`
   height: 100%;
+  flex: 1;
 `
 export const SubTittleWrapper = styled.View`
-  height: 100%;
   padding-left: 2px;
+  justify-content: flex-end;
 `
 export const DateWrapper = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
@@ -119,6 +114,29 @@ export const PhotoPreLoadingImageBackground = styled.View<Props>`
   opacity: 0.2;
   position: absolute;
 `
+export const ButtonsContainer = styled.View`
+  gap: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+`
+export const MoveCardUpButton = styled.TouchableOpacity`
+  gap: 12px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+`
+export const MoveCardDownButton = styled.TouchableOpacity`
+  gap: 12px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+`
 
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: theme.COLORS.GRADIENT_CARD_SERIE,
@@ -133,4 +151,17 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   border-radius: 8px;
 
   width: 100%;
+`
+export const InfoAndButtonAndBottomLineWrapper = styled.View<{
+  isOpenSettingsMode: boolean
+}>`
+  flex-direction: column;
+  flex: 1;
+  padding: 4px 4px 0 4px;
+  opacity: ${({ theme, isOpenSettingsMode }) => (isOpenSettingsMode ? 0.5 : 1)};
+`
+export const MoveToFirstButton = styled.TouchableOpacity`
+  justify-content: center;
+  align-items: center;
+  margin: 0 8px;
 `

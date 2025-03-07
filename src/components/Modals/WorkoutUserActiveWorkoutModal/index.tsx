@@ -19,75 +19,60 @@ import {
   OverLayBottom,
   ToggleSwitch,
   ToggleSwitchText,
-  ShareButton,
+  GreenSmallButton,
   ShareText,
   SubTitteText,
-  YellowToogleSwitch,
+  RedButton,
+  BlueSmallButton,
+  BlueButton,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 interface InputProps {
   handleSendWorkout: (id: string) => void
-  handleQRcodeWorkout: (id: string) => void
-  handleCancelShareWorkout: (id: string) => void
+  handleEditWorkout: (id: string) => void
+  handleDeactivateWorkout: (id: string) => void
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
-  isPrimaryWorkout: boolean
   activeIndex: number
   selectedLanguage: 'pt-br' | 'us'
+  isFirstElement: boolean
+  isMorethenTwoElementsAtQueue: boolean
+  onRestartCounter: (id: string) => void
+  onMoveWorkoutFromQueueToPrimary: (id: string) => void
 }
 
 export function WorkoutUserActiveWorkoutModal({
-  handleQRcodeWorkout,
+  handleEditWorkout,
   handleSendWorkout,
-  handleCancelShareWorkout,
+  handleDeactivateWorkout,
   closeModal,
-  isPrimaryWorkout,
   data,
   activeIndex,
+  onMoveWorkoutFromQueueToPrimary,
+  isFirstElement,
+  isMorethenTwoElementsAtQueue,
   selectedLanguage,
+  onRestartCounter,
 }: InputProps) {
-  const isWorkoutActive = data.isInUse
-  const isSharingActive = data.isShared
-
   const tittle = data.data.workoutName?.[selectedLanguage]
-
-  const mainWorkoutTitle =
-    selectedLanguage === 'pt-br' ? 'Treino Principal' : 'Main Workout'
-
-  const reserveWorkoutTitle =
-    selectedLanguage === 'pt-br'
-      ? `${activeIndex} - Treino Reserva`
-      : `${activeIndex} - Reserve Workout`
-
-  const auxTittle = isPrimaryWorkout ? mainWorkoutTitle : reserveWorkoutTitle
-
-  const sharingTitle =
-    selectedLanguage === 'pt-br' ? 'Compartilhamento' : 'Sharing'
-  const onText = selectedLanguage === 'pt-br' ? 'Ligar' : 'ON'
-  const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
-
-  async function onQRcode(id: string) {
-    handleQRcodeWorkout(id)
+  console.log('activeIndex ', activeIndex)
+  console.log('isFirstElement ', isFirstElement)
+  async function onEdit(id: string) {
+    handleEditWorkout(id)
   }
   async function onSend(id: string) {
     handleSendWorkout(id)
   }
-  async function onCancelShare(id: string) {
-    handleCancelShareWorkout(id)
+  async function onDeactivateWorkout(id: string) {
+    handleDeactivateWorkout(id)
   }
 
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()
   }
-  /* 
 
-compartilhar treino whatspp - gerar qrcode
-
-cancelar compartilhamento
-
-*/
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -106,26 +91,50 @@ cancelar compartilhamento
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
-                <YellowToogleSwitch
+                <RedButton
                   selected={!data.isInUse}
-                  onPress={() => onQRcode(data.id)}
+                  onPress={() => onDeactivateWorkout(data.id)}
                 >
                   <ToggleSwitchText selected={data.isInUse}>
                     Desativar
                   </ToggleSwitchText>
-                </YellowToogleSwitch>
-                <ShareButton onPress={() => onSend(data.id)}>
+                </RedButton>
+                <GreenSmallButton onPress={() => onSend(data.id)}>
                   <ShareText selected={data.isShared}>Enviar</ShareText>
-                </ShareButton>
+                </GreenSmallButton>
 
-                <ToggleSwitch
-                  selected={data.isInUse}
-                  onPress={() => onCancelShare(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    {data.isShared ? 'Cancelar' : 'Editar'}
-                  </ToggleSwitchText>
-                </ToggleSwitch>
+                {!isFirstElement ? (
+                  <>
+                    {isMorethenTwoElementsAtQueue && (
+                      <BlueSmallButton
+                        selected={data.isInUse}
+                        onPress={() => onEdit(data.id)}
+                        disabled={!isMorethenTwoElementsAtQueue}
+                      >
+                        <ToggleSwitchText selected={data.isInUse}>
+                          Editar Fila
+                        </ToggleSwitchText>
+                      </BlueSmallButton>
+                    )}
+                    <BlueButton
+                      selected={data.isInUse}
+                      onPress={() => onMoveWorkoutFromQueueToPrimary(data.id)}
+                    >
+                      <ToggleSwitchText selected={data.isInUse}>
+                        Usar este treino
+                      </ToggleSwitchText>
+                    </BlueButton>
+                  </>
+                ) : (
+                  <BlueButton
+                    selected={data.isInUse}
+                    onPress={() => onRestartCounter(data.id)}
+                  >
+                    <ToggleSwitchText selected={data.isInUse}>
+                      Reiniciar contagem
+                    </ToggleSwitchText>
+                  </BlueButton>
+                )}
               </InputsWrapper>
             </TipsNoteWrapper>
           </TipsNoteBodyWrapper>

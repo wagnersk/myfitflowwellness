@@ -60,6 +60,7 @@ export const ButtonContainer = styled.View<{ type: 'positive' | 'neutral' }>`
 export const CardsWrapper = styled.View`
   width: 100%;
   gap: 12px;
+  flex-direction: row;
 `
 
 /*   width: 100%;

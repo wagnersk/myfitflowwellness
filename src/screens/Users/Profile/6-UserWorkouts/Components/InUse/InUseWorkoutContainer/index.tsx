@@ -5,6 +5,9 @@ import {
   CardTittle,
   CardDate,
   CardsWrapper,
+  CardContainer,
+  ButtonsContainer,
+  MoveCardButton,
 } from './styles'
 import {
   IMyfitflowWorkoutInUseData,
@@ -23,6 +26,9 @@ interface WorkoutContainerProps {
   isOpenSettingsMode: boolean
   handleOnPressExpiredInUseWorkout: (id: string) => void
   handleOnPressActiveInUseWorkout: (id: string) => void
+  handleMoveUp: (id: string) => void
+  handleMoveDown: (id: string) => void
+  handleResetTimerUp: (id: string) => void
 }
 
 export default function InUseWorkoutContainer({
@@ -34,18 +40,16 @@ export default function InUseWorkoutContainer({
   isOpenSettingsMode,
   handleOnPressExpiredInUseWorkout,
   handleOnPressActiveInUseWorkout,
+  handleMoveUp,
+  handleMoveDown,
 }: WorkoutContainerProps) {
   function onPressActiveInUseWorkout(id: string) {
     handleOnPressActiveInUseWorkout(id)
   }
+
   function onPressExpiredWorkout(id: string) {
     handleOnPressExpiredInUseWorkout(id)
   }
-  /* 
-  TODO  MOSTARR A DATA DO INICIO E FIM DOS ACTIVOS
-
-  
-  */
 
   return (
     <ContainerWrapper>
@@ -53,30 +57,31 @@ export default function InUseWorkoutContainer({
         <CardsWrapper>
           {activeworkouts &&
             data &&
+            data.dataOrder &&
             activeworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
-              <InUseActiveWorkoutCard
-                dataOrder={data.dataOrder}
-                //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
-                key={i}
-                data={v || null}
-                selectedLanguage={user?.selectedLanguage || 'pt-br'}
-                index={i}
-                handleOnPressActiveWorkout={() =>
-                  onPressActiveInUseWorkout(v.id)
-                }
-              />
+              <CardContainer key={i}>
+                {i === 0 && <CardTittle>Atual:</CardTittle>}
+                {i === 1 && <CardTittle>Próximos:</CardTittle>}
+
+                <InUseActiveWorkoutCard
+                  dataOrder={data.dataOrder}
+                  //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
+                  data={v || null}
+                  selectedLanguage={user?.selectedLanguage || 'pt-br'}
+                  index={i}
+                  handleOnPressActiveWorkout={() =>
+                    onPressActiveInUseWorkout(v.id)
+                  }
+                  // handleResetTimerUp={handleResetTimerUp}
+                  handleMoveUp={handleMoveUp}
+                  handleMoveDown={handleMoveDown}
+                  isOpenSettingsMode={isOpenSettingsMode}
+                />
+              </CardContainer>
             ))}
         </CardsWrapper>
       )}
 
-      {/* 
-           handleOnPressExpiredInUseWorkout={
-                              handleOnPressExpiredInUseWorkout
-                            }
-                            handleOnPressActiveInUseWorkout={
-                              handleOnPressActiveWorkout
-                            }
-      */}
       {showScreen2 === 'Expirados' && (
         <CardsWrapper>
           {expiredworkouts &&

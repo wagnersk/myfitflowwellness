@@ -54,6 +54,7 @@ import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
 import Arrow from '@assets/Arrow-counter-clockwise.svg'
 import Export from '@assets/Export.svg'
+import { IMyfitflowWorkoutInUseData, IMyWorkouts } from '@hooks/authTypes'
 
 export function MarketPlaceWorkoutDetail() {
   const {
@@ -74,9 +75,52 @@ export function MarketPlaceWorkoutDetail() {
 
   const selectedWorkoutId = dataParam.data.workoutId
 
-  const cachedWorkout = myWorkout?.data.find((v) => v.id === selectedWorkoutId)
+  let cachedWorkout: IMyfitflowWorkoutInUseData | null = null
+  let workoutAlreadySelected: boolean = false
 
-  const workoutAlreadySelected = !!cachedWorkout
+  useFocusEffect(
+    useCallback(() => {
+      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
+      setStatusBarStyle('dark')
+    }, []),
+  )
+  useEffect(() => {
+    start()
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        return true
+      },
+    )
+
+    return () => backHandler.remove()
+
+    async function start() {
+      if (!selectedWorkoutId) return
+      const lastUpdatedValue =
+        await getLastUpdatedAtUserWorkoutCache(selectedWorkoutId)
+      if (!lastUpdatedValue) return
+      setLastUpdated(lastUpdatedValue)
+    }
+  }, [selectedWorkoutId])
+
+  console.log(`=>`, JSON.stringify(myWorkout))
+
+  if (myWorkout && myWorkout.data) {
+    const fcachedWorkout = myWorkout.data.find(
+      (v) => v.id === selectedWorkoutId,
+    )
+    console.log(`=> selectedWorkoutId`, JSON.stringify(selectedWorkoutId))
+    console.log(`=> fcachedWorkout`, JSON.stringify(fcachedWorkout))
+    console.log(`=> fcachedWorkout`, JSON.stringify(fcachedWorkout))
+
+    if (fcachedWorkout) {
+      cachedWorkout = fcachedWorkout
+    }
+
+    workoutAlreadySelected = !!cachedWorkout
+  }
 
   const tittle = cachedWorkout
     ? workoutAlreadySelected
@@ -87,7 +131,7 @@ export function MarketPlaceWorkoutDetail() {
         ? 'Cancelar outro treino antes'
         : 'Cancel another workout first'
     : selectedLanguage === 'pt-br'
-      ? myWorkout && myWorkout.data.length >= 1
+      ? myWorkout && myWorkout.data && myWorkout.data.length >= 1
         ? `Adicionar na fila  ${myWorkout.data.length - 1} / 2`
         : 'Escolher treino'
       : myWorkout && myWorkout.data.length >= 1
@@ -107,22 +151,7 @@ export function MarketPlaceWorkoutDetail() {
     if (!response) return
     navigation.navigate('marketPlaceHome')
   }
-  /* 
-criar botao que SAlvar preferencia usando  o hook updateUserWorkoutCache
 
- e um botao de compartilhar que cria um QR code ( Faco dps)
-  e de um de compartilhar ( faco dps)
-
-em profile criar botao amigos
--> Aqui eu consigo buscar um amigo e enviar convite e aceitar convite
-
-quando ele aceitar eu consigo pegar o treino dele atual
-
-
-   
-
- 
-*/
   async function handleDeleteWorkout(workoutId?: string) {
     if (!workoutId) return
     Alert.alert(
@@ -152,6 +181,7 @@ quando ele aceitar eu consigo pegar o treino dele atual
   }
 
   function syncronizePersonalizedWorkoutData() {
+    return
     if (!selectedWorkoutId) return
     const getWorkoutData = cachedUserWorkoutsLog?.workoutsLog.find(
       (v) => v.workoutId === selectedWorkoutId,
@@ -167,27 +197,6 @@ quando ele aceitar eu consigo pegar o treino dele atual
     setLastUpdated(lastUpdatedValue)
   }
 
-  async function start() {
-    if (!selectedWorkoutId) return
-    const lastUpdatedValue =
-      await getLastUpdatedAtUserWorkoutCache(selectedWorkoutId)
-    if (!lastUpdatedValue) return
-    setLastUpdated(lastUpdatedValue)
-  }
-
-  useEffect(() => {
-    start()
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        return true
-      },
-    )
-
-    return () => backHandler.remove()
-  }, [selectedWorkoutId])
-
   function formatTimestampToDate(timestamp: number | null): string {
     if (!timestamp) return ''
     const date = new Date(timestamp)
@@ -200,13 +209,6 @@ quando ele aceitar eu consigo pegar o treino dele atual
       minute: '2-digit',
     })
   }
-
-  useFocusEffect(
-    useCallback(() => {
-      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
-      setStatusBarStyle('dark')
-    }, []),
-  )
 
   return (
     <Container>

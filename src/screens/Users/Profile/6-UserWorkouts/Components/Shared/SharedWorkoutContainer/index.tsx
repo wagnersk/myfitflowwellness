@@ -27,7 +27,7 @@ export default function SharedWorkoutContainer({
   handleOnPressSendWorkout,
 }: WorkoutContainerProps) {
   let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
-  if (data) {
+  if (data !== null && data.data !== undefined && data.dataOrder) {
     const listOfWorkouts = data.data.filter((v) => v.isInUse)
 
     const getActiveWorkouts = listOfWorkouts

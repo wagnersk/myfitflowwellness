@@ -64,8 +64,8 @@ export function Login() {
   )
 
   const [userForm, setUserForm] = useState({
-    email: { value: '', errorBoolean: false },
-    password: { value: '', errorBoolean: false },
+    email: { value: 'wagnereletroskateet@gmail.com', errorBoolean: false },
+    password: { value: '123123', errorBoolean: false },
   })
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/

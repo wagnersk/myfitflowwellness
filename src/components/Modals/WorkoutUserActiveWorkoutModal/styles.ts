@@ -89,26 +89,30 @@ const TouchableOpacityComponent = styled(TouchableOpacity)`
 export const DeleteButton = styled(TouchableOpacityComponent)`
   border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
 `
-export const ShareButton = styled(TouchableOpacityComponent)`
-  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
 
-  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+export const GreenSmallButton = styled(TouchableOpacityComponent)`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
   padding: 4px;
 `
 
-export const ToggleSwitch = styled(TouchableOpacityComponent)<{
+export const BlueSmallButton = styled(TouchableOpacityComponent)<{
   selected?: boolean
 }>`
-  background-color: ${({ theme, selected }) =>
-    selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
-  border: 2px solid
-    ${({ theme, selected }) =>
-      selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+`
+export const BlueButton = styled(TouchableOpacityComponent)<{
+  selected?: boolean
+}>`
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  width: 100%;
 `
 
-export const YellowToogleSwitch = styled(TouchableOpacityComponent)<{
+export const RedButton = styled(TouchableOpacityComponent)<{
   selected?: boolean
 }>`
-  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_YELLOW};
-  border: 2px solid ${({ theme, selected }) => theme.COLORS.AUX_GOOGLE_YELLOW};
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
 `

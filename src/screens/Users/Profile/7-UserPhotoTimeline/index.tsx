@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
-
+import React, { useState } from 'react'
+import {
+  ImageBackground,
+  BackHandler,
+  SafeAreaView,
+  TouchableOpacity,
+  Image,
+  View,
+  Text,
+} from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
@@ -12,18 +19,13 @@ import {
   BodyImageWrapper,
   ImageBackgroundContainer,
   SettingsWrapper,
-  ButtonWrapper,
   UserName,
   ListWrapper,
   ContentWrapper,
   IconWrapper,
-  CardTitle,
   ContainerWrapper,
   ContainerTittle,
   MonthYearACTMessage,
-  ToggleButtonWrapper,
-  ToggleButton,
-  ToggleButtonText,
   FakeBackgroundWrapper,
   ButtonContainer,
   CardsWrapper,
@@ -32,8 +34,8 @@ import {
   CardSubTittle,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
-import { IptBrUs } from '@hooks/authTypes'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { IptBrUs } from '@hooks/selectOptionsDataFirebaseTypes'
 
 export interface IUserSelect {
   id: number
@@ -45,20 +47,45 @@ export interface IUserSelect {
 
 export function UserPhotoTimeline() {
   const { user, isWaitingApiResponse } = useAuth()
-  const [selectedPlan, setSelectedPlan] = useState<'mensal' | 'anual'>('mensal')
-
+  const [photos, setPhotos] = useState<{
+    [key: string]: { profile: string; side: string; gym: string }
+  }>({})
   const navigation = useNavigation()
 
   function handleGoBack() {
     navigation.goBack()
   }
-  useEffect(() => {
-    navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
-    BackHandler.addEventListener('hardwareBackPress', () => {
-      return true
+  function handleUploadPhoto(month: string, type: 'profile' | 'side' | 'gym') {
+    return
+    launchImageLibrary({}, (response) => {
+      if (response.assets && response.assets.length > 0) {
+        const uri = response.assets[0].uri
+        setPhotos((prevPhotos) => ({
+          ...prevPhotos,
+          [month]: {
+            ...prevPhotos[month],
+            [type]: uri,
+          },
+        }))
+      }
     })
-  }, [])
+  }
+
+  const months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ]
 
   return (
     <Container>
@@ -80,99 +107,114 @@ export function UserPhotoTimeline() {
                 </SettingsWrapper>
                 <UserName>
                   {user?.selectedLanguage === 'pt-br'
-                    ? `Selecione seu plano`
-                    : `Select your plan`}
+                    ? `Linha do Tempo`
+                    : `Timeline`}
                 </UserName>
                 <Body>
                   <ScrollView showsVerticalScrollIndicator={false}>
                     <ListWrapper>
-                      <ContainerWrapper>
-                        <ContainerTittleWrapper>
-                          <ContainerTittle>
-                            {user?.selectedLanguage === 'pt-br'
-                              ? 'Escolha seu plano: Free ou Premium'
-                              : 'Choose Your Plan: Free or Premium'}
-                          </ContainerTittle>
-                        </ContainerTittleWrapper>
-
-                        <ToggleButtonWrapper>
-                          <FakeBackgroundWrapper>
-                            <ToggleButton
-                              selected={selectedPlan === 'mensal'}
-                              onPress={() => setSelectedPlan('mensal')}
+                      {months.map((month) => (
+                        <ContainerWrapper key={month}>
+                          <ContainerTittleWrapper>
+                            <ContainerTittle>{month}</ContainerTittle>
+                          </ContainerTittleWrapper>
+                          <CardsWrapper>
+                            <TouchableOpacity
+                              onPress={() =>
+                                handleUploadPhoto(month, 'profile')
+                              }
                             >
-                              <ToggleButtonText
-                                selected={selectedPlan === 'mensal'}
+                              <View
+                                style={{
+                                  alignItems: 'center',
+                                  marginBottom: 10,
+                                }}
                               >
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Mensal'
-                                  : 'Monthly'}
-                              </ToggleButtonText>
-                            </ToggleButton>
-                            <ToggleButton
-                              selected={selectedPlan === 'anual'}
-                              onPress={() => setSelectedPlan('anual')}
+                                <Text>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Foto de Perfil'
+                                    : 'Profile Photo'}
+                                </Text>
+                                {photos[month]?.profile ? (
+                                  <Image
+                                    source={{ uri: photos[month].profile }}
+                                    style={{ width: 100, height: 100 }}
+                                    alt=""
+                                  />
+                                ) : (
+                                  <View
+                                    style={{
+                                      width: 100,
+                                      height: 100,
+                                      backgroundColor: 'gray',
+                                    }}
+                                  />
+                                )}
+                              </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => handleUploadPhoto(month, 'side')}
                             >
-                              <ToggleButtonText
-                                selected={selectedPlan === 'anual'}
+                              <View
+                                style={{
+                                  alignItems: 'center',
+                                  marginBottom: 10,
+                                }}
                               >
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Anual'
-                                  : 'Yearly'}
-                              </ToggleButtonText>
-                            </ToggleButton>
-                          </FakeBackgroundWrapper>
-                        </ToggleButtonWrapper>
-
-                        <MonthYearACTMessage>
-                          <MonthYearACTMessageText>
-                            {user?.selectedLanguage === 'pt-br'
-                              ? 'Economize mais com o plano anual!'
-                              : 'Save more with the yearly plan!'}
-                          </MonthYearACTMessageText>
-                        </MonthYearACTMessage>
-
-                        <CardsWrapper>
-                          <ButtonWrapper onPress={() => {}}>
-                            <ButtonContainer type={'neutral'}>
-                              <CardTitle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Plano Free'
-                                  : 'Free Plan'}
-                              </CardTitle>
-                              <CardSubTittle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Acesso básico aos treinos. Ideal para quem está começando.'
-                                  : 'Basic access to workouts. Perfect for beginners.'}
-                              </CardSubTittle>
-                              <CardSubTittle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Acesso limitado a funcionalidades.'
-                                  : 'Limited access to features.'}
-                              </CardSubTittle>
-                            </ButtonContainer>
-                          </ButtonWrapper>
-                          <ButtonWrapper onPress={() => {}}>
-                            <ButtonContainer type={'positive'}>
-                              <CardTitle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Plano Premium'
-                                  : 'Premium Plan'}
-                              </CardTitle>
-                              <CardSubTittle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Acesso completo com treinos personalizados.'
-                                  : 'Full access with personalized workouts.'}
-                              </CardSubTittle>
-                              <CardSubTittle>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Suporte 24/7 e todas as funcionalidades.'
-                                  : '24/7 support and all features.'}
-                              </CardSubTittle>
-                            </ButtonContainer>
-                          </ButtonWrapper>
-                        </CardsWrapper>
-                      </ContainerWrapper>
+                                <Text>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Foto de Lado'
+                                    : 'Side Photo'}
+                                </Text>
+                                {photos[month]?.side ? (
+                                  <Image
+                                    source={{ uri: photos[month].side }}
+                                    style={{ width: 100, height: 100 }}
+                                  />
+                                ) : (
+                                  <View
+                                    style={{
+                                      width: 100,
+                                      height: 100,
+                                      backgroundColor: 'gray',
+                                    }}
+                                  />
+                                )}
+                              </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => handleUploadPhoto(month, 'gym')}
+                            >
+                              <View
+                                style={{
+                                  alignItems: 'center',
+                                  marginBottom: 10,
+                                }}
+                              >
+                                <Text>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Foto na Academia'
+                                    : 'Gym Photo'}
+                                </Text>
+                                {photos[month]?.gym ? (
+                                  <Image
+                                    source={{ uri: photos[month].gym }}
+                                    style={{ width: 100, height: 100 }}
+                                  />
+                                ) : (
+                                  <View
+                                    style={{
+                                      width: 100,
+                                      height: 100,
+                                      backgroundColor: 'gray',
+                                    }}
+                                  />
+                                )}
+                              </View>
+                            </TouchableOpacity>
+                          </CardsWrapper>
+                        </ContainerWrapper>
+                      ))}
                     </ListWrapper>
                   </ScrollView>
                 </Body>

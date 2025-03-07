@@ -222,6 +222,12 @@ export function MarketPlaceHome() {
     ? categoriesGuestUserOrNo.filter((v) => v.workoutCategoryActive)
     : []
 
+  let activeWorkout
+  if (myWorkout && myWorkout.dataOrder) {
+    const getIdFromActiveWorkout = myWorkout.dataOrder[0].id
+    activeWorkout = myWorkout?.data.find((v) => v.id === getIdFromActiveWorkout)
+  }
+
   return (
     <Container>
       <HeaderImageBackground>
@@ -286,14 +292,14 @@ export function MarketPlaceHome() {
             />
             <MyWorkoutWrapper>
               <MyWorkoutTittleWrapper>
-                <Tittle>Meu treino ( linkar depois na screen) </Tittle>
+                <Tittle>Meu treino Atual</Tittle>
               </MyWorkoutTittleWrapper>
 
-              {myWorkout && (
+              {activeWorkout && (
                 <WorkoutInfoHomeCardWrapper>
                   <WorkoutsCardItem
                     handleNextStep={handleWorkoutDetailNextStep}
-                    data={myWorkout.data[0].data}
+                    data={activeWorkout.data}
                   />
                 </WorkoutInfoHomeCardWrapper>
               )}

@@ -20,6 +20,10 @@ import {
   GenderIconWrapper,
   SyncText,
   SubTittleWrapper,
+  ButtonsContainer,
+  MoveCardButton,
+  MoveCardUpButton,
+  MoveCardDownButton,
 } from './styles'
 
 import { getTrimmedName } from '@utils/getTrimmedName'
@@ -30,13 +34,22 @@ import { IMyfitflowWorkoutInUseData, IMyWorkouts } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
 import { formatTimestampToDDMMYYYY } from '@utils/calculeEndDateWithWeeks'
 
+import ArrowUp from '@assets/Arrow-fat-up.svg'
+import ArrowDown from '@assets/Arrow-fat-down.svg'
+
 interface Props extends TouchableOpacityProps {
   data: IMyfitflowWorkoutInUseData | null
   handleNextStep: (index: number) => void
   index: number
   dateStart: number
+  firstElement: boolean
+  secondElement: boolean
+  lastElement: boolean
   dateEnd: number
   isActive: boolean
+  handleMoveUp: (id: string) => void
+  handleMoveDown: (id: string) => void
+  isOpenSettingsMode: boolean
 }
 export function ItemCard({
   data,
@@ -45,13 +58,19 @@ export function ItemCard({
   isActive,
   dateStart,
   dateEnd,
+  handleMoveUp,
+  handleMoveDown,
+  isOpenSettingsMode,
+  firstElement,
+  secondElement,
+  lastElement,
   ...rest
 }: Props) {
   const size = 80
-  const { user, myWorkout } = useAuth()
+  const { user } = useAuth()
   const selectedLanguage = user?.selectedLanguage
 
-  function getColor(data) {
+  function getColor(data: IMyfitflowWorkoutInUseData | null) {
     if (!data) return 'red'
     switch (true) {
       case isActive:
@@ -63,7 +82,11 @@ export function ItemCard({
     }
   }
   return (
-    <Container {...rest} onPress={() => data && handleNextStep(index)}>
+    <Container
+      {...rest}
+      onPress={() => !isOpenSettingsMode && data && handleNextStep(index)}
+      disabled={isOpenSettingsMode}
+    >
       <ContainerGradient colors={['#000000', '#FFFFFF']}>
         <PhotoImageWrapper size={size}>
           <PhotoPreLoadingImageBackground size={size} />
@@ -84,18 +107,21 @@ export function ItemCard({
           )}
         </PhotoImageWrapper>
 
-        <InfoAndButtonAndBottomLineWrapper>
+        <InfoAndButtonAndBottomLineWrapper
+          isOpenSettingsMode={isOpenSettingsMode}
+        >
           <InfoAndButtonWrapper>
             <InfoWrapper>
               <Title>
-                {getTrimmedName(
+                {/*    {getTrimmedName(
                   20,
                   (data &&
                     selectedLanguage &&
                     data.data.workoutName &&
                     data.data.workoutName[selectedLanguage]) ||
                     undefined,
-                )}
+                )} */}
+                {data?.id}
               </Title>
               <SubTittleWrapper>
                 <SubTitle>
@@ -108,18 +134,13 @@ export function ItemCard({
                     data.data.workoutGoal &&
                     selectedLanguage &&
                     data.data.workoutGoal[selectedLanguage]}
-                </SubTitle>
-                <SubTitle>
+                  {' - '}
                   {data &&
                     data.data.workoutPeriod &&
                     selectedLanguage &&
                     data.data.workoutPeriod.period_insensitive[
                       selectedLanguage
                     ]}
-                  {' - '}
-                  {data &&
-                    data.data.workoutDivision &&
-                    data.data.workoutDivision.division}
                 </SubTitle>
                 <SubTitle>
                   {data &&
@@ -140,6 +161,11 @@ export function ItemCard({
                         selectedLanguage
                       ],
                     )}
+                  {' - '}(
+                  {data &&
+                    data.data.workoutDivision &&
+                    data.data.workoutDivision.division}
+                  )
                 </SubTitle>
 
                 {/* todo renderizar apenas no active , ver onde melhor no layout  */}
@@ -165,15 +191,32 @@ export function ItemCard({
 
             <ActiveBall color={getColor(data)} />
             <ShareIconWrapper>
-              <ShareNetwork height={12} width={12} />
+              {data?.isShared && <ShareNetwork height={12} width={12} />}
             </ShareIconWrapper>
-
-            {/* 
-            <WorkoutCardForwardButton>
-              <Forward width={36} height={36} stroke="#1B077F" />
-            </WorkoutCardForwardButton> */}
           </InfoAndButtonWrapper>
         </InfoAndButtonAndBottomLineWrapper>
+
+        {isOpenSettingsMode && !firstElement && (
+          <ButtonsContainer>
+            {!lastElement && (
+              <MoveCardDownButton
+                disabled={lastElement}
+                onPress={() => data && handleMoveDown(data.id)}
+              >
+                <ArrowDown width={24} height={24} stroke={'white'} />
+              </MoveCardDownButton>
+            )}
+
+            {!secondElement && (
+              <MoveCardUpButton
+                disabled={firstElement}
+                onPress={() => data && handleMoveUp(data.id)}
+              >
+                <ArrowUp width={24} height={24} />
+              </MoveCardUpButton>
+            )}
+          </ButtonsContainer>
+        )}
       </ContainerGradient>
     </Container>
   )

@@ -15,10 +15,23 @@ export const CardsWrapper = styled.View`
   width: 100%;
   gap: 12px;
 `
+export const CardContainer = styled.View`
+  gap: 8px;
+  border-radius: 12px;
+`
+export const ButtonsContainer = styled.View`
+  gap: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+`
+export const MoveCardButton = styled.TouchableOpacity`
+  gap: 12px;
+`
 export const CardTittle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(16)}px;
+  font-size: ${RFValue(14)}px;
 `
 export const CardDate = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

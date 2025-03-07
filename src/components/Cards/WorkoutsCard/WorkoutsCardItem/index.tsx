@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Forward from '../../../../assets/Forward.svg'
 import { TouchableOpacityProps } from 'react-native'
 import { Image } from 'expo-image'
@@ -44,9 +44,12 @@ export function WorkoutsCardItem({
   const { user, myWorkout } = useAuth()
   const selectedLanguage = user?.selectedLanguage
 
-  const getMyWorkout = myWorkout?.data.find(
-    (workout) => workout.id === data?.workoutId,
-  )
+  let getMyWorkoutOrder
+  if (myWorkout && myWorkout.data) {
+    getMyWorkoutOrder = myWorkout.dataOrder.find(
+      (workout) => workout.id === data?.workoutId,
+    )
+  }
 
   return (
     <Container {...rest} onPress={() => data && handleNextStep(data)}>
@@ -128,15 +131,15 @@ export function WorkoutsCardItem({
                   )}
               </SubTitle>
               <DateWrapper>
-                {getMyWorkout?.workoutStartAt === 0 &&
+                {getMyWorkoutOrder?.workoutStartAt === 0 &&
                   'Treino ainda não iniciado'}
 
-                {getMyWorkout?.workoutStartAt !== 0 &&
+                {getMyWorkoutOrder?.workoutStartAt !== 0 &&
                   index !== 0 &&
                   `${formatTimestampToDate(
-                    getMyWorkout?.workoutStartAt ?? 0,
+                    getMyWorkoutOrder?.workoutStartAt ?? 0,
                   )} - ${formatTimestampToDate(
-                    getMyWorkout?.workoutEndsAt ?? 0,
+                    getMyWorkoutOrder?.workoutEndsAt ?? 0,
                   )}`}
               </DateWrapper>
             </InfoWrapper>

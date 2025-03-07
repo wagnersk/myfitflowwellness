@@ -17,7 +17,7 @@ import { setStatusBarStyle } from 'expo-status-bar'
 import { WorkoutBlueCardList } from '@components/Cards/WorkoutBlueCard/WorkoutBlueCardList'
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
-import { differenceInDays, startOfDay } from 'date-fns'
+import { differenceInDays } from 'date-fns'
 import Camera from '@assets/Camera.svg'
 import {
   Container,
@@ -40,7 +40,7 @@ import {
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
-import { IMyWorkoutsData, IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
+import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
 
 export function UserHome() {
@@ -53,12 +53,10 @@ export function UserHome() {
     myWorkoutDataArray,
     loadWeightProgression,
     weightProgression,
-    cachedUserWorkoutsLog,
     firebaseSignOut,
     loadPersonalTrainerClientContract,
     loadPersonalTrainerData,
     savePersonalTrainerData,
-    premiumUserContract,
   } = useAuth()
 
   const [getWorkoutArrayData, setGetWorkoutArrayData] =
@@ -184,18 +182,23 @@ export function UserHome() {
       return true
     })
   }, [])
+  console.log('workoutData1 ', myWorkoutDataArray)
 
   useEffect(() => {
     if (
+      user &&
+      myWorkout &&
       myWorkoutDataArray &&
       myWorkoutDataArray.data &&
-      myWorkout &&
+      myWorkout.data &&
+      myWorkout.dataOrder &&
       myWorkout.data[0] &&
-      user
+      myWorkout.dataOrder[0]
     ) {
       const workoutData = myWorkoutDataArray.data.find(
-        (v) => v.id === myWorkout.data[0].id,
+        (v) => v.id === myWorkout.dataOrder[0].id,
       )
+      console.log('workoutData2 ')
       if (workoutData) {
         setGetWorkoutArrayData(workoutData.data)
       }
@@ -252,7 +255,7 @@ export function UserHome() {
               )}
           </BodyTopWrapper>
 
-          {!myWorkoutDataArray?.data[0].data && (
+          {!myWorkoutDataArray && (
             <View
               style={{
                 flex: 1,

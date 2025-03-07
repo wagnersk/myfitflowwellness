@@ -71,6 +71,7 @@ export const Container = styled.View`
   border-radius: 12px;
   flex-direction: row;
 `
+
 export const ImagePhoto = styled.Image`
   height: 200px;
   width: 100%;
