@@ -135,7 +135,7 @@ export function UserWorkout() {
             <BioInfoLetter>
               {user?.selectedLanguage === 'pt-br'
                 ? `Treino ${letter}`
-                : `Workout ${letter}`}
+                : `Workout ${letter} `}
             </BioInfoLetter>
             <BioInfoName> {getTrimmedName(30, muscleGroupsLabel)}</BioInfoName>
           </BioInfo>

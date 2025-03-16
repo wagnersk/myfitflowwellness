@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  ContainerWrapper,
-  MonthYearACTMessage,
-  CardTittle,
-  CardsWrapper,
-} from './styles'
+import { ContainerWrapper, CardsWrapper } from './styles'
 import {
   IMyfitflowWorkoutInUseData,
   IMyWorkouts,
@@ -14,47 +9,30 @@ import { SharedWorkoutCard } from '../SharedWorkoutCard'
 
 interface WorkoutContainerProps {
   data: IMyWorkouts | null
-  sharedData: IMyfitflowWorkoutInUseData[] | null
+  sharedWorkouts: IMyfitflowWorkoutInUseData[] | null
   user: SignInProps | null
-  handleOnPressSendWorkout: (id: string) => void
+  handleOnPressShareWorkout: (id: string) => void
 }
-// tirasr bolinha vermelha e por coisas apenas do shared
 
 export default function SharedWorkoutContainer({
   data,
-  sharedData,
+  sharedWorkouts,
   user,
-  handleOnPressSendWorkout,
+  handleOnPressShareWorkout,
 }: WorkoutContainerProps) {
-  let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
-  if (data !== null && data.data !== undefined && data.dataOrder) {
-    const listOfWorkouts = data.data.filter((v) => v.isInUse)
-
-    const getActiveWorkouts = listOfWorkouts
-      .map((workout) => {
-        const active = data.dataOrder.find((order) => order.id === workout.id)
-        if (!active) return false
-
-        return workout
-      })
-      .filter((workout) => workout !== false)
-
-    activeWorkouts = getActiveWorkouts
-  }
-
   return (
     <ContainerWrapper>
       <CardsWrapper>
-        {sharedData &&
-          sharedData.map((v: IMyfitflowWorkoutInUseData, i: number) => (
+        {sharedWorkouts &&
+          sharedWorkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
             <SharedWorkoutCard
               key={i}
               data={v || null}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
-              handleOnPressSendWorkout={handleOnPressSendWorkout}
+              handleOnPressShareWorkout={handleOnPressShareWorkout}
               index={i}
               isActive={
-                !!activeWorkouts.find((va) => va.id === v.id && va.isInUse)
+                data?.data.find((va) => va.id === v.id)?.isActive ?? false
               }
             />
           ))}

@@ -80,11 +80,10 @@ function WorkoutVideoCardComponent({
     updateStartAndEndDateFromMyWorkoutInCache,
     updateCachedUserWorkoutsLog,
     saveWeightProgression,
-    updateUserWorkoutCache,
     user,
   } = useAuth()
   const time = new Date()
-  time.setSeconds(time.getSeconds() + 123)
+  // time.setSeconds(time.getSeconds() + 123)
 
   const { seconds, minutes, isRunning, pause, restart, resume, totalSeconds } =
     useTimer({
@@ -113,66 +112,57 @@ function WorkoutVideoCardComponent({
       const initialDataWithCachedProgress = initialWorkoutData
 
       return initialDataWithCachedProgress
+
       function transformInitialData(
         _defaultSets: IPropsSets[],
         timeNow: number,
       ): ICachedCardExerciseData {
-        const transformedDataSets = _defaultSets.map((v) => {
-          if (!v.repetitionData) return v
-          const transformedData: ICachedUsingWorkoutData = {
-            repetitionData: v.repetitionData.map((va) => {
-              return {
-                isReps: va.isReps,
-                isTime: va.isTime,
-                sets_insensitive: va.sets_insensitive,
-                timeInSeconds: va.timeInSeconds,
+        const transformedDataSets = _defaultSets
+          .map((v) => {
+            if (!v.repetitionData) return null
+            const transformedData: ICachedUsingWorkoutData = {
+              repetitionData: v.repetitionData.map((va) => {
+                return {
+                  isReps: va.isReps,
+                  isTime: va.isTime,
+                  sets_insensitive: va.sets_insensitive,
+                  timeInSeconds: va.timeInSeconds,
+                  createdAt: timeNow,
+                  updatedAt: timeNow,
+                }
+              }),
+              selectedRepetitionData: {
+                checkedSet: '',
                 createdAt: timeNow,
                 updatedAt: timeNow,
-              }
-            }),
-            selectedRepetitionData: {
-              checkedSet: '',
+              },
+              restTimeData: {
+                restTimeNumber: v.restTimeData.restTimeNumber,
+                restTime_insensitive: v.restTimeData.restTime_insensitive,
+                createdAt: timeNow,
+                updatedAt: timeNow,
+              },
+              weightData: {
+                value: '0',
+                createdAt: timeNow,
+                updatedAt: timeNow,
+              },
+              completedData: {
+                isCompleted: false,
+                createdAt: timeNow,
+                updatedAt: timeNow,
+              },
               createdAt: timeNow,
               updatedAt: timeNow,
-            },
-            restTimeData: {
-              restTimeNumber: v.restTimeData.restTimeNumber,
-              restTime_insensitive: v.restTimeData.restTime_insensitive,
-              createdAt: timeNow,
-              updatedAt: timeNow,
-            },
-            weightData: {
-              value: '0',
-              createdAt: timeNow,
-              updatedAt: timeNow,
-            },
-            techiesData: {
-              title: v.techiesData.title,
-              description: v.techiesData.description,
-              createdAt: timeNow,
-              updatedAt: timeNow,
-            },
-            completedData: {
-              isCompleted: false,
-              createdAt: timeNow,
-              updatedAt: timeNow,
-            },
-            createdAt: timeNow,
-            updatedAt: timeNow,
-          }
+            }
 
-          return transformedData
-        })
+            return transformedData
+          })
+          .filter((v) => v !== null)
+
         const fdata: ICachedCardExerciseData = {
-          isEnabled: true,
           workoutExerciseId,
           workoutExerciseSets: transformedDataSets,
-          workoutExerciseName: item.workoutExerciseName,
-          workoutExerciseName_insensitive: item.workoutExerciseName_insensitive,
-          workoutExercisePrimaryMuscleGroup:
-            item.workoutExercisePrimaryMuscleGroup,
-          workoutExerciseTypes: item.workoutExerciseTypes,
-          workoutExerciseFilters: item.workoutExerciseFilters,
           workoutExerciseIndex: item.workoutExerciseIndex,
           createdAt: timeNow,
           updatedAt: timeNow,
@@ -190,10 +180,7 @@ function WorkoutVideoCardComponent({
 
   const [modalCachedCardExerciseData, setModalCachedCardExerciseData] =
     useState<ICachedCardExerciseData>(mergedData)
-  console.log(
-    ` asdadasfsdfgsadfgsd sfsdfmodalCachedCardExerciseData?.workoutExerciseSets`,
-    modalCachedCardExerciseData?.workoutExerciseSets,
-  )
+
   const allItensCompleted =
     modalCachedCardExerciseData?.workoutExerciseSets?.every(
       (v) => v.completedData.isCompleted,
@@ -636,7 +623,9 @@ modalCachedCardExerciseData.notes.value
     markAsCompletedGreenCheckAndCacheSave()
     onTimerManage('play')
 
-    if (myWorkout?.data[workoutCardIndex].workoutStartAt === 0) {
+    const find = myWorkout?.dataOrder.find((va) => va.id === workoutId)
+
+    if (find && find.workoutStartAt === 0) {
       startWorkoutCounterDate()
     }
 
@@ -741,7 +730,7 @@ modalCachedCardExerciseData.notes.value
     console.log(`getWorkoutInUse`, getWorkoutInUse)
     console.log(`dateNow`, dateNow)
     console.log(`dateEnd`, dateEnd)
-    updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow, dateEnd)
+    updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow)
   }
   /* 
 
@@ -1291,8 +1280,9 @@ conferir se toda atualizacao reflete no updatedAt do pai
         completedTimestamp,
         workoutCardIndex,
       )
+      const find = myWorkout?.dataOrder.find((va) => va.id === workoutId)
 
-      if (myWorkout?.data[workoutCardIndex].workoutStartAt === 0) {
+      if (find && find.workoutStartAt === 0) {
         startWorkoutCounterDate()
       }
     }

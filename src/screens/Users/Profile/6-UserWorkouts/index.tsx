@@ -45,8 +45,10 @@ import {
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   IMyfitflowWorkoutInUseData,
+  IMyInUseData,
   IMyWorkouts,
   IptBrUs,
+  IWorkoutOrder,
 } from '@hooks/authTypes'
 
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -90,8 +92,6 @@ export function UserWorkouts() {
     user,
     isWaitingApiResponse,
     myWorkout,
-    updateStartAndEndDateFromMyWorkoutInCache,
-    resetAllStartAndEndDateFromMyWorkoutInCache,
     updateMyWorkoutInCache,
     saveExerciseDataInCache,
   } = useAuth()
@@ -110,6 +110,15 @@ export function UserWorkouts() {
   )
 
   const [workouts, setWorkouts] = useState<IMyWorkouts | null>(myWorkout)
+
+  const [copiedWorkouts, setCopiedWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+
+  const [myTotalWorkouts, setMyTotalWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+
   const [activeworkouts, setActiveWorkouts] = useState<
     IMyfitflowWorkoutInUseData[] | null
   >(null)
@@ -138,56 +147,77 @@ export function UserWorkouts() {
     transform: [{ translateX: offset2.value }],
   }))
 
-  // console.log(` myWorkout`, myWorkout?.data)
   const navigation = useNavigation()
 
   function handleMoveUp(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
+    const index = workouts?.activeData.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
     if (index === 0) return
+    console.log(`index -> `, index)
 
-    setWorkouts((prevWorkouts) => {
-      if (!prevWorkouts) return null
-      const copyWorkouts = { ...prevWorkouts }
-      const { data } = copyWorkouts
+    const copyWorkouts: IMyWorkouts = {
+      userId: workouts?.userId || '',
+      createdAt: workouts?.createdAt || 0,
+      updatedAt: workouts?.updatedAt || 0,
+      data: workouts?.data || [],
+      activeData: workouts?.activeData || [],
+      mySharedWorkouts: workouts?.mySharedWorkouts || [],
+      copiedWorkouts: workouts?.copiedWorkouts || [],
+      expiredData: workouts?.expiredData || [],
+    }
 
-      if (!data || data.length === 0)
-        return prevWorkouts
+    if (!copyWorkouts.activeData || copyWorkouts.activeData.length === 0) return
+    ;[copyWorkouts.activeData[index], copyWorkouts.activeData[index - 1]] = [
+      copyWorkouts.activeData[index - 1],
+      copyWorkouts.activeData[index],
+    ]
 
-        // Troca as posições dos itens
-      ;[data[index], data[index - 1]] = [data[index - 1], data[index]]
+    const updatedWorkoutsWithNewStartAndEndDate =
+      resetAllDatesFromExistingWorkout(copyWorkouts)
 
-      console.log(`copyWorkouts`, workouts)
-
-      return copyWorkouts
-    })
+    setWorkouts(updatedWorkoutsWithNewStartAndEndDate)
 
     setIsDataOrderChanged(true)
   }
 
   function handleMoveDown(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
+    const index = workouts?.activeData.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
-    setWorkouts((prevWorkouts) => {
-      if (!prevWorkouts) return null
-      const copyWorkouts = { ...prevWorkouts }
-      const { data } = copyWorkouts
 
-      if (!data || data.length === 0 || index === data.length - 1)
-        return prevWorkouts
+    const copyWorkouts: IMyWorkouts = {
+      userId: workouts?.userId || '',
+      createdAt: workouts?.createdAt || 0,
+      updatedAt: workouts?.updatedAt || 0,
+      data: workouts?.data || [],
+      activeData: workouts?.activeData || [],
+      mySharedWorkouts: workouts?.mySharedWorkouts || [],
+      copiedWorkouts: workouts?.copiedWorkouts || [],
+      expiredData: workouts?.expiredData || [],
+    }
 
-        // Troca as posições dos itens
-      ;[data[index], data[index + 1]] = [data[index + 1], data[index]]
+    if (
+      !copyWorkouts.activeData ||
+      copyWorkouts.activeData.length === 0 ||
+      index === copyWorkouts.activeData.length - 1
+    )
+      return
+    ;[copyWorkouts.activeData[index], copyWorkouts.activeData[index + 1]] = [
+      copyWorkouts.activeData[index + 1],
+      copyWorkouts.activeData[index],
+    ]
 
-      return copyWorkouts
-    })
+    const updatedWorkoutsWithNewStartAndEndDate =
+      resetAllDatesFromExistingWorkout(copyWorkouts)
+
+    setWorkouts(updatedWorkoutsWithNewStartAndEndDate)
+
     setIsDataOrderChanged(true)
   }
 
   function handleMoveWorkoutFromQueueToPrimary(id: string) {
     if (!workouts) return
-    const index = workouts.data.findIndex((v) => v.id === id)
+    const index = workouts.activeData.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
     /* fazer a logica  */
     Alert.alert(
@@ -214,7 +244,7 @@ export function UserWorkouts() {
 
             await updateMyWorkoutInCache(updatedWorkoutsWithNewStartAndEndDate)
 
-            closeModal('Em uso')
+            closeModal()
           },
         },
       ],
@@ -223,53 +253,62 @@ export function UserWorkouts() {
 
     function moveWorkoutToPrimary(index: number): IMyWorkouts | null {
       if (!workouts) return null
-      /*   // Criar um novo array com o item movido para a primeira posição
-      copyWorkouts.dataOrder = [
-        orderItem,
-        ...copyWorkouts.dataOrder.filter((_, i) => i !== index),
-      ] */
+
       const copyWorkouts = { ...workouts }
+      console.log(`index`, index)
+      console.log(`copyWorkouts.activeData`, copyWorkouts.activeData)
 
       // Remove o treino da posição atual em dataOrder
-      const [orderItem] = copyWorkouts.dataOrder.splice(index, 1)
+      const [orderItem] = copyWorkouts.activeData.splice(index, 1)
+      console.log(`orderItem`, orderItem)
 
       // Adiciona o treino na primeira posição em dataOrder
-      copyWorkouts.dataOrder.unshift(orderItem)
+      copyWorkouts.activeData.unshift(orderItem)
 
       return copyWorkouts
     }
+  }
 
-    function resetAllDatesFromExistingWorkout(workoutData: IMyWorkouts) {
-      const copyMyWorkout = { ...workoutData }
-      const timeNow = new Date().getTime()
+  function resetAllDatesFromExistingWorkout(workoutData: IMyWorkouts) {
+    const copyMyWorkout = { ...workoutData }
+    const timeNow = new Date().getTime()
 
-      let prevStartAt = timeNow
+    let prevStartAt = timeNow
 
-      const newOrderedWorkouts = copyMyWorkout.dataOrder.map((workoutOrder) => {
-        const findWorkout = copyMyWorkout.data.find(
-          (v) => v.id === workoutOrder.id,
-        )
-        if (!findWorkout) return workoutOrder
+    const newOrderedWorkouts = copyMyWorkout.activeData.map((workoutActive) => {
+      const findWorkout = copyMyWorkout.data.find(
+        (v) => v.id === workoutActive.id,
+      )
+      if (!findWorkout) return workoutActive
 
-        const periodN = findWorkout.data.workoutPeriod.periodNumber
+      const periodN = findWorkout.data.workoutPeriod.periodNumber
 
-        const newStartDate = addWeeksToTimestamp(prevStartAt, periodN) // proximo dia livre
-        const newStartDateOnNextDay = addDaysToTimestamp(newStartDate, 1)
+      const newStartDate = addWeeksToTimestamp(prevStartAt, periodN) // proximo dia livre
+      const newStartDateOnNextDay = addDaysToTimestamp(newStartDate, 1)
+      /*  const copyWorkouts: IMyWorkouts = {
+      userId: workouts?.userId || '',
+      createdAt: workouts?.createdAt || 0,
+      updatedAt: workouts?.updatedAt || 0,
+      data: workouts?.data || [],
+      activeData: workouts?.activeData || [],
+      mySharedWorkouts: workouts?.mySharedWorkouts || [],
+      copiedWorkouts: workouts?.copiedWorkouts || [],
+      expiredData: workouts?.expiredData || [],
+    } */
+      const newWorkout: IMyInUseData = {
+        id: workoutActive.id,
+        createdAt: workoutActive.createdAt,
+        updatedAt: timeNow,
+        workoutStartAt: prevStartAt,
+        workoutEndsAt: newStartDate,
+      }
+      prevStartAt = newStartDateOnNextDay
 
-        const newWorkout = {
-          ...findWorkout,
-          updatedAt: timeNow,
-          workoutStartAt: prevStartAt,
-          workoutEndsAt: newStartDate,
-        }
-        prevStartAt = newStartDateOnNextDay
+      return newWorkout
+    })
 
-        return newWorkout
-      })
-
-      copyMyWorkout.dataOrder = newOrderedWorkouts
-      return copyMyWorkout
-    }
+    copyMyWorkout.activeData = newOrderedWorkouts
+    return copyMyWorkout
   }
 
   function handleResetTimerUp(id: string) {
@@ -288,8 +327,8 @@ export function UserWorkouts() {
           text: 'Reiniciar',
           onPress: () => {
             if (!myWorkout) return
-            resetAllStartAndEndDateFromMyWorkoutInCache(myWorkout)
-            closeModal('Em uso')
+            updateMyWorkoutInCache(myWorkout)
+            closeModal()
             // hook que deleta os dados do treino em uso pelo ID
             // TODO -> Criar hook para deletar os dados do treino em uso
           },
@@ -300,69 +339,98 @@ export function UserWorkouts() {
     // setIsDataOrderChanged(true)
   }
 
-  async function handleOnPressTotalWorkout(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
+  async function handleOnPressWorkout(
+    id: string,
+    modalType:
+      | 'totalWorkout'
+      | 'expiredWorkout'
+      | 'activeWorkout'
+      | 'shareWorkout',
+  ) {
+    let index: number | undefined
+    switch (modalType) {
+      case 'totalWorkout':
+        index = workouts?.data.findIndex((v) => v.id === id)
+        break
+      case 'expiredWorkout':
+        index = expiredworkouts?.findIndex((v) => v.id === id)
+        break
+      case 'activeWorkout':
+        index = activeworkouts?.findIndex((v) => v.id === id)
+        break
+      case 'shareWorkout':
+        index = sharedWorkouts?.findIndex((v) => v.id === id)
+        break
+      default:
+        return
+    }
     if (index === undefined || index === -1) return
+
     setDefaultModalState((prev) => ({
       ...prev,
-      isOpenModalEditTotalWorkout: true,
-      isOpenModalSharedWorkout: false,
-      isOpenModalActiveWorkout: false,
-      isOpenModalExpiredWorkout: false,
+      isOpenModalEditTotalWorkout: modalType === 'totalWorkout',
+      isOpenModalSharedWorkout: modalType === 'shareWorkout',
+      isOpenModalActiveWorkout: modalType === 'activeWorkout',
+      isOpenModalExpiredWorkout: modalType === 'expiredWorkout',
       activeWeightIndex: index,
     }))
   }
+  // fazer daqui pra baixo
 
-  async function handleOnPressExpiredInUseWorkout(id: string) {
-    console.log(`handleOnPressExpiredInUseWorkout`, id)
-    const index = workouts?.data.findIndex((v) => v.id === id)
-    if (index === undefined || index === -1) return
-    setDefaultModalState((prev) => ({
-      ...prev,
-      isOpenModalEditTotalWorkout: false,
-      isOpenModalSharedWorkout: false,
-      isOpenModalActiveWorkout: false,
-      isOpenModalExpiredWorkout: true,
-
-      activeWeightIndex: index,
-    }))
-  }
-
-  async function handleOnPressActiveWorkout(id: string) {
-    const index = workouts?.dataOrder.findIndex((v) => v.id === id)
-
-    if (index === undefined || index === -1) return
-    setDefaultModalState((prev) => ({
-      ...prev,
-      isOpenModalEditTotalWorkout: false,
-      isOpenModalSharedWorkout: false,
-      isOpenModalActiveWorkout: true,
-      isOpenModalExpiredWorkout: false,
-
-      activeWeightIndex: index,
-    }))
-  }
-
-  async function handleOnPressSendWorkout(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
-    if (index === undefined || index === -1) return
-    setDefaultModalState((prev) => ({
-      ...prev,
-      isOpenModalEditTotalWorkout: false,
-      isOpenModalSharedWorkout: true,
-      isOpenModalActiveWorkout: false,
-      isOpenModalExpiredWorkout: false,
-      activeWeightIndex: index,
-    }))
-  }
-
-  async function handleUseWorkout(id: string) {
+  // total - deletar treino - OK
+  async function handleDeleteWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
     Alert.alert(
-      'Deseja usar o treino?',
-      'Será adicionado ao final da lista de treinos em uso.',
+      'Deseja deletar o treino?',
+      '',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Deletar',
+          onPress: () => {
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            copyWorkouts.data.splice(index, 1)
+
+            setDefaultModalState((prev) => ({
+              ...prev,
+              isOpenModalEditTotalWorkout: false,
+              isOpenModalSharedWorkout: false,
+              isOpenModalActiveWorkout: false,
+              isOpenModalExpiredWorkout: false,
+              activeWeightIndex: 0,
+            }))
+
+            updateMyWorkoutInCache(copyWorkouts)
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+  // total -> ativar treino - OK
+  async function handleInUseExpiredWorkout(id: string) {
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+
+    const isActivedAndInUse = activeworkouts
+      ? !!activeworkouts.find((va) => va.id === id && va.isActive)
+      : false
+
+    if (isActivedAndInUse)
+      return Alert.alert(
+        'Treino ativo , por favor retire o treino da lista de ativos antes de desativa-lo.',
+      )
+
+    const isInUse = workouts?.data[index].isActive
+    Alert.alert(
+      isInUse ? 'Deseja desativar o treino?' : 'Deseja ativar o treino?',
+      '',
       [
         {
           text: 'Cancelar',
@@ -371,53 +439,35 @@ export function UserWorkouts() {
         {
           text: 'Ativar',
           onPress: () => {
-            const copyWorkouts = {
+            const copyWorkouts: IMyWorkouts = {
               userId: workouts?.userId || '',
               createdAt: workouts?.createdAt || 0,
               updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
+              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
+              activeData: workouts?.activeData || [], // aqui a lista dos ids
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
             }
+
             if (!copyWorkouts) return
-            if (!copyWorkouts.data) return
-            if (!copyWorkouts.dataOrder) return
 
-            const dateNow = new Date().getTime()
-            let startDate = dateNow
+            copyWorkouts.data[index].isActive = false
+            copyWorkouts.activeData = copyWorkouts.activeData.filter(
+              (activeData) => activeData.id !== copyWorkouts.data[index].id,
+            )
 
-            if (copyWorkouts.dataOrder.length > 0) {
-              const lastWorkout =
-                copyWorkouts.dataOrder[copyWorkouts.dataOrder.length - 1]
-
-              const nextDayTimestamp = addDaysToTimestamp(
-                lastWorkout.workoutEndsAt,
-                1,
-              )
-              startDate = nextDayTimestamp
-            }
-            copyWorkouts.dataOrder.push({
+            // Adiciona o treino a mySharedWorkouts
+            copyWorkouts.data[index].isExpired = true
+            copyWorkouts.expiredData.push({
               id: copyWorkouts.data[index].id,
-              createdAt: dateNow,
-              updatedAt: dateNow,
-              workoutStartAt: startDate,
-              workoutEndsAt: addWeeksToTimestamp(
-                startDate,
-                copyWorkouts.data[index].data.workoutPeriod.periodNumber,
-              ),
+              createdAt: copyWorkouts.data[index].createdAt,
+              updatedAt: copyWorkouts.data[index].updatedAt,
             })
 
             setWorkouts(copyWorkouts)
-
             updateMyWorkoutInCache(copyWorkouts)
-
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalSharedWorkout: false,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
+            closeModal()
           },
         },
       ],
@@ -425,9 +475,15 @@ export function UserWorkouts() {
     )
   }
 
+  // total - ativar share  - OK
   async function handleShareWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
+
+    console.log(
+      ` workouts?.data[index].isShared`,
+      workouts?.data[index].isShared,
+    )
 
     Alert.alert(
       workouts?.data[index].isShared
@@ -442,21 +498,41 @@ export function UserWorkouts() {
         {
           text: 'Compartilhar',
           onPress: () => {
-            const copyWorkouts = {
+            const copyWorkouts: IMyWorkouts = {
               userId: workouts?.userId || '',
               createdAt: workouts?.createdAt || 0,
               updatedAt: workouts?.updatedAt || 0,
               data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
+              activeData: workouts?.activeData || [],
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
             }
-            if (!copyWorkouts) return
 
-            console.log(`Ativando treino:`, copyWorkouts.data[index])
+            if (!copyWorkouts) return
 
             copyWorkouts.data[index].isShared =
               !copyWorkouts.data[index].isShared
 
+            if (copyWorkouts.data[index].isShared) {
+              // Adiciona o treino a mySharedWorkouts
+              copyWorkouts.mySharedWorkouts.push({
+                id: copyWorkouts.data[index].id,
+                createdAt: copyWorkouts.data[index].createdAt,
+                updatedAt: copyWorkouts.data[index].updatedAt,
+              })
+            } else {
+              // Remove o treino de mySharedWorkouts
+              copyWorkouts.mySharedWorkouts =
+                copyWorkouts.mySharedWorkouts.filter(
+                  (sharedWorkout) =>
+                    sharedWorkout.id !== copyWorkouts.data[index].id,
+                )
+            }
+
             setWorkouts(copyWorkouts)
+            updateMyWorkoutInCache(copyWorkouts)
+            closeModal()
           },
         },
       ],
@@ -464,12 +540,84 @@ export function UserWorkouts() {
     )
   }
 
-  async function handleCancelShareWorkout(id: string) {
+  // expirados - mover para ativo  OK
+  async function handleInUseActiveWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
     Alert.alert(
-      'Deseja parar o compartilhamento do treino?',
+      'Deseja usar o treino?',
+      'Será adicionado ao final da lista de treinos em uso.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Ativar',
+          onPress: () => {
+            const copyWorkouts: IMyWorkouts = {
+              userId: workouts?.userId || '',
+              createdAt: workouts?.createdAt || 0,
+              updatedAt: workouts?.updatedAt || 0,
+              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
+              activeData: workouts?.activeData || [], // aqui a lista dos ids
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
+            }
+
+            if (!copyWorkouts) return
+            if (!copyWorkouts.data) return
+            if (!copyWorkouts.activeData) return
+
+            const dateNow = new Date().getTime()
+            let startDate = dateNow
+
+            if (copyWorkouts.activeData.length > 0) {
+              const lastWorkout =
+                copyWorkouts.activeData[copyWorkouts.activeData.length - 1]
+
+              const nextDayTimestamp = addDaysToTimestamp(
+                lastWorkout.workoutEndsAt,
+                1,
+              )
+              startDate = nextDayTimestamp
+            }
+
+            copyWorkouts.data[index].isExpired = false
+            copyWorkouts.expiredData = copyWorkouts.expiredData.filter(
+              (activeData) => activeData.id !== copyWorkouts.data[index].id,
+            )
+
+            copyWorkouts.data[index].isActive = true
+            copyWorkouts.activeData.push({
+              id: copyWorkouts.data[index].id,
+              createdAt: dateNow,
+              updatedAt: dateNow,
+              workoutStartAt: startDate,
+              workoutEndsAt: addWeeksToTimestamp(
+                startDate,
+                copyWorkouts.data[index].data.workoutPeriod.periodNumber,
+              ),
+            })
+
+            setWorkouts(copyWorkouts)
+            updateMyWorkoutInCache(copyWorkouts)
+            closeModal()
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+  // expirados - remover da lista do expirados  OK
+  async function handleInUseRemoveFromExpiredWorkout(id: string) {
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+
+    Alert.alert(
+      'Deseja desativar o treino?',
       '',
       [
         {
@@ -477,31 +625,31 @@ export function UserWorkouts() {
           style: 'cancel',
         },
         {
-          text: 'Compartilhar',
+          text: 'Desativar',
           onPress: () => {
-            const copyWorkouts = {
+            const copyWorkouts: IMyWorkouts = {
               userId: workouts?.userId || '',
               createdAt: workouts?.createdAt || 0,
               updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
+              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
+              activeData: workouts?.activeData || [], // aqui a lista dos ids
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
             }
             if (!copyWorkouts) return
 
-            console.log(`Ativando treino:`, copyWorkouts.data[index])
+            console.log(`Desativando treino:`, copyWorkouts.data[index])
 
-            copyWorkouts.data[index].isShared = false
+            copyWorkouts.data[index].isActive = false
+            copyWorkouts.data[index].isExpired = false
+            copyWorkouts.expiredData = copyWorkouts.expiredData.filter(
+              (_expired) => _expired.id !== copyWorkouts.data[index].id,
+            )
 
             setWorkouts(copyWorkouts)
-
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalSharedWorkout: false,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
+            updateMyWorkoutInCache(copyWorkouts)
+            closeModal()
           },
         },
       ],
@@ -509,7 +657,8 @@ export function UserWorkouts() {
     )
   }
 
-  async function handleDeactivateWorkout(id: string) {
+  // active - ok
+  async function handleInUseRemoveFromActivedWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
@@ -524,37 +673,35 @@ export function UserWorkouts() {
         {
           text: 'Desativar',
           onPress: () => {
-            const copyWorkouts = {
+            const copyWorkouts: IMyWorkouts = {
               userId: workouts?.userId || '',
               createdAt: workouts?.createdAt || 0,
               updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
+              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
+              activeData: workouts?.activeData || [], // aqui a lista dos ids
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
             }
+
             if (!copyWorkouts) return
 
-            console.log(`Desativando treino:`, copyWorkouts.data[index].id)
-            console.log(`copyWorkouts: -> `, copyWorkouts.dataOrder.length)
+            copyWorkouts.data[index].isExpired = true
+            copyWorkouts.expiredData.push({
+              id: copyWorkouts.data[index].id,
+              createdAt: copyWorkouts.data[index].createdAt,
+              updatedAt: copyWorkouts.data[index].updatedAt,
+            })
 
-            // Remove o treino de dataOrder
-            copyWorkouts.dataOrder = copyWorkouts.dataOrder.filter(
-              (v) => v.id !== id,
+            copyWorkouts.data[index].isActive = false
+            copyWorkouts.activeData = copyWorkouts.activeData.filter(
+              (activeData) => activeData.id !== copyWorkouts.data[index].id,
             )
-            console.log(`copyWorkouts: -> `, copyWorkouts.dataOrder.length)
 
             // Define o treino como não ativo
             setWorkouts(copyWorkouts)
-
             updateMyWorkoutInCache(copyWorkouts)
-
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalSharedWorkout: false,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
+            closeModal()
           },
         },
       ],
@@ -562,45 +709,8 @@ export function UserWorkouts() {
     )
   }
 
-  async function handleQRcodeWorkout(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
-    if (index === undefined || index === -1) return
-    if (!workouts) return
-
-    const isAlreadyShared = workouts.data[index].isShared
-
-    if (!isAlreadyShared) {
-      Alert.alert(
-        'Deseja ativar o treino?',
-        '',
-        [
-          {
-            text: 'Cancelar',
-            style: 'cancel',
-          },
-          {
-            text: 'Ok',
-            onPress: () => {
-              activeShareWorkout()
-              openShareOptions()
-            },
-          },
-        ],
-        { cancelable: false },
-      )
-    }
-
-    openShareOptions()
-    function activeShareWorkout() {
-      console.log(`activeShareWorkout`)
-    }
-
-    function openShareOptions() {
-      console.log(`openShareOptions`)
-    }
-  }
-
-  async function handleSendWorkout(id: string) {
+  // active - ok ( falta so implementar)
+  async function handleSendActiveWorkout(id: string) {
     if (!workouts) return
     const index = workouts.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
@@ -641,12 +751,11 @@ export function UserWorkouts() {
     }
   }
 
-  async function handleEditWorkout(id: string) {
+  // active - ok
+  async function handleActiveSettingMode(id: string) {
     if (!workouts) return
     const index = workouts.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
-
-    console.log(`handleSendWorkout , fazer Todo send e edit  e cancel`)
 
     const isAlreadyShared = workouts.data[index].isShared
 
@@ -674,6 +783,7 @@ export function UserWorkouts() {
     function handleOpenSettingsMode() {
       setIsOpenSettingsMode((prev) => !prev)
     }
+
     function closeModal() {
       setDefaultModalState((prev) => ({
         ...prev,
@@ -685,13 +795,134 @@ export function UserWorkouts() {
       }))
     }
   }
+  // active - nova ordem  ( botao q aparece handleActiveSettingMode() )
+  function saveNewOrderModal(data: IMyWorkouts | null) {
+    if (!data) return
 
-  async function handleDeleteWorkout(id: string) {
+    // Recalcular treinos ativos e expirados
+    const filterInUseActiveWorkouts = data.data.filter((v) => v.isActive)
+    const filterInUseExpiredWorkouts = data.data.filter((v) => v.isExpired)
+
+    const getActiveWorkouts: IMyfitflowWorkoutInUseData[] = []
+    const getExpiredWorkouts: IMyfitflowWorkoutInUseData[] = []
+
+    data.activeData.forEach((_active) => {
+      const workout = filterInUseActiveWorkouts.find((v) => v.id === _active.id)
+      if (workout) {
+        getActiveWorkouts.push(workout)
+      }
+    })
+
+    data.expiredData.forEach((_expired) => {
+      const workout = filterInUseExpiredWorkouts.find(
+        (v) => v.id === _expired.id,
+      )
+      if (workout) {
+        getActiveWorkouts.push(workout)
+      }
+    })
+
+    updateMyWorkoutInCache(data)
+    setIsDataOrderChanged(false)
+    setIsOpenSettingsMode(false)
+    setActiveWorkouts(getActiveWorkouts)
+    setExpiredWorkouts(getExpiredWorkouts)
+  }
+
+  async function handleSendSharedWorkout(id: string) {
+    // shared - ok ( falta so implementar)
+    if (!workouts) return
+    const index = workouts.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+
+    const isAlreadyShared = workouts.data[index].isShared
+
+    if (!isAlreadyShared) {
+      Alert.alert(
+        'Deseja enviar o treino?',
+        '',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Ok',
+            onPress: () => {
+              activeShareWorkout()
+              openShareOptions()
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    } else {
+      openShareOptions()
+    }
+    function activeShareWorkout() {
+      if (!workouts) return
+      const copyWorkouts = { ...workouts }
+      copyWorkouts.data[index].isShared = true
+      setWorkouts(copyWorkouts)
+    }
+
+    function openShareOptions() {
+      console.log(`com o treino ativo, abrir opções de compartilhamento`)
+    }
+  }
+
+  // shared - ok ( falta so implementar)
+  async function handleQRcodeWorkout(id: string) {
+    const index = workouts?.data.findIndex((v) => v.id === id)
+    if (index === undefined || index === -1) return
+    if (!workouts) return
+
+    const isAlreadyShared = workouts.data[index].isShared
+
+    if (!isAlreadyShared) {
+      Alert.alert(
+        'Deseja Criar um QR do treino?',
+        '',
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Ok',
+            onPress: () => {
+              activeShareWorkout()
+              openShareOptions()
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    }
+
+    openShareOptions()
+    function activeShareWorkout() {
+      console.log(`activeShareWorkout`)
+    }
+
+    function openShareOptions() {
+      console.log(`openShareOptions`)
+    }
+  }
+  // shared - ok ( falta so implementar)
+  async function handleCancelShareWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
 
+    console.log(
+      ` workouts?.data[index].isShared`,
+      workouts?.data[index].isShared,
+    )
+
     Alert.alert(
-      'Deseja deletar o treino?',
+      workouts?.data[index].isShared
+        ? 'Deseja parar o compartilhamento do treino?'
+        : 'Deseja compartilhar o treino?',
       '',
       [
         {
@@ -699,22 +930,43 @@ export function UserWorkouts() {
           style: 'cancel',
         },
         {
-          text: 'Deletar',
+          text: 'Compartilhar',
           onPress: () => {
-            if (!workouts) return
-            const copyWorkouts = { ...workouts }
-            copyWorkouts.data.splice(index, 1)
+            const copyWorkouts: IMyWorkouts = {
+              userId: workouts?.userId || '',
+              createdAt: workouts?.createdAt || 0,
+              updatedAt: workouts?.updatedAt || 0,
+              data: workouts?.data || [],
+              activeData: workouts?.activeData || [],
+              mySharedWorkouts: workouts?.mySharedWorkouts || [],
+              copiedWorkouts: workouts?.copiedWorkouts || [],
+              expiredData: workouts?.expiredData || [],
+            }
 
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalSharedWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
+            if (!copyWorkouts) return
 
+            copyWorkouts.data[index].isShared =
+              !copyWorkouts.data[index].isShared
+
+            if (copyWorkouts.data[index].isShared) {
+              // Adiciona o treino a mySharedWorkouts
+              copyWorkouts.mySharedWorkouts.push({
+                id: copyWorkouts.data[index].id,
+                createdAt: copyWorkouts.data[index].createdAt,
+                updatedAt: copyWorkouts.data[index].updatedAt,
+              })
+            } else {
+              // Remove o treino de mySharedWorkouts
+              copyWorkouts.mySharedWorkouts =
+                copyWorkouts.mySharedWorkouts.filter(
+                  (sharedWorkout) =>
+                    sharedWorkout.id !== copyWorkouts.data[index].id,
+                )
+            }
+
+            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            closeModal()
           },
         },
       ],
@@ -722,161 +974,15 @@ export function UserWorkouts() {
     )
   }
 
-  async function handleActiveWorkout(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
-    if (index === undefined || index === -1) return
-
-    const isActivedAndInUse = activeworkouts
-      ? !!activeworkouts.find((va) => va.id === id && va.isInUse)
-      : false
-
-    if (isActivedAndInUse) return
-
-    const isInUse = workouts?.data[index].isInUse
-    Alert.alert(
-      isInUse ? 'Deseja desativar o treino?' : 'Deseja ativar o treino?',
-      '',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Ativar',
-          onPress: () => {
-            const copyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
-            }
-            if (!copyWorkouts) return
-
-            console.log(`Ativando treino:`, copyWorkouts.data[index])
-
-            /* 
-            logica que adicionar em dataOrder
-            */
-
-            copyWorkouts.data[index].isInUse = true
-
-            setWorkouts(copyWorkouts)
-
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalSharedWorkout: false,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
-          },
-        },
-      ],
-      { cancelable: false },
-    )
-  }
-
-  async function handleCancelActiveWorkout(id: string) {
-    const index = workouts?.data.findIndex((v) => v.id === id)
-    if (index === undefined || index === -1) return
-
-    Alert.alert(
-      'Deseja desativar o treino?',
-      '',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Desativar',
-          onPress: () => {
-            const copyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              dataOrder: workouts?.dataOrder || [],
-            }
-            if (!copyWorkouts) return
-
-            console.log(`Desativando treino:`, copyWorkouts.data[index])
-
-            copyWorkouts.data[index].isInUse = false
-
-            setWorkouts(copyWorkouts)
-
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalSharedWorkout: false,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
-          },
-        },
-      ],
-      { cancelable: false },
-    )
-  }
-
-  function closeModal(
-    type: 'Em uso' | 'Meus treinos' | 'Compartilhado' | 'Expired' | 'Active',
-  ) {
-    if (type === 'Em uso') {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalEditTotalWorkout: false,
-        isOpenModalSharedWorkout: false,
-        isOpenModalActiveWorkout: false,
-        isOpenModalExpiredWorkout: false,
-        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
-      }))
-    }
-
-    if (type === 'Meus treinos') {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalEditTotalWorkout: false,
-        isOpenModalSharedWorkout: false,
-        isOpenModalActiveWorkout: false,
-        isOpenModalExpiredWorkout: false,
-        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
-      }))
-    }
-    if (type === 'Compartilhado') {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalEditTotalWorkout: false,
-        isOpenModalSharedWorkout: false,
-        isOpenModalActiveWorkout: false,
-        isOpenModalExpiredWorkout: false,
-        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
-      }))
-    }
-    if (type === 'Expired') {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalEditTotalWorkout: false,
-        isOpenModalSharedWorkout: false,
-        isOpenModalActiveWorkout: false,
-        isOpenModalExpiredWorkout: false,
-        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
-      }))
-    }
-    if (type === 'Active') {
-      setDefaultModalState((prevState) => ({
-        ...prevState,
-        isOpenModalEditTotalWorkout: false,
-        isOpenModalSharedWorkout: false,
-        isOpenModalActiveWorkout: false,
-        isOpenModalExpiredWorkout: false,
-        activeWeightIndex: prevState?.activeWeightIndex ?? 0,
-      }))
-    }
+  function closeModal() {
+    setDefaultModalState((prevState) => ({
+      ...prevState,
+      isOpenModalEditTotalWorkout: false,
+      isOpenModalSharedWorkout: false,
+      isOpenModalActiveWorkout: false,
+      isOpenModalExpiredWorkout: false,
+      activeWeightIndex: prevState?.activeWeightIndex ?? 0,
+    }))
   }
 
   function handlePress(tab: 'Em uso' | 'Meus treinos' | 'Compartilhado') {
@@ -940,6 +1046,7 @@ export function UserWorkouts() {
       navigation.goBack()
     }
   }
+
   useEffect(() => {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
@@ -949,71 +1056,71 @@ export function UserWorkouts() {
   }, [])
 
   useEffect(() => {
-    if (workouts && workouts.data && workouts.dataOrder) {
-      const filterSharedWorkouts = workouts.data.filter((v) => v.isShared)
-      setSharedWorkouts(filterSharedWorkouts)
+    if (workouts && workouts.data && workouts.activeData) {
+      /* TODO-> renderizar em states separados e clicar no id certo ao passar
+      depois ver se as funcionalidades tao ok ,
 
-      const filterInUseWorkouts = workouts.data.filter((v) => v.isInUse)
+      testar com outra conta para pegar 
 
-      const getActiveWorkouts: IMyfitflowWorkoutInUseData[] = []
-      const getExpiredWorkouts: IMyfitflowWorkoutInUseData[] = []
+jogar no state principal e ver se consigo criar o tootle para meus / copiados
 
-      workouts.dataOrder.forEach((order) => {
-        const workout = filterInUseWorkouts.find((v) => v.id === order.id)
+e marcar no card se foi copiado de alguem
+
+      */
+
+      Alert.alert(`fazer aqui`)
+      const copiedList = workouts.copiedWorkouts.filter((v) => v.id)
+      const activeList = workouts.activeData.filter((v) => v.id)
+      const expiredList = workouts.expiredData.filter((v) => v.id)
+      const sharedList = workouts.mySharedWorkouts.filter((v) => v.id)
+
+      const copiedWorkouts: IMyfitflowWorkoutInUseData[] = []
+      const activeWorkouts: IMyfitflowWorkoutInUseData[] = []
+      const expiredWorkouts: IMyfitflowWorkoutInUseData[] = []
+      const sharedWorkouts: IMyfitflowWorkoutInUseData[] = []
+
+      copiedList.forEach((item) => {
+        const workout = workouts.data.find((v) => v.id === item.id)
         if (workout) {
-          getActiveWorkouts.push(workout)
+          copiedWorkouts.push(workout)
         }
       })
 
-      filterInUseWorkouts.forEach((workout) => {
-        const active = workouts.dataOrder.find(
-          (order) => order.id === workout.id,
-        )
-        if (!active) {
-          getExpiredWorkouts.push(workout)
+      activeList.forEach((item) => {
+        const workout = workouts.data.find((v) => v.id === item.id)
+        if (workout) {
+          activeWorkouts.push(workout)
+        }
+      })
+      expiredList.forEach((item) => {
+        const workout = workouts.data.find((v) => v.id === item.id)
+        if (workout) {
+          expiredWorkouts.push(workout)
         }
       })
 
-      console.log(`recalculando... `)
+      sharedList.forEach((item) => {
+        const workout = workouts.data.find((v) => v.id === item.id)
+        if (workout) {
+          sharedWorkouts.push(workout)
+        }
+      })
+      setMyTotalWorkouts(workouts.data)
 
-      setActiveWorkouts(getActiveWorkouts)
-      setExpiredWorkouts(getExpiredWorkouts)
+      setCopiedWorkouts(copiedWorkouts)
+      setActiveWorkouts(activeWorkouts)
+      setExpiredWorkouts(expiredWorkouts)
+      setSharedWorkouts(sharedWorkouts)
     }
-  }, [workouts, setShowScreen2])
+  }, [workouts, workouts?.data, setShowScreen2])
 
-  function saveNewOrderModal(data: IMyWorkouts | null) {
-    if (!data) return
-
-    // Recalcular treinos ativos e expirados
-    const filterInUseWorkouts = data.data.filter((v) => v.isInUse)
-
-    const getActiveWorkouts: IMyfitflowWorkoutInUseData[] = []
-    const getExpiredWorkouts: IMyfitflowWorkoutInUseData[] = []
-
-    data.dataOrder.forEach((order) => {
-      const workout = filterInUseWorkouts.find((v) => v.id === order.id)
-      if (workout) {
-        getActiveWorkouts.push(workout)
-      }
-    })
-
-    filterInUseWorkouts.forEach((workout) => {
-      const active = data.dataOrder.find((order) => order.id === workout.id)
-      if (!active) {
-        getExpiredWorkouts.push(workout)
-      }
-    })
-
-    updateMyWorkoutInCache(data)
-    setIsDataOrderChanged(false)
-    setIsOpenSettingsMode(false)
-    setActiveWorkouts(getActiveWorkouts)
-    setExpiredWorkouts(getExpiredWorkouts)
-  }
   useEffect(() => {
     setWorkouts(myWorkout)
   }, [myWorkout])
 
+  console.log(`activeworkouts`, activeworkouts)
+
+  console.log(`expiredworkouts`, expiredworkouts)
   return (
     <Container>
       <BodyImageWrapper>
@@ -1061,7 +1168,26 @@ export function UserWorkouts() {
                           style={animatedStyles}
                         />
                       </SelectScreenWrapper>
+                      {/* TODO->
+ENTENDER o q ta sendo renderizado 
+o id q eu clico nao ta correspondendo
 
+quando cabar isso botao tootle em total 
+
+Meus / dos amigos
+
+-> Criar um state para isso
+
+
+No caso vou crair varios states para desmembrar o meu array principal
+
+
+
+
+
+
+
+*/}
                       {showScreen === 'Em uso' && (
                         <>
                           <SelectScreenWrapper2>
@@ -1093,15 +1219,14 @@ export function UserWorkouts() {
                             showScreen2={showScreen2}
                             user={user}
                             isOpenSettingsMode={isOpenSettingsMode}
-                            handleOnPressExpiredInUseWorkout={
-                              handleOnPressExpiredInUseWorkout
+                            handleOnPressExpiredInUseWorkout={(id) =>
+                              handleOnPressWorkout(id, 'expiredWorkout')
                             }
-                            handleOnPressActiveInUseWorkout={
-                              handleOnPressActiveWorkout
+                            handleOnPressActiveInUseWorkout={(id) =>
+                              handleOnPressWorkout(id, 'activeWorkout')
                             }
                             handleMoveUp={handleMoveUp}
                             handleMoveDown={handleMoveDown}
-                            handleResetTimerUp={handleResetTimerUp}
                           />
                         </>
                       )}
@@ -1109,15 +1234,19 @@ export function UserWorkouts() {
                         <TotalWorkoutContainer
                           data={workouts}
                           user={user}
-                          handleOnPressTotalWorkout={handleOnPressTotalWorkout}
+                          handleOnPressTotalWorkout={(id) =>
+                            handleOnPressWorkout(id, 'totalWorkout')
+                          }
                         />
                       )}
                       {showScreen === 'Compartilhado' && workouts && (
                         <SharedWorkoutContainer
                           data={workouts}
-                          sharedData={sharedWorkouts}
+                          sharedWorkouts={sharedWorkouts}
                           user={user}
-                          handleOnPressSendWorkout={handleOnPressSendWorkout}
+                          handleOnPressShareWorkout={(id) =>
+                            handleOnPressWorkout(id, 'shareWorkout')
+                          }
                         />
                       )}
                     </ListWrapper>
@@ -1140,74 +1269,12 @@ export function UserWorkouts() {
         </ImageBackground>
       </BodyImageWrapper>
 
-      {/* active */}
-      <Modal
-        visible={defaultModalState?.isOpenModalActiveWorkout || false}
-        animationType={`slide`}
-        transparent={true}
-        onRequestClose={() => closeModal('Em uso')}
-        style={{
-          justifyContent: 'flex-end',
-          margin: 0,
-          flex: 1,
-        }}
-      >
-        {workouts &&
-          workouts.data &&
-          defaultModalState &&
-          workouts.data[defaultModalState.activeWeightIndex] && (
-            <WorkoutUserActiveWorkoutModal
-              handleDeactivateWorkout={handleDeactivateWorkout}
-              handleSendWorkout={handleSendWorkout}
-              handleEditWorkout={handleEditWorkout}
-              closeModal={() => closeModal('Em uso')}
-              data={workouts?.data[defaultModalState?.activeWeightIndex]}
-              activeIndex={defaultModalState.activeWeightIndex}
-              selectedLanguage={user?.selectedLanguage || 'pt-br'}
-              isFirstElement={defaultModalState.activeWeightIndex === 0}
-              isMorethenTwoElementsAtQueue={workouts.dataOrder.length > 2}
-              onRestartCounter={handleResetTimerUp}
-              onMoveWorkoutFromQueueToPrimary={
-                handleMoveWorkoutFromQueueToPrimary
-              }
-            />
-          )}
-      </Modal>
-
-      {/* expired  */}
-      <Modal
-        visible={defaultModalState?.isOpenModalExpiredWorkout || false}
-        animationType={`slide`}
-        transparent={true}
-        onRequestClose={() => closeModal('Compartilhado')}
-        style={{
-          justifyContent: 'flex-end',
-          margin: 0,
-          flex: 1,
-        }}
-      >
-        {workouts &&
-          workouts.data &&
-          defaultModalState &&
-          workouts.data[defaultModalState?.activeWeightIndex] && (
-            <ExpiredWorkoutsCardModal
-              handleUseWorkout={handleUseWorkout}
-              handleCancelActiveWorkout={handleCancelActiveWorkout}
-              closeModal={() => closeModal('Expired')}
-              data={workouts.data[defaultModalState.activeWeightIndex]}
-              activeIndex={defaultModalState.activeWeightIndex}
-              selectedLanguage={user?.selectedLanguage || 'pt-br'}
-              isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
-            />
-          )}
-      </Modal>
-
-      {/* edit total */}
+      {/*  total */}
       <Modal
         visible={defaultModalState?.isOpenModalEditTotalWorkout || false}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={() => closeModal('Meus treinos')}
+        onRequestClose={closeModal}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1220,12 +1287,81 @@ export function UserWorkouts() {
             <WorkoutUserEditTotalWorkoutModal
               handleDeleteWorkout={handleDeleteWorkout}
               handleShareWorkout={handleShareWorkout}
-              handleActiveWorkout={handleActiveWorkout}
-              closeModal={() => closeModal('Meus treinos')}
+              handleInUseExpiredWorkout={handleInUseExpiredWorkout}
+              closeModal={closeModal}
               data={workouts.data[defaultModalState?.activeWeightIndex ?? 0]}
               activeIndex={defaultModalState?.activeWeightIndex ?? 0}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
+            />
+          )}
+      </Modal>
+
+      {/* expired  */}
+      <Modal
+        visible={defaultModalState?.isOpenModalExpiredWorkout || false}
+        animationType={`slide`}
+        transparent={true}
+        onRequestClose={closeModal}
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+          flex: 1,
+        }}
+      >
+        {workouts &&
+          workouts.data &&
+          defaultModalState &&
+          workouts &&
+          workouts.data[defaultModalState?.activeWeightIndex] && (
+            <ExpiredWorkoutsCardModal
+              handleInUseActiveWorkout={handleInUseActiveWorkout}
+              handleInUseRemoveFromExpiredWorkout={
+                handleInUseRemoveFromExpiredWorkout
+              }
+              closeModal={closeModal}
+              data={workouts.data[defaultModalState.activeWeightIndex]}
+              activeIndex={defaultModalState.activeWeightIndex}
+              selectedLanguage={user?.selectedLanguage || 'pt-br'}
+              isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
+            />
+          )}
+      </Modal>
+
+      {/* active */}
+      <Modal
+        visible={defaultModalState?.isOpenModalActiveWorkout || false}
+        animationType={`slide`}
+        transparent={true}
+        onRequestClose={closeModal}
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+          flex: 1,
+        }}
+      >
+        {activeworkouts &&
+          defaultModalState &&
+          workouts &&
+          activeworkouts[defaultModalState.activeWeightIndex] &&
+          activeworkouts[defaultModalState.activeWeightIndex].data &&
+          workouts.data[defaultModalState.activeWeightIndex] && (
+            <WorkoutUserActiveWorkoutModal
+              handleInUseRemoveFromActivedWorkout={
+                handleInUseRemoveFromActivedWorkout
+              }
+              handleSendActiveWorkout={handleSendActiveWorkout}
+              handleActiveSettingMode={handleActiveSettingMode}
+              closeModal={closeModal}
+              data={activeworkouts[defaultModalState.activeWeightIndex]}
+              activeIndex={defaultModalState.activeWeightIndex}
+              selectedLanguage={user?.selectedLanguage || 'pt-br'}
+              isFirstElement={defaultModalState.activeWeightIndex === 0}
+              isMorethenTwoElementsAtQueue={workouts.activeData.length > 2}
+              onRestartCounter={handleResetTimerUp}
+              onMoveWorkoutFromQueueToPrimary={
+                handleMoveWorkoutFromQueueToPrimary
+              }
             />
           )}
       </Modal>
@@ -1235,7 +1371,7 @@ export function UserWorkouts() {
         visible={defaultModalState?.isOpenModalSharedWorkout || false}
         animationType={`slide`}
         transparent={true}
-        onRequestClose={() => closeModal('Compartilhado')}
+        onRequestClose={closeModal}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -1246,10 +1382,10 @@ export function UserWorkouts() {
           workouts.data &&
           workouts.data[defaultModalState?.activeWeightIndex ?? 0] && (
             <SharedWorkoutsCardModal
-              handleCancelShareWorkout={handleCancelShareWorkout}
+              handleSendSharedWorkout={handleSendSharedWorkout}
               handleQRcodeWorkout={handleQRcodeWorkout}
-              handleSendWorkout={handleSendWorkout}
-              closeModal={() => closeModal('Compartilhado')}
+              handleCancelShareWorkout={handleCancelShareWorkout}
+              closeModal={closeModal}
               data={workouts.data[defaultModalState?.activeWeightIndex ?? 0]}
               activeIndex={defaultModalState?.activeWeightIndex ?? 0}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}

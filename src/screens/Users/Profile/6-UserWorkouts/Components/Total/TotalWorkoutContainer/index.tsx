@@ -25,22 +25,6 @@ export default function TotalWorkoutContainer({
 }: WorkoutContainerProps) {
   // sxzaber se ativo o unao
 
-  let activeWorkouts: IMyfitflowWorkoutInUseData[] = []
-  if (data !== null && data.data !== undefined && data.dataOrder) {
-    const listOfWorkouts = data.data.filter((v) => v.isInUse)
-
-    const getActiveWorkouts = listOfWorkouts
-      .map((workout) => {
-        const active = data.dataOrder.find((order) => order.id === workout.id)
-        if (!active) return false
-
-        return workout
-      })
-      .filter((workout) => workout !== false)
-
-    activeWorkouts = getActiveWorkouts
-  }
-
   return (
     <ContainerWrapper>
       <CardsWrapper>
@@ -53,9 +37,6 @@ export default function TotalWorkoutContainer({
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               handleOnPressTotalWorkout={() => handleOnPressTotalWorkout(v.id)}
               index={i}
-              isActive={
-                !!activeWorkouts.find((va) => va.id === v.id && va.isInUse)
-              }
             />
           ))}
       </CardsWrapper>

@@ -72,6 +72,8 @@ import {
   ICachedCardExerciseData,
   IMyWorkouts,
   IMyWorkoutsData,
+  IMyfitflowWorkoutInUseData,
+  IWorkoutOrder,
 } from './authTypes'
 
 import {
@@ -112,6 +114,10 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [myWorkoutDataArray, setMyWorkoutDataArray] =
     useState<IMyWorkoutsData | null>(null)
 
+  // isso ta fazendo backup com o ID do exercicio
+  const [cachedUserWorkoutsLog, setCachedUserWorkoutsLog] =
+    useState<IUserWorkoutsLog | null>(null)
+
   const [graphicsValues, setGraphicsValues] = useState<
     IGraphicsValues[] | null
   >(null)
@@ -123,9 +129,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [cachedVideoTable, setCachedVideoTable] = useState<
     ICachedVideoTable[] | null
   >(null)
-
-  const [cachedUserWorkoutsLog, setCachedUserWorkoutsLog] =
-    useState<IUserWorkoutsLog | null>(null)
 
   const [cachedExerciseHistoryData, setCachedExerciseHistoryData] =
     useState<ICachedExerciseHistoryData | null>(null)
@@ -1713,21 +1716,19 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       if (!data) return null
       if (!data.updatedAt) return null
-      console.log(`data ->`, data)
       return data.updatedAt
     } catch (error) {
       console.log(error)
       return null
     }
   }
-  async function updateUserWorkoutCache(
-    workoutCacheId: string,
-    data: IWorkoutCardLogData,
-    lastCompletedTimestamp: number,
-  ) {
+
+  async function updateUserWorkoutCache(data: IWorkoutLog, updatedAt: number) {
     if (!user) return
+    console.log(`updateUserWorkoutCache`, updatedAt)
 
     const userId = user.id
+    const workoutCacheId = data.workoutId
 
     const workoutDataCacheDoc = doc(
       db,
@@ -1750,17 +1751,19 @@ function AuthProvider({ children }: AuthProviderProps) {
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
 
+      const getDateFromTimeStamp = new Date(updatedAt)
+
       if (!docSnap.exists()) {
         await setDoc(workoutDataCacheDoc, {
-          createdAt: lastCompletedTimestamp,
-          updatedAt: lastCompletedTimestamp,
+          createdAt: getDateFromTimeStamp,
+          updatedAt: getDateFromTimeStamp,
         })
       } else {
         await updateDoc(workoutDataCacheDoc, {
-          updatedAt: lastCompletedTimestamp,
+          updatedAt: getDateFromTimeStamp,
         })
       }
-
+      data.updatedAt = updatedAt
       await setDoc(workoutCacheDoc, { data })
     } catch (error) {
       console.log(error)
@@ -2174,11 +2177,13 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function updateCachedUserWorkoutsLog(
     newExercise: ICachedCardExerciseData,
     workoutId: string,
-    lastCompletedTimestamp: number,
+    updatedAt: number,
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ): Promise<void> {
+    console.log('updateCachedUserWorkoutsLog', workoutId)
+
     const userId = getUserId()
     if (!userId) {
       console.error('ID do usuário não está disponível.')
@@ -2186,139 +2191,88 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
-    const cachedLog = cachedUserWorkoutsLog || (await createUserWorkoutLog())
-
+    const cachedLog =
+      cachedUserWorkoutsLog || (await createUserWorkoutLog(updatedAt))
     if (!cachedLog) return
 
-    const updatedLog = await updateUserWorkoutsLog(
-      cachedLog.workoutsLog,
-      newExercise,
-      workoutId,
-      lastCompletedTimestamp,
-      lastCompletedFormattedDay,
-      lastCompletedFormattedDate,
-      cardIndex,
+    const logIndex = cachedLog.workoutsLog.findIndex(
+      (log) => log.workoutId === workoutId,
     )
-    if (updatedLog) {
-      await saveToStorage(storageKey, updatedLog)
-      setCachedUserWorkoutsLog(updatedLog)
-    }
 
-    async function createUserWorkoutLog(): Promise<IUserWorkoutsLog | null> {
-      const userId = getUserId()
-      if (!userId) return null
-
-      const newLog: IUserWorkoutsLog = {
-        workoutsLog: [],
-        userId,
-      }
-
-      return newLog
-    }
-
-    async function updateUserWorkoutsLog(
-      workoutLogs: IWorkoutLog[],
-      newExercise: ICachedCardExerciseData,
-      workoutId: string,
-      lastCompletedTimestamp: number,
-      lastCompletedFormattedDay: IptBrUs,
-      lastCompletedFormattedDate: string,
-      cardIndex: number,
-    ): Promise<IUserWorkoutsLog | null> {
-      const logIndex = workoutLogs.findIndex(
-        (log) => log.workoutId === workoutId,
-      )
-
-      const isNewWorkoutLog = logIndex === -1
-
-      if (isNewWorkoutLog) {
-        return await createNewWorkoutLog(
-          workoutLogs,
-          newExercise,
-          workoutId,
-          lastCompletedTimestamp,
-          lastCompletedFormattedDay,
-          lastCompletedFormattedDate,
-          cardIndex,
-        )
-      } else {
-        return await updateExistingWorkoutLog(
-          workoutLogs,
-          logIndex,
-          newExercise,
-          lastCompletedTimestamp,
-          lastCompletedFormattedDay,
-          lastCompletedFormattedDate,
-          cardIndex,
-        )
-      }
-    }
-
-    async function createNewWorkoutLog(
-      workoutLogs: IWorkoutLog[],
-      newExercise: ICachedCardExerciseData,
-      workoutId: string,
-      lastCompletedTimestamp: number,
-      lastCompletedFormattedDay: IptBrUs,
-      lastCompletedFormattedDate: string,
-      cardIndex: number,
-    ): Promise<IUserWorkoutsLog | null> {
-      const newWorkoutCardLog: IWorkoutCardLogData = {
+    // create
+    if (logIndex === -1) {
+      const workoutCardsLogData: IWorkoutCardLogData = {
         cardIndex,
         weightDoneLogs: [newExercise],
         totalSessionsCompleted: 1,
-        lastCompletedTimestamp,
+        updatedAt,
+        createdAt: updatedAt,
         lastCompletedFormattedDay,
         lastCompletedFormattedDate,
       }
 
-      const existingWorkoutLogIndex = workoutLogs.findIndex(
-        (log) => log.workoutId === workoutId,
-      )
+      const formattedData = {
+        workoutCardsLogData: [workoutCardsLogData],
+        workoutId,
+        createdAt: updatedAt,
+        updatedAt,
+      }
 
-      if (existingWorkoutLogIndex !== -1) {
-        // Preserve existing workout logs and add the new card log
-        workoutLogs[existingWorkoutLogIndex] = {
-          ...workoutLogs[existingWorkoutLogIndex],
-          workoutCardsLogData: [
-            ...workoutLogs[existingWorkoutLogIndex].workoutCardsLogData,
-            newWorkoutCardLog,
-          ],
+      cachedLog.workoutsLog.push(formattedData)
+    } else {
+      // update
+      const cardLogIndex = cachedLog.workoutsLog[
+        logIndex
+      ].workoutCardsLogData.findIndex((log) => log.cardIndex === cardIndex)
+
+      if (cardLogIndex === -1) {
+        const workoutCardsLogData: IWorkoutCardLogData = {
+          cardIndex,
+          weightDoneLogs: [newExercise],
+          totalSessionsCompleted: 1,
+          updatedAt,
+          createdAt: updatedAt,
+          lastCompletedFormattedDay,
+          lastCompletedFormattedDate,
         }
+
+        cachedLog.workoutsLog[logIndex].workoutCardsLogData.push(
+          workoutCardsLogData,
+        )
       } else {
-        // Create a new workout log if it doesn't exist
-        workoutLogs.push({
-          workoutCardsLogData: [newWorkoutCardLog],
-          workoutId,
-        })
+        cachedLog.workoutsLog[logIndex].workoutCardsLogData[
+          cardLogIndex
+        ].weightDoneLogs[cardLogIndex] = {
+          ...cachedLog.workoutsLog[logIndex].workoutCardsLogData[cardLogIndex]
+            .weightDoneLogs[cardLogIndex],
+          ...newExercise,
+        }
       }
 
-      const userId = getUserId()
-      if (!userId) return null
+      cachedLog.workoutsLog[logIndex].updatedAt = updatedAt
 
-      return {
-        workoutsLog: workoutLogs,
-        createdAt: lastCompletedTimestamp,
-        updatedAt: lastCompletedTimestamp,
-        userId,
-      }
+      /* funcao abaixo nao ta adicionando mais itens do array  */
     }
-    /* essa funcao ta BUGADA  refazer isso  */
+
+    if (cachedLog) {
+      await saveToStorage(storageKey, cachedLog)
+      setCachedUserWorkoutsLog(cachedLog)
+    }
+
     async function updateExistingWorkoutLog(
       workoutLogs: IWorkoutLog[],
-      logIndex: number,
       newExercise: ICachedCardExerciseData,
-      lastCompletedTimestamp: number,
+      logIndex: number,
+      updatedAt: number,
       lastCompletedFormattedDay: IptBrUs,
       lastCompletedFormattedDate: string,
       cardIndex: number,
     ): Promise<IUserWorkoutsLog | null> {
-      const workoutLog = workoutLogs[logIndex]
-      const cardLogIndex = workoutLog.workoutCardsLogData.findIndex(
+      const cardLogIndex = workoutLogs[logIndex].workoutCardsLogData.findIndex(
         (log) => log.cardIndex === cardIndex,
       )
 
-      const cardLog = workoutLog.workoutCardsLogData[cardLogIndex]
+      const cardLog = workoutLogs[logIndex].workoutCardsLogData[cardLogIndex]
 
       // Atualizar os dados existentes sem perder os anteriores
       const existingExerciseIndex = cardLog.weightDoneLogs.findIndex(
@@ -2336,24 +2290,49 @@ function AuthProvider({ children }: AuthProviderProps) {
       } else {
         // Adicionar o novo exercício se não existir
         cardLog.weightDoneLogs.push(newExercise)
+        workoutLogs[logIndex].updatedAt = updatedAt
       }
 
       cardLog.totalSessionsCompleted += 1
-      cardLog.lastCompletedTimestamp = lastCompletedTimestamp
+      cardLog.updatedAt = updatedAt
       cardLog.lastCompletedFormattedDay = lastCompletedFormattedDay
       cardLog.lastCompletedFormattedDate = lastCompletedFormattedDate
 
       const userId = getUserId()
       if (!userId) return null
+      console.log(`isNewWorkoutLog`, existingExerciseIndex)
 
-      return {
+      workoutLogs[logIndex].workoutCardsLogData[cardLogIndex] = cardLog
+
+      const finalData = {
         workoutsLog: workoutLogs,
-        updatedAt: lastCompletedTimestamp,
+        createdAt: cardLog.createdAt,
+        updatedAt,
         userId,
       }
+      return finalData
     }
 
-    async function saveToStorage(key: string, data: any): Promise<void> {
+    async function createUserWorkoutLog(
+      updatedAt: number,
+    ): Promise<IUserWorkoutsLog | null> {
+      const userId = getUserId()
+      if (!userId) return null
+
+      const newLog: IUserWorkoutsLog = {
+        workoutsLog: [],
+        userId,
+        createdAt: updatedAt,
+        updatedAt,
+      }
+
+      return newLog
+    }
+
+    async function saveToStorage(
+      key: string,
+      data: IUserWorkoutsLog,
+    ): Promise<void> {
       await AsyncStorage.setItem(key, JSON.stringify(data))
     }
 
@@ -2549,8 +2528,20 @@ function AuthProvider({ children }: AuthProviderProps) {
         workoutsData: formattedExerciseData,
       }
 
-      await saveExerciseDataInCache(userId, formattedWorkoutsDataArray)
-      await saveMyWorkoutInCache(userId, _workouts)
+      const updatedTime = new Date().getTime()
+
+      const updatedMyWorkoutsCachedData = await saveLocalData(
+        formattedWorkoutsDataArray,
+        _workouts,
+        updatedTime,
+      )
+      console.log(`updatedMyWorkoutsCachedData`, updatedMyWorkoutsCachedData)
+      if (updatedMyWorkoutsCachedData) {
+        saveFirebaseMyWorkoutDataAndDataOrder(
+          updatedMyWorkoutsCachedData,
+          updatedTime,
+        )
+      }
 
       Alert.alert(
         user?.selectedLanguage === 'pt-br'
@@ -2640,19 +2631,403 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     }
   }
-  async function saveExerciseDataInCache(
-    userId: string,
+  async function saveFirebaseMyWorkoutDataAndDataOrder(
+    __workouts: IMyWorkouts,
+    _updatedAt: number,
+  ) {
+    console.log(`__workouts ->>>`, JSON.stringify(__workouts))
+
+    await Promise.all([saveAllData(), saveAllDataOrder()])
+
+    async function saveAllData() {
+      const promises = __workouts.data.map((elementData) =>
+        saveMyWorkoutInFirebaseCacheData(elementData, _updatedAt),
+      )
+      await Promise.all(promises)
+    }
+
+    async function saveAllDataOrder() {
+      const promises = __workouts.dataOrder.map((elementOrder) =>
+        saveMyWorkoutInFirebaseCacheDataOrder(elementOrder, _updatedAt),
+      )
+      await Promise.all(promises)
+    }
+
+    async function saveMyWorkoutInFirebaseCacheData(
+      data: IMyfitflowWorkoutInUseData,
+      _updatedAt: number,
+    ) {
+      if (!user) return
+
+      const userId = user.id
+      const workoutDataMyWorkoutsDataCachedId = data.id
+
+      const workoutDataCacheDoc = doc(
+        db,
+        'users',
+        userId,
+        'workoutDataMyWorkoutsDataCached',
+        workoutDataMyWorkoutsDataCachedId,
+      )
+
+      const workoutCacheDoc = doc(
+        db,
+        'users',
+        userId,
+        'workoutDataMyWorkoutsDataCached',
+        workoutDataMyWorkoutsDataCachedId,
+        'workoutDataMyWorkoutsDataCachedItem',
+        workoutDataMyWorkoutsDataCachedId,
+      )
+
+      try {
+        const docSnap = await getDoc(workoutDataCacheDoc)
+
+        const getDateFromTimeStamp = new Date(_updatedAt)
+
+        if (!docSnap.exists()) {
+          await setDoc(workoutDataCacheDoc, {
+            createdAt: getDateFromTimeStamp,
+            updatedAt: getDateFromTimeStamp,
+          })
+        } else {
+          await updateDoc(workoutDataCacheDoc, {
+            updatedAt: getDateFromTimeStamp,
+          })
+        }
+        data.updatedAt = _updatedAt
+        await setDoc(workoutCacheDoc, { data })
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    async function saveMyWorkoutInFirebaseCacheDataOrder(
+      dataOrder: IWorkoutOrder,
+      _updatedAt: number,
+    ) {
+      if (!user) return
+
+      const userId = user.id
+      const workoutDataMyWorkoutsDataOrderCachedId = dataOrder.id
+
+      const workoutDataCacheDoc = doc(
+        db,
+        'users',
+        userId,
+        'workoutDataMyWorkoutsDataOrderCached',
+        workoutDataMyWorkoutsDataOrderCachedId,
+      )
+
+      const workoutCacheDoc = doc(
+        db,
+        'users',
+        userId,
+        'workoutDataMyWorkoutsDataOrderCached',
+        workoutDataMyWorkoutsDataOrderCachedId,
+        'workoutDataMyWorkoutsDataOrderCachedItem',
+        workoutDataMyWorkoutsDataOrderCachedId,
+      )
+
+      try {
+        const docSnap = await getDoc(workoutDataCacheDoc)
+
+        const getDateFromTimeStamp = new Date(_updatedAt)
+
+        if (!docSnap.exists()) {
+          await setDoc(workoutDataCacheDoc, {
+            createdAt: getDateFromTimeStamp,
+            updatedAt: getDateFromTimeStamp,
+          })
+        } else {
+          await updateDoc(workoutDataCacheDoc, {
+            updatedAt: getDateFromTimeStamp,
+          })
+        }
+        dataOrder.updatedAt = _updatedAt
+        await setDoc(workoutCacheDoc, { dataOrder })
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+  async function saveFirebaseMyWorkoutDataAndDataOrder2(
+    __workouts: IMyWorkouts,
+    _updatedAt: number,
+  ) {
+    console.log(`__workouts ->>>`, JSON.stringify(__workouts))
+
+    await saveAllData()
+    await saveAllDataOrder()
+
+    async function saveAllData() {
+      __workouts.data.forEach(async (elementData) => {
+        await saveMyWorkoutInFirebaseCacheData(elementData, _updatedAt) // salva no firebase
+      })
+
+      async function saveMyWorkoutInFirebaseCacheData(
+        data: IMyfitflowWorkoutInUseData,
+        _updatedAt: number,
+      ) {
+        if (!user) return
+
+        const userId = user.id
+        const workoutDataMyWorkoutsDataCachedId = data.id
+
+        const workoutDataCacheDoc = doc(
+          db,
+          'users',
+          userId,
+          'workoutDataMyWorkoutsDataCached',
+          workoutDataMyWorkoutsDataCachedId,
+        )
+
+        const workoutCacheDoc = doc(
+          db,
+          'users',
+          userId,
+          'workoutDataMyWorkoutsDataCached',
+          workoutDataMyWorkoutsDataCachedId,
+          'workoutDataMyWorkoutsDataCachedItem',
+          workoutDataMyWorkoutsDataCachedId,
+        )
+
+        try {
+          const docSnap = await getDoc(workoutDataCacheDoc)
+
+          const getDateFromTimeStamp = new Date(_updatedAt)
+
+          if (!docSnap.exists()) {
+            await setDoc(workoutDataCacheDoc, {
+              createdAt: getDateFromTimeStamp,
+              updatedAt: getDateFromTimeStamp,
+            })
+          } else {
+            await updateDoc(workoutDataCacheDoc, {
+              updatedAt: getDateFromTimeStamp,
+            })
+          }
+          data.updatedAt = _updatedAt
+          await setDoc(workoutCacheDoc, { data })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
+
+    async function saveAllDataOrder() {
+      __workouts.dataOrder.forEach(async (elementOrder) => {
+        await saveMyWorkoutInFirebaseCacheDataOrder(elementOrder, _updatedAt) // salva no firebase
+      })
+
+      async function saveMyWorkoutInFirebaseCacheDataOrder(
+        dataOrder: IWorkoutOrder,
+        _updatedAt: number,
+      ) {
+        if (!user) return
+
+        const userId = user.id
+        const workoutDataMyWorkoutsDataOrderCachedId = dataOrder.id
+
+        const workoutDataCacheDoc = doc(
+          db,
+          'users',
+          userId,
+          'workoutDataMyWorkoutsDataOrderCached',
+          workoutDataMyWorkoutsDataOrderCachedId,
+        )
+
+        const workoutCacheDoc = doc(
+          db,
+          'users',
+          userId,
+          'workoutDataMyWorkoutsDataOrderCached',
+          workoutDataMyWorkoutsDataOrderCachedId,
+          'workoutDataMyWorkoutsDataOrderCachedItem',
+          workoutDataMyWorkoutsDataOrderCachedId,
+        )
+        /*    'workoutDataMyWorkoutsDataCached',
+          workoutDataMyWorkoutsDataCachedId,
+          'workoutDataMyWorkoutsDataCachedItem',
+          workoutDataMyWorkoutsDataCachedId, */
+        try {
+          const docSnap = await getDoc(workoutDataCacheDoc)
+
+          const getDateFromTimeStamp = new Date(_updatedAt)
+
+          if (!docSnap.exists()) {
+            console.log(`create new cache`)
+            await setDoc(workoutDataCacheDoc, {
+              createdAt: getDateFromTimeStamp,
+              updatedAt: getDateFromTimeStamp,
+            })
+          } else {
+            console.log(`update cache`, dataOrder)
+            await updateDoc(workoutDataCacheDoc, {
+              updatedAt: getDateFromTimeStamp,
+            })
+          }
+          dataOrder.updatedAt = _updatedAt
+          await setDoc(workoutCacheDoc, { dataOrder })
+        } catch (error) {
+          console.log(error)
+        }
+      }
+    }
+  }
+
+  async function saveLocalData(
+    formattedWorkoutsDataArray: IWorkoutInfo,
+    _workouts: IMyfitflowWorkoutInUse,
+    updatedAt: number,
+  ) {
+    exerciseData(updatedAt)
+    const updatedExercisesCard = await exerciseCard(updatedAt)
+
+    if (updatedExercisesCard) {
+      return updatedExercisesCard
+    }
+
+    async function exerciseData(updatedAt: number) {
+      await saveExerciseDataInLocalCache(formattedWorkoutsDataArray, updatedAt) // nao vai pro firebase / so local
+    }
+
+    async function exerciseCard(updatedAt: number) {
+      const _myWorkoutExercises = await upsertWorkoutCache(_workouts, updatedAt)
+      if (!_myWorkoutExercises) return null
+
+      await saveMyWorkoutInCache(_myWorkoutExercises)
+
+      return _myWorkoutExercises
+      // upsertWorkoutCache
+    }
+
+    async function saveMyWorkoutInCache(_myWorkouts: IMyWorkouts) {
+      if (!user) return
+      const userId = user.id
+
+      const workoutKey = `@myfitflow:cachedworkout-${userId}`
+
+      await AsyncStorage.setItem(workoutKey, JSON.stringify(_myWorkouts))
+      setMyWorkout(_myWorkouts)
+    }
+    async function upsertWorkoutCache(
+      workoutData: IMyfitflowWorkoutInUse,
+      updatedAt: number,
+    ) {
+      if (!user) return null
+      const userId = user.id
+
+      let myWorkoutExercises: IMyWorkouts | null
+
+      if (myWorkout) {
+        myWorkoutExercises = updateExistingWorkout(workoutData, updatedAt)
+      } else {
+        myWorkoutExercises = createNewWorkoutData(
+          userId,
+          workoutData,
+          updatedAt,
+        )
+      }
+
+      return myWorkoutExercises
+
+      function updateExistingWorkout(
+        workoutData: IMyfitflowWorkoutInUse,
+        updatedAt: number,
+      ) {
+        if (!myWorkout) return null
+
+        const workoutIndex = myWorkout.data.findIndex(
+          (workout) => workout.id === workoutData.workoutId,
+        )
+
+        const copyMyWorkout = {
+          ...myWorkout,
+        }
+
+        if (workoutIndex !== -1) {
+          // Atualiza o workout existente
+          copyMyWorkout.data[workoutIndex] = {
+            ...copyMyWorkout.data[workoutIndex],
+            data: workoutData,
+            updatedAt,
+          }
+        } else {
+          // Adiciona um novo workout
+
+          copyMyWorkout.data.push({
+            id: workoutData.workoutId || '',
+            data: workoutData,
+            createdAt: updatedAt,
+            updatedAt,
+            isInUse: false,
+            isShared: false,
+          })
+        }
+
+        return copyMyWorkout
+      }
+
+      function createNewWorkoutData(
+        userId: string,
+        workoutData: IMyfitflowWorkoutInUse,
+        updatedAt: number,
+      ): IMyWorkouts {
+        console.log(`dataDoestNotExists`)
+
+        // Exemplo de uso:
+
+        // const formattedCurrentDate = formatDateToDDMMYYYY(currentDate)
+
+        return {
+          userId,
+          createdAt: updatedAt,
+          updatedAt,
+          data: [
+            {
+              id: workoutData.workoutId || '',
+              data: workoutData,
+              createdAt: updatedAt,
+              updatedAt,
+              isInUse: true,
+              isShared: false,
+            },
+          ],
+          dataOrder: [
+            {
+              id: workoutData.workoutId || '',
+              createdAt: updatedAt,
+              updatedAt,
+              workoutStartAt: updatedAt,
+              workoutEndsAt: addWeeksToTimestamp(
+                updatedAt,
+                workoutData.workoutPeriod.periodNumber,
+              ),
+            },
+          ],
+        }
+      }
+    }
+  }
+  async function saveExerciseDataInLocalCache(
     exerciseData: IWorkoutInfo,
+    updatedAt: number,
   ) {
     if (!user) return
+    const userId = user.id
     const workoutExercisesKey = `@myfitflow:cachedworkoutexercises-${userId}`
 
     let myWorkoutDataExercises: IMyWorkoutsData | null
 
     if (myWorkoutDataArray) {
-      myWorkoutDataExercises = updateExistingExercise(exerciseData)
+      myWorkoutDataExercises = updateExistingExercise(exerciseData, updatedAt)
     } else {
-      myWorkoutDataExercises = createNewExerciseData(userId, exerciseData)
+      myWorkoutDataExercises = createNewExerciseData(
+        userId,
+        exerciseData,
+        updatedAt,
+      )
     }
 
     if (myWorkoutDataExercises) {
@@ -2664,9 +3039,11 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
     // Salva os exercícios atualizados no AsyncStorage
 
-    function updateExistingExercise(exerciseData: IWorkoutInfo) {
+    function updateExistingExercise(
+      exerciseData: IWorkoutInfo,
+      updatedAt: number,
+    ) {
       if (!myWorkoutDataArray) return null
-      const dateTime = new Date().getTime()
       const exerciseIndex = myWorkoutDataArray.data.findIndex(
         (v) => v.id === exerciseData.workoutId,
       )
@@ -2680,129 +3057,37 @@ function AuthProvider({ children }: AuthProviderProps) {
           id: exerciseData.workoutId,
           data: exerciseData,
           createdAt: copyMyWorkoutDataArray.data[exerciseIndex].createdAt,
-          updatedAt: dateTime,
+          updatedAt,
         }
       } else {
         // Adiciona um novo exercício
         copyMyWorkoutDataArray.data.push({
           id: exerciseData.workoutId,
           data: exerciseData,
-          createdAt: dateTime,
-          updatedAt: dateTime,
+          createdAt: updatedAt,
+          updatedAt,
         })
       }
 
       return copyMyWorkoutDataArray
     }
 
-    function createNewExerciseData(userId: string, exerciseData: IWorkoutInfo) {
-      const dateTime = new Date().getTime()
+    function createNewExerciseData(
+      userId: string,
+      exerciseData: IWorkoutInfo,
+      updatedAt: number,
+    ) {
       console.log(`dataDoestNotExists`)
       return {
         userId,
-        createdAt: dateTime,
-        updatedAt: dateTime,
+        createdAt: updatedAt,
+        updatedAt,
         data: [
           {
             id: exerciseData.workoutId,
             data: exerciseData,
-            createdAt: dateTime,
-            updatedAt: dateTime,
-          },
-        ],
-      }
-    }
-  }
-
-  async function saveMyWorkoutInCache(
-    userId: string,
-    workoutData: IMyfitflowWorkoutInUse,
-  ) {
-    if (!user) return
-    const workoutKey = `@myfitflow:cachedworkout-${userId}`
-    // Tenta buscar o MyWorkouts existente
-    let myWorkoutExercises: IMyWorkouts | null
-
-    if (myWorkout) {
-      myWorkoutExercises = updateExistingWorkout(workoutData)
-    } else {
-      myWorkoutExercises = createNewWorkoutData(userId, workoutData)
-    }
-
-    if (myWorkoutExercises) {
-      await AsyncStorage.setItem(workoutKey, JSON.stringify(myWorkoutExercises))
-      setMyWorkout(myWorkoutExercises)
-    }
-
-    function updateExistingWorkout(workoutData: IMyfitflowWorkoutInUse) {
-      if (!myWorkout) return null
-
-      const workoutIndex = myWorkout.data.findIndex(
-        (workout) => workout.id === workoutData.workoutId,
-      )
-
-      const copyMyWorkout = {
-        ...myWorkout,
-      }
-      const currentDate = new Date().getTime()
-
-      if (workoutIndex !== -1) {
-        // Atualiza o workout existente
-        copyMyWorkout.data[workoutIndex] = {
-          ...copyMyWorkout.data[workoutIndex],
-          data: workoutData,
-          updatedAt: currentDate,
-        }
-      } else {
-        // Adiciona um novo workout
-
-        copyMyWorkout.data.push({
-          id: workoutData.workoutId || '',
-          data: workoutData,
-          createdAt: currentDate,
-          updatedAt: currentDate,
-          isInUse: false,
-          isShared: false,
-        })
-      }
-
-      return copyMyWorkout
-    }
-
-    function createNewWorkoutData(
-      userId: string,
-      workoutData: IMyfitflowWorkoutInUse,
-    ): IMyWorkouts {
-      console.log(`dataDoestNotExists`)
-
-      // Exemplo de uso:
-      const currentDate = new Date().getTime()
-      // const formattedCurrentDate = formatDateToDDMMYYYY(currentDate)
-
-      return {
-        userId,
-        createdAt: currentDate,
-        updatedAt: currentDate,
-        data: [
-          {
-            id: workoutData.workoutId || '',
-            data: workoutData,
-            createdAt: currentDate,
-            updatedAt: currentDate,
-            isInUse: true,
-            isShared: false,
-          },
-        ],
-        dataOrder: [
-          {
-            id: workoutData.workoutId || '',
-            createdAt: currentDate,
-            updatedAt: currentDate,
-            workoutStartAt: currentDate,
-            workoutEndsAt: addWeeksToTimestamp(
-              currentDate,
-              workoutData.workoutPeriod.periodNumber,
-            ),
+            createdAt: updatedAt,
+            updatedAt,
           },
         ],
       }
@@ -2820,24 +3105,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (data) {
       await AsyncStorage.setItem(workoutKey, JSON.stringify(data))
       setMyWorkout(data)
-    }
-  }
-
-  async function resetAllStartAndEndDateFromMyWorkoutInCache(
-    updatedWorkouts: IMyWorkouts,
-  ) {
-    if (!user) return
-    if (!myWorkout) return
-    const userId = user.id
-
-    if (!user) return
-    const workoutKey = `@myfitflow:cachedworkout-${userId}`
-
-    // Tenta buscar o MyWorkouts existente
-
-    if (updatedWorkouts) {
-      await AsyncStorage.setItem(workoutKey, JSON.stringify(updatedWorkouts))
-      setMyWorkout(updatedWorkouts)
     }
   }
 
@@ -3365,7 +3632,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         loadLoginInitialCachedWorkoutsData,
         loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
         updateStartAndEndDateFromMyWorkoutInCache,
-        resetAllStartAndEndDateFromMyWorkoutInCache,
 
         updateMyWorkoutInCache,
 

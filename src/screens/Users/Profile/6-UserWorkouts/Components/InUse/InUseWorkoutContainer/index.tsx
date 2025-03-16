@@ -28,7 +28,6 @@ interface WorkoutContainerProps {
   handleOnPressActiveInUseWorkout: (id: string) => void
   handleMoveUp: (id: string) => void
   handleMoveDown: (id: string) => void
-  handleResetTimerUp: (id: string) => void
 }
 
 export default function InUseWorkoutContainer({
@@ -57,14 +56,14 @@ export default function InUseWorkoutContainer({
         <CardsWrapper>
           {activeworkouts &&
             data &&
-            data.dataOrder &&
+            data.activeData &&
             activeworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
               <CardContainer key={i}>
                 {i === 0 && <CardTittle>Atual:</CardTittle>}
                 {i === 1 && <CardTittle>Próximos:</CardTittle>}
 
                 <InUseActiveWorkoutCard
-                  dataOrder={data.dataOrder}
+                  activeData={data.activeData}
                   //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
                   data={v || null}
                   selectedLanguage={user?.selectedLanguage || 'pt-br'}
@@ -72,7 +71,6 @@ export default function InUseWorkoutContainer({
                   handleOnPressActiveWorkout={() =>
                     onPressActiveInUseWorkout(v.id)
                   }
-                  // handleResetTimerUp={handleResetTimerUp}
                   handleMoveUp={handleMoveUp}
                   handleMoveDown={handleMoveDown}
                   isOpenSettingsMode={isOpenSettingsMode}

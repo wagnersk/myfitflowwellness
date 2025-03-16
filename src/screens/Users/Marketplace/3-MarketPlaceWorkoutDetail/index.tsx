@@ -52,18 +52,13 @@ import { getIcon } from '@utils/getIcon'
 
 import { IMarketPlaceWorkoutDetailNavigation } from '@src/@types/navigation'
 import { getGenderIcon } from '@utils/getGenderIcon'
-import Arrow from '@assets/Arrow-counter-clockwise.svg'
-import Export from '@assets/Export.svg'
-import { IMyfitflowWorkoutInUseData, IMyWorkouts } from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 export function MarketPlaceWorkoutDetail() {
   const {
     user,
     isWaitingApiResponse,
     myWorkout,
-    updateUserWorkoutCache,
-    cachedUserWorkoutsLog,
-    getLastUpdatedAtUserWorkoutCache,
     loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
     deleteMyWorkoutAndmyWorkoutDataArray,
   } = useAuth()
@@ -71,7 +66,6 @@ export function MarketPlaceWorkoutDetail() {
   const navigation = useNavigation()
   const route = useRoute()
   const dataParam = route.params as IMarketPlaceWorkoutDetailNavigation
-  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
 
   const selectedWorkoutId = dataParam.data.workoutId
 
@@ -84,26 +78,6 @@ export function MarketPlaceWorkoutDetail() {
       setStatusBarStyle('dark')
     }, []),
   )
-  useEffect(() => {
-    start()
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        return true
-      },
-    )
-
-    return () => backHandler.remove()
-
-    async function start() {
-      if (!selectedWorkoutId) return
-      const lastUpdatedValue =
-        await getLastUpdatedAtUserWorkoutCache(selectedWorkoutId)
-      if (!lastUpdatedValue) return
-      setLastUpdated(lastUpdatedValue)
-    }
-  }, [selectedWorkoutId])
 
   console.log(`=>`, JSON.stringify(myWorkout))
 
@@ -111,9 +85,6 @@ export function MarketPlaceWorkoutDetail() {
     const fcachedWorkout = myWorkout.data.find(
       (v) => v.id === selectedWorkoutId,
     )
-    console.log(`=> selectedWorkoutId`, JSON.stringify(selectedWorkoutId))
-    console.log(`=> fcachedWorkout`, JSON.stringify(fcachedWorkout))
-    console.log(`=> fcachedWorkout`, JSON.stringify(fcachedWorkout))
 
     if (fcachedWorkout) {
       cachedWorkout = fcachedWorkout
@@ -180,36 +151,6 @@ export function MarketPlaceWorkoutDetail() {
     Alert.alert('Share ')
   }
 
-  function syncronizePersonalizedWorkoutData() {
-    return
-    if (!selectedWorkoutId) return
-    const getWorkoutData = cachedUserWorkoutsLog?.workoutsLog.find(
-      (v) => v.workoutId === selectedWorkoutId,
-    )
-    console.log(`getWorkoutData`)
-    console.log(getWorkoutData)
-    if (!getWorkoutData) return
-
-    const lastUpdatedValue = cachedUserWorkoutsLog?.updatedAt
-
-    if (!lastUpdatedValue) return
-    updateUserWorkoutCache(selectedWorkoutId, getWorkoutData, lastUpdatedValue)
-    setLastUpdated(lastUpdatedValue)
-  }
-
-  function formatTimestampToDate(timestamp: number | null): string {
-    if (!timestamp) return ''
-    const date = new Date(timestamp)
-
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   return (
     <Container>
       <SafeAreaProvider style={{ width: `100%` }}>
@@ -238,58 +179,6 @@ export function MarketPlaceWorkoutDetail() {
                 <LockIconWrapper>
                   <Plan size={48} level={dataParam.data.workoutPlanType} />
                 </LockIconWrapper>
-
-                {dataParam.enableSyncDataAndShare && (
-                  <ActionButtonsWrapper
-                    pointerEvents={
-                      dataParam.enableSyncDataAndShare ? 'auto' : 'none'
-                    }
-                  >
-                    <TextWrapper>
-                      <TittleWrapper>
-                        <UpdatedAtText>Sincronizado na núvem:</UpdatedAtText>
-                      </TittleWrapper>
-
-                      <SubTittleWrapper>
-                        <UpdatedAtText>
-                          {formatTimestampToDate(lastUpdated)}
-                        </UpdatedAtText>
-                      </SubTittleWrapper>
-                    </TextWrapper>
-
-                    <ButtonsWrapper>
-                      <BlurIconViewWrapper
-                        disabled={
-                          lastUpdated === cachedUserWorkoutsLog?.updatedAt
-                        }
-                        intensity={70}
-                        tint="light"
-                      >
-                        <ContainerGradient colors={['#000000', '#FFFFFF']}>
-                          <ActButton
-                            disabled={
-                              lastUpdated === cachedUserWorkoutsLog?.updatedAt
-                            }
-                            onPress={syncronizePersonalizedWorkoutData}
-                          >
-                            <Arrow width={30} height={30} fill={'white'} />
-                          </ActButton>
-                        </ContainerGradient>
-                      </BlurIconViewWrapper>
-                      <BlurIconViewWrapper
-                        disabled={false}
-                        intensity={70}
-                        tint="light"
-                      >
-                        <ContainerGradient colors={['#000000', '#FFFFFF']}>
-                          <ActButton onPress={shareWorkout}>
-                            <Export width={30} height={30} fill={'white'} />
-                          </ActButton>
-                        </ContainerGradient>
-                      </BlurIconViewWrapper>
-                    </ButtonsWrapper>
-                  </ActionButtonsWrapper>
-                )}
               </PhotoImageWrapper>
 
               <Wrapper>

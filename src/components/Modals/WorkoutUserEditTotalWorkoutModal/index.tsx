@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -20,13 +20,18 @@ import {
   ToggleSwitch,
   ToggleSwitchText,
   SubTitteText,
+  BlurIconViewWrapper,
+  ButtonsWrapper,
+  ActButton,
+  SubTitteTextWrapper,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
+import { useAuth } from '@hooks/auth'
 
 interface InputProps {
   handleDeleteWorkout: (id: string) => void
   handleShareWorkout: (id: string) => void
-  handleActiveWorkout: (id: string) => void
+  handleInUseExpiredWorkout: (id: string) => void
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
   isPrimaryWorkout: boolean
@@ -37,32 +42,20 @@ interface InputProps {
 export function WorkoutUserEditTotalWorkoutModal({
   handleDeleteWorkout,
   handleShareWorkout,
-  handleActiveWorkout,
+  handleInUseExpiredWorkout,
   closeModal,
   isPrimaryWorkout,
   data,
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const isWorkoutActive = data.isInUse
-  const isSharingActive = data.isShared
+  const {
+    updateUserWorkoutCache,
+    cachedUserWorkoutsLog,
+    getLastUpdatedAtUserWorkoutCache,
+  } = useAuth()
 
   const tittle = data.data.workoutName?.[selectedLanguage]
-
-  const mainWorkoutTitle =
-    selectedLanguage === 'pt-br' ? 'Treino Principal' : 'Main Workout'
-
-  const reserveWorkoutTitle =
-    selectedLanguage === 'pt-br'
-      ? `${activeIndex} - Treino Reserva`
-      : `${activeIndex} - Reserve Workout`
-
-  const auxTittle = isPrimaryWorkout ? mainWorkoutTitle : reserveWorkoutTitle
-
-  const sharingTitle =
-    selectedLanguage === 'pt-br' ? 'Compartilhamento' : 'Sharing'
-  const onText = selectedLanguage === 'pt-br' ? 'Ligar' : 'ON'
-  const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
 
   async function onDelete(id: string) {
     handleDeleteWorkout(id)
@@ -70,20 +63,15 @@ export function WorkoutUserEditTotalWorkoutModal({
   async function onShare(id: string) {
     handleShareWorkout(id)
   }
-  async function onActive(id: string) {
-    handleActiveWorkout(id)
+  async function onInUse(id: string) {
+    handleInUseExpiredWorkout(id)
   }
 
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()
   }
-  /* 
 
-compartilhar treino whatspp
-gerar qrcode
-
-*/
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -98,19 +86,20 @@ gerar qrcode
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
-                <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
                 <TitteText>
-                  {data.isInUse ? 'Treino em uso' : 'Usar Treino'}
+                  {data.isExpired || data.isActive
+                    ? 'Treino em uso'
+                    : 'Usar Treino'}
                 </TitteText>
                 <ToggleSwitch
-                  selected={data.isInUse}
-                  onPress={() => onActive(data.id)}
+                  selected={data.isExpired || data.isActive}
+                  onPress={() => onInUse(data.id)}
                 >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    {data.isInUse ? 'ON' : 'OFF'}
+                  <ToggleSwitchText selected={data.isExpired || data.isActive}>
+                    {data.isExpired || data.isActive ? 'ON' : 'OFF'}
                   </ToggleSwitchText>
                 </ToggleSwitch>
               </InputsWrapper>
@@ -121,6 +110,7 @@ gerar qrcode
                     ? 'Compartilhamento Ativo'
                     : 'Compartilhar Treino'}
                 </TitteText>
+                <TitteText>{data.id}</TitteText>
                 <ToggleSwitch
                   selected={data.isShared}
                   onPress={() => onShare(data.id)}

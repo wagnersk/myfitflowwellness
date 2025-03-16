@@ -316,30 +316,6 @@ restTimeData-> { restTime_insensitive: { 'pt-br': string; us: string }; restTime
 t
 
 */
-export interface ICachedUsingWorkoutData {
-  // cada exercicio
-  repetitionData: ICachedSetsProps[] // [{ sets_insensitive: string; isReps: boolean; isTime: boolean; timeInSeconds: number }]
-  restTimeData: ICachedRestTimeProps // { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
-  techiesData: ICachedTchiesProps // { description: { us: string; 'pt-br': string }; title: { 'pt-br': string; us: string } }
-  weightData: {
-    value: string
-    createdAt: number
-    updatedAt: number
-  }
-  selectedRepetitionData: {
-    checkedSet: string
-    createdAt: number
-    updatedAt: number
-  }
-  completedData: {
-    isCompleted: boolean
-    createdAt: number
-    updatedAt: number
-  }
-  /*  */
-  createdAt: number
-  updatedAt: number
-}
 
 export interface ICardExerciseData {
   isEnabled: boolean
@@ -413,16 +389,17 @@ export interface IWorkoutInfo {
   workoutsData: IWorkoutsData[]
   workoutId: string
 }
+export interface IMyWorkoutsDataItem {
+  id: string
+  data: IWorkoutInfo
+  createdAt: number
+  updatedAt: number
+}
 export interface IMyWorkoutsData {
   userId: string
   createdAt: number
   updatedAt: number
-  data: {
-    id: string
-    data: IWorkoutInfo
-    createdAt: number
-    updatedAt: number
-  }[]
+  data: IMyWorkoutsDataItem[]
 }
 
 // Ou, se as chaves são sempre strings que representam números, você pode usar
@@ -519,26 +496,51 @@ export interface IMyfitflowWorkoutInUse {
 export interface IMyfitflowWorkoutInUseData {
   id: string
   data: IMyfitflowWorkoutInUse
+
+  isActive: boolean
+  isExpired: boolean
+  isShared: boolean
+  isCopied: boolean
+
   createdAt: number
   updatedAt: number
-  isInUse: boolean
-  isShared: boolean
 }
-export interface IWorkoutOrder {
+export interface IMyInUseActiveData {
+  id: string
+  workoutStartAt: number
+  workoutEndsAt: number
+  createdAt: number
+  updatedAt: number
+}
+export interface IMyInUseExpiredData {
   id: string
   createdAt: number
   updatedAt: number
-  workoutStartAt: number
-  workoutEndsAt: number
 }
-// vou ter agora total , actives e shared
-// actives e shared vao ser prorpiedades
+
+export interface IMySharedWorkoutsData {
+  id: string
+  createdAt: number
+  updatedAt: number
+}
+
+export interface IMyCopiedWorkoutsData {
+  id: string
+  copiedFromUserId: string
+  userOwnerName: string
+  createdAt: number
+  updatedAt: number
+}
+
 export interface IMyWorkouts {
   userId: string
   createdAt: number
   updatedAt: number
   data: IMyfitflowWorkoutInUseData[] // total de treinos
-  dataOrder: IWorkoutOrder[] // lista de treinos ativos
+  activeData: IMyInUseActiveData[] // total de treinos
+  expiredData: IMyInUseExpiredData[] // total de treinos
+  mySharedWorkouts: IMySharedWorkoutsData[] // lista de treinos compartilhados
+  copiedWorkouts: IMyCopiedWorkoutsData[] // lista de treinos copiados
 }
 
 export type ICachedWorkoutsWithLastUpdatedTimestamp = {
@@ -607,16 +609,32 @@ export interface MonthRecord {
 export interface YearRecord {
   [year: string]: MonthRecord
 }
-
+export interface ICachedUsingWorkoutData {
+  // cada exercicio
+  repetitionData: ICachedSetsProps[] // [{ sets_insensitive: string; isReps: boolean; isTime: boolean; timeInSeconds: number }]
+  restTimeData: ICachedRestTimeProps // { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
+  weightData: {
+    value: string
+    createdAt: number
+    updatedAt: number
+  }
+  selectedRepetitionData: {
+    checkedSet: string // 1,2,3
+    createdAt: number
+    updatedAt: number
+  }
+  completedData: {
+    isCompleted: boolean
+    createdAt: number
+    updatedAt: number
+  }
+  /*  */
+  createdAt: number
+  updatedAt: number
+}
 export interface ICachedCardExerciseData {
-  isEnabled: boolean
-
   workoutExerciseId?: string
   workoutExerciseSets?: ICachedUsingWorkoutData[]
-  workoutExerciseName?: IptBrUs
-  workoutExerciseName_insensitive?: IptBrUs
-  workoutExercisePrimaryMuscleGroup?: IptBrUs
-  workoutExerciseTypes?: string
 
   workoutExerciseIndex?: number
   notes: {
@@ -624,11 +642,11 @@ export interface ICachedCardExerciseData {
     createdAt: number
     updatedAt: number
   }
-  workoutExerciseFilters?: ICachedFiltersExercise
 
-  createdAt?: number
-  updatedAt?: number
+  createdAt: number
+  updatedAt: number
 }
+
 export interface IWorkoutCardLogData {
   // dentro do card A B C
   cardIndex: number
@@ -636,23 +654,24 @@ export interface IWorkoutCardLogData {
 
   totalSessionsCompleted: number
 
-  lastCompletedTimestamp: number
   lastCompletedFormattedDay: IptBrUs
   lastCompletedFormattedDate: string
+  createdAt: number
+  updatedAt: number
 }
 
 export interface IWorkoutLog {
   workoutCardsLogData: IWorkoutCardLogData[] // A B C
   workoutId: string // id do treino que ta dentro de category no firebase
-  createdAt?: number
-  updatedAt?: number
+  createdAt: number
+  updatedAt: number
 }
 
 export interface IUserWorkoutsLog {
   workoutsLog: IWorkoutLog[]
   userId: string
-  createdAt?: number
-  updatedAt?: number
+  createdAt: number
+  updatedAt: number
 }
 export type ExerciseHistoryData = YearRecord
 
@@ -818,9 +837,7 @@ export interface AuthContextData {
   /// eliminiar isso pois vou usar o sumary
 
   loadCachedExerciseHistoryData: (userId: string) => Promise<void>
-  resetAllStartAndEndDateFromMyWorkoutInCache: (
-    updatedWorkouts: IMyWorkouts,
-  ) => Promise<void>
+
   updateStartAndEndDateFromMyWorkoutInCache: (
     workoutData: IMyfitflowWorkoutInUse,
     startDate: number,
@@ -835,7 +852,7 @@ export interface AuthContextData {
   updateCachedUserWorkoutsLog: (
     newExercise: ICachedCardExerciseData,
     workoutId: string,
-    lastCompletedTimestamp: number,
+    updatedAt: number,
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
@@ -843,13 +860,12 @@ export interface AuthContextData {
 
   // firebase
   updateUserWorkoutCache: (
-    workoutCacheId: string,
-    data: IWorkoutCardLogData,
-    lastCompletedTimestamp: number,
+    data: IWorkoutLog,
+    updatedAt: number,
   ) => Promise<void>
   getLastUpdatedAtUserWorkoutCache: (
     workoutCacheId: string,
-  ) => Promise<number | null>
+  ) => Promise<{ nanoseconds: number; seconds: number } | null>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (

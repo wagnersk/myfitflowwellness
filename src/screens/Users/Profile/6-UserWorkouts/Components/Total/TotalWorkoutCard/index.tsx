@@ -12,7 +12,6 @@ interface PlanCardProps {
   selectedLanguage: 'pt-br' | 'us'
   handleOnPressTotalWorkout: (index: number) => void
   index: number
-  isActive: boolean
 }
 
 export function TotalWorkoutCard({
@@ -21,7 +20,6 @@ export function TotalWorkoutCard({
   handleOnPressTotalWorkout,
   index,
   isOpenSettingsMode,
-  isActive,
 }: PlanCardProps) {
   function handleOnPressWorkout(index: number) {
     handleOnPressTotalWorkout(index)
@@ -35,7 +33,10 @@ export function TotalWorkoutCard({
             index={index}
             data={data}
             handleNextStep={() => handleOnPressWorkout(index)}
-            isActive={isActive}
+            isActive={data?.isActive || false}
+            isExpired={data?.isExpired || false}
+            handleMoveUp={() => {}}
+            handleMoveDown={() => {}}
           />
         </BodyWraper>
       </ButtonContainer>

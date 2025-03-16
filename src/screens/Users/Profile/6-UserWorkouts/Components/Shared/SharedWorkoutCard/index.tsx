@@ -10,7 +10,7 @@ import { ItemCard } from '../../ItemCard'
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
   selectedLanguage: 'pt-br' | 'us'
-  handleOnPressSendWorkout: (id: string) => void
+  handleOnPressShareWorkout: (id: string) => void
   index: number
   isActive: boolean
 }
@@ -18,12 +18,12 @@ interface PlanCardProps {
 export function SharedWorkoutCard({
   data,
   selectedLanguage,
-  handleOnPressSendWorkout,
+  handleOnPressShareWorkout,
   index,
   isActive,
 }: PlanCardProps) {
   function handleOnPressWorkout(id: string) {
-    handleOnPressSendWorkout(id)
+    handleOnPressShareWorkout(id)
   }
   return (
     <Container>
@@ -34,6 +34,8 @@ export function SharedWorkoutCard({
             data={data}
             handleNextStep={() => data && handleOnPressWorkout(data.id)}
             isActive={isActive}
+            handleMoveUp={() => {}}
+            handleMoveDown={() => {}}
           />
         </BodyWraper>
       </ButtonContainer>

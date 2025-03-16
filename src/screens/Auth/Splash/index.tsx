@@ -25,7 +25,7 @@ export function Splash() {
   })
 
   function startApp() {
-    navigation.navigate('onBoarding1')
+    navigation.navigate('login', { selectedLanguage: 'pt-br' })
   }
 
   useEffect(() => {

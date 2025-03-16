@@ -101,23 +101,19 @@ export function WorkoutBlueCardItem({
       copyWorkoutsLog &&
       copyWorkoutsLog.workoutCardsLogData &&
       copyWorkoutsLog.workoutCardsLogData[cardIndex] &&
-      copyWorkoutsLog.workoutCardsLogData[cardIndex].lastCompletedTimestamp
+      copyWorkoutsLog.workoutCardsLogData[cardIndex].updatedAt
     ) {
       hours = String(
-        getHours(
-          copyWorkoutsLog.workoutCardsLogData[cardIndex].lastCompletedTimestamp,
-        ),
+        getHours(copyWorkoutsLog.workoutCardsLogData[cardIndex].updatedAt),
       ).padStart(2, '0')
       minutes = String(
-        getMinutes(
-          copyWorkoutsLog.workoutCardsLogData[cardIndex].lastCompletedTimestamp,
-        ),
+        getMinutes(copyWorkoutsLog.workoutCardsLogData[cardIndex].updatedAt),
       ).padStart(2, '0')
 
       const today = new Date().getTime()
 
       sameDay = isSameDay(
-        copyWorkoutsLog.workoutCardsLogData[cardIndex].lastCompletedTimestamp,
+        copyWorkoutsLog.workoutCardsLogData[cardIndex].updatedAt,
         today,
       )
     }

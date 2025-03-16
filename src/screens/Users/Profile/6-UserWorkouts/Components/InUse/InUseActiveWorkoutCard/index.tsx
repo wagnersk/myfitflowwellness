@@ -1,11 +1,18 @@
 import React from 'react'
 import { ButtonContainer, Container, BodyWraper } from './styles'
-import { IMyfitflowWorkoutInUseData, IWorkoutOrder } from '@hooks/authTypes'
+import {
+  IMyfitflowWorkoutInUseData,
+  IMyInUseActiveData,
+} from '@hooks/authTypes'
 import { ItemCard } from '../../ItemCard'
-
+/*   data: IMyfitflowWorkoutInUseData[] // total de treinos
+  activeData: IMyInUseActiveData[] // total de treinos
+  expiredData: IMyInUseExpiredData[] // total de treinos
+  mySharedWorkouts: IMySharedWorkoutsData[] // lista de treinos compartilhados
+  copiedWorkouts: IMyCopiedWorkoutsData[] // lista de treinos copiados */
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
-  dataOrder: IWorkoutOrder[]
+  activeData: IMyInUseActiveData[]
   selectedLanguage: 'pt-br' | 'us'
   handleOnPressActiveWorkout: (id: string) => void
   handleMoveUp: (id: string) => void
@@ -15,8 +22,7 @@ interface PlanCardProps {
 }
 
 export function InUseActiveWorkoutCard({
-  data,
-  dataOrder,
+  activeData,
   selectedLanguage,
   handleMoveUp,
   handleMoveDown,
@@ -31,20 +37,21 @@ export function InUseActiveWorkoutCard({
     <Container>
       <ButtonContainer>
         <BodyWraper>
-          {dataOrder && dataOrder[index] && (
+          {activeData && (
             <ItemCard
               index={index}
               data={data}
               handleNextStep={() => data && handleOnPressWorkout(data.id)}
               isActive={true}
-              dateStart={dataOrder[index].workoutStartAt}
-              dateEnd={dataOrder[index].workoutEndsAt}
+              isExpired={false}
+              dateStart={activeData[index].workoutStartAt}
+              dateEnd={activeData[index].workoutEndsAt}
               handleMoveUp={handleMoveUp}
               handleMoveDown={handleMoveDown}
               isOpenSettingsMode={isOpenSettingsMode}
               firstElement={index === 0}
               secondElement={index === 1}
-              lastElement={index === dataOrder.length - 1}
+              lastElement={index === activeData.length - 1}
             />
           )}
         </BodyWraper>

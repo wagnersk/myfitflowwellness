@@ -100,6 +100,7 @@ export function UserWorkoutList() {
                 ? `Treino ${letter}`
                 : `Workout ${letter}`}
             </BioInfoLetter>
+
             <BioInfoName>{getTrimmedName(26, muscleGroupsLabel)}</BioInfoName>
           </BioInfo>
         </BioInfoWrapper>

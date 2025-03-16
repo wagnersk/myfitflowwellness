@@ -26,8 +26,8 @@ import {
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 interface InputProps {
-  handleUseWorkout: (id: string) => void
-  handleCancelActiveWorkout: (id: string) => void
+  handleInUseActiveWorkout: (id: string) => void
+  handleInUseRemoveFromExpiredWorkout: (id: string) => void
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
   isPrimaryWorkout: boolean
@@ -36,8 +36,8 @@ interface InputProps {
 }
 
 export function ExpiredWorkoutsCardModal({
-  handleUseWorkout,
-  handleCancelActiveWorkout,
+  handleInUseActiveWorkout,
+  handleInUseRemoveFromExpiredWorkout,
   closeModal,
   isPrimaryWorkout,
   data,
@@ -65,23 +65,17 @@ export function ExpiredWorkoutsCardModal({
   const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
 
   async function onUseWorkout(id: string) {
-    handleUseWorkout(id)
+    handleInUseActiveWorkout(id)
   }
   async function onCancel(id: string) {
-    handleCancelActiveWorkout(id)
+    handleInUseRemoveFromExpiredWorkout(id)
   }
 
   function handleOverlayPress() {
     Keyboard.dismiss()
     closeModal()
   }
-  /* 
 
-compartilhar treino whatspp - gerar qrcode
-
-cancelar compartilhamento
-
-*/
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -96,7 +90,9 @@ cancelar compartilhamento
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
+                {/* buscar updatedAt do dataARray linkado nesse id */}
                 <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
+                <SubTitteText>{data.id}</SubTitteText>
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>

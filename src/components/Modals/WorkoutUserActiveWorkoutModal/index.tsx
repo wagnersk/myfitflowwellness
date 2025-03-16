@@ -29,9 +29,9 @@ import {
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 interface InputProps {
-  handleSendWorkout: (id: string) => void
-  handleEditWorkout: (id: string) => void
-  handleDeactivateWorkout: (id: string) => void
+  handleSendActiveWorkout: (id: string) => void
+  handleActiveSettingMode: (id: string) => void
+  handleInUseRemoveFromActivedWorkout: (id: string) => void
   closeModal: () => void
   data: IMyfitflowWorkoutInUseData
   activeIndex: number
@@ -43,9 +43,9 @@ interface InputProps {
 }
 
 export function WorkoutUserActiveWorkoutModal({
-  handleEditWorkout,
-  handleSendWorkout,
-  handleDeactivateWorkout,
+  handleActiveSettingMode,
+  handleSendActiveWorkout,
+  handleInUseRemoveFromActivedWorkout,
   closeModal,
   data,
   activeIndex,
@@ -56,16 +56,15 @@ export function WorkoutUserActiveWorkoutModal({
   onRestartCounter,
 }: InputProps) {
   const tittle = data.data.workoutName?.[selectedLanguage]
-  console.log('activeIndex ', activeIndex)
-  console.log('isFirstElement ', isFirstElement)
-  async function onEdit(id: string) {
-    handleEditWorkout(id)
+
+  async function onSettingModeActived(id: string) {
+    handleActiveSettingMode(id)
   }
   async function onSend(id: string) {
-    handleSendWorkout(id)
+    handleSendActiveWorkout(id)
   }
   async function onDeactivateWorkout(id: string) {
-    handleDeactivateWorkout(id)
+    handleInUseRemoveFromActivedWorkout(id)
   }
 
   function handleOverlayPress() {
@@ -88,14 +87,15 @@ export function WorkoutUserActiveWorkoutModal({
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
                 <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
+                <SubTitteText>{data.id}</SubTitteText>
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
                 <RedButton
-                  selected={!data.isInUse}
+                  selected={!data.isActive}
                   onPress={() => onDeactivateWorkout(data.id)}
                 >
-                  <ToggleSwitchText selected={data.isInUse}>
+                  <ToggleSwitchText selected={data.isActive}>
                     Desativar
                   </ToggleSwitchText>
                 </RedButton>
@@ -107,30 +107,30 @@ export function WorkoutUserActiveWorkoutModal({
                   <>
                     {isMorethenTwoElementsAtQueue && (
                       <BlueSmallButton
-                        selected={data.isInUse}
-                        onPress={() => onEdit(data.id)}
+                        selected={data.isActive}
+                        onPress={() => onSettingModeActived(data.id)}
                         disabled={!isMorethenTwoElementsAtQueue}
                       >
-                        <ToggleSwitchText selected={data.isInUse}>
+                        <ToggleSwitchText selected={data.isActive}>
                           Editar Fila
                         </ToggleSwitchText>
                       </BlueSmallButton>
                     )}
                     <BlueButton
-                      selected={data.isInUse}
+                      selected={data.isActive}
                       onPress={() => onMoveWorkoutFromQueueToPrimary(data.id)}
                     >
-                      <ToggleSwitchText selected={data.isInUse}>
+                      <ToggleSwitchText selected={data.isActive}>
                         Usar este treino
                       </ToggleSwitchText>
                     </BlueButton>
                   </>
                 ) : (
                   <BlueButton
-                    selected={data.isInUse}
+                    selected={data.isActive}
                     onPress={() => onRestartCounter(data.id)}
                   >
-                    <ToggleSwitchText selected={data.isInUse}>
+                    <ToggleSwitchText selected={data.isActive}>
                       Reiniciar contagem
                     </ToggleSwitchText>
                   </BlueButton>

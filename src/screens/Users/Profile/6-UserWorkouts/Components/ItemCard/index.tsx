@@ -30,32 +30,37 @@ import { getTrimmedName } from '@utils/getTrimmedName'
 import { getGenderIcon } from '@utils/getGenderIcon'
 import { WorkoutBoxInfo } from '@components/WorkoutBoxInfo'
 import { getIcon } from '@utils/getIcon'
-import { IMyfitflowWorkoutInUseData, IMyWorkouts } from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
 import { formatTimestampToDDMMYYYY } from '@utils/calculeEndDateWithWeeks'
 
 import ArrowUp from '@assets/Arrow-fat-up.svg'
 import ArrowDown from '@assets/Arrow-fat-down.svg'
-
+/*  
+            isActive={data?.isActive}
+            isExpired={data?.isExpired}
+             */
 interface Props extends TouchableOpacityProps {
-  data: IMyfitflowWorkoutInUseData | null
-  handleNextStep: (index: number) => void
   index: number
-  dateStart: number
-  firstElement: boolean
-  secondElement: boolean
-  lastElement: boolean
-  dateEnd: number
+  data: IMyfitflowWorkoutInUseData | null
+  handleNextStep: () => void
   isActive: boolean
+  isExpired: boolean
+  dateStart?: number
+  firstElement?: boolean
+  secondElement?: boolean
+  lastElement?: boolean
+  dateEnd?: number
   handleMoveUp: (id: string) => void
   handleMoveDown: (id: string) => void
-  isOpenSettingsMode: boolean
+  isOpenSettingsMode?: boolean
 }
 export function ItemCard({
   data,
   handleNextStep,
   index,
   isActive,
+  isExpired,
   dateStart,
   dateEnd,
   handleMoveUp,
@@ -75,7 +80,7 @@ export function ItemCard({
     switch (true) {
       case isActive:
         return 'green'
-      case data.isInUse:
+      case isExpired:
         return 'yellow'
       default:
         return 'red'
@@ -84,7 +89,7 @@ export function ItemCard({
   return (
     <Container
       {...rest}
-      onPress={() => !isOpenSettingsMode && data && handleNextStep(index)}
+      onPress={() => handleNextStep()}
       disabled={isOpenSettingsMode}
     >
       <ContainerGradient colors={['#000000', '#FFFFFF']}>
@@ -108,20 +113,19 @@ export function ItemCard({
         </PhotoImageWrapper>
 
         <InfoAndButtonAndBottomLineWrapper
-          isOpenSettingsMode={isOpenSettingsMode}
+          isOpenSettingsMode={isOpenSettingsMode ?? false}
         >
           <InfoAndButtonWrapper>
             <InfoWrapper>
               <Title>
-                {/*    {getTrimmedName(
+                {getTrimmedName(
                   20,
                   (data &&
                     selectedLanguage &&
                     data.data.workoutName &&
                     data.data.workoutName[selectedLanguage]) ||
                     undefined,
-                )} */}
-                {data?.id}
+                )}
               </Title>
               <SubTittleWrapper>
                 <SubTitle>
@@ -167,7 +171,9 @@ export function ItemCard({
                     data.data.workoutDivision.division}
                   )
                 </SubTitle>
-
+                <SubTitle>{data?.id}</SubTitle>
+                <SubTitle>{firstElement && 'firstElement'}</SubTitle>
+                <SubTitle>{secondElement && 'secondElement'}</SubTitle>
                 {/* todo renderizar apenas no active , ver onde melhor no layout  */}
                 {dateEnd && dateStart && (
                   <SubTitle>

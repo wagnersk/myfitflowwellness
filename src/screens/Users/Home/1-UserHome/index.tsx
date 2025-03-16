@@ -78,10 +78,17 @@ export function UserHome() {
 
   async function handleNextStep(data: IWorkoutsData, cardIndex: number) {
     if (!myWorkoutDataArray) return
+    if (!myWorkout) return
+
+    const findMyWorkoutDataArray = myWorkoutDataArray.data.find(
+      (v) => v.id === myWorkout.dataOrder[0].id,
+    )
+    if (!findMyWorkoutDataArray) return
+
     navigation.navigate('userWorkoutList', {
-      workoutId: myWorkoutDataArray.data[0].id,
+      workoutId: findMyWorkoutDataArray.id,
       data,
-      workoutLength: myWorkoutDataArray.data[0].data.workoutsData.length,
+      workoutLength: findMyWorkoutDataArray.data.workoutsData.length,
       cardIndex,
     })
   }
@@ -182,7 +189,6 @@ export function UserHome() {
       return true
     })
   }, [])
-  console.log('workoutData1 ', myWorkoutDataArray)
 
   useEffect(() => {
     if (
@@ -198,7 +204,6 @@ export function UserHome() {
       const workoutData = myWorkoutDataArray.data.find(
         (v) => v.id === myWorkout.dataOrder[0].id,
       )
-      console.log('workoutData2 ')
       if (workoutData) {
         setGetWorkoutArrayData(workoutData.data)
       }

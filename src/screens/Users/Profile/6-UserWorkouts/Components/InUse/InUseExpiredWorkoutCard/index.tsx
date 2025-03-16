@@ -31,7 +31,11 @@ export function InUseExpiredWorkoutCard({
           <ItemCard
             index={index}
             data={data}
-            handleNextStep={onExpiredWorkout}
+            handleNextStep={() => onExpiredWorkout(data?.id || '')}
+            isActive={false}
+            isExpired={true}
+            handleMoveUp={() => {}}
+            handleMoveDown={() => {}}
           />
         </BodyWraper>
       </ButtonContainer>

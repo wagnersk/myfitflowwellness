@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
 } from 'react-native'
+import Arrow from '@assets/Arrow-counter-clockwise.svg'
 
 import {
   Container,
@@ -22,11 +23,24 @@ import {
   ShareButton,
   ShareText,
   SubTitteText,
+  SubTitteTextWrapper,
+  ButtonsWrapper,
+  BlurIconViewWrapper,
+  ActButton,
+  SubTitteContainer,
+  CancelShareButton,
+  CancelShareText,
+  QRCodeButton,
 } from './styles'
-import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
+import {
+  IMyfitflowWorkoutInUseData,
+  IUserWorkoutsLog,
+  IWorkoutLog,
+} from '@hooks/authTypes'
+import { useAuth } from '@hooks/auth'
 
 interface InputProps {
-  handleSendWorkout: (id: string) => void
+  handleSendSharedWorkout: (id: string) => void
   handleQRcodeWorkout: (id: string) => void
   handleCancelShareWorkout: (id: string) => void
   closeModal: () => void
@@ -38,7 +52,7 @@ interface InputProps {
 
 export function SharedWorkoutsCardModal({
   handleQRcodeWorkout,
-  handleSendWorkout,
+  handleSendSharedWorkout,
   handleCancelShareWorkout,
   closeModal,
   isPrimaryWorkout,
@@ -46,31 +60,22 @@ export function SharedWorkoutsCardModal({
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const isWorkoutActive = data.isInUse
-  const isSharingActive = data.isShared
+  const {
+    updateUserWorkoutCache,
+    cachedUserWorkoutsLog,
+    getLastUpdatedAtUserWorkoutCache,
+  } = useAuth()
+
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
+  const [workoutData, setWorkoutData] = useState<IWorkoutLog | null>(null)
 
   const tittle = data.data.workoutName?.[selectedLanguage]
-
-  const mainWorkoutTitle =
-    selectedLanguage === 'pt-br' ? 'Treino Principal' : 'Main Workout'
-
-  const reserveWorkoutTitle =
-    selectedLanguage === 'pt-br'
-      ? `${activeIndex} - Treino Reserva`
-      : `${activeIndex} - Reserve Workout`
-
-  const auxTittle = isPrimaryWorkout ? mainWorkoutTitle : reserveWorkoutTitle
-
-  const sharingTitle =
-    selectedLanguage === 'pt-br' ? 'Compartilhamento' : 'Sharing'
-  const onText = selectedLanguage === 'pt-br' ? 'Ligar' : 'ON'
-  const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
 
   async function onQRcode(id: string) {
     handleQRcodeWorkout(id)
   }
   async function onSend(id: string) {
-    handleSendWorkout(id)
+    handleSendSharedWorkout(id)
   }
   async function onCancelShare(id: string) {
     handleCancelShareWorkout(id)
@@ -80,6 +85,35 @@ export function SharedWorkoutsCardModal({
     Keyboard.dismiss()
     closeModal()
   }
+  function syncronizePersonalizedWorkoutData() {
+    if (!data.id) return
+    if (!lastUpdated) return
+    if (!workoutData) return
+
+    if (workoutData.updatedAt >= lastUpdated) {
+      console.log(
+        `Entrou em minha data eh maior que a do site`,
+        workoutData.updatedAt,
+      )
+
+      updateUserWorkoutCache(workoutData, workoutData.updatedAt)
+      setLastUpdated(workoutData.updatedAt)
+    }
+
+    if (workoutData.updatedAt < lastUpdated) {
+      console.log(
+        `Entrou em minha data eh menor que a do site`,
+        workoutData.updatedAt,
+      )
+    }
+
+    if (workoutData.updatedAt === lastUpdated) {
+      console.log(
+        `Entrou em minha data eh igual que a do site`,
+        workoutData.updatedAt,
+      )
+    }
+  }
   /* 
 
 compartilhar treino whatspp - gerar qrcode
@@ -87,6 +121,46 @@ compartilhar treino whatspp - gerar qrcode
 cancelar compartilhamento
 
 */
+  function formatTimestampToDate(timestamp: number | null): string {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+  useEffect(() => {
+    start()
+
+    async function start() {
+      const lastUpdatedValue = await getLastUpdatedAtUserWorkoutCache(data.id)
+      if (!lastUpdatedValue) return
+
+      const timestamp = convertToTimestamp(
+        lastUpdatedValue.nanoseconds,
+        lastUpdatedValue.seconds,
+      )
+      setLastUpdated(timestamp)
+    }
+    function convertToTimestamp(nanoseconds: number, seconds: number): number {
+      return seconds * 1000 + Math.floor(nanoseconds / 1000000)
+    }
+  }, [data.id])
+
+  useEffect(() => {
+    if (!cachedUserWorkoutsLog) return
+    const getIt = cachedUserWorkoutsLog.workoutsLog.find(
+      (v) => v.workoutId === data.id,
+    )
+
+    setWorkoutData(getIt || null)
+
+    console.log(`useEffect -> timestamp -> `)
+  }, [cachedUserWorkoutsLog])
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -101,30 +175,48 @@ cancelar compartilhamento
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
-                <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
+                <ButtonsWrapper>
+                  {workoutData && lastUpdated ? (
+                    <SubTitteContainer>
+                      <SubTitteTextWrapper>
+                        <SubTitteText>
+                          Local - {formatTimestampToDate(workoutData.updatedAt)}
+                        </SubTitteText>
+                        <SubTitteText>
+                          Servidor - {formatTimestampToDate(lastUpdated)}
+                        </SubTitteText>
+                      </SubTitteTextWrapper>
+
+                      <BlurIconViewWrapper
+                        disabled={false}
+                        intensity={50}
+                        tint="light"
+                      >
+                        <ActButton
+                          disabled={workoutData?.updatedAt === lastUpdated}
+                          onPress={syncronizePersonalizedWorkoutData}
+                        >
+                          <Arrow width={30} height={30} fill={'white'} />
+                        </ActButton>
+                      </BlurIconViewWrapper>
+                    </SubTitteContainer>
+                  ) : (
+                    <SubTitteText>Treino ainda não iniciado.</SubTitteText>
+                  )}
+                </ButtonsWrapper>
               </TipsTitleNoteWrapper>
+              <SubTitteText>{data.id}</SubTitteText>
 
               <InputsWrapper>
-                <ToggleSwitch
-                  selected={data.isInUse}
-                  onPress={() => onCancelShare(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    {data.isShared ? 'Cancelar' : 'Share'}
-                  </ToggleSwitchText>
-                </ToggleSwitch>
-                <ToggleSwitch
-                  selected={!data.isInUse}
-                  onPress={() => onQRcode(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    QRcode
-                  </ToggleSwitchText>
-                </ToggleSwitch>
+                <CancelShareButton onPress={() => onCancelShare(data.id)}>
+                  <CancelShareText>Cancelar</CancelShareText>
+                </CancelShareButton>
+                <QRCodeButton onPress={() => onQRcode(data.id)}>
+                  <ToggleSwitchText>QRcode</ToggleSwitchText>
+                </QRCodeButton>
+
                 <ShareButton onPress={() => onSend(data.id)}>
-                  <ShareText selected={data.isShared}>
-                    {data.isShared ? 'Enviar' : 'Share'}
-                  </ShareText>
+                  <ShareText>{data.isShared ? 'Enviar' : 'Share'}</ShareText>
                 </ShareButton>
               </InputsWrapper>
             </TipsNoteWrapper>

@@ -50,6 +50,12 @@ export const TitteText = styled.Text`
   justify-content: flex-start;
 `
 
+export const SubTitteTextWrapper = styled.View`
+  padding: 8px;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+`
 export const SubTitteText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(14)}px;
@@ -103,4 +109,13 @@ export const ToggleSwitch = styled(TouchableOpacityComponent)<{
   border: 2px solid
     ${({ theme, selected }) =>
       selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
+`
+
+export const ActionButtonsWrapper = styled.View`
+  padding-top: 8px;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 16px;
+
+  width: 100%;
 `
