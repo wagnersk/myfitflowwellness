@@ -49,11 +49,7 @@ export function WorkoutUserEditTotalWorkoutModal({
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const {
-    updateUserWorkoutCache,
-    cachedUserWorkoutsLog,
-    getLastUpdatedAtUserWorkoutCache,
-  } = useAuth()
+  const { updateUserFirebaseWorkoutCache, cachedUserWorkoutsLog } = useAuth()
 
   const tittle = data.data.workoutName?.[selectedLanguage]
 

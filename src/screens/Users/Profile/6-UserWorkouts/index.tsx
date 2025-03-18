@@ -69,6 +69,7 @@ import {
   addDaysToTimestamp,
   addWeeksToTimestamp,
 } from '@utils/calculeEndDateWithWeeks'
+
 import { WorkoutUserActiveWorkoutModal } from '@components/Modals/WorkoutUserActiveWorkoutModal'
 import { CTAButton } from '@components/Buttons/CTAButton'
 
@@ -93,7 +94,7 @@ export function UserWorkouts() {
     isWaitingApiResponse,
     myWorkout,
     updateMyWorkoutInCache,
-    saveExerciseDataInCache,
+    saveFirebaseMyWorkout,
   } = useAuth()
 
   const [isOpenSettingsMode, setIsOpenSettingsMode] = useState(false)
@@ -348,9 +349,28 @@ export function UserWorkouts() {
       | 'shareWorkout',
   ) {
     let index: number | undefined
+
+    /* 
+  const [copiedWorkouts, setCopiedWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+
+  const [myTotalWorkouts, setMyTotalWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+
+  const [activeworkouts, setActiveWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+  const [expiredworkouts, setExpiredWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null)
+  const [sharedWorkouts, setSharedWorkouts] = useState<
+    IMyfitflowWorkoutInUseData[] | null
+  >(null) */
     switch (modalType) {
       case 'totalWorkout':
-        index = workouts?.data.findIndex((v) => v.id === id)
+        index = myTotalWorkouts?.findIndex((v) => v.id === id)
         break
       case 'expiredWorkout':
         index = expiredworkouts?.findIndex((v) => v.id === id)
@@ -365,7 +385,9 @@ export function UserWorkouts() {
         return
     }
     if (index === undefined || index === -1) return
-
+    console.log(`modalType`, modalType)
+    console.log(`id`, id)
+    console.log(`index`, index)
     setDefaultModalState((prev) => ({
       ...prev,
       isOpenModalEditTotalWorkout: modalType === 'totalWorkout',
@@ -377,7 +399,6 @@ export function UserWorkouts() {
   }
   // fazer daqui pra baixo
 
-  // total - deletar treino - OK
   async function handleDeleteWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
     if (index === undefined || index === -1) return
@@ -397,16 +418,11 @@ export function UserWorkouts() {
             const copyWorkouts = { ...workouts }
             copyWorkouts.data.splice(index, 1)
 
-            setDefaultModalState((prev) => ({
-              ...prev,
-              isOpenModalEditTotalWorkout: false,
-              isOpenModalSharedWorkout: false,
-              isOpenModalActiveWorkout: false,
-              isOpenModalExpiredWorkout: false,
-              activeWeightIndex: 0,
-            }))
+            const timeNow = new Date().getTime()
 
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             updateMyWorkoutInCache(copyWorkouts)
+            closeModal()
           },
         },
       ],
@@ -439,20 +455,13 @@ export function UserWorkouts() {
         {
           text: 'Ativar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
-              activeData: workouts?.activeData || [], // aqui a lista dos ids
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
+            if (!workouts) return
 
-            if (!copyWorkouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
             copyWorkouts.data[index].isActive = false
+
             copyWorkouts.activeData = copyWorkouts.activeData.filter(
               (activeData) => activeData.id !== copyWorkouts.data[index].id,
             )
@@ -465,8 +474,8 @@ export function UserWorkouts() {
               updatedAt: copyWorkouts.data[index].updatedAt,
             })
 
-            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -498,18 +507,9 @@ export function UserWorkouts() {
         {
           text: 'Compartilhar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              activeData: workouts?.activeData || [],
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
-
-            if (!copyWorkouts) return
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
             copyWorkouts.data[index].isShared =
               !copyWorkouts.data[index].isShared
@@ -518,8 +518,8 @@ export function UserWorkouts() {
               // Adiciona o treino a mySharedWorkouts
               copyWorkouts.mySharedWorkouts.push({
                 id: copyWorkouts.data[index].id,
-                createdAt: copyWorkouts.data[index].createdAt,
-                updatedAt: copyWorkouts.data[index].updatedAt,
+                createdAt: timeNow,
+                updatedAt: timeNow,
               })
             } else {
               // Remove o treino de mySharedWorkouts
@@ -530,8 +530,8 @@ export function UserWorkouts() {
                 )
             }
 
-            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -556,23 +556,11 @@ export function UserWorkouts() {
         {
           text: 'Ativar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
-              activeData: workouts?.activeData || [], // aqui a lista dos ids
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
-            if (!copyWorkouts) return
-            if (!copyWorkouts.data) return
-            if (!copyWorkouts.activeData) return
-
-            const dateNow = new Date().getTime()
-            let startDate = dateNow
+            let startDate = timeNow
 
             if (copyWorkouts.activeData.length > 0) {
               const lastWorkout =
@@ -593,8 +581,8 @@ export function UserWorkouts() {
             copyWorkouts.data[index].isActive = true
             copyWorkouts.activeData.push({
               id: copyWorkouts.data[index].id,
-              createdAt: dateNow,
-              updatedAt: dateNow,
+              createdAt: timeNow,
+              updatedAt: timeNow,
               workoutStartAt: startDate,
               workoutEndsAt: addWeeksToTimestamp(
                 startDate,
@@ -602,8 +590,8 @@ export function UserWorkouts() {
               ),
             })
 
-            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -627,17 +615,9 @@ export function UserWorkouts() {
         {
           text: 'Desativar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
-              activeData: workouts?.activeData || [], // aqui a lista dos ids
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
-            if (!copyWorkouts) return
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
             console.log(`Desativando treino:`, copyWorkouts.data[index])
 
@@ -647,8 +627,8 @@ export function UserWorkouts() {
               (_expired) => _expired.id !== copyWorkouts.data[index].id,
             )
 
-            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -673,16 +653,9 @@ export function UserWorkouts() {
         {
           text: 'Desativar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [], // aqui o boolean // ja q ta ativo o expired fica false
-              activeData: workouts?.activeData || [], // aqui a lista dos ids
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
             if (!copyWorkouts) return
 
@@ -699,8 +672,9 @@ export function UserWorkouts() {
             )
 
             // Define o treino como não ativo
-            setWorkouts(copyWorkouts)
+
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -796,37 +770,29 @@ export function UserWorkouts() {
     }
   }
   // active - nova ordem  ( botao q aparece handleActiveSettingMode() )
-  function saveNewOrderModal(data: IMyWorkouts | null) {
-    if (!data) return
+  function saveNewOrderModal() {
+    if (!workouts) return
+    const copyWorkouts = { ...workouts }
+    const timeNow = new Date().getTime()
 
     // Recalcular treinos ativos e expirados
-    const filterInUseActiveWorkouts = data.data.filter((v) => v.isActive)
-    const filterInUseExpiredWorkouts = data.data.filter((v) => v.isExpired)
+    const filterInUseActiveWorkouts = workouts.data.filter((v) => v.isActive)
 
     const getActiveWorkouts: IMyfitflowWorkoutInUseData[] = []
-    const getExpiredWorkouts: IMyfitflowWorkoutInUseData[] = []
 
-    data.activeData.forEach((_active) => {
+    copyWorkouts.activeData.forEach((_active) => {
       const workout = filterInUseActiveWorkouts.find((v) => v.id === _active.id)
       if (workout) {
         getActiveWorkouts.push(workout)
       }
     })
 
-    data.expiredData.forEach((_expired) => {
-      const workout = filterInUseExpiredWorkouts.find(
-        (v) => v.id === _expired.id,
-      )
-      if (workout) {
-        getActiveWorkouts.push(workout)
-      }
-    })
+    updateMyWorkoutInCache(copyWorkouts)
+    saveFirebaseMyWorkout(copyWorkouts, timeNow)
 
-    updateMyWorkoutInCache(data)
     setIsDataOrderChanged(false)
     setIsOpenSettingsMode(false)
     setActiveWorkouts(getActiveWorkouts)
-    setExpiredWorkouts(getExpiredWorkouts)
   }
 
   async function handleSendSharedWorkout(id: string) {
@@ -932,18 +898,9 @@ export function UserWorkouts() {
         {
           text: 'Compartilhar',
           onPress: () => {
-            const copyWorkouts: IMyWorkouts = {
-              userId: workouts?.userId || '',
-              createdAt: workouts?.createdAt || 0,
-              updatedAt: workouts?.updatedAt || 0,
-              data: workouts?.data || [],
-              activeData: workouts?.activeData || [],
-              mySharedWorkouts: workouts?.mySharedWorkouts || [],
-              copiedWorkouts: workouts?.copiedWorkouts || [],
-              expiredData: workouts?.expiredData || [],
-            }
-
-            if (!copyWorkouts) return
+            if (!workouts) return
+            const copyWorkouts = { ...workouts }
+            const timeNow = new Date().getTime()
 
             copyWorkouts.data[index].isShared =
               !copyWorkouts.data[index].isShared
@@ -964,8 +921,8 @@ export function UserWorkouts() {
                 )
             }
 
-            setWorkouts(copyWorkouts)
             updateMyWorkoutInCache(copyWorkouts)
+            saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
         },
@@ -1057,18 +1014,6 @@ export function UserWorkouts() {
 
   useEffect(() => {
     if (workouts && workouts.data && workouts.activeData) {
-      /* TODO-> renderizar em states separados e clicar no id certo ao passar
-      depois ver se as funcionalidades tao ok ,
-
-      testar com outra conta para pegar 
-
-jogar no state principal e ver se consigo criar o tootle para meus / copiados
-
-e marcar no card se foi copiado de alguem
-
-      */
-
-      Alert.alert(`fazer aqui`)
       const copiedList = workouts.copiedWorkouts.filter((v) => v.id)
       const activeList = workouts.activeData.filter((v) => v.id)
       const expiredList = workouts.expiredData.filter((v) => v.id)
@@ -1105,12 +1050,12 @@ e marcar no card se foi copiado de alguem
           sharedWorkouts.push(workout)
         }
       })
-      setMyTotalWorkouts(workouts.data)
+      setMyTotalWorkouts(workouts.data) // ok
 
-      setCopiedWorkouts(copiedWorkouts)
-      setActiveWorkouts(activeWorkouts)
-      setExpiredWorkouts(expiredWorkouts)
-      setSharedWorkouts(sharedWorkouts)
+      setCopiedWorkouts(copiedWorkouts) // ainda nao feito
+      setActiveWorkouts(activeWorkouts) // fazer 1
+      setExpiredWorkouts(expiredWorkouts) // fazer 2
+      setSharedWorkouts(sharedWorkouts) // fazer 3
     }
   }, [workouts, workouts?.data, setShowScreen2])
 
@@ -1118,9 +1063,6 @@ e marcar no card se foi copiado de alguem
     setWorkouts(myWorkout)
   }, [myWorkout])
 
-  console.log(`activeworkouts`, activeworkouts)
-
-  console.log(`expiredworkouts`, expiredworkouts)
   return (
     <Container>
       <BodyImageWrapper>
@@ -1168,27 +1110,8 @@ e marcar no card se foi copiado de alguem
                           style={animatedStyles}
                         />
                       </SelectScreenWrapper>
-                      {/* TODO->
-ENTENDER o q ta sendo renderizado 
-o id q eu clico nao ta correspondendo
 
-quando cabar isso botao tootle em total 
-
-Meus / dos amigos
-
--> Criar um state para isso
-
-
-No caso vou crair varios states para desmembrar o meu array principal
-
-
-
-
-
-
-
-*/}
-                      {showScreen === 'Em uso' && (
+                      {showScreen === 'Em uso' && workouts && (
                         <>
                           <SelectScreenWrapper2>
                             <Underline2
@@ -1213,7 +1136,8 @@ No caso vou crair varios states para desmembrar o meu array principal
                           </SelectScreenWrapper2>
 
                           <InUseWorkoutContainer
-                            data={workouts}
+                            activeData={workouts.activeData}
+                            expiredData={workouts.expiredData}
                             activeworkouts={activeworkouts}
                             expiredworkouts={expiredworkouts}
                             showScreen2={showScreen2}
@@ -1230,9 +1154,10 @@ No caso vou crair varios states para desmembrar o meu array principal
                           />
                         </>
                       )}
+
                       {showScreen === 'Meus treinos' && workouts && (
                         <TotalWorkoutContainer
-                          data={workouts}
+                          myTotalWorkouts={myTotalWorkouts}
                           user={user}
                           handleOnPressTotalWorkout={(id) =>
                             handleOnPressWorkout(id, 'totalWorkout')
@@ -1255,7 +1180,7 @@ No caso vou crair varios states para desmembrar o meu array principal
                   {isOpenSettingsMode && isDataOrderChanged && (
                     <CTAButton
                       style={{ marginBottom: 54 }}
-                      onPress={() => saveNewOrderModal(workouts)}
+                      onPress={saveNewOrderModal}
                       changeColor
                       title={'Salvar nova ordem'}
                       loading={false}
@@ -1282,14 +1207,14 @@ No caso vou crair varios states para desmembrar o meu array principal
         }}
       >
         {workouts &&
-          workouts.data &&
-          workouts.data[defaultModalState?.activeWeightIndex ?? 0] && (
+          myTotalWorkouts &&
+          myTotalWorkouts[defaultModalState?.activeWeightIndex ?? 0] && (
             <WorkoutUserEditTotalWorkoutModal
               handleDeleteWorkout={handleDeleteWorkout}
               handleShareWorkout={handleShareWorkout}
               handleInUseExpiredWorkout={handleInUseExpiredWorkout}
               closeModal={closeModal}
-              data={workouts.data[defaultModalState?.activeWeightIndex ?? 0]}
+              data={myTotalWorkouts[defaultModalState?.activeWeightIndex ?? 0]}
               activeIndex={defaultModalState?.activeWeightIndex ?? 0}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
@@ -1310,17 +1235,16 @@ No caso vou crair varios states para desmembrar o meu array principal
         }}
       >
         {workouts &&
-          workouts.data &&
           defaultModalState &&
-          workouts &&
-          workouts.data[defaultModalState?.activeWeightIndex] && (
+          expiredworkouts &&
+          expiredworkouts[defaultModalState.activeWeightIndex] && (
             <ExpiredWorkoutsCardModal
               handleInUseActiveWorkout={handleInUseActiveWorkout}
               handleInUseRemoveFromExpiredWorkout={
                 handleInUseRemoveFromExpiredWorkout
               }
               closeModal={closeModal}
-              data={workouts.data[defaultModalState.activeWeightIndex]}
+              data={expiredworkouts[defaultModalState.activeWeightIndex]}
               activeIndex={defaultModalState.activeWeightIndex}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}
@@ -1340,12 +1264,11 @@ No caso vou crair varios states para desmembrar o meu array principal
           flex: 1,
         }}
       >
-        {activeworkouts &&
-          defaultModalState &&
+        {defaultModalState &&
           workouts &&
-          activeworkouts[defaultModalState.activeWeightIndex] &&
-          activeworkouts[defaultModalState.activeWeightIndex].data &&
-          workouts.data[defaultModalState.activeWeightIndex] && (
+          workouts.data[defaultModalState.activeWeightIndex] &&
+          activeworkouts &&
+          activeworkouts[defaultModalState.activeWeightIndex] && (
             <WorkoutUserActiveWorkoutModal
               handleInUseRemoveFromActivedWorkout={
                 handleInUseRemoveFromActivedWorkout
@@ -1379,14 +1302,15 @@ No caso vou crair varios states para desmembrar o meu array principal
         }}
       >
         {workouts &&
-          workouts.data &&
-          workouts.data[defaultModalState?.activeWeightIndex ?? 0] && (
+          defaultModalState &&
+          sharedWorkouts &&
+          sharedWorkouts[defaultModalState.activeWeightIndex] && (
             <SharedWorkoutsCardModal
               handleSendSharedWorkout={handleSendSharedWorkout}
               handleQRcodeWorkout={handleQRcodeWorkout}
               handleCancelShareWorkout={handleCancelShareWorkout}
               closeModal={closeModal}
-              data={workouts.data[defaultModalState?.activeWeightIndex ?? 0]}
+              data={sharedWorkouts[defaultModalState.activeWeightIndex]}
               activeIndex={defaultModalState?.activeWeightIndex ?? 0}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               isPrimaryWorkout={defaultModalState?.activeWeightIndex === 0}

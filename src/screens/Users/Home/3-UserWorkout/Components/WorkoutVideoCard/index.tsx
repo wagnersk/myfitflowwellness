@@ -623,7 +623,7 @@ modalCachedCardExerciseData.notes.value
     markAsCompletedGreenCheckAndCacheSave()
     onTimerManage('play')
 
-    const find = myWorkout?.dataOrder.find((va) => va.id === workoutId)
+    const find = myWorkout?.activeData.find((va) => va.id === workoutId)
 
     if (find && find.workoutStartAt === 0) {
       startWorkoutCounterDate()
@@ -1280,7 +1280,7 @@ conferir se toda atualizacao reflete no updatedAt do pai
         completedTimestamp,
         workoutCardIndex,
       )
-      const find = myWorkout?.dataOrder.find((va) => va.id === workoutId)
+      const find = myWorkout?.activeData.find((va) => va.id === workoutId)
 
       if (find && find.workoutStartAt === 0) {
         startWorkoutCounterDate()

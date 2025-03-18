@@ -42,6 +42,7 @@ import {
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
+import { convertToTimestamp } from '@utils/convertToTimestamp'
 
 export function UserHome() {
   const navigation = useNavigation()
@@ -57,6 +58,12 @@ export function UserHome() {
     loadPersonalTrainerClientContract,
     loadPersonalTrainerData,
     savePersonalTrainerData,
+    getLastUpdatedAtUserWorkoutCache,
+    updateUserFirebaseWorkoutCache,
+    updateCachedUserWorkoutsLog,
+    saveCachedUserWorkoutsLog,
+    cachedUserWorkoutsLog,
+    fetchworkoutDataCache,
   } = useAuth()
 
   const [getWorkoutArrayData, setGetWorkoutArrayData] =
@@ -81,7 +88,7 @@ export function UserHome() {
     if (!myWorkout) return
 
     const findMyWorkoutDataArray = myWorkoutDataArray.data.find(
-      (v) => v.id === myWorkout.dataOrder[0].id,
+      (v) => v.id === myWorkout.activeData[0].id,
     )
     if (!findMyWorkoutDataArray) return
 
@@ -197,12 +204,12 @@ export function UserHome() {
       myWorkoutDataArray &&
       myWorkoutDataArray.data &&
       myWorkout.data &&
-      myWorkout.dataOrder &&
+      myWorkout.activeData &&
       myWorkout.data[0] &&
-      myWorkout.dataOrder[0]
+      myWorkout.activeData[0]
     ) {
       const workoutData = myWorkoutDataArray.data.find(
-        (v) => v.id === myWorkout.dataOrder[0].id,
+        (v) => v.id === myWorkout.activeData[0].id,
       )
       if (workoutData) {
         setGetWorkoutArrayData(workoutData.data)
@@ -218,6 +225,65 @@ export function UserHome() {
   )
 
   const svgColor = theme.COLORS.BLUE_STROKE
+
+  useEffect(() => {
+    start()
+
+    /* 
+ agora q ta sincronizandi com o servidor
+
+ ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
+ 
+    */
+    async function start() {
+      if (!cachedUserWorkoutsLog) return
+
+      const lastupdated = await getLastUpdatedAtUserWorkoutCache()
+      if (!lastupdated) return
+      console.log(`servidor:`, lastupdated)
+      console.log(`cache lo:`, cachedUserWorkoutsLog.updatedAt)
+
+      // lastupdated 1742250984000
+      // cachedUserWorkoutsLog.updatedAt 1742250984871
+      if (lastupdated > cachedUserWorkoutsLog.updatedAt) {
+        const updatedCache = await fetchworkoutDataCache() // busca noivo
+        if (updatedCache) {
+          // TODO criar fetch
+          console.log(`updated do servidor ta mais atual asd`, updatedCache)
+
+          // esse ta funcionando
+
+          updatedCache.updatedAt = lastupdated
+          saveCachedUserWorkoutsLog(updatedCache)
+          // salvar no cache
+        }
+      }
+      if (cachedUserWorkoutsLog.updatedAt > lastupdated) {
+        console.log(
+          `updated local  ta mais atual`,
+          cachedUserWorkoutsLog.updatedAt,
+        )
+
+        updateUserFirebaseWorkoutCache(
+          cachedUserWorkoutsLog,
+          cachedUserWorkoutsLog.updatedAt,
+        )
+      }
+    }
+  }, [cachedUserWorkoutsLog])
+
+  function formatTimestampToDate(timestamp: number | null): string {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
   return (
     <Container>

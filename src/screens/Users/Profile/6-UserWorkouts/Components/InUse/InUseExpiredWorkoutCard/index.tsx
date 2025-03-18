@@ -1,12 +1,14 @@
 import React from 'react'
 import { ButtonContainer, Container, BodyWraper } from './styles'
-import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
-import { InUseWorkoutItem } from '../InUseWorkoutItem'
-import { InUseExpiredWorkoutItem } from '../InUseExpiredWorkoutItem'
+import {
+  IMyfitflowWorkoutInUseData,
+  IMyInUseExpiredData,
+} from '@hooks/authTypes'
 import { ItemCard } from '../../ItemCard'
 
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
+  expiredData: IMyInUseExpiredData[]
   selectedLanguage: 'pt-br' | 'us'
   handleOnPressExpiredWorkout: (id: string) => void
 
@@ -15,6 +17,7 @@ interface PlanCardProps {
 
 export function InUseExpiredWorkoutCard({
   data,
+  expiredData,
   selectedLanguage,
   handleOnPressExpiredWorkout,
   index,
@@ -31,7 +34,7 @@ export function InUseExpiredWorkoutCard({
           <ItemCard
             index={index}
             data={data}
-            handleNextStep={() => onExpiredWorkout(data?.id || '')}
+            handleNextStep={() => data && onExpiredWorkout(data.id)}
             isActive={false}
             isExpired={true}
             handleMoveUp={() => {}}

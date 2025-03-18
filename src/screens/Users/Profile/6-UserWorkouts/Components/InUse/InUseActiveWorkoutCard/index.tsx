@@ -24,6 +24,7 @@ interface PlanCardProps {
 export function InUseActiveWorkoutCard({
   activeData,
   selectedLanguage,
+  data,
   handleMoveUp,
   handleMoveDown,
   isOpenSettingsMode,
@@ -37,7 +38,7 @@ export function InUseActiveWorkoutCard({
     <Container>
       <ButtonContainer>
         <BodyWraper>
-          {activeData && (
+          {activeData && activeData[index] && (
             <ItemCard
               index={index}
               data={data}

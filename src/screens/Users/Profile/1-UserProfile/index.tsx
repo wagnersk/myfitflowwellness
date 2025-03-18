@@ -177,7 +177,7 @@ export function UserProfile() {
     user.muscleFocus &&
     user.muscleFocus.muscleSelectedData &&
     user.muscleFocus.muscleSelectedData.reduce(
-      (acc: string, curr: any, index: number) => {
+      (acc: string, curr: IptBrUs, index: number) => {
         const muscleUs = curr?.[selectedLanguage] // Acessando diretamente o SELECTEDLANGUAGE
         return muscleUs ? acc + (index > 0 ? ', ' : '') + muscleUs : acc
       },
@@ -212,38 +212,7 @@ export function UserProfile() {
     user.timeBySession.timeBySessionSelectedData[selectedLanguage]
       ? user.timeBySession.timeBySessionSelectedData[selectedLanguage]
       : ''
-  /* 
-meu plano
-meus treinos
-preferencia de treino
-suporte
 
-push notification
-face id
-logout (opcao deletar conta)
-
-
-
-. Seção: Minha Conta
-	•	Meu Plano (detalhes do plano ativo, histórico de assinaturas ou gerenciamento de plano).
-	•	Meus Treinos (treinos personalizados ou salvos).
-	•	Preferência de Treino (ajustes para metas: emagrecimento, hipertrofia, etc.).
-	// JA TEM	Editar Perfil (dados como nome, idade, altura, peso, e-mail).
-
-2. Seção: Configurações do App
-	•	Push Notification (ativar/desativar notificações de treinos, metas, lembretes).
-	•	Face ID / Biométrico (habilitar para login rápido e seguro).
-	•	Idioma e Moeda (se o app atender diferentes regiões).
-
-3. Seção: Suporte e Informações
-	•	Suporte (FAQ e canal de contato, como chat, e-mail ou WhatsApp).
-	•	Política de Privacidade e Termos de Uso.
-
-4. Seção: Sair e Excluir Conta
-	•	Logout (opção clara para sair da conta atual).
-	•	Deletar Conta (com um fluxo separado e explicativo para excluir a conta).
-
-*/
   return (
     <Container>
       <StatusBar

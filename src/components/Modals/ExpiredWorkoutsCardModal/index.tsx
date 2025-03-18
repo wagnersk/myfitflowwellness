@@ -17,7 +17,8 @@ import {
   DeleteText,
   OverLayTop,
   OverLayBottom,
-  ToggleSwitch,
+  RedButton,
+  GreenButton,
   ToggleSwitchText,
   ShareButton,
   ShareText,
@@ -44,25 +45,7 @@ export function ExpiredWorkoutsCardModal({
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const isWorkoutActive = data.isInUse
-  const isSharingActive = data.isShared
-
   const tittle = data.data.workoutName?.[selectedLanguage]
-
-  const mainWorkoutTitle =
-    selectedLanguage === 'pt-br' ? 'Treino Principal' : 'Main Workout'
-
-  const reserveWorkoutTitle =
-    selectedLanguage === 'pt-br'
-      ? `${activeIndex} - Treino Reserva`
-      : `${activeIndex} - Reserve Workout`
-
-  const auxTittle = isPrimaryWorkout ? mainWorkoutTitle : reserveWorkoutTitle
-
-  const sharingTitle =
-    selectedLanguage === 'pt-br' ? 'Compartilhamento' : 'Sharing'
-  const onText = selectedLanguage === 'pt-br' ? 'Ligar' : 'ON'
-  const offText = selectedLanguage === 'pt-br' ? 'Desligar' : 'OFF'
 
   async function onUseWorkout(id: string) {
     handleInUseActiveWorkout(id)
@@ -96,23 +79,12 @@ export function ExpiredWorkoutsCardModal({
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>
-                <ToggleSwitch
-                  selected={!data.isInUse}
-                  onPress={() => onCancel(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    Deletar
-                  </ToggleSwitchText>
-                </ToggleSwitch>
-
-                <ToggleSwitch
-                  selected={data.isInUse}
-                  onPress={() => onUseWorkout(data.id)}
-                >
-                  <ToggleSwitchText selected={data.isInUse}>
-                    Ativar
-                  </ToggleSwitchText>
-                </ToggleSwitch>
+                <RedButton onPress={() => onCancel(data.id)}>
+                  <ToggleSwitchText>Deletar</ToggleSwitchText>
+                </RedButton>
+                <GreenButton onPress={() => onUseWorkout(data.id)}>
+                  <ToggleSwitchText>Ativar</ToggleSwitchText>
+                </GreenButton>
               </InputsWrapper>
             </TipsNoteWrapper>
           </TipsNoteBodyWrapper>

@@ -60,15 +60,6 @@ export function SharedWorkoutsCardModal({
   activeIndex,
   selectedLanguage,
 }: InputProps) {
-  const {
-    updateUserWorkoutCache,
-    cachedUserWorkoutsLog,
-    getLastUpdatedAtUserWorkoutCache,
-  } = useAuth()
-
-  const [lastUpdated, setLastUpdated] = useState<number | null>(null)
-  const [workoutData, setWorkoutData] = useState<IWorkoutLog | null>(null)
-
   const tittle = data.data.workoutName?.[selectedLanguage]
 
   async function onQRcode(id: string) {
@@ -85,35 +76,7 @@ export function SharedWorkoutsCardModal({
     Keyboard.dismiss()
     closeModal()
   }
-  function syncronizePersonalizedWorkoutData() {
-    if (!data.id) return
-    if (!lastUpdated) return
-    if (!workoutData) return
 
-    if (workoutData.updatedAt >= lastUpdated) {
-      console.log(
-        `Entrou em minha data eh maior que a do site`,
-        workoutData.updatedAt,
-      )
-
-      updateUserWorkoutCache(workoutData, workoutData.updatedAt)
-      setLastUpdated(workoutData.updatedAt)
-    }
-
-    if (workoutData.updatedAt < lastUpdated) {
-      console.log(
-        `Entrou em minha data eh menor que a do site`,
-        workoutData.updatedAt,
-      )
-    }
-
-    if (workoutData.updatedAt === lastUpdated) {
-      console.log(
-        `Entrou em minha data eh igual que a do site`,
-        workoutData.updatedAt,
-      )
-    }
-  }
   /* 
 
 compartilhar treino whatspp - gerar qrcode
@@ -121,46 +84,7 @@ compartilhar treino whatspp - gerar qrcode
 cancelar compartilhamento
 
 */
-  function formatTimestampToDate(timestamp: number | null): string {
-    if (!timestamp) return ''
-    const date = new Date(timestamp)
 
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-  useEffect(() => {
-    start()
-
-    async function start() {
-      const lastUpdatedValue = await getLastUpdatedAtUserWorkoutCache(data.id)
-      if (!lastUpdatedValue) return
-
-      const timestamp = convertToTimestamp(
-        lastUpdatedValue.nanoseconds,
-        lastUpdatedValue.seconds,
-      )
-      setLastUpdated(timestamp)
-    }
-    function convertToTimestamp(nanoseconds: number, seconds: number): number {
-      return seconds * 1000 + Math.floor(nanoseconds / 1000000)
-    }
-  }, [data.id])
-
-  useEffect(() => {
-    if (!cachedUserWorkoutsLog) return
-    const getIt = cachedUserWorkoutsLog.workoutsLog.find(
-      (v) => v.workoutId === data.id,
-    )
-
-    setWorkoutData(getIt || null)
-
-    console.log(`useEffect -> timestamp -> `)
-  }, [cachedUserWorkoutsLog])
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -175,35 +99,6 @@ cancelar compartilhamento
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
-                <ButtonsWrapper>
-                  {workoutData && lastUpdated ? (
-                    <SubTitteContainer>
-                      <SubTitteTextWrapper>
-                        <SubTitteText>
-                          Local - {formatTimestampToDate(workoutData.updatedAt)}
-                        </SubTitteText>
-                        <SubTitteText>
-                          Servidor - {formatTimestampToDate(lastUpdated)}
-                        </SubTitteText>
-                      </SubTitteTextWrapper>
-
-                      <BlurIconViewWrapper
-                        disabled={false}
-                        intensity={50}
-                        tint="light"
-                      >
-                        <ActButton
-                          disabled={workoutData?.updatedAt === lastUpdated}
-                          onPress={syncronizePersonalizedWorkoutData}
-                        >
-                          <Arrow width={30} height={30} fill={'white'} />
-                        </ActButton>
-                      </BlurIconViewWrapper>
-                    </SubTitteContainer>
-                  ) : (
-                    <SubTitteText>Treino ainda não iniciado.</SubTitteText>
-                  )}
-                </ButtonsWrapper>
               </TipsTitleNoteWrapper>
               <SubTitteText>{data.id}</SubTitteText>
 

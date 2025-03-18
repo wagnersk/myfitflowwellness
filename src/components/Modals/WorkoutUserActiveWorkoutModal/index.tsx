@@ -13,10 +13,7 @@ import {
   TipsTitleNoteWrapper,
   TitteText,
   InputsWrapper,
-  DeleteButton,
-  DeleteText,
   OverLayTop,
-  OverLayBottom,
   ToggleSwitch,
   ToggleSwitchText,
   GreenSmallButton,
@@ -25,6 +22,7 @@ import {
   RedButton,
   BlueSmallButton,
   BlueButton,
+  OverLayBottom,
 } from './styles'
 import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 

@@ -223,8 +223,8 @@ export function MarketPlaceHome() {
     : []
 
   let activeWorkout
-  if (myWorkout && myWorkout.dataOrder) {
-    const getIdFromActiveWorkout = myWorkout.dataOrder[0].id
+  if (myWorkout && myWorkout.activeData) {
+    const getIdFromActiveWorkout = myWorkout.activeData[0].id
     activeWorkout = myWorkout?.data.find((v) => v.id === getIdFromActiveWorkout)
   }
 

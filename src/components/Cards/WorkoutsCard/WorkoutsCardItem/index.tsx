@@ -46,7 +46,7 @@ export function WorkoutsCardItem({
 
   let getMyWorkoutOrder
   if (myWorkout && myWorkout.data) {
-    getMyWorkoutOrder = myWorkout.dataOrder.find(
+    getMyWorkoutOrder = myWorkout.activeData.find(
       (workout) => workout.id === data?.workoutId,
     )
   }

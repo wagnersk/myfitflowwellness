@@ -11,6 +11,8 @@ import {
 } from './styles'
 import {
   IMyfitflowWorkoutInUseData,
+  IMyInUseActiveData,
+  IMyInUseExpiredData,
   IMyWorkouts,
   SignInProps,
 } from '@hooks/authTypes'
@@ -18,7 +20,9 @@ import { InUseExpiredWorkoutCard } from '../InUseExpiredWorkoutCard'
 import { InUseActiveWorkoutCard } from '../InUseActiveWorkoutCard'
 
 interface WorkoutContainerProps {
-  data: IMyWorkouts | null
+  activeData: IMyInUseActiveData[] | null
+  expiredData: IMyInUseExpiredData[] | null
+
   activeworkouts: IMyfitflowWorkoutInUseData[] | null
   expiredworkouts: IMyfitflowWorkoutInUseData[] | null
   user: SignInProps | null
@@ -31,7 +35,8 @@ interface WorkoutContainerProps {
 }
 
 export default function InUseWorkoutContainer({
-  data,
+  activeData,
+  expiredData,
   activeworkouts,
   expiredworkouts,
   showScreen2,
@@ -55,15 +60,14 @@ export default function InUseWorkoutContainer({
       {showScreen2 === 'Ativos' && (
         <CardsWrapper>
           {activeworkouts &&
-            data &&
-            data.activeData &&
+            activeData &&
             activeworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
               <CardContainer key={i}>
                 {i === 0 && <CardTittle>Atual:</CardTittle>}
                 {i === 1 && <CardTittle>Próximos:</CardTittle>}
 
                 <InUseActiveWorkoutCard
-                  activeData={data.activeData}
+                  activeData={activeData}
                   //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
                   data={v || null}
                   selectedLanguage={user?.selectedLanguage || 'pt-br'}
@@ -80,11 +84,12 @@ export default function InUseWorkoutContainer({
         </CardsWrapper>
       )}
 
-      {showScreen2 === 'Expirados' && (
+      {showScreen2 === 'Expirados' && expiredData && (
         <CardsWrapper>
           {expiredworkouts &&
             expiredworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
               <InUseExpiredWorkoutCard
+                expiredData={expiredData}
                 //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
                 key={i}
                 data={v || null}

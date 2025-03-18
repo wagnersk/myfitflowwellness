@@ -1694,82 +1694,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   // hook para sincronizar cache de log de treinos
 
-  async function getLastUpdatedAtUserWorkoutCache(workoutCacheId: string) {
-    if (!user) return null
-
-    const userId = user.id
-
-    const workoutDataCacheDoc = doc(
-      db,
-      'users',
-      userId,
-      'workoutDataCache',
-      workoutCacheId,
-    )
-
-    try {
-      const docSnap = await getDoc(workoutDataCacheDoc)
-
-      if (!docSnap.exists()) return null
-
-      const data = docSnap.data() as IWorkoutLog
-
-      if (!data) return null
-      if (!data.updatedAt) return null
-      return data.updatedAt
-    } catch (error) {
-      console.log(error)
-      return null
-    }
-  }
-
-  async function updateUserWorkoutCache(data: IWorkoutLog, updatedAt: number) {
-    if (!user) return
-    console.log(`updateUserWorkoutCache`, updatedAt)
-
-    const userId = user.id
-    const workoutCacheId = data.workoutId
-
-    const workoutDataCacheDoc = doc(
-      db,
-      'users',
-      userId,
-      'workoutDataCache',
-      workoutCacheId,
-    )
-
-    const workoutCacheDoc = doc(
-      db,
-      'users',
-      userId,
-      'workoutDataCache',
-      workoutCacheId,
-      'workoutCache',
-      workoutCacheId,
-    )
-
-    try {
-      const docSnap = await getDoc(workoutDataCacheDoc)
-
-      const getDateFromTimeStamp = new Date(updatedAt)
-
-      if (!docSnap.exists()) {
-        await setDoc(workoutDataCacheDoc, {
-          createdAt: getDateFromTimeStamp,
-          updatedAt: getDateFromTimeStamp,
-        })
-      } else {
-        await updateDoc(workoutDataCacheDoc, {
-          updatedAt: getDateFromTimeStamp,
-        })
-      }
-      data.updatedAt = updatedAt
-      await setDoc(workoutCacheDoc, { data })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   async function createNewContractWithPersonalUpdateUserClientId(
     personalTrainerContractId: string,
     personalTrainerData: IPersonal,
@@ -2250,6 +2174,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
 
       cachedLog.workoutsLog[logIndex].updatedAt = updatedAt
+      cachedLog.updatedAt = updatedAt
 
       /* funcao abaixo nao ta adicionando mais itens do array  */
     }
@@ -2340,6 +2265,29 @@ function AuthProvider({ children }: AuthProviderProps) {
       return user?.id || null
     }
   }
+
+  async function saveCachedUserWorkoutsLog(
+    updatedCache: IUserWorkoutsLog,
+  ): Promise<void> {
+    const userId = getUserId()
+    console.log(`saveCachedUserWorkoutsLog`)
+
+    const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+    await saveToStorage(storageKey, updatedCache)
+    setCachedUserWorkoutsLog(updatedCache)
+
+    async function saveToStorage(
+      key: string,
+      data: IUserWorkoutsLog,
+    ): Promise<void> {
+      await AsyncStorage.setItem(key, JSON.stringify(data))
+    }
+
+    function getUserId(): string | null {
+      return user?.id || null
+    }
+  }
+
   /*   console.log('cachedUserWorkoutsLog()')
   console.log(JSON.stringify(cachedUserWorkoutsLog)) */
 
@@ -2537,10 +2485,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
       console.log(`updatedMyWorkoutsCachedData`, updatedMyWorkoutsCachedData)
       if (updatedMyWorkoutsCachedData) {
-        saveFirebaseMyWorkoutDataAndDataOrder(
-          updatedMyWorkoutsCachedData,
-          updatedTime,
-        )
+        saveFirebaseMyWorkout(updatedMyWorkoutsCachedData, updatedTime)
       }
 
       Alert.alert(
@@ -2631,251 +2576,158 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     }
   }
-  async function saveFirebaseMyWorkoutDataAndDataOrder(
-    __workouts: IMyWorkouts,
-    _updatedAt: number,
-  ) {
-    console.log(`__workouts ->>>`, JSON.stringify(__workouts))
+  async function saveFirebaseMyWorkout(data: IMyWorkouts, _updatedAt: number) {
+    if (!user) return
 
-    await Promise.all([saveAllData(), saveAllDataOrder()])
+    const userId = user.id
 
-    async function saveAllData() {
-      const promises = __workouts.data.map((elementData) =>
-        saveMyWorkoutInFirebaseCacheData(elementData, _updatedAt),
-      )
-      await Promise.all(promises)
-    }
+    const workoutDataCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataMyWorkout',
+      'updatedData',
+    )
 
-    async function saveAllDataOrder() {
-      const promises = __workouts.dataOrder.map((elementOrder) =>
-        saveMyWorkoutInFirebaseCacheDataOrder(elementOrder, _updatedAt),
-      )
-      await Promise.all(promises)
-    }
+    const workoutUpdatedDataCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataMyWorkout',
+      'myWorkoutData',
+    )
 
-    async function saveMyWorkoutInFirebaseCacheData(
-      data: IMyfitflowWorkoutInUseData,
-      _updatedAt: number,
-    ) {
-      if (!user) return
+    try {
+      const docSnap = await getDoc(workoutDataCacheDoc)
 
-      const userId = user.id
-      const workoutDataMyWorkoutsDataCachedId = data.id
+      const getDateFromTimeStamp = new Date(_updatedAt)
 
-      const workoutDataCacheDoc = doc(
-        db,
-        'users',
-        userId,
-        'workoutDataMyWorkoutsDataCached',
-        workoutDataMyWorkoutsDataCachedId,
-      )
-
-      const workoutCacheDoc = doc(
-        db,
-        'users',
-        userId,
-        'workoutDataMyWorkoutsDataCached',
-        workoutDataMyWorkoutsDataCachedId,
-        'workoutDataMyWorkoutsDataCachedItem',
-        workoutDataMyWorkoutsDataCachedId,
-      )
-
-      try {
-        const docSnap = await getDoc(workoutDataCacheDoc)
-
-        const getDateFromTimeStamp = new Date(_updatedAt)
-
-        if (!docSnap.exists()) {
-          await setDoc(workoutDataCacheDoc, {
-            createdAt: getDateFromTimeStamp,
-            updatedAt: getDateFromTimeStamp,
-          })
-        } else {
-          await updateDoc(workoutDataCacheDoc, {
-            updatedAt: getDateFromTimeStamp,
-          })
-        }
-        data.updatedAt = _updatedAt
-        await setDoc(workoutCacheDoc, { data })
-      } catch (error) {
-        console.log(error)
+      if (!docSnap.exists()) {
+        await setDoc(workoutDataCacheDoc, {
+          createdAt: getDateFromTimeStamp,
+          updatedAt: getDateFromTimeStamp,
+        })
+      } else {
+        await updateDoc(workoutDataCacheDoc, {
+          updatedAt: getDateFromTimeStamp,
+        })
       }
-    }
-
-    async function saveMyWorkoutInFirebaseCacheDataOrder(
-      dataOrder: IWorkoutOrder,
-      _updatedAt: number,
-    ) {
-      if (!user) return
-
-      const userId = user.id
-      const workoutDataMyWorkoutsDataOrderCachedId = dataOrder.id
-
-      const workoutDataCacheDoc = doc(
-        db,
-        'users',
-        userId,
-        'workoutDataMyWorkoutsDataOrderCached',
-        workoutDataMyWorkoutsDataOrderCachedId,
-      )
-
-      const workoutCacheDoc = doc(
-        db,
-        'users',
-        userId,
-        'workoutDataMyWorkoutsDataOrderCached',
-        workoutDataMyWorkoutsDataOrderCachedId,
-        'workoutDataMyWorkoutsDataOrderCachedItem',
-        workoutDataMyWorkoutsDataOrderCachedId,
-      )
-
-      try {
-        const docSnap = await getDoc(workoutDataCacheDoc)
-
-        const getDateFromTimeStamp = new Date(_updatedAt)
-
-        if (!docSnap.exists()) {
-          await setDoc(workoutDataCacheDoc, {
-            createdAt: getDateFromTimeStamp,
-            updatedAt: getDateFromTimeStamp,
-          })
-        } else {
-          await updateDoc(workoutDataCacheDoc, {
-            updatedAt: getDateFromTimeStamp,
-          })
-        }
-        dataOrder.updatedAt = _updatedAt
-        await setDoc(workoutCacheDoc, { dataOrder })
-      } catch (error) {
-        console.log(error)
-      }
-    }
-  }
-  async function saveFirebaseMyWorkoutDataAndDataOrder2(
-    __workouts: IMyWorkouts,
-    _updatedAt: number,
-  ) {
-    console.log(`__workouts ->>>`, JSON.stringify(__workouts))
-
-    await saveAllData()
-    await saveAllDataOrder()
-
-    async function saveAllData() {
-      __workouts.data.forEach(async (elementData) => {
-        await saveMyWorkoutInFirebaseCacheData(elementData, _updatedAt) // salva no firebase
-      })
-
-      async function saveMyWorkoutInFirebaseCacheData(
-        data: IMyfitflowWorkoutInUseData,
-        _updatedAt: number,
-      ) {
-        if (!user) return
-
-        const userId = user.id
-        const workoutDataMyWorkoutsDataCachedId = data.id
-
-        const workoutDataCacheDoc = doc(
-          db,
-          'users',
-          userId,
-          'workoutDataMyWorkoutsDataCached',
-          workoutDataMyWorkoutsDataCachedId,
-        )
-
-        const workoutCacheDoc = doc(
-          db,
-          'users',
-          userId,
-          'workoutDataMyWorkoutsDataCached',
-          workoutDataMyWorkoutsDataCachedId,
-          'workoutDataMyWorkoutsDataCachedItem',
-          workoutDataMyWorkoutsDataCachedId,
-        )
-
-        try {
-          const docSnap = await getDoc(workoutDataCacheDoc)
-
-          const getDateFromTimeStamp = new Date(_updatedAt)
-
-          if (!docSnap.exists()) {
-            await setDoc(workoutDataCacheDoc, {
-              createdAt: getDateFromTimeStamp,
-              updatedAt: getDateFromTimeStamp,
-            })
-          } else {
-            await updateDoc(workoutDataCacheDoc, {
-              updatedAt: getDateFromTimeStamp,
-            })
-          }
-          data.updatedAt = _updatedAt
-          await setDoc(workoutCacheDoc, { data })
-        } catch (error) {
-          console.log(error)
-        }
-      }
-    }
-
-    async function saveAllDataOrder() {
-      __workouts.dataOrder.forEach(async (elementOrder) => {
-        await saveMyWorkoutInFirebaseCacheDataOrder(elementOrder, _updatedAt) // salva no firebase
-      })
-
-      async function saveMyWorkoutInFirebaseCacheDataOrder(
-        dataOrder: IWorkoutOrder,
-        _updatedAt: number,
-      ) {
-        if (!user) return
-
-        const userId = user.id
-        const workoutDataMyWorkoutsDataOrderCachedId = dataOrder.id
-
-        const workoutDataCacheDoc = doc(
-          db,
-          'users',
-          userId,
-          'workoutDataMyWorkoutsDataOrderCached',
-          workoutDataMyWorkoutsDataOrderCachedId,
-        )
-
-        const workoutCacheDoc = doc(
-          db,
-          'users',
-          userId,
-          'workoutDataMyWorkoutsDataOrderCached',
-          workoutDataMyWorkoutsDataOrderCachedId,
-          'workoutDataMyWorkoutsDataOrderCachedItem',
-          workoutDataMyWorkoutsDataOrderCachedId,
-        )
-        /*    'workoutDataMyWorkoutsDataCached',
-          workoutDataMyWorkoutsDataCachedId,
-          'workoutDataMyWorkoutsDataCachedItem',
-          workoutDataMyWorkoutsDataCachedId, */
-        try {
-          const docSnap = await getDoc(workoutDataCacheDoc)
-
-          const getDateFromTimeStamp = new Date(_updatedAt)
-
-          if (!docSnap.exists()) {
-            console.log(`create new cache`)
-            await setDoc(workoutDataCacheDoc, {
-              createdAt: getDateFromTimeStamp,
-              updatedAt: getDateFromTimeStamp,
-            })
-          } else {
-            console.log(`update cache`, dataOrder)
-            await updateDoc(workoutDataCacheDoc, {
-              updatedAt: getDateFromTimeStamp,
-            })
-          }
-          dataOrder.updatedAt = _updatedAt
-          await setDoc(workoutCacheDoc, { dataOrder })
-        } catch (error) {
-          console.log(error)
-        }
-      }
+      await setDoc(workoutUpdatedDataCacheDoc, data)
+    } catch (error) {
+      console.log(error)
     }
   }
 
+  async function updateUserFirebaseWorkoutCache(
+    data: IUserWorkoutsLog,
+    updatedAt: number,
+  ) {
+    if (!user) return
+    console.log(`utilizando `, updatedAt)
+
+    const userId = user.id
+
+    const workoutDataCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataCache',
+      'updatedData',
+    )
+
+    const workoutCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataCache',
+      'cachedData',
+    )
+
+    try {
+      const docSnap = await getDoc(workoutDataCacheDoc)
+
+      const getDateFromTimeStamp = new Date(updatedAt)
+
+      if (!docSnap.exists()) {
+        console.log(`n existe`)
+        await setDoc(workoutDataCacheDoc, {
+          createdAt: getDateFromTimeStamp,
+          updatedAt: getDateFromTimeStamp,
+        })
+      } else {
+        console.log(`  existe`)
+
+        await updateDoc(workoutDataCacheDoc, {
+          updatedAt: getDateFromTimeStamp,
+        })
+      }
+      data.updatedAt = updatedAt
+      await setDoc(workoutCacheDoc, data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async function getLastUpdatedAtUserWorkoutCache() {
+    if (!user) return null
+
+    const userId = user.id
+
+    const workoutDataCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataCache',
+      'updatedData',
+    )
+
+    try {
+      const docSnap = await getDoc(workoutDataCacheDoc)
+
+      if (!docSnap.exists()) return null
+
+      const data = docSnap.data() as IWorkoutLog
+
+      if (!data) return null
+      if (!data.updatedAt) return null
+
+      const getDateFromTimeStamp = new Date(
+        data.updatedAt.seconds * 1000 + data.updatedAt.nanoseconds / 1000000,
+      )
+      return getDateFromTimeStamp.getTime()
+    } catch (error) {
+      console.log(error)
+      return null
+    }
+  }
+  async function fetchworkoutDataCache() {
+    if (!user) return null
+
+    const userId = user.id
+
+    const workoutCacheDoc = doc(
+      db,
+      'users',
+      userId,
+      'workoutDataCache',
+      'cachedData',
+    )
+
+    try {
+      const docSnap = await getDoc(workoutCacheDoc)
+
+      if (!docSnap.exists()) return null
+
+      const data = docSnap.data() as IUserWorkoutsLog
+
+      if (!data) return null
+
+      return data
+    } catch (error) {
+      console.log(error)
+      return null
+    }
+  }
   async function saveLocalData(
     formattedWorkoutsDataArray: IWorkoutInfo,
     _workouts: IMyfitflowWorkoutInUse,
@@ -2961,8 +2813,10 @@ function AuthProvider({ children }: AuthProviderProps) {
             data: workoutData,
             createdAt: updatedAt,
             updatedAt,
-            isInUse: false,
             isShared: false,
+            isActive: false,
+            isExpired: false,
+            isCopied: false,
           })
         }
 
@@ -2974,8 +2828,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         workoutData: IMyfitflowWorkoutInUse,
         updatedAt: number,
       ): IMyWorkouts {
-        console.log(`dataDoestNotExists`)
-
         // Exemplo de uso:
 
         // const formattedCurrentDate = formatDateToDDMMYYYY(currentDate)
@@ -2990,11 +2842,13 @@ function AuthProvider({ children }: AuthProviderProps) {
               data: workoutData,
               createdAt: updatedAt,
               updatedAt,
-              isInUse: true,
               isShared: false,
+              isActive: false,
+              isExpired: false,
+              isCopied: false,
             },
           ],
-          dataOrder: [
+          activeData: [
             {
               id: workoutData.workoutId || '',
               createdAt: updatedAt,
@@ -3006,6 +2860,9 @@ function AuthProvider({ children }: AuthProviderProps) {
               ),
             },
           ],
+          expiredData: [],
+          mySharedWorkouts: [],
+          copiedWorkouts: [],
         }
       }
     }
@@ -3229,13 +3086,13 @@ function AuthProvider({ children }: AuthProviderProps) {
       const newWorkoutDataArray = copyMyWorkout.data.filter(
         (v) => v.id !== workoutId,
       )
-      const newWorkoutDataOrder = copyMyWorkout.dataOrder.filter(
+      const newWorkoutDataOrder = copyMyWorkout.activeData.filter(
         (v) => v.id !== workoutId,
       )
 
       // Atualiza o objeto copyMyWorkout com o novo array de workouts
       copyMyWorkout.data = newWorkoutDataArray
-      copyMyWorkout.dataOrder = newWorkoutDataOrder
+      copyMyWorkout.activeData = newWorkoutDataOrder
 
       // Salva os dados atualizados no AsyncStorage
       await AsyncStorage.setItem(workoutKey, JSON.stringify(copyMyWorkout))
@@ -3634,6 +3491,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateStartAndEndDateFromMyWorkoutInCache,
 
         updateMyWorkoutInCache,
+        saveFirebaseMyWorkout,
+
+        updateUserFirebaseWorkoutCache,
+        fetchworkoutDataCache,
 
         deleteMyWorkoutAndmyWorkoutDataArray,
         premiumUserUpdateProfileUpdatedAt,
@@ -3650,7 +3511,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateCachedExerciseHistoryData,
 
         updateCachedUserWorkoutsLog,
-
+        saveCachedUserWorkoutsLog,
         loadCachedVideoTable,
         updateCachedVideoTable,
 
@@ -3669,7 +3530,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateUserGoalFocusMusclePreffer,
         updateUserFrequencyByWeekPreffer,
         updateUserTimeBySessionPreffer,
-        updateUserWorkoutCache,
+
         getLastUpdatedAtUserWorkoutCache,
 
         fetchMuscleOptionData,

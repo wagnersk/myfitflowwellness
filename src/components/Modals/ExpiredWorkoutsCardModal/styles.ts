@@ -64,7 +64,7 @@ export const DeleteText = styled.Text`
   justify-content: flex-start;
 `
 
-export const ToggleSwitchText = styled.Text<{ selected: boolean }>`
+export const ToggleSwitchText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
   color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
@@ -96,12 +96,11 @@ export const ShareButton = styled(TouchableOpacityComponent)`
   padding: 4px;
 `
 
-export const ToggleSwitch = styled(TouchableOpacityComponent)<{
-  selected?: boolean
-}>`
-  background-color: ${({ theme, selected }) =>
-    selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
-  border: 2px solid
-    ${({ theme, selected }) =>
-      selected ? theme.COLORS.AUX_GOOGLE_GREEN : theme.COLORS.AUX_GOOGLE_RED};
+export const GreenButton = styled(TouchableOpacityComponent)`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+  border: 2px solid ${({ theme, selected }) => theme.COLORS.AUX_GOOGLE_GREEN};
+`
+export const RedButton = styled(TouchableOpacityComponent)`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
+  border: 2px solid ${({ theme }) => theme.COLORS.AUX_GOOGLE_RED};
 `

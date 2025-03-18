@@ -844,10 +844,13 @@ export interface AuthContextData {
   ) => Promise<void>
 
   updateMyWorkoutInCache: (data: IMyWorkouts) => Promise<void>
+  saveFirebaseMyWorkout: (data: IMyWorkouts, updatedAt: number) => Promise<void>
 
   updateCachedExerciseHistoryData: (
     data: ICachedExerciseHistoryData,
   ) => Promise<void>
+
+  saveCachedUserWorkoutsLog: (updatedCache: IUserWorkoutsLog) => Promise<void>
 
   updateCachedUserWorkoutsLog: (
     newExercise: ICachedCardExerciseData,
@@ -858,14 +861,14 @@ export interface AuthContextData {
     cardIndex: number,
   ) => Promise<void>
 
-  // firebase
-  updateUserWorkoutCache: (
-    data: IWorkoutLog,
+  // firebasefetchworkoutDataCache
+  updateUserFirebaseWorkoutCache: (
+    data: IUserWorkoutsLog,
     updatedAt: number,
   ) => Promise<void>
-  getLastUpdatedAtUserWorkoutCache: (
-    workoutCacheId: string,
-  ) => Promise<{ nanoseconds: number; seconds: number } | null>
+  fetchworkoutDataCache: () => Promise<IUserWorkoutsLog | null>
+
+  getLastUpdatedAtUserWorkoutCache: () => Promise<number | null>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (
