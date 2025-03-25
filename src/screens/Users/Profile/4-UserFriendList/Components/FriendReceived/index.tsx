@@ -18,14 +18,16 @@ interface FriendCardProps {
   friendIndex: number
   friendName: string
   friendAge: number | undefined
-  onCancelRequest: () => void
+  onAccept: () => void
+  onDecline: () => void
 }
 
-export default function FriendRequest({
+export default function FriendReceived({
   friendIndex,
   friendName,
   friendAge,
-  onCancelRequest,
+  onAccept,
+  onDecline,
 }: FriendCardProps) {
   const theme = useTheme()
 
@@ -43,8 +45,15 @@ export default function FriendRequest({
           <FriendNameText>{`${friendUpperFirstLetter}, ${friendAge}`}</FriendNameText>
         </FriendNameWrapper>
         <FriendEmailWrapper>
-          <ActFriendButton onPress={onCancelRequest}>
+          <ActFriendButton onPress={onDecline}>
             <X width={36} height={36} fill={theme.COLORS.AUX_GOOGLE_RED} />
+          </ActFriendButton>
+          <ActFriendButton onPress={onAccept}>
+            <Check
+              width={36}
+              height={36}
+              stroke={theme.COLORS.AUX_GOOGLE_GREEN}
+            />
           </ActFriendButton>
         </FriendEmailWrapper>
       </FriendContentWrapper>

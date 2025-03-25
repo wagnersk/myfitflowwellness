@@ -61,7 +61,7 @@ export function UserFriendProfile() {
     fetchUserProfile,
     sendFriendRequest,
     cancelFriendRequest,
-    deleteFriend,
+    acceptFriendRequest,
   } = useAuth()
   const route = useRoute()
   const theme = useTheme()

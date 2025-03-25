@@ -937,17 +937,17 @@ export interface AuthContextData {
   fetchListOfUsers: (text: string) => Promise<SignInProps[] | null>
 
   fetchUserInfo: (id: string) => Promise<SignInProps | null>
-  fetchFriendList: (accepted: boolean) => Promise<
-    | {
-        id: string
-      }[]
-    | null
-  >
+  fetchReceivedRequestsList: () => Promise<{ id: string }[] | null>
+  fetchFriendList: () => Promise<{ id: string }[] | null>
+  fetchFriendRequestsList: () => Promise<{ id: string }[] | null>
+
   fetchUserProfile: (id: string) => Promise<null | {
     accepted: boolean
   }>
-  sendFriendRequest: (friendId: string) => Promise<{ accepted: boolean } | null>
+  sendFriendRequest: (friendId: string) => Promise<boolean | null>
   cancelFriendRequest: (friendId: string) => Promise<boolean | null>
+  declineReceivedRequest: (friendId: string) => Promise<boolean | null>
+  acceptFriendRequest: (friendId: string) => Promise<boolean | null>
 
   user: SignInProps | null
 

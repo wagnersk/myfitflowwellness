@@ -36,7 +36,7 @@
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.8",
-    "expo-updates": "~0.27.3",
+    "expo-updates": "~0.27.4",
     "expo-video": "~2.0.6",
     "firebase": "^9.23.0",
     "lottie-react-native": "7.1.0",

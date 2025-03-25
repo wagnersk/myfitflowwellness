@@ -4,7 +4,7 @@ import { Alert } from 'react-native'
 
 import { firebaseApp, auth } from '../../firebase-config'
 
-import { addDays, format, set } from 'date-fns'
+import { add, addDays, format, set } from 'date-fns'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -1162,6 +1162,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
+
   async function fetchMuscleOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
 
@@ -1201,7 +1202,31 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function fetchFriendList(accepted: boolean) {
+  async function fetchFriendList() {
+    if (!user) return null
+
+    const userId = user.id
+    const friendListCollectionRef = collection(
+      db,
+      'users',
+      userId,
+      'friendList',
+    )
+
+    try {
+      const querySnapshot = await getDocs(friendListCollectionRef)
+      const friendList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      return friendList
+    } catch (error) {
+      console.error('Erro ao buscar a lista de amigos:', error)
+      return null
+    }
+  }
+  async function fetchFriendRequestsList() {
     if (!user) return null
 
     const userId = user.id
@@ -1209,82 +1234,282 @@ function AuthProvider({ children }: AuthProviderProps) {
       db,
       'users',
       userId,
-      'friendRequest',
+      'friendRequests',
     )
-    const q = query(
-      friendRequestCollectionRef,
-      where('accepted', '==', accepted),
-    )
+
+    const q = query(friendRequestCollectionRef, where('accepted', '==', false))
 
     const querySnapshot = await getDocs(q)
 
-    const friendRequests = querySnapshot.docs.map((doc) => ({
+    const receivedRequests = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
 
-    return friendRequests
+    return receivedRequests
   }
-
-  async function sendFriendRequest(friendId: string) {
+  async function fetchReceivedRequestsList() {
     if (!user) return null
 
     const userId = user.id
-    const friendRequestStatusDataRef = doc(
+    const friendRequestCollectionRef = collection(
       db,
       'users',
       userId,
-      'friendRequest',
-      friendId,
+      'receivedRequests',
     )
+    const q = query(friendRequestCollectionRef, where('accepted', '==', false))
+
+    const querySnapshot = await getDocs(q)
+
+    const receivedRequests = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+
+    return receivedRequests
+  }
+
+  /* 
+/users/hM7GEloty3dBVSsDOaD5cJHsC3R2/receivedRequests/UtLm1fYorgchlGpVaAt8JxBd8ln2
+/users/UtLm1fYorgchlGpVaAt8JxBd8ln2/receivedRequests/hM7GEloty3dBVSsDOaD5cJHsC3R2
+
+
+*/
+
+  async function sendFriendRequest(friendId: string) {
+    if (!user) return null
+    const userId = user.id
+    console.log('userId', userId)
+    console.log('friendId', friendId)
+
+    const timeNow = new Date().getTime()
+
+    // Referência para quem enviou (Usuário A)
+    // Referência para quem recebeu (Usuário B)
+    const sentRef = doc(db, 'users', userId, 'friendRequests', friendId)
+    const receivedRef = doc(db, 'users', friendId, 'receivedRequests', userId)
 
     try {
       const data = {
         accepted: false,
+        createdAt: timeNow,
+        updatedAt: timeNow,
       }
-      await setDoc(friendRequestStatusDataRef, data)
+
+      // Salva nos dois usuários
+      await Promise.all([setDoc(sentRef, data), setDoc(receivedRef, data)])
 
       return data
     } catch (error) {
       console.error(error)
       return null
     }
-
-    /*   
-    updateDoc,
-  setDoc,
-  sendFriendRequest,
-    cancelFriendRequest,
-    deleteFriend, */
   }
-  async function cancelFriendRequest(friendId: string) {
-    if (!user) return null
 
+  async function acceptFriendRequest(friendId: string) {
+    if (!user) return null
     const userId = user.id
-    const friendRequestStatusDataRef = doc(
-      db,
-      'users',
-      userId,
-      'friendRequest',
-      friendId,
-    )
+    console.log('userId', userId)
+    console.log('friendId', friendId)
+
+    const timeNow = new Date().getTime()
 
     try {
-      await deleteDoc(friendRequestStatusDataRef)
+      // Atualiza as solicitações de amizade
+      const updateSuccess = await updateFriendRequests(
+        userId,
+        friendId,
+        timeNow,
+      )
+      if (!updateSuccess) return false
+
+      // Adiciona os usuários à lista de amigos de ambos
+      const addSuccess = await addToFriendList(userId, friendId, timeNow)
+      if (!addSuccess) return false
+
       return true
     } catch (error) {
       console.error(error)
       return false
     }
+    async function updateFriendRequests(
+      userId: string,
+      friendId: string,
+      timeNow: number,
+    ): Promise<boolean> {
+      const sentRequestRef = doc(
+        db,
+        'users',
+        friendId,
+        'friendRequests',
+        userId,
+      ) // convite aceito
+      const ownRequestRef = doc(db, 'users', userId, 'friendRequests', friendId) // convite aceito
+      const receivedRef = doc(db, 'users', userId, 'receivedRequests', friendId) // convite deleta
 
-    /*   
-    updateDoc,
-  setDoc,
-  sendFriendRequest,
-    cancelFriendRequest,
-    deleteFriend, */
+      const data = {
+        accepted: true,
+        updatedAt: timeNow,
+      }
+
+      const data2 = {
+        accepted: true,
+        updatedAt: timeNow,
+        creted: timeNow,
+      }
+
+      const updateResults = await Promise.allSettled([
+        setDoc(ownRequestRef, data2),
+        updateDoc(sentRequestRef, data),
+        deleteDoc(receivedRef),
+      ])
+
+      const updateErrors = updateResults.filter(
+        (result) => result.status === 'rejected',
+      )
+      if (updateErrors.length > 0) {
+        console.error(
+          'Erro ao atualizar as solicitações de amizade:',
+          updateErrors,
+        )
+        return false
+      }
+
+      return true
+    }
+
+    async function addToFriendList(
+      userId: string,
+      friendId: string,
+      timeNow: number,
+    ): Promise<boolean> {
+      const friendListUserRef = doc(db, 'users', userId, 'friendList', friendId)
+      const friendListFriendRef = doc(
+        db,
+        'users',
+        friendId,
+        'friendList',
+        userId,
+      )
+
+      const friendData = {
+        friendId,
+        createdAt: timeNow,
+        updatedAt: timeNow,
+      }
+
+      const userFriendData = {
+        friendId: userId,
+        createdAt: timeNow,
+        updatedAt: timeNow,
+      }
+
+      const addResults = await Promise.allSettled([
+        setDoc(friendListUserRef, friendData),
+        setDoc(friendListFriendRef, userFriendData),
+      ])
+
+      const addErrors = addResults.filter(
+        (result) => result.status === 'rejected',
+      )
+      if (addErrors.length > 0) {
+        console.error('Erro ao adicionar à lista de amigos:', addErrors)
+        return false
+      }
+
+      return true
+    }
   }
 
+  async function cancelFriendRequest(friendId: string) {
+    if (!user) return null
+
+    const userId = user.id
+
+    // Referências para deletar a solicitação nos dois usuários
+    const sentRequestsDataRef = doc(
+      db,
+      'users',
+      friendId,
+      'receivedRequests',
+      userId,
+    )
+    const receivedRequestsDataRef = doc(
+      db,
+      'users',
+      userId,
+      'friendRequests',
+      friendId,
+    )
+
+    try {
+      // Remove a solicitação de ambos os lados
+      await Promise.all([
+        deleteDoc(sentRequestsDataRef),
+        deleteDoc(receivedRequestsDataRef),
+      ])
+      console.log(`usuario ${userId} - amigo ${friendId}`)
+
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+  async function declineReceivedRequest(friendId: string) {
+    if (!user) return null
+
+    const userId = user.id
+
+    // Referências para deletar a solicitação nos dois usuários
+    const sentRequestsDataRef = doc(
+      db,
+      'users',
+      userId,
+      'receivedRequests',
+      friendId,
+    )
+    const receivedRequestsDataRef = doc(
+      db,
+      'users',
+      friendId,
+      'friendRequests',
+      userId,
+    )
+
+    try {
+      // Remove a solicitação de ambos os lados
+      await Promise.all([
+        deleteDoc(sentRequestsDataRef),
+        deleteDoc(receivedRequestsDataRef),
+      ])
+      console.log(`usuario ${userId} - amigo ${friendId}`)
+
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  }
+  /* 
+
+usaurio A envia para usuario B ( sentRequests (A ) , receivedRequests (B) )
+
+
+
+Usuario B checa se tem convite e aceita ou recusa ( receivedRequests (B) , ao aceitar, ele sentRequest para o A em true tbm)
+
+um sempre confirma o sent 
+
+Usuario B aceita
+
+Usuario B envia para usuario A
+
+
+
+
+*/
   async function fetchListOfUsers(text: string) {
     if (!user) return null
     const userId = user.id
@@ -3535,6 +3760,8 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         fetchMuscleOptionData,
         fetchUserProfile,
+        fetchFriendList,
+        fetchFriendRequestsList,
         fetchFrequencyByWeekOptionData,
         fetchGoalOptionData,
         fetchTimeBySessionOptionData,
@@ -3563,8 +3790,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         fetchListOfUsers,
         fetchUserInfo,
         sendFriendRequest,
+        acceptFriendRequest,
         cancelFriendRequest,
-        fetchFriendList,
+        declineReceivedRequest,
+        fetchReceivedRequestsList,
 
         user,
         premiumUserContract,

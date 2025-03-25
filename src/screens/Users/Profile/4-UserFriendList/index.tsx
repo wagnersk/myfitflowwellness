@@ -55,55 +55,33 @@ import FriendList from './Components/FriendList'
 import FriendRequest from './Components/FriendRequest'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { SignInProps } from '@hooks/authTypes'
+import { set } from 'date-fns'
+import FriendReceived from './Components/FriendReceived'
 
 export function UserFriendList() {
   const {
     user,
     isWaitingApiResponse,
     fetchListOfUsers,
-    fetchFriendList,
+    fetchReceivedRequestsList,
+    fetchFriendRequestsList,
     fetchUserProfile,
+    fetchFriendList,
     fetchUserInfo,
+    cancelFriendRequest,
+    declineReceivedRequest,
+    acceptFriendRequest,
   } = useAuth()
   const navigation = useNavigation()
   const theme = useTheme()
 
-  const items = ['Solicitações', 'Amigos']
-
-  const friendlist = [
-    {
-      name: 'Wagner',
-      email: 'wagnereletroskateet@gmail.com',
-      photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '30/10/1991',
-    },
-    {
-      name: 'Gustavo',
-      email: 'wagnereletroskateet@gmail.com',
-      photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '30/10/1991',
-    },
-  ]
-
-  const friendAcceptlist = [
-    {
-      name: 'Wagner',
-      email: 'wagnereletroskateet@gmail.com',
-      photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '30/10/1991',
-    },
-    {
-      name: 'Gustavo',
-      email: 'wagnereletroskateet@gmail.com',
-      photo: 'wagnereletroskateet@gmail.com',
-      birthdate: '30/10/1996',
-    },
-  ]
+  const items = ['Solicitações', 'Amigos', 'Envios']
 
   const [selectedItem, setSelectedItem] = useState<string | null>('Amigos')
   const [isVisibleInput, setIsVisibleInput] = useState(false)
   const [listOfSearchUsers, setListOfSearchUsers] = useState<SignInProps[]>([])
   const [userRequestList, setUserRequestList] = useState<SignInProps[]>([])
+  const [userReceivedList, setUserReceivedList] = useState<SignInProps[]>([])
   const [userFriendList, setUserFriendList] = useState<SignInProps[]>([])
   const [search, setSearch] = useState('')
 
@@ -112,20 +90,59 @@ export function UserFriendList() {
   function handleGoBack() {
     navigation.goBack()
   }
+
   function handleOpenFriendProfile(friend: SignInProps) {
     navigation.navigate('userFriendProfile', { friend })
   }
-  function handleAcceptFriend() {
-    Alert.alert(`cliquei em aceitar`)
+
+  async function handleAcceptFriend(friendId: string) {
+    const sucess = await acceptFriendRequest(friendId)
+
+    if (!sucess) return
+
+    const userReceived = userReceivedList.filter(
+      (request) => request.id !== friendId,
+    )
+
+    setUserReceivedList(userReceived)
+    setUserFriendList((prev) => prev) // teste
+
+    Alert.alert(`Convite aceito com sucesso`)
   }
-  function handleDeclineFriend() {
-    Alert.alert(`cliquei em recusar`)
+
+  async function handleDeclineFriend(friendId: string) {
+    const sucess = await declineReceivedRequest(friendId)
+
+    if (!sucess) return
+
+    const userReceived = userReceivedList.filter(
+      (request) => request.id !== friendId,
+    )
+
+    setUserReceivedList(userReceived)
+    setUserFriendList((prev) => prev) // teste
+
+    Alert.alert(`Convite recusado com sucesso`)
+  }
+
+  async function handleOnCancelRequest(friendId: string) {
+    const sucess = await cancelFriendRequest(friendId)
+
+    if (!sucess) return
+
+    const userRequest = userRequestList.filter(
+      (request) => request.id !== friendId,
+    )
+
+    setUserRequestList(userRequest)
+    setUserFriendList((prev) => prev) // teste
+
+    // userRequestList
+    Alert.alert(`Convite cancelado com sucesso`)
   }
   function handleSetInputVisible() {
     setIsVisibleInput((prev) => !prev)
   }
-
-  /*   const [search, setSearch] = useState([{ user: 'wagner' }]) */
 
   function handleSearchFriend(text: string) {
     setSearch(text.toLocaleLowerCase())
@@ -146,12 +163,52 @@ export function UserFriendList() {
     }
   }
 
-  /*  */
+  const renderFriendList = () => {
+    if (search !== '') return null
+
+    if (selectedItem === 'Solicitações') {
+      return userReceivedList.map((friend, friendIndex) => (
+        <FriendReceived
+          key={friendIndex}
+          friendIndex={friendIndex}
+          friendName={friend.name}
+          friendAge={diffInAge(friend?.birthdate)}
+          onAccept={() => handleAcceptFriend(friend.id)}
+          onDecline={() => handleDeclineFriend(friend.id)}
+        />
+      ))
+    }
+
+    if (selectedItem === 'Amigos') {
+      return userFriendList.map((friend, friendIndex) => (
+        <FriendList
+          key={friendIndex}
+          friend={friend}
+          openFriendProfile={handleOpenFriendProfile}
+        />
+      ))
+    }
+
+    if (selectedItem === 'Envios') {
+      return userRequestList.map((friend, friendIndex) => (
+        <FriendRequest
+          key={friendIndex}
+          friendIndex={friendIndex}
+          friendName={friend.name}
+          friendAge={diffInAge(friend?.birthdate)}
+          onCancelRequest={() => handleOnCancelRequest(friend.id)}
+        />
+      ))
+    }
+
+    return null
+  }
+
   useEffect(() => {
-    async function fetchRequests() {
+    async function fetchReceivedRequests() {
       if (userRequestList.length > 0) return
-      const acceptedFriends = false
-      const getUserRequestList = await fetchFriendList(acceptedFriends)
+
+      const getUserRequestList = await fetchReceivedRequestsList()
       if (getUserRequestList) {
         const userRequests = (await Promise.all(
           getUserRequestList.map(async (request) => {
@@ -160,18 +217,17 @@ export function UserFriendList() {
           }),
         )) as SignInProps[]
 
-        setUserRequestList(userRequests)
+        setUserReceivedList(userRequests)
         console.log(`getUserRequestList`, userRequests)
       }
     }
-    fetchRequests()
+    fetchReceivedRequests()
   }, [selectedItem === 'Solicitações'])
 
   useEffect(() => {
     async function fetchRequests() {
       if (userFriendList.length > 0) return
-      const acceptedFriends = true
-      const getUserRequestList = await fetchFriendList(acceptedFriends)
+      const getUserRequestList = await fetchFriendList()
       if (getUserRequestList) {
         const userRequests = (await Promise.all(
           getUserRequestList.map(async (request) => {
@@ -186,6 +242,25 @@ export function UserFriendList() {
     }
     fetchRequests()
   }, [selectedItem === 'Amigos'])
+
+  useEffect(() => {
+    async function fetchRequests() {
+      if (userFriendList.length > 0) return
+      const getUserRequestList = await fetchFriendRequestsList()
+      if (getUserRequestList) {
+        const userRequests = (await Promise.all(
+          getUserRequestList.map(async (request) => {
+            const userProfile = await fetchUserInfo(request.id)
+            return { ...request, ...userProfile }
+          }),
+        )) as SignInProps[]
+
+        setUserRequestList(userRequests)
+        console.log(`getUserRequestList`, userRequests)
+      }
+    }
+    fetchRequests()
+  }, [selectedItem === 'Envios'])
 
   useFocusEffect(
     useCallback(() => {
@@ -267,25 +342,7 @@ export function UserFriendList() {
                       >
                         {/*! isVisibleInput && quando  search tiver algo nao mostarr o q tinha antes  */}
 
-                        {search === '' &&
-                          (selectedItem === 'Solicitações'
-                            ? userRequestList.map((friend, friendIndex) => (
-                                <FriendRequest
-                                  key={friendIndex}
-                                  friendIndex={friendIndex}
-                                  friendName={friend.name}
-                                  friendAge={diffInAge(friend?.birthdate)}
-                                  onAccept={handleAcceptFriend}
-                                  onDecline={handleDeclineFriend}
-                                />
-                              ))
-                            : userFriendList.map((friend, friendIndex) => (
-                                <FriendList
-                                  key={friendIndex}
-                                  friend={friend}
-                                  openFriendProfile={handleOpenFriendProfile}
-                                />
-                              )))}
+                        {renderFriendList()}
                       </ScrollView>
                     ) : (
                       listOfSearchUsers &&

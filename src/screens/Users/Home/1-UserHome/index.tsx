@@ -228,12 +228,9 @@ export function UserHome() {
 
   useEffect(() => {
     start()
-
     /* 
  agora q ta sincronizandi com o servidor
-
  ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
- 
     */
     async function start() {
       if (!cachedUserWorkoutsLog) return
