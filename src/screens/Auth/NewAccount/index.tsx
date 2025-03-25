@@ -81,10 +81,10 @@ export function NewAccount() {
   const { selectedLanguage } = route.params as INewAccount
 
   const [userForm, setUserForm] = useState<IUserForm>({
-    name: { value: 'wagner', errorBoolean: false },
-    email: { value: 'wagnereletroskateet@gmail.com', errorBoolean: false },
-    password: { value: '123123', errorBoolean: false },
-    birthdate: { value: '30101991', errorBoolean: false },
+    name: { value: '', errorBoolean: false },
+    email: { value: '', errorBoolean: false },
+    password: { value: '', errorBoolean: false },
+    birthdate: { value: '', errorBoolean: false },
     selectedLanguage: { value: 'pt-br', errorBoolean: false },
   })
 
