@@ -12,6 +12,7 @@ import {
   FriendNameText,
   FriendEmailWrapper,
   ActFriendButton,
+  FriendPhoto,
 } from './styles'
 
 interface FriendCardProps {
@@ -38,7 +39,7 @@ export default function FriendReceived({
     <FriendCardWrapper key={friendIndex}>
       <FriendPhotoWrapper>
         <FriendPhotoImage />
-        {/*  <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" /> */}
+        <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" />
       </FriendPhotoWrapper>
       <FriendContentWrapper>
         <FriendNameWrapper>

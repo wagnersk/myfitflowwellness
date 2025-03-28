@@ -54,7 +54,7 @@ import { diffInAge } from '@utils/diffInAge'
 import FriendList from './Components/FriendList'
 import FriendRequest from './Components/FriendRequest'
 import { CTAButton } from '@components/Buttons/CTAButton'
-import { SignInProps } from '@hooks/authTypes'
+import { IUser } from '@hooks/authTypes'
 import { set } from 'date-fns'
 import FriendReceived from './Components/FriendReceived'
 
@@ -79,10 +79,10 @@ export function UserFriendList() {
 
   const [selectedItem, setSelectedItem] = useState<string | null>('Amigos')
   const [isVisibleInput, setIsVisibleInput] = useState(false)
-  const [listOfSearchUsers, setListOfSearchUsers] = useState<SignInProps[]>([])
-  const [userRequestList, setUserRequestList] = useState<SignInProps[]>([])
-  const [userReceivedList, setUserReceivedList] = useState<SignInProps[]>([])
-  const [userFriendList, setUserFriendList] = useState<SignInProps[]>([])
+  const [listOfSearchUsers, setListOfSearchUsers] = useState<IUser[]>([])
+  const [userRequestList, setUserRequestList] = useState<IUser[]>([])
+  const [userReceivedList, setUserReceivedList] = useState<IUser[]>([])
+  const [userFriendList, setUserFriendList] = useState<IUser[]>([])
   const [search, setSearch] = useState('')
 
   // funcao para conferir aqui
@@ -91,7 +91,7 @@ export function UserFriendList() {
     navigation.goBack()
   }
 
-  function handleOpenFriendProfile(friend: SignInProps) {
+  function handleOpenFriendProfile(friend: IUser) {
     navigation.navigate('userFriendProfile', { friend })
   }
 
@@ -215,7 +215,7 @@ export function UserFriendList() {
             const userProfile = await fetchUserInfo(request.id)
             return { ...request, ...userProfile }
           }),
-        )) as SignInProps[]
+        )) as IUser[]
 
         setUserReceivedList(userRequests)
         console.log(`getUserRequestList`, userRequests)
@@ -234,7 +234,7 @@ export function UserFriendList() {
             const userProfile = await fetchUserInfo(request.id)
             return { ...request, ...userProfile }
           }),
-        )) as SignInProps[]
+        )) as IUser[]
 
         setUserFriendList(userRequests)
         console.log(`getUserRequestList`, userRequests)
@@ -253,7 +253,7 @@ export function UserFriendList() {
             const userProfile = await fetchUserInfo(request.id)
             return { ...request, ...userProfile }
           }),
-        )) as SignInProps[]
+        )) as IUser[]
 
         setUserRequestList(userRequests)
         console.log(`getUserRequestList`, userRequests)

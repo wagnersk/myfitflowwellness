@@ -16,12 +16,12 @@ import {
   FriendCardInfoWrapper,
   FriendCardLineDivisor,
 } from './styles'
-import { SignInProps } from '@hooks/authTypes'
+import { IUser } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 
 interface FriendCardProps {
-  friend: SignInProps
-  openFriendProfile: (friend: SignInProps) => void
+  friend: IUser
+  openFriendProfile: (friend: IUser) => void
 }
 
 export default function FriendList({
@@ -29,7 +29,7 @@ export default function FriendList({
   openFriendProfile,
 }: FriendCardProps) {
   console.log(`friend`, friend)
-  function handleOpenFriendProfile(friend: SignInProps) {
+  function handleOpenFriendProfile(friend: IUser) {
     openFriendProfile(friend)
   }
   const theme = useTheme()
@@ -38,8 +38,7 @@ export default function FriendList({
     <FriendCardWrapper onPress={() => handleOpenFriendProfile(friend)}>
       <FriendPhotoWrapper>
         <FriendPhotoImage />
-        {/*         <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" />
-         */}
+        <FriendPhoto src={friend.photoBase64} />
       </FriendPhotoWrapper>
 
       <FriendContentWrapper>

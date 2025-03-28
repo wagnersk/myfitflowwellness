@@ -4,7 +4,7 @@ import { Alert } from 'react-native'
 
 import { firebaseApp, auth } from '../../firebase-config'
 
-import { add, addDays, format, set } from 'date-fns'
+import { addDays, format } from 'date-fns'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -43,7 +43,7 @@ import {
   IGraphicsValues,
   IWorkoutInfo,
   IWorkoutsData,
-  SignInProps,
+  IUser,
   IStatisticsItens,
   IUserWorkoutsLog,
   ICachedVideoTable,
@@ -74,6 +74,9 @@ import {
   IMyWorkoutsData,
   IMyfitflowWorkoutInUseData,
   IWorkoutOrder,
+  IEquipamentData,
+  IGymInfo,
+  IPersonalTrainerContract,
 } from './authTypes'
 
 import {
@@ -96,7 +99,7 @@ const USER_SIGNIN_COLLECTION = '@myfitflow:signin'
 export const AuthContext = createContext({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<SignInProps | null>(null)
+  const [user, setUser] = useState<IUser | null>(null)
 
   const [contract, setContract] = useState<IContract | null>(null)
 
@@ -152,104 +155,23 @@ function AuthProvider({ children }: AuthProviderProps) {
         const usersRef = collection(db, 'anonymousUsers')
         const updatedTime = serverTimestamp()
 
-        const muscleFocus = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          muscleSelectedData: [
-            {
-              'pt-br': `equilibrado`,
-              us: `balanced`,
-            },
-          ],
-        }
-
-        const freeData: IFreeSelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            barSelectData: [
-              {
-                bar_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            benchSelectData: [
-              {
-                bench_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            otherSelectData: [
-              {
-                other_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            weightSelectData: [
-              {
-                weight_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        const pulleyData: IPulleySelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            pulleyHandlerSelectData: [
-              {
-                pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-            pulleySelectData: [
-              {
-                pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        const machineData: IMachineSelectData = {
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-          data: {
-            machineSelectData: [
-              {
-                machine_insensitive: { 'pt-br': 'todos', us: 'all' },
-              },
-            ],
-          },
-        }
-
-        await setDoc(doc(usersRef, account.user.uid), {
-          anabol: null,
-          birthdate: null,
-          clientId: null,
-          createdAt: updatedTime,
-          email: null,
-          freeData,
-          goal: null,
-          gym: null,
+        const anonimousData: IUser = {
           id: account.user.uid,
+          name: '',
+          name_insensitive: '',
+          birthdate: '',
+          email: '',
+          whatsappNumber: '',
+          photo: '',
           isNewUser: true,
-          machineData,
-          muscleFocus,
-          name: null,
-          name_insensitive: null,
-          personalPlanActive: false,
-          photoBase64: '',
-          premiumPlanActive: false,
           anonymousUser: true,
-          pulleyData,
-          restrictions: null,
           selectedLanguage,
-          sessionsByWeek: null,
-          submissionPending: false,
-          timeBySession: null,
+          premiumContractId: '',
+          createdAt: updatedTime,
           updatedAt: updatedTime,
-          whatsappNumber: null,
-          whenStartedAtGym: '',
-          personalTrainerContractId: null,
-          personalTrainerId: null,
-        })
+        }
+
+        await setDoc(doc(usersRef, account.user.uid), anonimousData)
           .then(() => {
             Alert.alert(
               user?.selectedLanguage === 'pt-br'
@@ -286,7 +208,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     const docSnap = await getDoc(userDocRef)
 
     if (docSnap.exists()) {
-      const userData = docSnap.data() as SignInProps
+      const userData = docSnap.data() as IUser
 
       await AsyncStorage.setItem(
         USER_SIGNIN_COLLECTION,
@@ -416,92 +338,58 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         if (docSnap.exists()) {
           const {
-            anabol,
-            birthdate,
-            clientId,
-            createdAt,
-            email,
-            freeData,
-            goal,
-            gym,
             id,
-            isNewUser,
-            machineData,
-            muscleFocus,
             name,
             name_insensitive,
-            premiumContractId,
-            photoBase64,
-            premiumPlanActive,
-
-            pulleyData,
-            restrictions,
-            selectedLanguage,
-
-            sessionsByWeek,
-            submissionPending,
-            timeBySession,
-            updatedAt,
-            whatsappNumber,
-            whenStartedAtGym,
-
-            personalTrainerContractId,
-            personalTrainerId,
-          } = docSnap.data() as SignInProps
-
-          const userData: SignInProps = {
-            anabol,
             birthdate,
-            clientId,
-            createdAt,
             email,
-            freeData,
-            goal,
-            gym,
-            id,
+            whatsappNumber,
+            photo,
             isNewUser,
-            machineData,
-            muscleFocus,
+            anonymousUser,
+            selectedLanguage,
+            premiumContractId,
+            createdAt,
+            updatedAt,
+          } = docSnap.data() as IUser
+
+          const userData: IUser = {
+            id,
             name,
             name_insensitive,
-            photoBase64,
-            premiumPlanActive,
-            premiumContractId,
-
-            pulleyData,
-            restrictions,
-            selectedLanguage,
-
-            sessionsByWeek,
-            submissionPending,
-            timeBySession,
-            updatedAt,
+            birthdate,
+            email,
             whatsappNumber,
-            whenStartedAtGym,
-
-            personalTrainerContractId,
-            personalTrainerId,
-
-            anonymousUser: false,
+            photo,
+            isNewUser,
+            anonymousUser,
+            selectedLanguage,
+            premiumContractId,
+            createdAt,
+            updatedAt,
           }
+
           await AsyncStorage.setItem(
             USER_SIGNIN_COLLECTION,
             JSON.stringify(userData),
           )
 
           setUser(userData)
-
           loadLoginInitialCachedWorkoutsData(id)
         } else {
-          let userData: IUnconfirmedUserData | null =
+          // dados foram criados local por conta da new account
+          // mas nao foram salvos no banco
+          // esperando usuario confirmar email
+          //
+          let newAccountCachedData: IUnconfirmedUserData | null =
             await loadNewUserTempUnconfirmedData(account.user.uid)
 
-          if (!userData) {
-            userData = {
+          if (!newAccountCachedData) {
+            newAccountCachedData = {
               email,
               password,
-              name: '',
-              birthdate: '',
+              name: 'novo usuario',
+              birthdate: '01/01/2000',
               selectedLanguage,
             }
           }
@@ -510,9 +398,9 @@ function AuthProvider({ children }: AuthProviderProps) {
             account.user.uid,
             email,
             password,
-            userData.name,
-            userData.birthdate,
-            userData.selectedLanguage,
+            newAccountCachedData.name,
+            newAccountCachedData.birthdate,
+            newAccountCachedData.selectedLanguage,
           )
         }
       })
@@ -553,7 +441,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setIsLogging(false)
       })
   }
-
+  //* parei aqui , ta criando ja os dados como quero , agora ver o fluxo do app */
   async function firebaseSignUpWithUserAndPopulateDatabase(
     accountUserUid: string,
     email: string,
@@ -564,80 +452,120 @@ function AuthProvider({ children }: AuthProviderProps) {
   ) {
     setIsWaitingApiResponse(true)
 
-    const usersRef = collection(db, 'users')
-    const updatedTime = serverTimestamp()
+    const userDoc = doc(db, 'users', accountUserUid)
+    const usersEquipamentDoc = doc(
+      db,
+      'users',
+      accountUserUid,
+      'equipamentData',
+      'equipamentFilter',
+    )
 
-    const muscleFocus = {
-      createdAt: updatedTime,
-      updatedAt: updatedTime,
-      muscleSelectedData: [
-        {
-          'pt-br': `equilibrado`,
-          us: `balanced`,
-        },
-      ],
-    }
-
-    const freeData: IFreeSelectData = {
-      createdAt: updatedTime,
-      updatedAt: updatedTime,
-      data: {
-        barSelectData: [
-          {
-            bar_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-        benchSelectData: [
-          {
-            bench_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-        otherSelectData: [
-          {
-            other_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-        weightSelectData: [
-          {
-            weight_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-      },
-    }
-
-    const pulleyData: IPulleySelectData = {
-      createdAt: updatedTime,
-      updatedAt: updatedTime,
-      data: {
-        pulleyHandlerSelectData: [
-          {
-            pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-        pulleySelectData: [
-          {
-            pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-      },
-    }
-
-    const machineData: IMachineSelectData = {
-      createdAt: updatedTime,
-      updatedAt: updatedTime,
-      data: {
-        machineSelectData: [
-          {
-            machine_insensitive: { 'pt-br': 'todos', us: 'all' },
-          },
-        ],
-      },
-    }
+    const usersGymInfoDoc = doc(
+      db,
+      'users',
+      accountUserUid,
+      'gymData',
+      'gymInfo',
+    )
 
     const premiumContractId =
       await createNewContractWithPremiumPersonalUpdateUserClientId(
         accountUserUid,
       )
+
+    const updatedTime = serverTimestamp()
+
+    function generateDefaultEquipamentData() {
+      const freeData: IFreeSelectData = {
+        data: {
+          barSelectData: [
+            {
+              bar_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+          benchSelectData: [
+            {
+              bench_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+          otherSelectData: [
+            {
+              other_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+          weightSelectData: [
+            {
+              weight_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+        },
+      }
+
+      const pulleyData: IPulleySelectData = {
+        data: {
+          pulleyHandlerSelectData: [
+            {
+              pulleyHandler_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+          pulleySelectData: [
+            {
+              pulley_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+        },
+      }
+
+      const machineData: IMachineSelectData = {
+        data: {
+          machineSelectData: [
+            {
+              machine_insensitive: { 'pt-br': 'todos', us: 'all' },
+            },
+          ],
+        },
+      }
+
+      const equipamentData: IEquipamentData = {
+        createdAt: updatedTime,
+        updatedAt: updatedTime,
+        freeData,
+        machineData,
+        pulleyData,
+      }
+      return equipamentData
+    }
+
+    function generateDefaultGymInfoData() {
+      const goal = null
+      const sessionsByWeek = null
+      const timeBySession = null
+
+      const muscleFocus = {
+        muscleSelectedData: [
+          {
+            'pt-br': `equilibrado`,
+            us: `balanced`,
+          },
+        ],
+      }
+
+      const gymName = ''
+      const whenStartedAtGym = ''
+
+      const gymInfoData: IGymInfo = {
+        goal,
+        sessionsByWeek,
+        timeBySession,
+        muscleFocus,
+        gymName,
+        whenStartedAtGym,
+        createdAt: updatedTime,
+        updatedAt: updatedTime,
+      }
+      return gymInfoData
+    }
 
     if (!premiumContractId) {
       Alert.alert(
@@ -648,39 +576,28 @@ function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    const userDataCreate = {
-      anabol: null,
-      birthdate,
-      clientId: null,
-      createdAt: updatedTime,
-      email,
-      freeData,
-      goal: null,
-      gym: null,
+    const userData: IUser = {
       id: accountUserUid,
-      isNewUser: true,
-      machineData,
-      muscleFocus,
       name,
       name_insensitive: name.toLocaleLowerCase().trim(),
-      personalPlanActive: false,
-      photoBase64: '',
-      premiumContractId,
-      pulleyData,
-      restrictions: null,
+      birthdate,
+      email,
+      whatsappNumber: '',
+      photo: '',
+      isNewUser: true,
+      anonymousUser: true,
       selectedLanguage,
-      sessionsByWeek: null,
-      submissionPending: false,
-      timeBySession: null,
+      premiumContractId,
+      createdAt: updatedTime,
       updatedAt: updatedTime,
-      whatsappNumber: null,
-      whenStartedAtGym: '',
-      personalTrainerContractId: null,
-      personalTrainerId: null,
     }
+    const equipamentData = generateDefaultEquipamentData()
+    const gymInfoData = generateDefaultGymInfoData()
 
-    await setDoc(doc(usersRef, accountUserUid), userDataCreate)
-      .then(() => {
+    await setDoc(userDoc, userData)
+      .then(async () => {
+        await setDoc(usersEquipamentDoc, equipamentData)
+        await setDoc(usersGymInfoDoc, gymInfoData)
         Alert.alert(
           selectedLanguage === 'pt-br'
             ? 'Conta criada com sucesso!'
@@ -1525,7 +1442,7 @@ Usuario B envia para usuario A
     const fetchUsers = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as SignInProps[]
+    })) as IUser[]
 
     const removeCurrentUser = fetchUsers.filter((fuser) => fuser.id !== userId)
 
@@ -1539,7 +1456,7 @@ Usuario B envia para usuario A
     const docSnapshot = await getDoc(usersCollectionRef)
 
     if (docSnapshot.exists()) {
-      const initialData = docSnapshot.data() as SignInProps
+      const initialData = docSnapshot.data() as IUser
       return initialData
     } else {
       return null
@@ -3619,7 +3536,7 @@ Usuario B envia para usuario A
         return
       }
 
-      const cachedUserData = JSON.parse(storedUser) as SignInProps
+      const cachedUserData = JSON.parse(storedUser) as IUser
 
       await updateUserState(cachedUserData)
       //  await loadWorkoutData(cachedUserData)
@@ -3638,14 +3555,14 @@ Usuario B envia para usuario A
       setIsLoadingUserStorageData(false)
     }
 
-    async function updateUserState(userData: SignInProps) {
+    async function updateUserState(userData: IUser) {
       if (!userData) return
       setUser(userData)
     }
 
     // armazena em cache meu usuario logado
 
-    /* async function checkForUpdates(userData: SignInProps) {
+    /* async function checkForUpdates(userData: IUser) {
       const state = await NetInfo.fetch()
       if (!state.isConnected) return
 
@@ -3660,7 +3577,7 @@ Usuario B envia para usuario A
         return
       }
 
-      const newUserData = docSnap.data() as SignInProps
+      const newUserData = docSnap.data() as IUser
       const workoutNeedsUpdate =
         JSON.stringify(newUserData.updatedAt) !==
         JSON.stringify(userData.updatedAt)
@@ -3674,7 +3591,7 @@ Usuario B envia para usuario A
         loadLoginInitialCachedWorkoutsData(newUserData.id)
       }
 
-      async function updateStoredUser(newUserData: SignInProps) {
+      async function updateStoredUser(newUserData: IUser) {
         await AsyncStorage.setItem(
           USER_SIGNIN_COLLECTION,
           JSON.stringify(newUserData),
@@ -3693,6 +3610,9 @@ Usuario B envia para usuario A
     await loadGraphicsAndStatistics(userId)
 
     await loadCachedVideoTable(userId)
+    console.log(`criar cache load para carregar IPersonalTrainerContract 
+IGymInfo
+ IEquipamentData , que sao os dados que separei de user , vao ser docs , estou em loadLoginInitialCachedWorkoutsData , linha 3591 auth.tsx`)
   }
 
   useEffect(() => {

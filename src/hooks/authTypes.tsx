@@ -52,15 +52,7 @@ export interface FinalDataItem {
 }
 
 export type IUserGoal = {
-  goalSelectedData?: IptBrUs
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
-}
-
-export interface IFreeSelectData {
-  data?: IFreeSelectItem
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
+  goalSelectedData: IptBrUs
 }
 
 export type IEquipamentsFilters = {
@@ -75,20 +67,16 @@ export type IEquipamentsFilters = {
 
 export interface IMachineSelectData {
   data?: IMachineSelectItem
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
 }
-
+export interface IFreeSelectData {
+  data?: IFreeSelectItem
+}
 export type IPulleySelectData = {
   data?: IPulleySelectItem
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
 }
 
 export type IUserMuscleFocus = {
   muscleSelectedData?: IptBrUs[]
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
 }
 export interface IMuscleSelectItem {
   muscle_insensitive: IptBrUs
@@ -103,17 +91,13 @@ export type IUserFreeEquipament = {
 }
 
 export type IUserSessionsByWeek = {
-  sessionsByWeekSelectedData?: IptBrUs
-  sessionsByWeekNumber?: number
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
+  sessionsByWeekSelectedData: IptBrUs
+  sessionsByWeekNumber: number
 }
 
 export type IUserTimeBySession = {
   timeBySessionSelectedData?: IptBrUs
   timeBySessionByWeekRangeNumber?: number[]
-  updatedAt?: FieldValue
-  createdAt?: FieldValue
 }
 
 export interface IGoalSelectItem {
@@ -142,42 +126,96 @@ export interface IFrequencybyweekSelectData {
   data: IFrequencybyweekSelectItem[]
 }
 
-export type SignInProps = {
-  anabol: string
+export type IUser2 = {
+  id: string
+
+  name: string
+  name_insensitive: string
   birthdate: string
-  clientId: string | null
-  createdAt: ServerTimestamp
   email: string
+  whatsappNumber: string
+  photoBase64?: string
+
+  isNewUser: boolean
+  submissionPending: boolean
+  anonymousUser: boolean
+  selectedLanguage: 'pt-br' | 'us'
 
   goal: IUserGoal
+  whenStartedAtGym: string
   sessionsByWeek: IUserSessionsByWeek
   timeBySession: IUserTimeBySession
   muscleFocus: IUserMuscleFocus
+  gym: string // gymName
+  restrictions: string
+  anabol: string // ??
+  clientId: string | null
+
+  premiumPlanActive: boolean
+  premiumContractId: string | null
+  personalTrainerContractId: string | null
+  personalTrainerId: string | null
 
   freeData?: IFreeSelectData
   pulleyData?: IPulleySelectData
   machineData?: IMachineSelectData
 
-  gym: string
+  createdAt: ServerTimestamp
+  updatedAt: ServerTimestamp
+}
+export type IUser = {
   id: string
-  isNewUser: boolean
   name: string
   name_insensitive: string
+  birthdate: string
+  email: string
+  whatsappNumber: string
+  photo: string
 
-  premiumContractId: string | null
+  isNewUser: boolean
+  anonymousUser: boolean
+  selectedLanguage: 'pt-br' | 'us'
+
+  premiumContractId: string
+
+  createdAt: ServerTimestamp
+  updatedAt: ServerTimestamp
+}
+/* IPersonalTrainerContract IGymInfo IEquipamentData */
+// criar doc dentro de user
+// cria quando for contratar um personal apenas
+export interface IPersonalTrainerContract {
+  submissionPending: boolean
   personalTrainerContractId: string | null
   personalTrainerId: string | null
-  photoBase64?: string
-  premiumPlanActive: boolean
+  clientId: string | null // ver se preciso realmente disso
+  anabol: string // ??
   restrictions: string
-  selectedLanguage: 'pt-br' | 'us'
-  submissionPending: boolean
-
-  updatedAt: ServerTimestamp
-  whatsappNumber: string
-  whenStartedAtGym: string
-  anonymousUser: boolean
+  createdAt: FieldValue
+  updatedAt: FieldValue
 }
+// criar doc dentro de user
+export interface IGymInfo {
+  goal: IUserGoal | null
+  sessionsByWeek: IUserSessionsByWeek | null
+  timeBySession: IUserTimeBySession | null
+  muscleFocus: IUserMuscleFocus | null
+
+  gymName: string
+  whenStartedAtGym: string
+
+  createdAt: FieldValue
+  updatedAt: FieldValue
+}
+// criar doc dentro de user
+export interface IEquipamentData {
+  freeData: IFreeSelectData | null
+  pulleyData: IPulleySelectData | null
+  machineData: IMachineSelectData | null
+  createdAt: FieldValue
+  updatedAt: FieldValue
+}
+
 export interface IStatisticsItens {
   createdAt: number
   updatedAt: number
@@ -934,9 +972,9 @@ export interface AuthContextData {
 
   saveStatisticsItens: (data: IStatisticsItens[] | null) => Promise<void>
   loadStatisticsItens: (userId: string) => Promise<IStatisticsItens[]>
-  fetchListOfUsers: (text: string) => Promise<SignInProps[] | null>
+  fetchListOfUsers: (text: string) => Promise<IUser[] | null>
 
-  fetchUserInfo: (id: string) => Promise<SignInProps | null>
+  fetchUserInfo: (id: string) => Promise<IUser | null>
   fetchReceivedRequestsList: () => Promise<{ id: string }[] | null>
   fetchFriendList: () => Promise<{ id: string }[] | null>
   fetchFriendRequestsList: () => Promise<{ id: string }[] | null>
@@ -949,7 +987,7 @@ export interface AuthContextData {
   declineReceivedRequest: (friendId: string) => Promise<boolean | null>
   acceptFriendRequest: (friendId: string) => Promise<boolean | null>
 
-  user: SignInProps | null
+  user: IUser | null
 
   personalsList: IPersonal[] | null
   workoutsCategories: IWorkoutCategory[] | null

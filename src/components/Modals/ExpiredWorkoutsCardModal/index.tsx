@@ -74,8 +74,7 @@ export function ExpiredWorkoutsCardModal({
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
                 {/* buscar updatedAt do dataARray linkado nesse id */}
-                <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
-                <SubTitteText>{data.id}</SubTitteText>
+                {/*  <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText> */}
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>

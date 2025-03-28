@@ -5,12 +5,12 @@ import {
   CardTittle,
   CardsWrapper,
 } from './styles'
-import { IMyfitflowWorkoutInUseData, SignInProps } from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData, IUser } from '@hooks/authTypes'
 import { TotalWorkoutCard } from '../TotalWorkoutCard'
 
 interface WorkoutContainerProps {
   myTotalWorkouts: IMyfitflowWorkoutInUseData[] | null
-  user: SignInProps | null
+  user: IUser | null
   handleOnPressTotalWorkout: (id: string) => void
 }
 

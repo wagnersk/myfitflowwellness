@@ -14,7 +14,7 @@ import {
   IMyInUseActiveData,
   IMyInUseExpiredData,
   IMyWorkouts,
-  SignInProps,
+  IUser,
 } from '@hooks/authTypes'
 import { InUseExpiredWorkoutCard } from '../InUseExpiredWorkoutCard'
 import { InUseActiveWorkoutCard } from '../InUseActiveWorkoutCard'
@@ -25,7 +25,7 @@ interface WorkoutContainerProps {
 
   activeworkouts: IMyfitflowWorkoutInUseData[] | null
   expiredworkouts: IMyfitflowWorkoutInUseData[] | null
-  user: SignInProps | null
+  user: IUser | null
   showScreen2: 'Ativos' | 'Expirados'
   isOpenSettingsMode: boolean
   handleOnPressExpiredInUseWorkout: (id: string) => void

@@ -3,14 +3,14 @@ import { ContainerWrapper, CardsWrapper } from './styles'
 import {
   IMyfitflowWorkoutInUseData,
   IMyWorkouts,
-  SignInProps,
+  IUser,
 } from '@hooks/authTypes'
 import { SharedWorkoutCard } from '../SharedWorkoutCard'
 
 interface WorkoutContainerProps {
   data: IMyWorkouts | null
   sharedWorkouts: IMyfitflowWorkoutInUseData[] | null
-  user: SignInProps | null
+  user: IUser | null
   handleOnPressShareWorkout: (id: string) => void
 }
 

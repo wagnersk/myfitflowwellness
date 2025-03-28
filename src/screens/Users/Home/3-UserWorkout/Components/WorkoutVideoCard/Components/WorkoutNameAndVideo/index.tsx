@@ -10,7 +10,7 @@ import {
 } from './styles'
 import PlayVideo from '@assets/PlayVideo.svg'
 import { getTrimmedName } from '@utils/getTrimmedName'
-import { IFormattedCardExerciseData, SignInProps } from '@hooks/authTypes'
+import { IFormattedCardExerciseData, IUser } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
 import * as FileSystem from 'expo-file-system'
 import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
@@ -22,7 +22,7 @@ interface WorkoutNameAndVideoProps {
   item: IFormattedCardExerciseData
   selectedLanguage: 'pt-br' | 'us'
   exerciseIndex: number
-  user: SignInProps
+  user: IUser
   openVideoPlayer: () => void
   closeModal: (
     type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',

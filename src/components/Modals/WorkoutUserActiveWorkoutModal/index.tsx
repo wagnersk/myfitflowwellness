@@ -84,8 +84,7 @@ export function WorkoutUserActiveWorkoutModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <TitteText>{tittle}</TitteText>
-                <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText>
-                <SubTitteText>{data.id}</SubTitteText>
+                {/*      <SubTitteText>Atualizado em: 20/10/1991 as 18:38</SubTitteText> */}
               </TipsTitleNoteWrapper>
 
               <InputsWrapper>

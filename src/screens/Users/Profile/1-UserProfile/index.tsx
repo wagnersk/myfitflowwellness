@@ -48,7 +48,7 @@ import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWork
 import {
   IEquipamentsFilters,
   IUserFormProps,
-  SignInProps,
+  IUser,
 } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
