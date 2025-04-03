@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import {
   ImageBackground,
-  BackHandler,
   SafeAreaView,
   TouchableOpacity,
   Image,
@@ -21,17 +20,10 @@ import {
   SettingsWrapper,
   UserName,
   ListWrapper,
-  ContentWrapper,
-  IconWrapper,
   ContainerWrapper,
   ContainerTittle,
-  MonthYearACTMessage,
-  FakeBackgroundWrapper,
-  ButtonContainer,
-  CardsWrapper,
   ContainerTittleWrapper,
-  MonthYearACTMessageText,
-  CardSubTittle,
+  CardsWrapper,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -170,6 +162,7 @@ export function UserPhotoTimeline() {
                                   <Image
                                     source={{ uri: photos[month].side }}
                                     style={{ width: 100, height: 100 }}
+                                    alt=""
                                   />
                                 ) : (
                                   <View

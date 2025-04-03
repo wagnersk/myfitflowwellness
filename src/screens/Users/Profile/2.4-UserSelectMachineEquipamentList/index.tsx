@@ -43,6 +43,8 @@ export type IAllMAchineDataSelect = {
 export function UserSelectMachineEquipamentList() {
   const {
     user,
+    userEquipaments,
+
     isWaitingApiResponse,
     fetchMachineOptionData,
     updateUserMachinePreffer,
@@ -174,8 +176,8 @@ export function UserSelectMachineEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!user) return
-      const { machineData } = user
+      if (!userEquipaments) return
+      const { machineData } = userEquipaments
 
       const machineDefaultSelectData = await fetchMachineOptionData()
       if (!machineDefaultSelectData) return

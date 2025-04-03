@@ -29,43 +29,26 @@ import {
   PhillsRowContainer,
   TittleWrapper,
   AddFriendButton,
-  AddFriendButtonText,
-  FriendCardWrapper,
-  FriendPhotoWrapper,
-  FriendContentWrapper,
-  FriendNameWrapper,
-  FriendNameText,
-  FriendEmailText,
-  FriendEmailWrapper,
-  FriendPhoto,
-  ActFriendButton,
-  FriendPhotoImage,
   InputWrapper,
   InputSearchFriend,
-  CTAButtonWrapper,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Search from '@assets/Search.svg'
-import Dna from '@assets/Dna.svg'
-import { diffInAge } from '@utils/diffInAge'
 import FriendList from './Components/FriendList'
 import FriendRequest from './Components/FriendRequest'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { IUser } from '@hooks/authTypes'
-import { set } from 'date-fns'
 import FriendReceived from './Components/FriendReceived'
 
 export function UserFriendList() {
   const {
-    user,
     isWaitingApiResponse,
     fetchListOfUsers,
     fetchReceivedRequestsList,
     fetchFriendRequestsList,
-    fetchUserProfile,
     fetchFriendList,
     fetchUserInfo,
     cancelFriendRequest,
@@ -170,9 +153,7 @@ export function UserFriendList() {
       return userReceivedList.map((friend, friendIndex) => (
         <FriendReceived
           key={friendIndex}
-          friendIndex={friendIndex}
-          friendName={friend.name}
-          friendAge={diffInAge(friend?.birthdate)}
+          friend={friend}
           onAccept={() => handleAcceptFriend(friend.id)}
           onDecline={() => handleDeclineFriend(friend.id)}
         />
@@ -193,9 +174,7 @@ export function UserFriendList() {
       return userRequestList.map((friend, friendIndex) => (
         <FriendRequest
           key={friendIndex}
-          friendIndex={friendIndex}
-          friendName={friend.name}
-          friendAge={diffInAge(friend?.birthdate)}
+          friend={friend}
           onCancelRequest={() => handleOnCancelRequest(friend.id)}
         />
       ))
@@ -237,7 +216,7 @@ export function UserFriendList() {
         )) as IUser[]
 
         setUserFriendList(userRequests)
-        console.log(`getUserRequestList`, userRequests)
+        console.log(`getUserRequestList a`, userRequests)
       }
     }
     fetchRequests()

@@ -14,21 +14,13 @@ import {
   Container,
   BioInfoWrapper,
   BioInfo,
-  Tittle,
   BioInfoLetter,
   BodyImageContainer,
-  CategoriesWrapper,
-  MyWorkoutWrapper,
-  WorkoutInfoHomeCardWrapper,
-  BlurViewWrapper,
-  MyWorkoutTittleWrapper,
 } from './styles'
+
 import { FlatList } from 'react-native-gesture-handler'
 import { ICachedWorkoutsWithLastUpdatedTimestamp } from '@hooks/authTypes'
-import { CTAButton } from '@components/Buttons/CTAButton'
 import { IWorkoutCategory } from '@src/@types/navigation'
-import { SettingsButton } from '@components/Buttons/SettingsButton'
-import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
 import { BackButton } from '@components/Buttons/BackButton'
 
 export function UserAllCategories() {
@@ -38,7 +30,6 @@ export function UserAllCategories() {
     workoutsCategories,
     loadWorkouts,
     loadCachedWorkouts,
-    myWorkout,
     saveWorkouts,
     loadWorkoutsCategories,
     contract,

@@ -22,14 +22,8 @@ import {
   SettingsWrapper,
   ListWrapper,
   IconWrapper,
-  ContainerWrapper,
   ContainerTittle,
-  MonthYearACTMessage,
-  CardsWrapper,
   ContainerTittleWrapper,
-  CardTittle,
-  OpenSettingsButton,
-  CardDate,
   SelectScreenWrapper,
   SelectScreenButton,
   SelectScreenButtonText,
@@ -45,10 +39,9 @@ import {
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   IMyfitflowWorkoutInUseData,
-  IMyInUseData,
+  IMyInUseActiveData,
   IMyWorkouts,
   IptBrUs,
-  IWorkoutOrder,
 } from '@hooks/authTypes'
 
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -296,7 +289,7 @@ export function UserWorkouts() {
       copiedWorkouts: workouts?.copiedWorkouts || [],
       expiredData: workouts?.expiredData || [],
     } */
-      const newWorkout: IMyInUseData = {
+      const newWorkout: IMyInUseActiveData = {
         id: workoutActive.id,
         createdAt: workoutActive.createdAt,
         updatedAt: timeNow,
@@ -994,7 +987,7 @@ export function UserWorkouts() {
           },
           {
             text: 'Salvar',
-            onPress: () => [saveNewOrderModal(workouts)],
+            onPress: () => [saveNewOrderModal()],
           },
         ],
         { cancelable: false },

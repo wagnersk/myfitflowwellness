@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import {
-  Alert,
   ImageBackground,
   TouchableWithoutFeedback,
   Keyboard,
@@ -22,10 +21,7 @@ import UserMinus from '@assets/User-circle-minus.svg'
 import UserCheck from '@assets/User-circle-check.svg'
 
 import backgroundImg from '../../../../../assets/back.png'
-import { PhotoButton } from '@components/Buttons/PhotoButton'
 import { useTheme } from 'styled-components/native'
-
-import * as ImagePicker from 'expo-image-picker'
 
 import {
   Container,
@@ -36,7 +32,6 @@ import {
   ProfileWrapper,
   PhotoBorderWrapper,
   InputWrapper,
-  Tittle,
   UserFriendEmail,
   UserFriendName,
   CopyWorkoutButton,
@@ -61,15 +56,12 @@ export function UserFriendProfile() {
     fetchUserProfile,
     sendFriendRequest,
     cancelFriendRequest,
-    acceptFriendRequest,
   } = useAuth()
   const route = useRoute()
   const theme = useTheme()
   const dataParams = route.params as IUserFriendProfile
   const [isAlreadyFriend, setIsAlreadyFriend] = useState(false)
   const [isPendingRequest, setIsPendingRequest] = useState(false)
-  console.log(`isAlreadyFriend`, isAlreadyFriend)
-  console.log(`isPendingRequest`, isPendingRequest)
   const navigation = useNavigation()
 
   // funcao para conferir aqui
@@ -150,7 +142,7 @@ export function UserFriendProfile() {
                             ? `Não há foto`
                             : `No Photo`
                         }
-                        defaultPhotoBase64={user?.photoBase64}
+                        defaultPhotoBase64={user?.photo}
                         newDefaultPhotoBase64={`userForm.photoBase64.value`}
                       />
                     </PhotoBorderWrapper>

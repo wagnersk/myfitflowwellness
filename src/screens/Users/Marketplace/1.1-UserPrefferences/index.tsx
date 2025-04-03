@@ -1,20 +1,12 @@
 /* eslint-disable camelcase */
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ImageBackground,
-  TouchableWithoutFeedback,
-  Keyboard,
-  BackHandler,
-  SafeAreaView,
-} from 'react-native'
+import { BackHandler, SafeAreaView } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
 import { BackButton } from '@components/Buttons/BackButton'
 
 import { useAuth } from '@hooks/auth'
-
-import backgroundImg from '../../../../../assets/back.png'
 
 import {
   Container,
@@ -33,7 +25,6 @@ import {
   BodyWrapper,
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
-import { SelectButton } from '@components/Buttons/SelectButton'
 import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
 import {
   IUserSelectFreeEquipamentListNavigation,
@@ -48,7 +39,6 @@ import {
   IExerciseItemType,
   IMuscleGroups,
 } from '@hooks/authTypes'
-import { diffInAge } from '@utils/diffInAge'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -56,6 +46,8 @@ import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackg
 export function UserPrefferences() {
   const {
     user,
+    userPersonalTrainerContract,
+    userGymInfo,
     isWaitingApiResponse,
 
     fetchCachedWorkoutsExercises,
@@ -179,48 +171,51 @@ export function UserPrefferences() {
       return true
     })
   }, [])
-
+  /*   userEquipaments,
+    userGymInfo, */
   const formattedGoal =
-    user &&
     selectedLanguage &&
-    user.goal &&
-    user.goal.goalSelectedData &&
-    user.goal.goalSelectedData[selectedLanguage]
-      ? user.goal.goalSelectedData[selectedLanguage].charAt(0).toUpperCase() +
-        user.goal.goalSelectedData[selectedLanguage].slice(1)
+    userGymInfo &&
+    userGymInfo.goal &&
+    userGymInfo.goal.goalSelectedData &&
+    userGymInfo.goal.goalSelectedData[selectedLanguage]
+      ? userGymInfo.goal.goalSelectedData[selectedLanguage]
+          .charAt(0)
+          .toUpperCase() +
+        userGymInfo.goal.goalSelectedData[selectedLanguage].slice(1)
       : selectedLanguage === 'pt-br'
         ? 'Selecione um objetivo'
         : 'Select a goal'
 
   const formattedFrequencyByWeek =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.sessionsByWeek &&
-    user.sessionsByWeek.sessionsByWeekSelectedData &&
-    user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
-      ? user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
+    userGymInfo.sessionsByWeek &&
+    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData &&
+    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
+      ? userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
       : selectedLanguage === 'pt-br'
         ? 'Selecione quantos dias por semana'
         : 'Select how many days per week'
 
   const formattedTimeBySession =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.timeBySession &&
-    user.timeBySession.timeBySessionSelectedData &&
-    user.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
-    user.timeBySession.timeBySessionSelectedData[selectedLanguage]
-      ? user.timeBySession.timeBySessionSelectedData[selectedLanguage]
+    userGymInfo.timeBySession &&
+    userGymInfo.timeBySession.timeBySessionSelectedData &&
+    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
+    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
+      ? userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
       : selectedLanguage === 'pt-br'
         ? 'Selecione quanto tempo por treino'
         : 'Select how long per session'
 
   const formattedMuscleFocus =
-    user &&
-    user.muscleFocus &&
-    user.muscleFocus.muscleSelectedData &&
+    userGymInfo &&
+    userGymInfo.muscleFocus &&
+    userGymInfo.muscleFocus.muscleSelectedData &&
     selectedLanguage
-      ? user.muscleFocus.muscleSelectedData.reduce(
+      ? userGymInfo.muscleFocus.muscleSelectedData.reduce(
           (acc: string, curr: any, index: number) => {
             const muscleUs = curr?.[selectedLanguage]
             return muscleUs ? acc + (index > 0 ? ', ' : '') + muscleUs : acc
@@ -296,49 +291,50 @@ export function UserPrefferences() {
                       </ButtonWrapper>
                     </SelectWrapper>
                   </SelectContentWrapper>
-                  {user && user.personalTrainerContractId && (
-                    <FooterWrapper>
-                      <Title>Equipamentos disponíveis</Title>
-                      <FooterContainer>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Livre`}
-                            onPress={() => {
-                              handleOpenFilterFreeEquipamentList({
-                                dataType: 'Livre',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Polia`}
-                            onPress={() => {
-                              handleOpenFilterPulleyEquipamentList({
-                                dataType: 'Polia',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Máquina`}
-                            onPress={() => {
-                              handleOpenFilterMachineEquipamentList({
-                                dataType: 'Máquina',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                      </FooterContainer>
-                    </FooterWrapper>
-                  )}
+                  {userPersonalTrainerContract &&
+                    userPersonalTrainerContract.personalTrainerContractId && (
+                      <FooterWrapper>
+                        <Title>Equipamentos disponíveis</Title>
+                        <FooterContainer>
+                          <SelectFilterButtonWrapper>
+                            <SelectFilterButton
+                              title={`Livre`}
+                              onPress={() => {
+                                handleOpenFilterFreeEquipamentList({
+                                  dataType: 'Livre',
+                                })
+                              }}
+                              enabled={true}
+                              loading={false}
+                            />
+                          </SelectFilterButtonWrapper>
+                          <SelectFilterButtonWrapper>
+                            <SelectFilterButton
+                              title={`Polia`}
+                              onPress={() => {
+                                handleOpenFilterPulleyEquipamentList({
+                                  dataType: 'Polia',
+                                })
+                              }}
+                              enabled={true}
+                              loading={false}
+                            />
+                          </SelectFilterButtonWrapper>
+                          <SelectFilterButtonWrapper>
+                            <SelectFilterButton
+                              title={`Máquina`}
+                              onPress={() => {
+                                handleOpenFilterMachineEquipamentList({
+                                  dataType: 'Máquina',
+                                })
+                              }}
+                              enabled={true}
+                              loading={false}
+                            />
+                          </SelectFilterButtonWrapper>
+                        </FooterContainer>
+                      </FooterWrapper>
+                    )}
                 </Body>
               </BodyWrapper>
             </SafeAreaView>

@@ -17,8 +17,6 @@ export const ContentWrapper = styled.View`
   height: 100%;
 `
 
-export const InfoAndButtonWrapper = styled.View``
-
 export const InfoWrapper = styled.View`
   flex: 1;
 `

@@ -11,18 +11,11 @@ interface PlanCardProps {
   expiredData: IMyInUseExpiredData[]
   selectedLanguage: 'pt-br' | 'us'
   handleOnPressExpiredWorkout: (id: string) => void
-
-  index: number
 }
 
 export function InUseExpiredWorkoutCard({
   data,
-  expiredData,
-  selectedLanguage,
   handleOnPressExpiredWorkout,
-  index,
-  isOpenSettingsMode,
-  handleOnPressTotalWorkout,
 }: PlanCardProps) {
   function onExpiredWorkout(id: string) {
     handleOnPressExpiredWorkout(id)
@@ -32,7 +25,6 @@ export function InUseExpiredWorkoutCard({
       <ButtonContainer>
         <BodyWraper>
           <ItemCard
-            index={index}
             data={data}
             handleNextStep={() => data && onExpiredWorkout(data.id)}
             isActive={false}

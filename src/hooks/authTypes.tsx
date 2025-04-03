@@ -30,15 +30,11 @@ export type IExerciseItems =
   | `weight`
 
 export type IUserFormProps = {
-  anabol: string
   birthdate: string
   email: string
-  gym: string
   name: string
-  photoBase64: string
-  restrictions: string
+  photo: string
   whatsappNumber: string
-  whenStartedAtGym: string
 }
 
 export interface FilterItem {
@@ -181,10 +177,10 @@ export type IUser = {
   createdAt: ServerTimestamp
   updatedAt: ServerTimestamp
 }
-/* IPersonalTrainerContract IGymInfo IEquipamentData */
+/* IUserPersonalTrainerContract IUserGymInfo IUserEquipamentData */
 // criar doc dentro de user
 // cria quando for contratar um personal apenas
-export interface IPersonalTrainerContract {
+export interface IUserPersonalTrainerContract {
   submissionPending: boolean
   personalTrainerContractId: string | null
   personalTrainerId: string | null
@@ -195,7 +191,7 @@ export interface IPersonalTrainerContract {
   updatedAt: FieldValue
 }
 // criar doc dentro de user
-export interface IGymInfo {
+export interface IUserGymInfo {
   goal: IUserGoal | null
   sessionsByWeek: IUserSessionsByWeek | null
   timeBySession: IUserTimeBySession | null
@@ -208,7 +204,7 @@ export interface IGymInfo {
   updatedAt: FieldValue
 }
 // criar doc dentro de user
-export interface IEquipamentData {
+export interface IUserEquipamentData {
   freeData: IFreeSelectData | null
   pulleyData: IPulleySelectData | null
   machineData: IMachineSelectData | null
@@ -938,6 +934,12 @@ export interface AuthContextData {
   ) => Promise<void>
   updateUserSelectedLanguage: (language: 'pt-br' | 'us') => Promise<void>
 
+  loadUserGymInfo: () => Promise<IUserGymInfo | null>
+  saveUserGymInfo: (gymInfo: IUserGymInfo) => Promise<void>
+
+  loadUserEquipments: () => Promise<IUserEquipamentData | null>
+  saveUserEquipments: (equipamentsInfo: IUserEquipamentData) => Promise<void>
+
   fetchGoalOptionData: () => Promise<IGoalSelectData | null>
   updateUserGoalPreffer: (data: IUserGoal) => Promise<void>
 
@@ -982,12 +984,19 @@ export interface AuthContextData {
   fetchUserProfile: (id: string) => Promise<null | {
     accepted: boolean
   }>
-  sendFriendRequest: (friendId: string) => Promise<boolean | null>
+  sendFriendRequest: (friendId: string) => Promise<{
+    accepted: boolean
+    createdAt: number
+    updatedAt: number
+  } | null>
   cancelFriendRequest: (friendId: string) => Promise<boolean | null>
   declineReceivedRequest: (friendId: string) => Promise<boolean | null>
   acceptFriendRequest: (friendId: string) => Promise<boolean | null>
 
   user: IUser | null
+  userEquipaments: IUserEquipamentData | null
+  userGymInfo: IUserGymInfo | null
+  userPersonalTrainerContract: IUserPersonalTrainerContract | null
 
   personalsList: IPersonal[] | null
   workoutsCategories: IWorkoutCategory[] | null

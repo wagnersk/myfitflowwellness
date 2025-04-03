@@ -31,7 +31,6 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendEmailVerification,
-  UserCredential,
 } from 'firebase/auth'
 
 import {
@@ -39,7 +38,6 @@ import {
   AuthContextData,
   AuthProviderProps,
   ICachedExerciseHistoryData,
-  IFormattedCardExerciseData,
   IGraphicsValues,
   IWorkoutInfo,
   IWorkoutsData,
@@ -47,7 +45,6 @@ import {
   IStatisticsItens,
   IUserWorkoutsLog,
   ICachedVideoTable,
-  IWeightDoneLog,
   IWorkoutCardLogData,
   IWorkoutLog,
   IPersonal,
@@ -72,11 +69,9 @@ import {
   ICachedCardExerciseData,
   IMyWorkouts,
   IMyWorkoutsData,
-  IMyfitflowWorkoutInUseData,
-  IWorkoutOrder,
-  IEquipamentData,
-  IGymInfo,
-  IPersonalTrainerContract,
+  IUserEquipamentData,
+  IUserGymInfo,
+  IUserPersonalTrainerContract,
 } from './authTypes'
 
 import {
@@ -89,7 +84,6 @@ import { IWorkoutCategory } from '@src/@types/navigation'
 import {
   addDaysToTimestamp,
   addWeeksToTimestamp,
-  formatDateToDDMMYYYY,
 } from '@utils/calculeEndDateWithWeeks'
 
 const db = getFirestore(firebaseApp)
@@ -100,6 +94,11 @@ export const AuthContext = createContext({} as AuthContextData)
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<IUser | null>(null)
+  const [userEquipaments, setUserEquipaments] =
+    useState<IUserEquipamentData | null>(null)
+  const [userGymInfo, setUserGymInfo] = useState<IUserGymInfo | null>(null)
+  const [userPersonalTrainerContract, setUserPersonalTrainerContract] =
+    useState<IUserPersonalTrainerContract | null>(null)
 
   const [contract, setContract] = useState<IContract | null>(null)
 
@@ -325,6 +324,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     signInWithEmailAndPassword(auth, email, password)
       .then(async (account) => {
         const userDocRef = doc(db, 'users', account.user.uid)
+
         const docSnap = await getDoc(userDocRef)
 
         if (!account.user.emailVerified) {
@@ -375,6 +375,7 @@ function AuthProvider({ children }: AuthProviderProps) {
           )
 
           setUser(userData)
+
           loadLoginInitialCachedWorkoutsData(id)
         } else {
           // dados foram criados local por conta da new account
@@ -394,14 +395,23 @@ function AuthProvider({ children }: AuthProviderProps) {
             }
           }
 
-          await firebaseSignUpWithUserAndPopulateDatabase(
-            account.user.uid,
-            email,
-            password,
-            newAccountCachedData.name,
-            newAccountCachedData.birthdate,
-            newAccountCachedData.selectedLanguage,
-          )
+          const responseUserData =
+            await firebaseSignUpWithUserAndPopulateDatabase(
+              account.user.uid,
+              email,
+              password,
+              newAccountCachedData.name,
+              newAccountCachedData.birthdate,
+              newAccountCachedData.selectedLanguage,
+            )
+          if (responseUserData) {
+            await AsyncStorage.setItem(
+              USER_SIGNIN_COLLECTION,
+              JSON.stringify(responseUserData),
+            )
+
+            setUser(responseUserData)
+          }
         }
       })
       .catch((error) => {
@@ -441,7 +451,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setIsLogging(false)
       })
   }
-  //* parei aqui , ta criando ja os dados como quero , agora ver o fluxo do app */
+  //* parei aqui , ta criando ja os dados como quero , agora ver o fluxo do app ver como ta o app */
   async function firebaseSignUpWithUserAndPopulateDatabase(
     accountUserUid: string,
     email: string,
@@ -476,6 +486,55 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const updatedTime = serverTimestamp()
 
+    if (!premiumContractId) {
+      Alert.alert(
+        selectedLanguage === 'pt-br'
+          ? 'erro premium bonus'
+          : 'erro premium bonus',
+      )
+      return
+    }
+
+    const userData: IUser = {
+      id: accountUserUid,
+      name,
+      name_insensitive: name.toLocaleLowerCase().trim(),
+      birthdate,
+      email,
+      whatsappNumber: '',
+      photo: '',
+      isNewUser: true,
+      anonymousUser: false,
+      selectedLanguage,
+      premiumContractId,
+      createdAt: updatedTime,
+      updatedAt: updatedTime,
+    }
+    const equipamentData = generateDefaultEquipamentData()
+    const gymInfoData = generateDefaultGymInfoData()
+
+    const responseUserData = await setDoc(userDoc, userData)
+      .then(async () => {
+        await setDoc(usersEquipamentDoc, equipamentData)
+        await setDoc(usersGymInfoDoc, gymInfoData)
+        Alert.alert(
+          selectedLanguage === 'pt-br'
+            ? 'Conta criada com sucesso!'
+            : 'Account created successfully!',
+        )
+
+        firebaseSignIn(email, password, selectedLanguage)
+        return userData
+      })
+      .catch((error) => {
+        console.log(error.code)
+        return null
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+      })
+
+    return responseUserData
     function generateDefaultEquipamentData() {
       const freeData: IFreeSelectData = {
         data: {
@@ -527,7 +586,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         },
       }
 
-      const equipamentData: IEquipamentData = {
+      const equipamentData: IUserEquipamentData = {
         createdAt: updatedTime,
         updatedAt: updatedTime,
         freeData,
@@ -554,7 +613,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       const gymName = ''
       const whenStartedAtGym = ''
 
-      const gymInfoData: IGymInfo = {
+      const gymInfoData: IUserGymInfo = {
         goal,
         sessionsByWeek,
         timeBySession,
@@ -566,52 +625,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
       return gymInfoData
     }
-
-    if (!premiumContractId) {
-      Alert.alert(
-        selectedLanguage === 'pt-br'
-          ? 'erro premium bonus'
-          : 'erro premium bonus',
-      )
-      return
-    }
-
-    const userData: IUser = {
-      id: accountUserUid,
-      name,
-      name_insensitive: name.toLocaleLowerCase().trim(),
-      birthdate,
-      email,
-      whatsappNumber: '',
-      photo: '',
-      isNewUser: true,
-      anonymousUser: true,
-      selectedLanguage,
-      premiumContractId,
-      createdAt: updatedTime,
-      updatedAt: updatedTime,
-    }
-    const equipamentData = generateDefaultEquipamentData()
-    const gymInfoData = generateDefaultGymInfoData()
-
-    await setDoc(userDoc, userData)
-      .then(async () => {
-        await setDoc(usersEquipamentDoc, equipamentData)
-        await setDoc(usersGymInfoDoc, gymInfoData)
-        Alert.alert(
-          selectedLanguage === 'pt-br'
-            ? 'Conta criada com sucesso!'
-            : 'Account created successfully!',
-        )
-
-        firebaseSignIn(email, password, selectedLanguage)
-      })
-      .catch((error) => {
-        console.log(error.code)
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-      })
   }
 
   async function firebaseSignOut() {
@@ -822,37 +835,33 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function updateUserGoalPreffer(userGoal: IUserGoal) {
     if (!user) return
-    const { createdAt, goalSelectedData, updatedAt } = userGoal
-    let fgoal: IUserGoal = {}
-    if (user.goal) {
+    if (!userGymInfo) return
+    const { goalSelectedData } = userGoal
+    const { id } = user
+    let fgoal: IUserGoal = { goalSelectedData: { 'pt-br': '', us: '' } }
+    if (userGymInfo.goal) {
       fgoal = {
         goalSelectedData,
-        updatedAt,
       }
     }
 
-    if (!user.goal) {
+    if (!userGymInfo.goal) {
       fgoal = {
         goalSelectedData,
-        updatedAt,
-        createdAt,
       }
     }
 
     setIsWaitingApiResponse(true)
     const userRef = collection(db, 'users')
 
-    const { id } = user
-
     await updateDoc(doc(userRef, id), {
       goal: fgoal,
-      updatedAt,
     })
       .catch((err) => {
         console.error(err)
       })
       .then(async () => {
-        if (!user || !updatedAt) {
+        if (!user) {
           return
         }
 
@@ -875,7 +884,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
-
+  // TODO
   async function updateUserGoalFocusMusclePreffer(
     mucleFocus: IUserMuscleFocus,
   ) {
@@ -937,7 +946,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
-
+  // TODO
   async function updateUserFrequencyByWeekPreffer(
     userSessionsByWeek: IUserSessionsByWeek,
   ) {
@@ -1008,7 +1017,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
-
+  // TODO
   async function updateUserTimeBySessionPreffer(
     userTimeBySession: IUserTimeBySession,
   ) {
@@ -1079,7 +1088,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         )
       })
   }
-
   async function fetchMuscleOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
 
@@ -1186,13 +1194,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     return receivedRequests
   }
-
-  /* 
-/users/hM7GEloty3dBVSsDOaD5cJHsC3R2/receivedRequests/UtLm1fYorgchlGpVaAt8JxBd8ln2
-/users/UtLm1fYorgchlGpVaAt8JxBd8ln2/receivedRequests/hM7GEloty3dBVSsDOaD5cJHsC3R2
-
-
-*/
 
   async function sendFriendRequest(friendId: string) {
     if (!user) return null
@@ -1409,24 +1410,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return false
     }
   }
-  /* 
 
-usaurio A envia para usuario B ( sentRequests (A ) , receivedRequests (B) )
-
-
-
-Usuario B checa se tem convite e aceita ou recusa ( receivedRequests (B) , ao aceitar, ele sentRequest para o A em true tbm)
-
-um sempre confirma o sent 
-
-Usuario B aceita
-
-Usuario B envia para usuario A
-
-
-
-
-*/
   async function fetchListOfUsers(text: string) {
     if (!user) return null
     const userId = user.id
@@ -1514,7 +1498,7 @@ Usuario B envia para usuario A
       return null
     }
   }
-
+  // TODO
   async function updateUserFreePreffer(data: IFreeSelectItem) {
     if (!user) return
 
@@ -1578,7 +1562,6 @@ Usuario B envia para usuario A
         )
       })
   }
-
   async function fetchPulleyOptionData() {
     const pulleySelectDataRef = doc(db, 'selectOptionsData', `pulley`)
 
@@ -1591,7 +1574,7 @@ Usuario B envia para usuario A
       return null
     }
   }
-
+  // TODO
   async function updateUserPulleyPreffer(data: IPulleySelectItem) {
     if (!user) return
 
@@ -1675,7 +1658,7 @@ Usuario B envia para usuario A
       throw error
     }
   }
-
+  // TODO
   async function updateUserMachinePreffer(data: IMachineSelectItem) {
     if (!user) return
 
@@ -1831,6 +1814,100 @@ Usuario B envia para usuario A
       return initialData
     } else {
       return null
+    }
+  }
+
+  async function loadUserGymInfo(): Promise<IUserGymInfo | null> {
+    const userId = user?.id
+    if (!userId) return null
+    const usersGymInfoDoc = doc(db, 'users', userId, 'gymData', 'gymInfo')
+
+    const gymInfoSnap = await getDoc(usersGymInfoDoc)
+
+    if (!gymInfoSnap.exists()) {
+      console.error('Informações da academia não encontradas.')
+      return null
+    }
+
+    const {
+      createdAt,
+      goal,
+      gymName,
+      muscleFocus,
+      sessionsByWeek,
+      timeBySession,
+      updatedAt,
+      whenStartedAtGym,
+    } = gymInfoSnap.data() as IUserGymInfo
+
+    return {
+      createdAt,
+      goal,
+      gymName,
+      muscleFocus,
+      sessionsByWeek,
+      timeBySession,
+      updatedAt,
+      whenStartedAtGym,
+    }
+  }
+  async function saveUserGymInfo(gymInfo: IUserGymInfo) {
+    if (!gymInfo) return
+    const userId = user?.id
+    if (!userId) return
+
+    const USER_GYMINFO_COLLECTION = `@myfitflow:userlocaldata-gyminfo-${userId}`
+
+    if (gymInfo) {
+      setUserGymInfo(gymInfo)
+      await AsyncStorage.setItem(
+        USER_GYMINFO_COLLECTION,
+        JSON.stringify(gymInfo),
+      )
+    }
+  }
+  async function loadUserEquipments(): Promise<IUserEquipamentData | null> {
+    const userId = user?.id
+    if (!userId) return null
+
+    const usersEquipamentDoc = doc(
+      db,
+      'users',
+      userId,
+      'equipamentData',
+      'equipamentFilter',
+    )
+    const equipamentSnap = await getDoc(usersEquipamentDoc)
+
+    if (!equipamentSnap.exists()) {
+      console.error('Equipamentos não encontrados.')
+      return null
+    }
+
+    const { createdAt, freeData, machineData, pulleyData, updatedAt } =
+      equipamentSnap.data() as IUserEquipamentData
+
+    return {
+      createdAt,
+      freeData,
+      machineData,
+      pulleyData,
+      updatedAt,
+    }
+  }
+  async function saveUserEquipments(equipamentsInfo: IUserEquipamentData) {
+    if (!equipamentsInfo) return
+    const userId = user?.id
+    if (!userId) return
+
+    const USER_EQUIPAMENTS_COLLECTION = `@myfitflow:userlocaldata-equipaments-${userId}`
+
+    if (equipamentsInfo) {
+      setUserEquipaments(equipamentsInfo)
+      await AsyncStorage.setItem(
+        USER_EQUIPAMENTS_COLLECTION,
+        JSON.stringify(equipamentsInfo),
+      )
     }
   }
 
@@ -2012,7 +2089,7 @@ Usuario B envia para usuario A
       return null
     }
   }
-
+  // TODO
   async function loadPersonalTrainerData() {
     if (!user) return null
     const personalTrainerId = user.personalTrainerId
@@ -2118,13 +2195,7 @@ Usuario B envia para usuario A
     console.log(
       `falta enviar esses dados para o servidor caso o usuario seja mentorado por personal OU pagar conta premium`,
     )
-    /* 
-    
-    falta enviar esses dados para o servidor caso o usuario seja mentorado por personal OU pagar conta premium
-    
-    */
 
-    // const getGraphicName = data.data.
     if (!user) {
       return
     }
@@ -2166,7 +2237,6 @@ Usuario B envia para usuario A
       return console.log(`recebendo data null`)
     }
 
-    // const getGraphicName = data.data.
     if (!user) {
       return
     }
@@ -2430,16 +2500,45 @@ Usuario B envia para usuario A
     }
   }
 
-  /*   console.log('cachedUserWorkoutsLog()')
-  console.log(JSON.stringify(cachedUserWorkoutsLog)) */
-
   /// apagarCached()
   async function apagarCached() {
     AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
   }
 
   // fazer se inspirando no notes
+  async function loadCachedUserGymInfo(userId: string) {
+    const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
 
+    try {
+      const storedCachedGymInfoString =
+        await AsyncStorage.getItem(storageGymInfoKey)
+
+      if (storedCachedGymInfoString) {
+        const gymInfoData = JSON.parse(storedCachedGymInfoString)
+
+        setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      // console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+  async function loadCachedUserEquipaments(userId: string) {
+    const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
+
+    try {
+      const storedCachedEquipamentsString = await AsyncStorage.getItem(
+        storageEquipamentsKey,
+      )
+
+      if (storedCachedEquipamentsString) {
+        const equipamentsData = JSON.parse(storedCachedEquipamentsString)
+
+        setUserEquipaments(equipamentsData) // Atualiza o estado com os dados carregados
+      }
+    } catch (error) {
+      // console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
   // setCachedUserWorkoutsLog
   async function updateCachedVideoTable(
     cachedLocalPathVideo: string,
@@ -2718,6 +2817,7 @@ Usuario B envia para usuario A
       }
     }
   }
+
   async function saveFirebaseMyWorkout(data: IMyWorkouts, _updatedAt: number) {
     if (!user) return
 
@@ -2809,7 +2909,7 @@ Usuario B envia para usuario A
       console.log(error)
     }
   }
-
+  // TODO
   async function getLastUpdatedAtUserWorkoutCache() {
     if (!user) return null
 
@@ -2842,6 +2942,7 @@ Usuario B envia para usuario A
       return null
     }
   }
+
   async function fetchworkoutDataCache() {
     if (!user) return null
 
@@ -2870,6 +2971,7 @@ Usuario B envia para usuario A
       return null
     }
   }
+
   async function saveLocalData(
     formattedWorkoutsDataArray: IWorkoutInfo,
     _workouts: IMyfitflowWorkoutInUse,
@@ -3009,6 +3111,7 @@ Usuario B envia para usuario A
       }
     }
   }
+
   async function saveExerciseDataInLocalCache(
     exerciseData: IWorkoutInfo,
     updatedAt: number,
@@ -3610,9 +3713,9 @@ Usuario B envia para usuario A
     await loadGraphicsAndStatistics(userId)
 
     await loadCachedVideoTable(userId)
-    console.log(`criar cache load para carregar IPersonalTrainerContract 
-IGymInfo
- IEquipamentData , que sao os dados que separei de user , vao ser docs , estou em loadLoginInitialCachedWorkoutsData , linha 3591 auth.tsx`)
+    await loadCachedUserGymInfo(userId)
+    await loadCachedUserEquipaments(userId)
+    //  await loadCachedUserPersonalContract(userId)  > Criar
   }
 
   useEffect(() => {
@@ -3715,7 +3818,15 @@ IGymInfo
         declineReceivedRequest,
         fetchReceivedRequestsList,
 
+        loadUserGymInfo,
+        saveUserGymInfo,
+        loadUserEquipments,
+        saveUserEquipments,
+
         user,
+        userEquipaments,
+        userGymInfo,
+        userPersonalTrainerContract,
         premiumUserContract,
 
         workoutsCategories,

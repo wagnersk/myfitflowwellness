@@ -13,7 +13,6 @@ import { ItemCard } from '../../ItemCard'
 interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
   activeData: IMyInUseActiveData[]
-  selectedLanguage: 'pt-br' | 'us'
   handleOnPressActiveWorkout: (id: string) => void
   handleMoveUp: (id: string) => void
   handleMoveDown: (id: string) => void
@@ -23,7 +22,6 @@ interface PlanCardProps {
 
 export function InUseActiveWorkoutCard({
   activeData,
-  selectedLanguage,
   data,
   handleMoveUp,
   handleMoveDown,
@@ -40,7 +38,6 @@ export function InUseActiveWorkoutCard({
         <BodyWraper>
           {activeData && activeData[index] && (
             <ItemCard
-              index={index}
               data={data}
               handleNextStep={() => data && handleOnPressWorkout(data.id)}
               isActive={true}

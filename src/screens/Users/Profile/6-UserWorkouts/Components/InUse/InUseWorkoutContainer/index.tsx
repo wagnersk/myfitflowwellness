@@ -1,19 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
   ContainerWrapper,
-  MonthYearACTMessage,
   CardTittle,
-  CardDate,
   CardsWrapper,
   CardContainer,
-  ButtonsContainer,
-  MoveCardButton,
 } from './styles'
 import {
   IMyfitflowWorkoutInUseData,
   IMyInUseActiveData,
   IMyInUseExpiredData,
-  IMyWorkouts,
   IUser,
 } from '@hooks/authTypes'
 import { InUseExpiredWorkoutCard } from '../InUseExpiredWorkoutCard'
@@ -70,7 +65,6 @@ export default function InUseWorkoutContainer({
                   activeData={activeData}
                   //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
                   data={v || null}
-                  selectedLanguage={user?.selectedLanguage || 'pt-br'}
                   index={i}
                   handleOnPressActiveWorkout={() =>
                     onPressActiveInUseWorkout(v.id)
@@ -94,7 +88,6 @@ export default function InUseWorkoutContainer({
                 key={i}
                 data={v || null}
                 selectedLanguage={user?.selectedLanguage || 'pt-br'}
-                index={i}
                 handleOnPressExpiredWorkout={() => onPressExpiredWorkout(v.id)}
               />
             ))}

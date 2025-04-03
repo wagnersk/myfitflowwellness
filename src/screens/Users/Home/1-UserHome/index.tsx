@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  BackHandler,
-  ActivityIndicator,
-  Alert,
-  View,
-  Button,
-  GestureResponderEvent,
-} from 'react-native'
+import { BackHandler, ActivityIndicator, Alert, View } from 'react-native'
 import { useTheme } from 'styled-components/native'
 
 import { useAuth } from '@hooks/auth'
@@ -34,21 +27,19 @@ import {
   FavoriteIconContainer,
   LinearGradientButton,
   NoWorkoutFoundWrapper,
-  FavIconCameraButton,
-  CameraText,
   CameraBorder,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
-import { convertToTimestamp } from '@utils/convertToTimestamp'
 
 export function UserHome() {
   const navigation = useNavigation()
 
   const {
     user,
+    userPersonalTrainerContract,
     isLoadingUserStorageData,
     myWorkout,
     myWorkoutDataArray,
@@ -60,7 +51,6 @@ export function UserHome() {
     savePersonalTrainerData,
     getLastUpdatedAtUserWorkoutCache,
     updateUserFirebaseWorkoutCache,
-    updateCachedUserWorkoutsLog,
     saveCachedUserWorkoutsLog,
     cachedUserWorkoutsLog,
     fetchworkoutDataCache,
@@ -100,7 +90,7 @@ export function UserHome() {
     })
   }
 
-  async function handleOpenCamera(event: GestureResponderEvent) {
+  async function handleOpenCamera() {
     navigation.navigate('camera')
   }
 
@@ -151,8 +141,9 @@ export function UserHome() {
     fetchWeightProgressionData()
 
     async function startContract() {
-      if (!user) return
-      const { personalTrainerContractId, clientId } = user
+      if (!userPersonalTrainerContract) return
+      const { personalTrainerContractId, clientId } =
+        userPersonalTrainerContract
 
       if (!personalTrainerContractId || !clientId) return
 
@@ -268,19 +259,6 @@ export function UserHome() {
       }
     }
   }, [cachedUserWorkoutsLog])
-
-  function formatTimestampToDate(timestamp: number | null): string {
-    if (!timestamp) return ''
-    const date = new Date(timestamp)
-
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
 
   return (
     <Container>

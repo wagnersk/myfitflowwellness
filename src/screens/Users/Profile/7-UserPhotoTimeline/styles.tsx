@@ -47,21 +47,6 @@ export const ContainerWrapper = styled.View`
   width: 100%;
   gap: 16px;
 `
-export const ButtonContainer = styled.View<{ type: 'positive' | 'neutral' }>`
-  width: 100%;
-  height: 100%;
-  padding: 8px;
-  border-radius: 12px;
-  background-color: ${({ theme, type }) =>
-    type === 'positive'
-      ? theme.COLORS.AUX_GOOGLE_GREEN
-      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-`
-export const CardsWrapper = styled.View`
-  width: 100%;
-  gap: 12px;
-  flex-direction: row;
-`
 
 /*   width: 100%;
   border: 2px ${({ theme }) => theme.COLORS.BLUE_STROKE}; */
@@ -79,15 +64,6 @@ export const ButtonWrapper = styled(TouchableOpacity)<Props>`
   height:120px;
 `
 
-export const ContentWrapper = styled.View`
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  border-radius: 12px;
-  width: 100%;
-  padding: 12px;
-  height: 48px;
-`
 export const UserName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -97,35 +73,22 @@ export const UserName = styled.Text`
 export const ContainerTittleWrapper = styled.View`
   left: 16px;
 `
-export const MonthYearACTMessage = styled.View`
-  justify-content: center;
-  align-items: center;
-`
+
 export const ContainerTittle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(16)}px;
 `
-export const CardSubTittle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
-`
-export const MonthYearACTMessageText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
+export const CardsWrapper = styled.View`
+  width: 100%;
+  gap: 12px;
+  flex-direction: row;
 `
 export const ButtonTitleWrapper = styled.View`
   position: absolute;
   top: 4px;
 `
-export const IconWrapper = styled.View`
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 48px;
-`
+
 export const CardTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
@@ -136,17 +99,6 @@ export const ToggleButtonWrapper = styled.View`
   justify-content: center;
   align-items: center;
   margin-top: 20px;
-`
-export const FakeBackgroundWrapper = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
-
-  gap: 16px;
-  border-radius: 24px;
-  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  background-color: white;
 `
 
 export const ToggleButton = styled.TouchableOpacity<{ selected: boolean }>`

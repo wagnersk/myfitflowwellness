@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, BackHandler, SafeAreaView } from 'react-native'
+import React, { useCallback } from 'react'
+import { Alert, SafeAreaView } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -30,16 +30,7 @@ import {
   Wrapper,
   TitleDivision,
   TitleWorkout,
-  BlurIconViewWrapper,
-  ContainerGradient,
-  ActionButtonsWrapper,
-  TextWrapper,
-  UpdatedAtText,
-  ButtonsWrapper,
   InfoBoxesWrapper,
-  ActButton,
-  TittleWrapper,
-  SubTittleWrapper,
 } from './styles'
 import { useAuth } from '@hooks/auth'
 
@@ -147,9 +138,9 @@ export function MarketPlaceWorkoutDetail() {
     )
   }
 
-  function shareWorkout() {
+  /*   function shareWorkout() {
     Alert.alert('Share ')
-  }
+  } */
 
   return (
     <Container>

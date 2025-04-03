@@ -42,7 +42,7 @@ import { setStatusBarStyle } from 'expo-status-bar'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 
-function encode(arraybuffer) {
+function encode(arraybuffer: ArrayBuffer) {
   const bytes = new Uint8Array(arraybuffer)
   const len = bytes.length
   let base64 = ''

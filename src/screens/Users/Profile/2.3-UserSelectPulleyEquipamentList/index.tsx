@@ -46,10 +46,12 @@ export type IAllPulleyDataSelect = {
 export function UserSelectPulleyEquipamentList() {
   const {
     user,
+    userEquipaments,
     isWaitingApiResponse,
     fetchPulleyOptionData,
     updateUserPulleyPreffer,
   } = useAuth()
+
   const theme = useTheme()
   const navigation = useNavigation()
   const route = useRoute()
@@ -243,8 +245,8 @@ export function UserSelectPulleyEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!user) return
-      const { pulleyData } = user
+      if (!userEquipaments) return
+      const { pulleyData } = userEquipaments
 
       const pulleyDefaultSelectData = await fetchPulleyOptionData()
       if (!pulleyDefaultSelectData) return

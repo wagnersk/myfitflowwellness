@@ -9,13 +9,7 @@ export const FriendCardWrapper = styled.View`
   flex-direction: row;
 `
 export const FriendPhotoWrapper = styled.View``
-export const FriendPhotoImage = styled.View`
-  width: 52px;
-  height: 52px;
-  border-radius: 26px;
-  overflow: hidden;
-  background-color: red;
-`
+
 export const FriendPhoto = styled.Image``
 export const FriendContentWrapper = styled.View`
   border-bottom-width: 0.3px;

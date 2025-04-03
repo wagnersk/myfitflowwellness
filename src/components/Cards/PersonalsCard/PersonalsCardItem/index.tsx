@@ -6,7 +6,6 @@ import { Image } from 'expo-image'
 import {
   Container,
   ContentWrapper,
-  InfoAndButtonWrapper,
   InfoWrapper,
   Title,
   WorkoutCardForwardButton,

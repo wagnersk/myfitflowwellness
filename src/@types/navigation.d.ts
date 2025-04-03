@@ -90,7 +90,7 @@ export interface IFormattedCardExerciseData extends ICardExerciseData {
 interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
-  cardExerciseData: ICardExerciseData[]
+  cardExerciseData: IFormattedCardExerciseData[]
   cardExerciseUniquesMuscles: IptBrUs[]
 }
 export type WorkoutExercise = {

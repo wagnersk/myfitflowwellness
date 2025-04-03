@@ -30,7 +30,6 @@ export default function SharedWorkoutContainer({
               data={v || null}
               selectedLanguage={user?.selectedLanguage || 'pt-br'}
               handleOnPressShareWorkout={handleOnPressShareWorkout}
-              index={i}
               isActive={
                 data?.data.find((va) => va.id === v.id)?.isActive ?? false
               }

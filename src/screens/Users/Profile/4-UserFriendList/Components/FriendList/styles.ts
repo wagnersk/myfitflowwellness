@@ -9,13 +9,7 @@ export const FriendCardWrapper = styled.TouchableOpacity`
   flex-direction: row;
 `
 export const FriendPhotoWrapper = styled.View``
-export const FriendPhotoImage = styled.View`
-  width: 52px;
-  height: 52px;
-  border-radius: 26px;
-  overflow: hidden;
-  background-color: blue;
-`
+
 export const FriendPhoto = styled.Image``
 export const FriendContentWrapper = styled.View`
   border-bottom-width: 0.4px;
@@ -27,10 +21,7 @@ export const FriendContentWrapper = styled.View`
 
 export const FriendNameWrapper = styled.View``
 export const FriendEmailWrapper = styled.View``
-export const ActButtonWrapper = styled.View`
-  gap: 16px;
-  flex-direction: row;
-`
+
 export const FriendNameText = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -41,10 +32,4 @@ export const FriendEmailText = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
   opacity: 0.7;
-`
-export const ActFriendButton = styled.TouchableOpacity`
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 48px;
 `

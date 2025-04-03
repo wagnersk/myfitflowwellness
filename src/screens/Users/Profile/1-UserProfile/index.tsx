@@ -1,16 +1,8 @@
 import React, { useCallback, useState } from 'react'
-import {
-  Alert,
-  Button,
-  ImageBackground,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Alert, ImageBackground, ScrollView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
-import { SettingsButton } from '@components/Buttons/SettingsButton'
 import { Photo } from '@components/Photo'
 
 import backgroundImg from '../../../../../assets/back.png'
@@ -41,32 +33,29 @@ import {
   UserEmail,
   UserNameAndEmailWrapper,
   EditProfileButton,
-  EditProfileNameText,
   EditProfileButtonWraper,
 } from './styles'
 import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
-import {
-  IEquipamentsFilters,
-  IUserFormProps,
-  IUser,
-} from '@hooks/authTypes'
+import { IEquipamentsFilters, IptBrUs } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
-
-export interface IptBrUs {
-  'pt-br': string
-  us: string
-}
 
 export function UserProfile() {
   const {
     user,
+    userGymInfo,
+    userEquipaments,
+    userPersonalTrainerContract,
     updateUserSelectedLanguage,
     updateLocalCacheAnonymousUserSelectedLanguage,
-    isWaitingApiResponse,
     firebaseSignOut,
   } = useAuth()
+
   const navigation = useNavigation()
+
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    user?.selectedLanguage || 'us',
+  )
   async function handleDeleteAccountTimer() {
     console.log(`mudar para deletar conta em 7 dias e abrir contagem`)
     if (!user) return
@@ -88,10 +77,6 @@ export function UserProfile() {
     )
   }
 
-  const [selectedLanguage, setSelectedLanguage] = useState(
-    user?.selectedLanguage || 'us',
-  )
-
   function handleEditProfileNextStep() {
     navigation.navigate('userFormEditProfile')
   }
@@ -112,7 +97,7 @@ export function UserProfile() {
     navigation.navigate('userSupport')
   }
   const userAge = diffInAge(user?.birthdate)
-  const experienceTime = diffInAge(user?.whenStartedAtGym)
+  const experienceTime = diffInAge(userGymInfo?.whenStartedAtGym)
 
   async function handleLanguageChange(language: 'pt-br' | 'us') {
     setSelectedLanguage(language)
@@ -135,33 +120,36 @@ export function UserProfile() {
   let equipmentFilters: IEquipamentsFilters | undefined
 
   if (
-    user &&
-    user.freeData &&
-    user.freeData.data &&
-    user.freeData.data.barSelectData &&
-    user.pulleyData &&
-    user.pulleyData.data &&
-    user.machineData &&
-    user.machineData.data
+    userEquipaments &&
+    userEquipaments.freeData &&
+    userEquipaments.freeData.data &&
+    userEquipaments.freeData.data.barSelectData &&
+    userEquipaments.pulleyData &&
+    userEquipaments.pulleyData.data &&
+    userEquipaments.machineData &&
+    userEquipaments.machineData.data
   ) {
     equipmentFilters = {
-      bar: user.freeData.data.barSelectData.map((item) => item.bar_insensitive),
-      bench: user.freeData.data.benchSelectData.map(
+      bar: userEquipaments.freeData.data.barSelectData.map(
+        (item) => item.bar_insensitive,
+      ),
+      bench: userEquipaments.freeData.data.benchSelectData.map(
         (item) => item.bench_insensitive,
       ),
-      machine: user.machineData.data.machineSelectData.map(
+      machine: userEquipaments.machineData.data.machineSelectData.map(
         (item) => item.machine_insensitive,
       ),
-      other: user.freeData.data.otherSelectData.map(
+      other: userEquipaments.freeData.data.otherSelectData.map(
         (item) => item.other_insensitive,
       ),
-      pulley: user.pulleyData.data.pulleySelectData.map(
+      pulley: userEquipaments.pulleyData.data.pulleySelectData.map(
         (item) => item.pulley_insensitive,
       ),
-      pulleyHandles: user.pulleyData.data.pulleyHandlerSelectData.map(
-        (item) => item.pulleyHandler_insensitive,
-      ),
-      weight: user.freeData.data.weightSelectData.map(
+      pulleyHandles:
+        userEquipaments.pulleyData.data.pulleyHandlerSelectData.map(
+          (item) => item.pulleyHandler_insensitive,
+        ),
+      weight: userEquipaments.freeData.data.weightSelectData.map(
         (item) => item.weight_insensitive,
       ),
     }
@@ -172,11 +160,11 @@ export function UserProfile() {
       : []
 
   const formattedMuscleFocus =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.muscleFocus &&
-    user.muscleFocus.muscleSelectedData &&
-    user.muscleFocus.muscleSelectedData.reduce(
+    userGymInfo.muscleFocus &&
+    userGymInfo.muscleFocus.muscleSelectedData &&
+    userGymInfo.muscleFocus.muscleSelectedData.reduce(
       (acc: string, curr: IptBrUs, index: number) => {
         const muscleUs = curr?.[selectedLanguage] // Acessando diretamente o SELECTEDLANGUAGE
         return muscleUs ? acc + (index > 0 ? ', ' : '') + muscleUs : acc
@@ -185,32 +173,34 @@ export function UserProfile() {
     )
 
   const formattedGoal =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.goal &&
-    user.goal.goalSelectedData &&
-    user.goal.goalSelectedData[selectedLanguage]
-      ? user.goal.goalSelectedData[selectedLanguage].charAt(0).toUpperCase() +
-        user.goal.goalSelectedData[selectedLanguage].slice(1)
+    userGymInfo.goal &&
+    userGymInfo.goal.goalSelectedData &&
+    userGymInfo.goal.goalSelectedData[selectedLanguage]
+      ? userGymInfo.goal.goalSelectedData[selectedLanguage]
+          .charAt(0)
+          .toUpperCase() +
+        userGymInfo.goal.goalSelectedData[selectedLanguage].slice(1)
       : ''
 
   const formattedFrequencyByWeek =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.sessionsByWeek &&
-    user.sessionsByWeek.sessionsByWeekSelectedData &&
-    user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
-      ? user.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
+    userGymInfo.sessionsByWeek &&
+    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData &&
+    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
+      ? userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
       : ''
 
   const formattedTimeBySession =
-    user &&
+    userGymInfo &&
     selectedLanguage &&
-    user.timeBySession &&
-    user.timeBySession.timeBySessionSelectedData &&
-    user.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
-    user.timeBySession.timeBySessionSelectedData[selectedLanguage]
-      ? user.timeBySession.timeBySessionSelectedData[selectedLanguage]
+    userGymInfo.timeBySession &&
+    userGymInfo.timeBySession.timeBySessionSelectedData &&
+    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
+    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
+      ? userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
       : ''
 
   return (
@@ -257,7 +247,7 @@ export function UserProfile() {
               <ProfileWrapper>
                 <PhotoBorderWrapper>
                   <Photo
-                    defaultPhotoBase64={user?.photoBase64}
+                    defaultPhotoBase64={user?.photo}
                     defaultText={
                       selectedLanguage === 'pt-br' ? `Não há foto` : `No Photo`
                     }
@@ -384,32 +374,37 @@ export function UserProfile() {
                       {formattedMuscleFocus}
                     </ProfileInfoText>
 
-                    {user && user.personalTrainerContractId && (
-                      <>
-                        <ProfileInfoDivisor />
-                        <Title>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Tempo de treino'
-                            : 'Training time'}
-                          :{' '}
-                        </Title>
-                        <ProfileInfoText>
-                          {experienceTime}{' '}
-                          {experienceTime &&
-                            (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
-                        </ProfileInfoText>
-                        <ProfileInfoDivisor />
-                      </>
-                    )}
+                    {userPersonalTrainerContract &&
+                      userPersonalTrainerContract.personalTrainerContractId && (
+                        <>
+                          {/* criar state personalcontract igual userGymInfo  */}
+                          <ProfileInfoDivisor />
+                          <Title>
+                            {selectedLanguage === 'pt-br'
+                              ? 'Tempo de treino'
+                              : 'Training time'}
+                            :{' '}
+                          </Title>
+                          <ProfileInfoText>
+                            {experienceTime}{' '}
+                            {experienceTime &&
+                              (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
+                          </ProfileInfoText>
+                          <ProfileInfoDivisor />
+                        </>
+                      )}
 
-                    {user && user.personalTrainerContractId && (
-                      <>
-                        <Title>
-                          {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
-                        </Title>
-                        <ProfileInfoText>{user && user.gym}</ProfileInfoText>
-                      </>
-                    )}
+                    {userPersonalTrainerContract &&
+                      userPersonalTrainerContract.personalTrainerContractId && (
+                        <>
+                          <Title>
+                            {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
+                          </Title>
+                          <ProfileInfoText>
+                            {userGymInfo && userGymInfo.gymName}
+                          </ProfileInfoText>
+                        </>
+                      )}
 
                     <ProfileInfoDivisor />
                     <Title>
@@ -425,72 +420,76 @@ export function UserProfile() {
                         (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
                     </ProfileInfoText>
                     <ProfileInfoDivisor />
-                    {user && user.personalTrainerContractId && (
-                      <>
-                        <Title>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Anabolizante'
-                            : 'Anabolic'}
-                          :
-                        </Title>
-                        <ProfileInfoText>
-                          {user && user.anabol
-                            ? user.anabol
-                            : selectedLanguage === 'pt-br'
-                              ? 'Nenhum'
-                              : 'None'}
-                        </ProfileInfoText>
-                        <ProfileInfoDivisor />
-                        <Title>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Restrições'
-                            : 'Restrictions'}
-                          :
-                        </Title>
-                        <ProfileInfoText>
-                          {user && user.restrictions
-                            ? user.restrictions
-                            : selectedLanguage === 'pt-br'
-                              ? 'Nenhuma'
-                              : 'None'}
-                        </ProfileInfoText>
-                        <ProfileInfoDivisor />
-                        <Title>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Equipamentos disponíveis'
-                            : 'Available equipment'}
-                          :
-                        </Title>
-                        <View
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 8,
-                          }}
-                        >
-                          {auxDataUnicFiltersText.map((val, i) => {
-                            return (
-                              <LabelWrapper key={i}>
-                                {val.data.length > 0 &&
-                                  val.data.map((_val, _i) => {
-                                    if (_val.value) {
-                                      return (
-                                        <LabelWrapper key={_i}>
-                                          <Label>
-                                            {_val.key}: {_val.value}
-                                          </Label>
-                                        </LabelWrapper>
-                                      )
-                                    } else {
-                                      return null
-                                    }
-                                  })}
-                              </LabelWrapper>
-                            )
-                          })}
-                        </View>
-                      </>
-                    )}
+                    {userPersonalTrainerContract &&
+                      userPersonalTrainerContract.personalTrainerContractId && (
+                        <>
+                          <Title>
+                            {selectedLanguage === 'pt-br'
+                              ? 'Anabolizante'
+                              : 'Anabolic'}
+                            :
+                          </Title>
+                          <ProfileInfoText>
+                            {/* isso vem do state personalContract */}
+                            {userPersonalTrainerContract &&
+                            userPersonalTrainerContract.anabol
+                              ? userPersonalTrainerContract.anabol
+                              : selectedLanguage === 'pt-br'
+                                ? 'Nenhum'
+                                : 'None'}
+                          </ProfileInfoText>
+                          <ProfileInfoDivisor />
+                          <Title>
+                            {selectedLanguage === 'pt-br'
+                              ? 'Restrições'
+                              : 'Restrictions'}
+                            :
+                          </Title>
+                          <ProfileInfoText>
+                            {userPersonalTrainerContract &&
+                            userPersonalTrainerContract.restrictions
+                              ? userPersonalTrainerContract.restrictions
+                              : selectedLanguage === 'pt-br'
+                                ? 'Nenhuma'
+                                : 'None'}
+                          </ProfileInfoText>
+                          <ProfileInfoDivisor />
+                          <Title>
+                            {selectedLanguage === 'pt-br'
+                              ? 'Equipamentos disponíveis'
+                              : 'Available equipment'}
+                            :
+                          </Title>
+                          <View
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 8,
+                            }}
+                          >
+                            {auxDataUnicFiltersText.map((val, i) => {
+                              return (
+                                <LabelWrapper key={i}>
+                                  {val.data.length > 0 &&
+                                    val.data.map((_val, _i) => {
+                                      if (_val.value) {
+                                        return (
+                                          <LabelWrapper key={_i}>
+                                            <Label>
+                                              {_val.key}: {_val.value}
+                                            </Label>
+                                          </LabelWrapper>
+                                        )
+                                      } else {
+                                        return null
+                                      }
+                                    })}
+                                </LabelWrapper>
+                              )
+                            })}
+                          </View>
+                        </>
+                      )}
                   </ProfileInfoWrapper>
                 )}
               </BodyWrapper>

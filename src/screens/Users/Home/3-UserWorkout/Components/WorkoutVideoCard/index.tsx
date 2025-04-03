@@ -13,12 +13,7 @@ import { useTimer } from 'react-timer-hook'
 import FileText from '@assets/FileText.svg'
 
 import {
-  ICachedExerciseHistoryData,
-  DayData,
-  MonthData,
-  YearData,
   IFormattedCardExerciseData,
-  Exercise,
   ICachedUsingWorkoutData,
   ICachedCardExerciseData,
   IPropsSets,
@@ -79,7 +74,6 @@ function WorkoutVideoCardComponent({
     myWorkout, // CACHE DO TREINO DIRETO DO FIREBASE
     updateStartAndEndDateFromMyWorkoutInCache,
     updateCachedUserWorkoutsLog,
-    saveWeightProgression,
     user,
   } = useAuth()
   const time = new Date()

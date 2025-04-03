@@ -78,15 +78,6 @@ export const ButtonWrapper = styled(TouchableOpacity)<Props>`
   height:120px;
 `
 
-export const ContentWrapper = styled.View`
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  border-radius: 12px;
-  width: 100%;
-  padding: 12px;
-  height: 48px;
-`
 export const UserName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -119,12 +110,7 @@ export const ButtonTitleWrapper = styled.View`
   position: absolute;
   top: 4px;
 `
-export const IconWrapper = styled.View`
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 48px;
-`
+
 export const CardTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};

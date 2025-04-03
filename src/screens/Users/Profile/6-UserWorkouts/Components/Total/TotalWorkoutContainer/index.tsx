@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  ContainerWrapper,
-  MonthYearACTMessage,
-  CardTittle,
-  CardsWrapper,
-} from './styles'
+import { ContainerWrapper, CardsWrapper } from './styles'
 import { IMyfitflowWorkoutInUseData, IUser } from '@hooks/authTypes'
 import { TotalWorkoutCard } from '../TotalWorkoutCard'
 

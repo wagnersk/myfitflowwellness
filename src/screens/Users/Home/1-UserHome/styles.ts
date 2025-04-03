@@ -102,16 +102,9 @@ export const LinearGradientButton = styled(LinearGradient).attrs(
   justify-content: center;
   align-items: center;
 `
-export const FavIconCameraButton = styled.View`
-  flex: 1;
-`
+
 export const CameraBorder = styled.View`
   border: 2px solid ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   border-radius: 999px;
   padding: 6px;
-`
-export const CameraText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
 `

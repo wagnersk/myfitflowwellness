@@ -42,6 +42,7 @@ export function MarketPlacePersonalsDetail() {
     isWaitingApiResponse,
     contract,
     user,
+    userPersonalTrainerContract,
   } = useAuth()
 
   function handleGoBack() {
@@ -57,8 +58,10 @@ export function MarketPlacePersonalsDetail() {
       : await choose()
 
     async function checkIfAlreadyHavePendingRequest() {
+      if (!userPersonalTrainerContract) return
       if (!user) return
-      const { clientId, personalTrainerContractId } = user
+      const { clientId, personalTrainerContractId } =
+        userPersonalTrainerContract
       if (!clientId) return
       if (!personalTrainerContractId) return
 
@@ -186,7 +189,8 @@ export function MarketPlacePersonalsDetail() {
 
   const buttonTextMessage =
     contract?.submissionPending &&
-    dataParam.data.personalTrainerContractId === user?.personalTrainerContractId
+    dataParam.data.personalTrainerContractId ===
+      userPersonalTrainerContract?.personalTrainerContractId
       ? 'Cancelar convite'
       : 'Enviar convite'
 
@@ -253,14 +257,14 @@ export function MarketPlacePersonalsDetail() {
               opacity:
                 contract?.submissionPending &&
                 dataParam.data.personalTrainerContractId ===
-                  user?.personalTrainerContractId
+                  userPersonalTrainerContract?.personalTrainerContractId
                   ? 0.7
                   : 1,
             }}
             onPress={() => {
               contract?.submissionPending &&
               dataParam.data.personalTrainerContractId ===
-                user?.personalTrainerContractId
+                userPersonalTrainerContract?.personalTrainerContractId
                 ? handleCancelRequest()
                 : handleChoose(dataParam.data)
             }}

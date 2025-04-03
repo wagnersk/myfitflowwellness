@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import {
-  Alert,
-  BackHandler,
-  View,
-  Text,
-  Touchable,
-  TouchableOpacity,
-} from 'react-native'
+import { Alert, BackHandler, View, Text, TouchableOpacity } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
@@ -28,15 +21,13 @@ import {
   MyWorkoutWrapper,
   WorkoutInfoHomeCardWrapper,
   BlurViewWrapper,
-  CallTeacherButton,
-  CallTeacherButtonText,
   CallTeacherWrapper,
   CallTeacherTitleWrapper,
   CallTeacherTitle,
-  CallButtonWrapper,
   MyWorkoutTittleWrapper,
   ButtonText,
 } from './styles'
+
 import { FlatList } from 'react-native-gesture-handler'
 import {
   ICachedWorkoutsWithLastUpdatedTimestamp,
@@ -59,8 +50,6 @@ export function MarketPlaceHome() {
     myWorkout,
     saveWorkouts,
     loadWorkoutsCategories,
-    loadPersonalTrainerClientContract,
-    cancelNewContractWithPersonalUpdateUserClientId,
     contract,
     personalData,
     user,

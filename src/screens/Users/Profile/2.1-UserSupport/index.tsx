@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
 
-import { useNavigation, useRoute } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import backgroundImg from '../../../../../assets/back.png'
-import Email from '@assets/Email.svg'
-import Question from '@assets/Question.svg'
 
 import {
   Container,
@@ -14,11 +12,8 @@ import {
   BodyImageWrapper,
   ImageBackgroundContainer,
   SettingsWrapper,
-  ButtonWrapper,
   UserName,
   ListWrapper,
-  IconWrapper,
-  ListTitle,
   ContainerWrapper,
   ContainerTittle,
   ContainerTittleWrapper,

@@ -1,9 +1,6 @@
 import React from 'react'
 import { ButtonContainer, Container, BodyWraper } from './styles'
-import {
-  IMyfitflowWorkoutInUse,
-  IMyfitflowWorkoutInUseData,
-} from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 
 import { ItemCard } from '../../ItemCard'
 
@@ -11,15 +8,12 @@ interface PlanCardProps {
   data: IMyfitflowWorkoutInUseData | null
   selectedLanguage: 'pt-br' | 'us'
   handleOnPressShareWorkout: (id: string) => void
-  index: number
   isActive: boolean
 }
 
 export function SharedWorkoutCard({
   data,
-  selectedLanguage,
   handleOnPressShareWorkout,
-  index,
   isActive,
 }: PlanCardProps) {
   function handleOnPressWorkout(id: string) {
@@ -30,10 +24,10 @@ export function SharedWorkoutCard({
       <ButtonContainer>
         <BodyWraper>
           <ItemCard
-            index={index}
             data={data}
             handleNextStep={() => data && handleOnPressWorkout(data.id)}
             isActive={isActive}
+            isExpired={data ? data.isExpired : false}
             handleMoveUp={() => {}}
             handleMoveDown={() => {}}
           />

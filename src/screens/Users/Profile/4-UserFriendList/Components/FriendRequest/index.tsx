@@ -1,46 +1,43 @@
 import React from 'react'
 import { useTheme } from 'styled-components/native'
-import Check from '@assets/Check.svg'
 import X from '@assets/X.svg'
+import { diffInAge } from '@utils/diffInAge'
 
 import {
   FriendCardWrapper,
   FriendPhotoWrapper,
-  FriendPhotoImage,
   FriendContentWrapper,
   FriendNameWrapper,
   FriendNameText,
   FriendEmailWrapper,
   ActFriendButton,
+  FriendPhoto,
 } from './styles'
+import { IUser } from '@hooks/authTypes'
 
 interface FriendCardProps {
-  friendIndex: number
-  friendName: string
-  friendAge: number | undefined
+  friend: IUser
+
   onCancelRequest: () => void
 }
 
 export default function FriendRequest({
-  friendIndex,
-  friendName,
-  friendAge,
+  friend,
   onCancelRequest,
 }: FriendCardProps) {
   const theme = useTheme()
 
   const friendUpperFirstLetter =
-    friendName.charAt(0).toUpperCase() + friendName.slice(1)
+    friend.name.charAt(0).toUpperCase() + friend.name.slice(1)
 
   return (
-    <FriendCardWrapper key={friendIndex}>
+    <FriendCardWrapper>
       <FriendPhotoWrapper>
-        <FriendPhotoImage />
-        {/*  <FriendPhoto src="https://www.google.com/url?sa=i&url=https%3A%2F%2Foglobo.globo.com%2Fsaber-viver%2Ftudo-que-voce-precisa-saber-sobre-dor-de-cabeca-23307264&psig=AOvVaw1Yu1vHnqqZjDFOO-7BD5aT&ust=1739768198265000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMDPhd-zx4sDFQAAAAAdAAAAABAE" /> */}
+        <FriendPhoto src={friend.photo} />
       </FriendPhotoWrapper>
       <FriendContentWrapper>
         <FriendNameWrapper>
-          <FriendNameText>{`${friendUpperFirstLetter}, ${friendAge}`}</FriendNameText>
+          <FriendNameText>{`${friendUpperFirstLetter}, ${diffInAge(friend?.birthdate)}`}</FriendNameText>
         </FriendNameWrapper>
         <FriendEmailWrapper>
           <ActFriendButton onPress={onCancelRequest}>

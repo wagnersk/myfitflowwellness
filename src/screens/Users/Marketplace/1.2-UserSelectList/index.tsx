@@ -27,7 +27,6 @@ import {
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { IUserSelectListNavigation } from '@src/@types/navigation'
 import { ScrollView } from 'react-native-gesture-handler'
-import { serverTimestamp } from 'firebase/firestore'
 import {
   IptBrUs,
   IUserGoal,
@@ -49,6 +48,7 @@ export interface IUserSelect {
 export function UserSelectList() {
   const {
     user,
+    userGymInfo,
     isWaitingApiResponse,
 
     updateUserGoalPreffer,
@@ -161,13 +161,10 @@ export function UserSelectList() {
 
     if (dataType === `Objetivo`) {
       const formattedData = selectedData.find((v) => v.selected === true)
-      const servertimestamp = serverTimestamp()
 
       if (formattedData) {
         const fdata: IUserGoal = {
           goalSelectedData: formattedData.tittle,
-          updatedAt: servertimestamp,
-          createdAt: servertimestamp,
         }
 
         await updateUserGoalPreffer(fdata).then(() => {
@@ -192,13 +189,9 @@ export function UserSelectList() {
           us: item.tittle.us,
         }))
 
-      const servertimestamp = serverTimestamp()
-
       if (selectedArray.length === 0) return
       const fdata: IUserMuscleFocus = {
         muscleSelectedData: selectedArray,
-        updatedAt: servertimestamp,
-        createdAt: servertimestamp,
       }
 
       await updateUserGoalFocusMusclePreffer(fdata).then(async () => {
@@ -208,14 +201,11 @@ export function UserSelectList() {
 
     if (dataType === `Treinos por semana`) {
       const formattedData = selectedData.find((v) => v.selected === true)
-      const servertimestamp = serverTimestamp()
       if (!formattedData) return
 
       const fdata: IUserSessionsByWeek = {
         sessionsByWeekSelectedData: formattedData.tittle,
-        sessionsByWeekNumber: formattedData.byWeekNumber,
-        updatedAt: servertimestamp,
-        createdAt: servertimestamp,
+        sessionsByWeekNumber: formattedData.byWeekNumber ?? 0,
       }
 
       await updateUserFrequencyByWeekPreffer(fdata).then(async () => {
@@ -225,14 +215,11 @@ export function UserSelectList() {
 
     if (dataType === `Tempo de cada treino`) {
       const formattedData = selectedData.find((v) => v.selected === true)
-      const servertimestamp = serverTimestamp()
       if (!formattedData) return
 
       const fdata: IUserTimeBySession = {
         timeBySessionSelectedData: formattedData.tittle,
         timeBySessionByWeekRangeNumber: formattedData.bySessionRangeNumber,
-        updatedAt: servertimestamp,
-        createdAt: servertimestamp,
       }
 
       await updateUserTimeBySessionPreffer(fdata).then(async () => {
@@ -265,7 +252,7 @@ export function UserSelectList() {
 
         const { data } = goalOptionData
 
-        const userSelectedGoalOption = user?.goal
+        const userSelectedGoalOption = userGymInfo?.goal
 
         let formattedData: IUserSelect[] = [] // Ajustado para ser uma lista
 
@@ -303,9 +290,9 @@ export function UserSelectList() {
       if (dataType === `Foco em`) {
         const muscleOptionData = await fetchMuscleOptionData()
         if (!muscleOptionData) return
-        if (!user) return
+        if (!userGymInfo) return
         const { data } = muscleOptionData
-        const { muscleFocus } = user
+        const { muscleFocus } = userGymInfo
 
         const balancedData = {
           muscle_insensitive: {
@@ -340,6 +327,7 @@ export function UserSelectList() {
           muscleDataFound()
 
           function muscleDataFound() {
+            if (!muscleFocus) return
             const { muscleSelectedData } = muscleFocus
             if (!muscleSelectedData) return
 
@@ -363,7 +351,13 @@ export function UserSelectList() {
                 }
 
             formattedMuscleData = data.map((v, i) => {
-              if (!translateMuscleGroupInfo) return ''
+              if (!translateMuscleGroupInfo) {
+                return {
+                  tittle: { 'pt-br': '', us: '' },
+                  id: i,
+                  selected: false,
+                }
+              }
               const findIt = muscleSelectedData.find(
                 (val) =>
                   selectedLanguage &&
@@ -390,7 +384,7 @@ export function UserSelectList() {
 
         const { data } = frequencyByWeekOptionData
 
-        const userSelectedSessionsByWeekOption = user?.sessionsByWeek
+        const userSelectedSessionsByWeekOption = userGymInfo?.sessionsByWeek
 
         let formattedData: IUserSelect[] = [] // Ajustado para ser uma lista
         if (!userSelectedSessionsByWeekOption) {
@@ -438,7 +432,7 @@ export function UserSelectList() {
 
         const { data } = timeBySessionOptionData
 
-        const userSelectedTimeBySessionOption = user?.timeBySession
+        const userSelectedTimeBySessionOption = userGymInfo?.timeBySession
 
         let formattedData: IUserSelect[] = [] // Ajustado para ser uma lista
         if (!userSelectedTimeBySessionOption) {

@@ -1,10 +1,6 @@
 import React from 'react'
 import { ButtonContainer, Container, BodyWraper } from './styles'
-import {
-  IMyfitflowWorkoutInUse,
-  IMyfitflowWorkoutInUseData,
-  IMyWorkouts,
-} from '@hooks/authTypes'
+import { IMyfitflowWorkoutInUseData } from '@hooks/authTypes'
 import { ItemCard } from '../../ItemCard'
 
 interface PlanCardProps {
@@ -16,10 +12,8 @@ interface PlanCardProps {
 
 export function TotalWorkoutCard({
   data,
-  selectedLanguage,
   handleOnPressTotalWorkout,
   index,
-  isOpenSettingsMode,
 }: PlanCardProps) {
   function handleOnPressWorkout(index: number) {
     handleOnPressTotalWorkout(index)
@@ -30,7 +24,6 @@ export function TotalWorkoutCard({
       <ButtonContainer>
         <BodyWraper>
           <ItemCard
-            index={index}
             data={data}
             handleNextStep={() => handleOnPressWorkout(index)}
             isActive={data?.isActive || false}

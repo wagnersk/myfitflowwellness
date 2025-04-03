@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ShareNetwork from '@assets/Share-network.svg'
 import { TouchableOpacityProps } from 'react-native'
 import { Image } from 'expo-image'
@@ -9,19 +9,15 @@ import {
   InfoAndButtonWrapper,
   InfoWrapper,
   Title,
-  WorkoutCardForwardButton,
   ContainerGradient,
   PhotoImageWrapper,
   PhotoPreLoadingImageBackground,
   SubTitle,
-  IconBottomWrapper,
   ActiveBall,
   ShareIconWrapper,
   GenderIconWrapper,
-  SyncText,
   SubTittleWrapper,
   ButtonsContainer,
-  MoveCardButton,
   MoveCardUpButton,
   MoveCardDownButton,
 } from './styles'
@@ -41,7 +37,6 @@ import ArrowDown from '@assets/Arrow-fat-down.svg'
             isExpired={data?.isExpired}
              */
 interface Props extends TouchableOpacityProps {
-  index: number
   data: IMyfitflowWorkoutInUseData | null
   handleNextStep: () => void
   isActive: boolean
@@ -58,7 +53,6 @@ interface Props extends TouchableOpacityProps {
 export function ItemCard({
   data,
   handleNextStep,
-  index,
   isActive,
   isExpired,
   dateStart,

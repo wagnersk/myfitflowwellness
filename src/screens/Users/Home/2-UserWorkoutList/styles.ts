@@ -1,6 +1,5 @@
 import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { BlurView } from 'expo-blur'
 
 export const Container = styled.View`
   flex: 1;
@@ -59,13 +58,4 @@ export const WarningWrapper = styled.View`
 export const BodyImageBackgroundContainerSpaceBetween = styled.View`
   height: 100%;
   justify-content: space-between;
-`
-
-export const BlurViewWrapper = styled(BlurView)`
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-top: 16px;
-  padding-bottom: 50px;
-  bottom: -100px;
 `

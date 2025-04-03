@@ -88,11 +88,6 @@ export const UserName = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(22)}px;
 `
-export const EditProfileNameText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-`
 
 export const UserEmail = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

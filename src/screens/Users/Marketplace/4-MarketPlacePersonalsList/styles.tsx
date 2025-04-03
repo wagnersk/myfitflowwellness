@@ -44,24 +44,6 @@ export const BioInfoLetter = styled.Text`
   font-size: ${RFValue(22)}px;
 `
 
-export const MyWorkoutWrapper = styled.View`
-  padding-left: 32px;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 4px;
-  padding-top: 16px;
-  padding-bottom: 8px;
-`
-
-export const CategoriesWrapper = styled.View`
-  padding-left: 32px;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 4px;
-  padding-top: 16px;
-  padding-bottom: 8px;
-`
-
 export const BodyImageContainer = styled.View`
   flex: 1;
   border-top-left-radius: 20px;
@@ -97,20 +79,4 @@ export const BodyImageBackgroundContainerSpaceBetween = styled.View`
   height: 100%;
   justify-content: space-between;
   align-items: center;
-`
-export const WorkoutInfoHomeCardWrapper = styled.View`
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 16px;
-  padding-top: 20px;
-  padding-left: 32px;
-  padding-right: 32px;
-`
-export const BlurViewWrapper = styled(BlurView)`
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-top: 16px;
-  padding-bottom: 50px;
-  bottom: -100px;
 `

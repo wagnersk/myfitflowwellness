@@ -24,7 +24,6 @@ import {
   Warning,
   WarningWrapper,
   BodyImageBackgroundContainerSpaceBetween,
-  BlurViewWrapper,
 } from './styles'
 import {
   NavigationUserWorkoutListProps,
@@ -36,7 +35,6 @@ import { ICardExerciseData, IptBrUs } from '@hooks/authTypes'
 export function UserWorkoutList() {
   const { isWaitingApiResponse, user } = useAuth()
 
-  const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
   const theme = useTheme()
   const route = useRoute()

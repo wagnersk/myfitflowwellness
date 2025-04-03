@@ -38,15 +38,6 @@ export const SettingsWrapper = styled.View`
   padding-left: 16px;
   align-items: flex-start;
 `
-export const ContainerWrapper = styled.View`
-  width: 100%;
-  gap: 16px;
-`
-
-export const CardsWrapper = styled.View`
-  width: 100%;
-  gap: 12px;
-`
 
 export const ContainerTittleWrapper = styled.View`
   flex-direction: row;
@@ -54,11 +45,7 @@ export const ContainerTittleWrapper = styled.View`
   align-items: center;
   justify-content: space-between;
 `
-export const MonthYearACTMessage = styled.View`
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-`
+
 export const TittleWrapper = styled.View`
   left: -16px;
 `
@@ -69,16 +56,6 @@ export const ContainerTittle = styled.Text`
   padding-left: 16px;
 `
 
-export const CardTittle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(16)}px;
-`
-export const CardDate = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
-`
 export const ButtonTitleWrapper = styled.View`
   position: absolute;
   top: 4px;
@@ -90,7 +67,6 @@ export const IconWrapper = styled.View`
   width: 48px;
 `
 
-export const OpenSettingsButton = styled.TouchableOpacity``
 export const RowWrapper = styled.View`
   flex-direction: row;
   width: 100%;

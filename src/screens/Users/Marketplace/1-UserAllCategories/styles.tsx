@@ -49,33 +49,6 @@ export const BioInfoLetter = styled.Text`
   font-size: ${RFValue(22)}px;
 `
 
-export const MyWorkoutTittleWrapper = styled.View`
-  padding-left: 32px;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 4px;
-  padding-top: 16px;
-  padding-bottom: 8px;
-  width: 100%;
-`
-
-export const CategoriesWrapper = styled.View`
-  padding: 0 32px;
-
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 4px;
-  padding-top: 16px;
-  padding-bottom: 8px;
-  flex-direction: row;
-`
-
-export const Tittle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-`
-
 export const BodyTopWrapper = styled.View`
   width: 100%;
 `
@@ -103,24 +76,4 @@ export const BodyImageBackgroundContainerSpaceBetween = styled.View`
   height: 100%;
   justify-content: space-between;
   align-items: center;
-`
-export const MyWorkoutWrapper = styled.View`
-  align-items: center;
-  justify-content: center;
-`
-export const WorkoutInfoHomeCardWrapper = styled.View`
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 16px;
-  padding-top: 20px;
-  padding-left: 32px;
-  padding-right: 32px;
-`
-export const BlurViewWrapper = styled(BlurView)`
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-top: 16px;
-  padding-bottom: 50px;
-  bottom: -100px;
 `

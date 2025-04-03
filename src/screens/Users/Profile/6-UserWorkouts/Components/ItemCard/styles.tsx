@@ -45,8 +45,6 @@ export const SubTitle = styled.Text`
   padding-bottom: 2px;
 `
 
-export const WorkoutCardForwardButton = styled.View``
-
 export const WorkoutCardForwardButtonWrapper = styled.View`
   padding-right: 4px;
 
@@ -99,12 +97,6 @@ export const ShareIconWrapper = styled.View`
   width: 12px;
   height: 12px;
   border-radius: 6px;
-`
-
-export const IconBottomWrapper = styled.View`
-  position: absolute;
-  right: 8px;
-  bottom: 0;
 `
 
 export const PhotoPreLoadingImageBackground = styled.View<Props>`

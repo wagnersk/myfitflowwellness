@@ -15,11 +15,8 @@ import {
   BioInfo,
   BioInfoLetter,
   BodyImageContainer,
-  CategoriesWrapper,
-  MyWorkoutWrapper,
-  WorkoutInfoHomeCardWrapper,
-  BlurViewWrapper,
 } from './styles'
+
 import { IPersonal } from '@hooks/authTypes'
 import { PersonalsCardList } from '@components/Cards/PersonalsCard/PersonalsCardList'
 import { BackButton } from '@components/Buttons/BackButton'

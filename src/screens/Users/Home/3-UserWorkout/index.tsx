@@ -1,11 +1,10 @@
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
+import React, { useState, useRef, useMemo, useCallback } from 'react'
 import {
   useWindowDimensions,
   FlatList,
   ViewToken,
   Platform,
   ScrollView,
-  Button,
 } from 'react-native'
 
 import { useNavigation } from '@react-navigation/core'
@@ -48,7 +47,7 @@ interface ChangeWorkoutCardProps {
 }
 
 export function UserWorkout() {
-  const { user, cachedUserWorkoutsLog } = useAuth()
+  const { user } = useAuth()
 
   const selectedLanguage = user?.selectedLanguage
   const route = useRoute()

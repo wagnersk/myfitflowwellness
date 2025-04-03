@@ -99,36 +99,7 @@ export const WorkoutBoxInfoWrapper = styled.View`
   flex-direction: row;
   width: 100%;
 `
-export const ActionButtonsWrapper = styled.View`
-  padding-top: 8px;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 16px;
 
-  width: 100%;
-`
-
-export const TextWrapper = styled.View`
-  padding-left: 4px;
-  flex-direction: column;
-  gap: 4px;
-`
-export const TittleWrapper = styled.View`
-  padding-left: 4px;
-`
-export const SubTittleWrapper = styled.View`
-  padding-left: 4px;
-`
-export const ButtonsWrapper = styled.View`
-  flex-direction: row;
-  gap: 16px;
-`
-
-export const UpdatedAtText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(14)}px;
-`
 export const SubTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -149,39 +120,4 @@ export const BlurViewWrapper = styled(BlurView)`
   padding-bottom: 24px;
   margin-bottom: 16px;
   top: 40px;
-`
-export const BlurIconViewWrapper = styled(BlurView)<{ disabled: boolean }>`
-  height: 48px;
-  width: 48px;
-  justify-content: center;
-  align-items: center;
-  margin-right: 2px;
-  border-radius: 12px;
-  overflow: hidden;
-  background-color: red;
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-`
-export const ActButton = styled(TouchableOpacity)`
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-`
-export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
-  colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
-  start: { x: 0, y: 1 },
-  end: { x: 1, y: 0 },
-}))`
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  height: 48px;
-  width: 48px;
-  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  border-radius: 8px;
-
-  border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  width: 100%;
 `

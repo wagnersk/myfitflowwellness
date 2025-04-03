@@ -46,6 +46,7 @@ export type IAllFreeDataSelect = {
 export function UserSelectFreeEquipamentList() {
   const {
     user,
+    userEquipaments,
     isWaitingApiResponse,
     fetchFreeOptionData,
     updateUserFreePreffer,
@@ -378,8 +379,8 @@ export function UserSelectFreeEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!user) return
-      const { freeData } = user
+      if (!userEquipaments) return
+      const { freeData } = userEquipaments
 
       const freeDefaultSelectData = await fetchFreeOptionData()
       if (!freeDefaultSelectData) return

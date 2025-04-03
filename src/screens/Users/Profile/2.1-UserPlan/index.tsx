@@ -6,6 +6,10 @@ import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import backgroundImg from '../../../../../assets/back.png'
 
+import { ScrollView } from 'react-native-gesture-handler'
+import { IptBrUs } from '@hooks/authTypes'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+
 import {
   Container,
   Body,
@@ -15,8 +19,6 @@ import {
   ButtonWrapper,
   UserName,
   ListWrapper,
-  ContentWrapper,
-  IconWrapper,
   CardTitle,
   ContainerWrapper,
   ContainerTittle,
@@ -31,9 +33,6 @@ import {
   MonthYearACTMessageText,
   CardSubTittle,
 } from './styles'
-import { ScrollView } from 'react-native-gesture-handler'
-import { IptBrUs } from '@hooks/authTypes'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export interface IUserSelect {
   id: number

@@ -48,35 +48,6 @@ export const ContainerWrapper = styled.View`
   width: 100%;
 `
 
-/*   width: 100%;
-  border: 2px ${({ theme }) => theme.COLORS.BLUE_STROKE}; */
-export const ButtonWrapper = styled(TouchableOpacity)<Props>`
-  justify-content: center;
-  align-items: center;
-  border: solid 1px ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-  ${({ loading }) =>
-    loading &&
-    css`
-      opacity: 0.5;
-    `}
-  border: solid 1px ${({ theme }) => theme.COLORS.BLUE_STROKE};
-
-  ${({ type }) =>
-    type === 'up' &&
-    css`
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-    `}
-
-  ${({ type }) =>
-    type === 'down' &&
-    css`
-      border-bottom-left-radius: 12px;
-      border-bottom-right-radius: 12px;
-    `}
-`
-
 export const UserName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
@@ -94,15 +65,4 @@ export const ContainerTittle = styled.Text`
 export const ButtonTitleWrapper = styled.View`
   position: absolute;
   top: 4px;
-`
-export const IconWrapper = styled.View`
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 48px;
-`
-export const ListTitle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(16)}px;
 `

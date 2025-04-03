@@ -153,28 +153,6 @@ export const CallTeacherTitle = styled.Text`
   margin-bottom: 8px;
 `
 
-export const CallTeacherButton = styled(
-  TouchableOpacity,
-)<TouchableOpacityProps>`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 48px;
-  width: 100%;
-  border-radius: 12px;
-  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
-`
-
-export const CallTeacherButtonText = styled.Text`
-  color: #ffffff;
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(16)}px;
-  padding-right: 8px;
-`
-export const CallButtonWrapper = styled.View`
-  border-radius: 8px;
-`
-
 export const CallTeacherTitleWrapper = styled.View`
   width: 100%;
 `
