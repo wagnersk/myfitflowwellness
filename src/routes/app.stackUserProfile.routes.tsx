@@ -3,9 +3,9 @@ import { createStackNavigator } from '@react-navigation/stack'
 
 import { UserProfile } from '@screens/Users/Profile/1-UserProfile'
 
-import { UserSelectFreeEquipamentList } from '@screens/Users/Profile/2.2-UserSelectFreeEquipamentList'
-import { UserSelectPulleyEquipamentList } from '@screens/Users/Profile/2.3-UserSelectPulleyEquipamentList'
-import { UserSelectMachineEquipamentList } from '@screens/Users/Profile/2.4-UserSelectMachineEquipamentList'
+import { UserSelectFreeEquipamentList } from '@screens/Users/Profile/1.1-UserPrefferences/Components/1.1.1-UserSelectFreeEquipamentList'
+import { UserSelectPulleyEquipamentList } from '@screens/Users/Profile/1.1-UserPrefferences/Components/1.1.2-UserSelectPulleyEquipamentList'
+import { UserSelectMachineEquipamentList } from '@screens/Users/Profile/1.1-UserPrefferences/Components/1.1.3-UserSelectMachineEquipamentList'
 
 import { UserFormEditProfile } from '@screens/Users/Profile/3-UserFormEditProfile'
 import { UserSupport } from '@screens/Users/Profile/2.1-UserSupport'
@@ -14,6 +14,9 @@ import { UserFriendList } from '@screens/Users/Profile/4-UserFriendList'
 import { UserFriendProfile } from '@screens/Users/Profile/5-UserFriendProfile'
 import { UserWorkouts } from '@screens/Users/Profile/6-UserWorkouts'
 import { UserPhotoTimeline } from '@screens/Users/Profile/7-UserPhotoTimeline'
+
+import { UserPrefferences } from '@screens/Users/Profile/1.1-UserPrefferences'
+import { UserPrefferencesSelectList } from '@screens/Users/Profile/1.1-UserPrefferences/Components/1.1.0-UserPrefferencesSelectList'
 
 const { Navigator, Screen } = createStackNavigator()
 
@@ -44,6 +47,11 @@ export function AppStackUserProfileRoutes() {
       <Screen
         name="userSelectMachineEquipamentList"
         component={UserSelectMachineEquipamentList}
+      />
+      <Screen name="userPrefferences" component={UserPrefferences} />
+      <Screen
+        name="userPrefferencesSelectList"
+        component={UserPrefferencesSelectList}
       />
     </Navigator>
   )

@@ -92,6 +92,9 @@ export function UserProfile() {
   function handleMyFriendListNextStep() {
     navigation.navigate('userFriendList')
   }
+  function handlePreferencesStep() {
+    navigation.navigate('userPrefferences')
+  }
 
   function handleSuporteNextStep() {
     navigation.navigate('userSupport')
@@ -312,6 +315,43 @@ export function UserProfile() {
                     onPress={handleMyPhotosNextStep}
                     bordertype="down"
                     iconStyle="camera"
+                  />
+                </Body>
+                <Body>
+                  <BodyText>
+                    {selectedLanguage === 'pt-br' ? 'Filtros' : 'Filters'}
+                  </BodyText>
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Preferencias de treino'
+                        : 'Preferences of workout'
+                    }
+                    onPress={handlePreferencesStep}
+                    bordertype="up"
+                    iconStyle="plan"
+                  />
+                  {/*  'Informações Pessoais' = GymInfo 
+                  testar se ta tudo funfando
+                  inclusive form do aluno
+                  criar conceito de add foto
+                  renderizar isso quando cahama o amigo
+                  
+                  por foto padrao
+                  por activit indicator no loading dos alunos
+                  fazer build 
+                  
+                  e seguranca das fotos */}
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Informações Pessoais'
+                        : 'Personal Information'
+                    }
+                    onPress={() => {}}
+                    bordertype="down"
+                    iconStyle="support"
                   />
                 </Body>
                 <Body>

@@ -6,7 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
-import backgroundImg from '../../../../../assets/back.png'
+import backgroundImg from '../../../../../../../assets/back.png'
 import Check from '@assets/Check.svg'
 
 import {

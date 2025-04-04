@@ -29,7 +29,7 @@ import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
 import {
   IUserSelectFreeEquipamentListNavigation,
   IUserSelectPulleyEquipamentListNavigation,
-  IUserSelectListNavigation,
+  IUserPrefferencesSelectListNavigation,
   IUserSelectMachineEquipamentListNavigation,
 } from '@src/@types/navigation'
 
@@ -65,8 +65,8 @@ export function UserPrefferences() {
     navigation.goBack()
   }
 
-  function handleOpenList({ dataType }: IUserSelectListNavigation) {
-    navigation.navigate('userSelectList', { dataType })
+  function handleOpenList({ dataType }: IUserPrefferencesSelectListNavigation) {
+    navigation.navigate('userEquipaments', { dataType })
   }
 
   function handleOpenFilterFreeEquipamentList({
@@ -291,50 +291,49 @@ export function UserPrefferences() {
                       </ButtonWrapper>
                     </SelectWrapper>
                   </SelectContentWrapper>
-                  {userPersonalTrainerContract &&
-                    userPersonalTrainerContract.personalTrainerContractId && (
-                      <FooterWrapper>
-                        <Title>Equipamentos disponíveis</Title>
-                        <FooterContainer>
-                          <SelectFilterButtonWrapper>
-                            <SelectFilterButton
-                              title={`Livre`}
-                              onPress={() => {
-                                handleOpenFilterFreeEquipamentList({
-                                  dataType: 'Livre',
-                                })
-                              }}
-                              enabled={true}
-                              loading={false}
-                            />
-                          </SelectFilterButtonWrapper>
-                          <SelectFilterButtonWrapper>
-                            <SelectFilterButton
-                              title={`Polia`}
-                              onPress={() => {
-                                handleOpenFilterPulleyEquipamentList({
-                                  dataType: 'Polia',
-                                })
-                              }}
-                              enabled={true}
-                              loading={false}
-                            />
-                          </SelectFilterButtonWrapper>
-                          <SelectFilterButtonWrapper>
-                            <SelectFilterButton
-                              title={`Máquina`}
-                              onPress={() => {
-                                handleOpenFilterMachineEquipamentList({
-                                  dataType: 'Máquina',
-                                })
-                              }}
-                              enabled={true}
-                              loading={false}
-                            />
-                          </SelectFilterButtonWrapper>
-                        </FooterContainer>
-                      </FooterWrapper>
-                    )}
+                  {!userPersonalTrainerContract && (
+                    <FooterWrapper>
+                      <Title>Equipamentos disponíveis</Title>
+                      <FooterContainer>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Livre`}
+                            onPress={() => {
+                              handleOpenFilterFreeEquipamentList({
+                                dataType: 'Livre',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Polia`}
+                            onPress={() => {
+                              handleOpenFilterPulleyEquipamentList({
+                                dataType: 'Polia',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                        <SelectFilterButtonWrapper>
+                          <SelectFilterButton
+                            title={`Máquina`}
+                            onPress={() => {
+                              handleOpenFilterMachineEquipamentList({
+                                dataType: 'Máquina',
+                              })
+                            }}
+                            enabled={true}
+                            loading={false}
+                          />
+                        </SelectFilterButtonWrapper>
+                      </FooterContainer>
+                    </FooterWrapper>
+                  )}
                 </Body>
               </BodyWrapper>
             </SafeAreaView>

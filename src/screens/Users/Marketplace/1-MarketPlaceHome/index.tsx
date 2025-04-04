@@ -153,11 +153,6 @@ export function MarketPlaceHome() {
     navigation.navigate('userAllCategories')
   }
 
-  function handlePreferencesStep() {
-    // jogar pra dentro do meu treino
-    navigation.navigate('userPrefferences')
-  }
-
   function handleCallTeacherWhatsapp() {
     if (!user) return
     Alert.alert(
@@ -230,11 +225,6 @@ export function MarketPlaceHome() {
                 : `Workouts`}
             </BioInfoLetter>
           </BioInfo>
-
-          <SettingsButton
-            style={{ paddingTop: 32 }}
-            onPress={handlePreferencesStep}
-          />
         </BioInfoWrapper>
       </HeaderImageBackground>
 

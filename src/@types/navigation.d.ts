@@ -277,7 +277,8 @@ export interface IOnBoading {
 export interface IUserFriendProfile {
   friend: IUser
 }
-export interface IUserSelectListNavigation {
+
+export interface IUserPrefferencesSelectListNavigation {
   dataType:
     | `Objetivo`
     | `Foco em`
@@ -309,7 +310,7 @@ export declare global {
       marketPlaceHome: undefined
       userAllCategories: undefined
       userPrefferences: undefined
-      userSelectList: IUserSelectListNavigation
+      userPrefferencesSelectList: IUserPrefferencesSelectListNavigation
       marketPlaceWorkoutList: IMarketPlaceWorkoutListNavigation
       marketPlaceWorkoutDetail: IMarketPlaceWorkoutDetailNavigation
 

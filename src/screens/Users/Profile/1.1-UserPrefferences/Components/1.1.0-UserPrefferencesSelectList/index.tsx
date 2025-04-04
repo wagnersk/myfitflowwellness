@@ -25,7 +25,7 @@ import {
   ListTitle,
 } from './styles'
 import { CTAButton } from '@components/Buttons/CTAButton'
-import { IUserSelectListNavigation } from '@src/@types/navigation'
+import { IUserPrefferencesSelectListNavigation } from '@src/@types/navigation'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   IptBrUs,
@@ -45,7 +45,7 @@ export interface IUserSelect {
   selected: boolean
 }
 
-export function UserSelectList() {
+export function UserPrefferencesSelectList() {
   const {
     user,
     userGymInfo,
@@ -66,7 +66,7 @@ export function UserSelectList() {
   const navigation = useNavigation()
   const route = useRoute()
 
-  const { dataType } = route.params as IUserSelectListNavigation
+  const { dataType } = route.params as IUserPrefferencesSelectListNavigation
 
   const [selectedBalData, setSelectedBalData] = useState<IUserSelect | null>(
     null,
@@ -245,7 +245,7 @@ export function UserSelectList() {
 
     async function fetchSelectOptionsData({
       dataType,
-    }: IUserSelectListNavigation) {
+    }: IUserPrefferencesSelectListNavigation) {
       if (dataType === `Objetivo`) {
         const goalOptionData = await fetchGoalOptionData()
         if (!goalOptionData) return
