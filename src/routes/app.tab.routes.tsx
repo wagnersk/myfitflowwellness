@@ -13,11 +13,14 @@ import { AppStackMarketPlaceHomeRoutes } from './app.stackMarketPlaceHome.routes
 import { AppStackUserProfileRoutes } from './app.stackUserProfile.routes'
 import { AppStackUserStatisticsRoutes } from './app.stackUserStatistics.routes'
 import { useTheme } from 'styled-components/native'
+import { useAuth } from '@hooks/auth'
 
 const { Navigator, Screen, Group } = createBottomTabNavigator()
 
 export function AppTabRoutes() {
   const theme = useTheme()
+  const { user } = useAuth()
+
   return (
     <Navigator
       screenOptions={{
@@ -35,33 +38,36 @@ export function AppTabRoutes() {
         name="userhome"
         component={AppStackUserHomeRoutes}
         options={{
-          tabBarIcon: ({ focused, color }) => (
-            <House
-              width={32}
-              height={32}
-              opacity={focused ? 1 : 0.4}
-              fill={color}
-            />
-          ),
+          tabBarIcon: ({ focused, color }) =>
+            user && user.anonymousUser ? null : (
+              <House
+                width={32}
+                height={32}
+                opacity={focused ? 1 : 0.4}
+                fill={color}
+              />
+            ),
           tabBarHideOnKeyboard: true,
         }}
       />
 
-      <Screen
-        name="marketplacehome"
-        component={AppStackMarketPlaceHomeRoutes}
-        options={{
-          tabBarIcon: ({ focused, color }) => (
-            <Barbell
-              width={32}
-              height={32}
-              opacity={focused ? 1 : 0.4}
-              fill={color}
-            />
-          ),
-          tabBarHideOnKeyboard: true,
-        }}
-      />
+      {user && !user.anonymousUser && (
+        <Screen
+          name="marketplacehome"
+          component={AppStackMarketPlaceHomeRoutes}
+          options={{
+            tabBarIcon: ({ focused, color }) => (
+              <Barbell
+                width={32}
+                height={32}
+                opacity={focused ? 1 : 0.4}
+                fill={color}
+              />
+            ),
+            tabBarHideOnKeyboard: true,
+          }}
+        />
+      )}
 
       {/* TODO , ATIVAR PERSONAL- estatisticas  */}
       {false && (
@@ -81,22 +87,23 @@ export function AppTabRoutes() {
           }}
         />
       )}
-
-      <Screen
-        name="profile"
-        component={AppStackUserProfileRoutes}
-        options={{
-          tabBarIcon: ({ focused, color }) => (
-            <UserCircle
-              width={32}
-              height={32}
-              opacity={focused ? 1 : 0.4}
-              fill={color}
-            />
-          ),
-          tabBarHideOnKeyboard: true,
-        }}
-      />
+      {user && !user.anonymousUser && (
+        <Screen
+          name="profile"
+          component={AppStackUserProfileRoutes}
+          options={{
+            tabBarIcon: ({ focused, color }) => (
+              <UserCircle
+                width={32}
+                height={32}
+                opacity={focused ? 1 : 0.4}
+                fill={color}
+              />
+            ),
+            tabBarHideOnKeyboard: true,
+          }}
+        />
+      )}
     </Navigator>
   )
 }

@@ -14,6 +14,7 @@ import { IFormattedCardExerciseData, IUser } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
 import * as FileSystem from 'expo-file-system'
 import { CachedVideoPlayerModal } from '@components/Modals/CachedVideoPlayerModal'
+import { getMockedVideo } from './MockedVideos/getMockedVideo'
 
 interface WorkoutNameAndVideoProps {
   isFocused: boolean
@@ -35,7 +36,6 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
   isOpenModalVideoPlayer,
   item,
   selectedLanguage,
-  exerciseIndex,
   user,
   openVideoPlayer,
   closeModal,
@@ -47,6 +47,7 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
     useState<string>('')
 
   useEffect(() => {
+    if (user.anonymousUser) return
     if (!cachedVideoTable) {
       startDownload(
         item.workoutExerciseVideoUrl,
@@ -121,42 +122,83 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
       id?: string,
     ) {
       if (!url || !name || !mime || !id) return
-      const cachedVideo = await downloadAndCacheVideo(name, mime, url, id)
+      // const cachedVideo = await downloadAndCacheVideo(name, mime, url, id)
+      const videoPath = await downloadVideo(name, mime, url)
 
-      if (cachedVideo) {
-        setModalVideoLocalPathState(cachedVideo)
+      if (videoPath) {
+        await cacheVideo(videoPath, id)
+        return videoPath
+      }
+
+      if (videoPath) {
+        setModalVideoLocalPathState(videoPath)
       }
     }
 
-    async function downloadAndCacheVideo(
-      _exerciseFileName: string,
-      _exerciseMIME: string,
-      _exerciseUrlDownload: string,
-      _exerciseId: string,
-    ) {
+    async function cacheVideo(
+      videoPath: string,
+      exerciseId: string,
+    ): Promise<void> {
       try {
-        const fileUri = `${FileSystem.documentDirectory}${_exerciseFileName}${_exerciseMIME}`
-
-        const downloadResumable = FileSystem.createDownloadResumable(
-          _exerciseUrlDownload,
-          fileUri,
-          {},
-        )
-
-        const downloadResult = await downloadResumable.downloadAsync()
-        if (!downloadResult?.uri) return
-        const cachedLocalPathVideo = downloadResult.uri
-        await updateCachedVideoTable(cachedLocalPathVideo, _exerciseId)
-
-        return cachedLocalPathVideo
+        await updateCachedVideoTable(videoPath, exerciseId)
       } catch (error) {
-        console.error('Erro ao baixar o vídeo:', error)
-
-        return null
+        console.error('Erro ao salvar o vídeo no cache:', error)
       }
     }
   }, [cachedVideoTable, cachedVideoTable?.length])
 
+  useEffect(() => {
+    if (!user.anonymousUser) return
+    if (!item.workoutExerciseId) return
+
+    if (isOpenModalVideoPlayer) {
+      const videoPath = getMockedVideo(item.workoutExerciseId) // Usando a função getFakeVideo
+
+      if (!item.workoutExerciseVideoFileName) return
+      if (!item.workoutExerciseVideoMIME) return
+      if (!videoPath) return
+
+      checkFileExists(
+        item.workoutExerciseVideoFileName,
+        item.workoutExerciseVideoMIME,
+        videoPath,
+      )
+    }
+    async function checkFileExists(
+      fileName: string,
+      mime: string,
+      url: string,
+    ) {
+      const getPath = await downloadVideo(fileName, mime, url)
+      if (!getPath) return
+      console.log(`getPath`, getPath)
+      setModalVideoLocalPathState(getPath)
+    }
+  }, [isOpenModalVideoPlayer])
+
+  async function downloadVideo(
+    fileName: string,
+    mime: string,
+    url: string,
+  ): Promise<string | null> {
+    try {
+      const fileUri = `${FileSystem.documentDirectory}${fileName}${mime}`
+
+      const downloadResumable = FileSystem.createDownloadResumable(
+        url,
+        fileUri,
+        {},
+      )
+      const downloadResult = await downloadResumable.downloadAsync()
+
+      if (!downloadResult?.uri) return null
+
+      return downloadResult.uri
+    } catch (error) {
+      console.error('Erro ao baixar o vídeo:', error)
+      return null
+    }
+  }
   return (
     <WorkoutNameAndVideoWrapper pointerEvents={disabled ? 'none' : 'auto'}>
       <WorkoutNameWrapper style={{ opacity: isFocused ? 1 : 0.4 }}>
@@ -173,7 +215,6 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
 
       {item.workoutExerciseThumbnailUrl && (
         <WorkoutVideoPlayerButton
-          disabled={exerciseIndex !== 0 && user?.anonymousUser}
           onPress={isFocused ? openVideoPlayer : () => {}}
           enabled={isFocused}
         >

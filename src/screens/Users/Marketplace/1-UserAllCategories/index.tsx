@@ -193,7 +193,7 @@ export function UserAllCategories() {
               contentContainerStyle={{
                 padding: 16,
               }}
-              data={filteredByActiveWorkoutCategoriesList}
+              data={workoutsCategories}
               renderItem={({ item }) => (
                 <WorkoutsCategoriesCardList
                   item={item}

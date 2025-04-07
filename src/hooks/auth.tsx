@@ -147,86 +147,28 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [isLoadingUserStorageData, setIsLoadingUserStorageData] =
     useState(false)
 
+  // parar de salvar no servidor e deixar hardcoded
+  // incluir os gifs no celular
   async function firebaseAnonymousSignUp(selectedLanguage: 'pt-br' | 'us') {
-    setIsWaitingApiResponse(true)
-    await signInAnonymously(auth)
-      .then(async (account) => {
-        const usersRef = collection(db, 'anonymousUsers')
-        const updatedTime = serverTimestamp()
-
-        const anonimousData: IUser = {
-          id: account.user.uid,
-          name: '',
-          name_insensitive: '',
-          birthdate: '',
-          email: '',
-          whatsappNumber: '',
-          photo: '',
-          isNewUser: true,
-          anonymousUser: true,
-          selectedLanguage,
-          premiumContractId: '',
-          createdAt: updatedTime,
-          updatedAt: updatedTime,
-        }
-
-        await setDoc(doc(usersRef, account.user.uid), anonimousData)
-          .then(() => {
-            Alert.alert(
-              user?.selectedLanguage === 'pt-br'
-                ? 'Conta anônima criada com sucesso!'
-                : 'Anonymous account created successfully!',
-            )
-            firebaseAnonymousSignIn(account.user.uid)
-          })
-          .catch((error) => {
-            console.log(error.code)
-          })
-      })
-      .catch((error) => {
-        const { code } = error
-        console.log(`code`, code)
-        setIsWaitingApiResponse(false)
-
-        Alert.alert(
-          selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
-          selectedLanguage === 'pt-br'
-            ? 'Não foi possível criar a conta anônima.'
-            : 'Could not create an anonymous account.',
-        )
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-      })
-  }
-
-  async function firebaseAnonymousSignIn(uid: string) {
-    setIsLogging(true)
-
-    const userDocRef = doc(db, 'anonymousUsers', uid)
-    const docSnap = await getDoc(userDocRef)
-
-    if (docSnap.exists()) {
-      const userData = docSnap.data() as IUser
-
-      await AsyncStorage.setItem(
-        USER_SIGNIN_COLLECTION,
-        JSON.stringify(userData),
-      )
-      setUser(userData)
-
-      loadLoginInitialCachedWorkoutsData(uid)
-      setIsLogging(false)
-    } else {
-      Alert.alert(
-        user?.selectedLanguage === 'pt-br'
-          ? 'Login realizado'
-          : 'Login successful',
-        user?.selectedLanguage === 'pt-br'
-          ? 'Porém não foi possível buscar os dados de perfil do usuário'
-          : 'However, it was not possible to fetch the user profile data',
-      )
+    const anonimousData: IUser = {
+      id: `123`,
+      name: null,
+      name_insensitive: null,
+      birthdate: null,
+      email: null,
+      whatsappNumber: null,
+      photo: null,
+      isNewUser: false,
+      anonymousUser: true,
+      selectedLanguage,
+      premiumContractId: null,
+      createdAt: null,
+      updatedAt: null,
+      trainingStartDate: null, // formato: 'YYYY-MM-DD' ou timestamp
+      trainingLevel: null, // 'iniciante' | 'intermediario' | 'avancado'
     }
+
+    setUser(anonimousData)
   }
 
   async function firebaseCreateUserAndSendEmailVerification(
@@ -351,6 +293,8 @@ function AuthProvider({ children }: AuthProviderProps) {
             premiumContractId,
             createdAt,
             updatedAt,
+            trainingLevel,
+            trainingStartDate,
           } = docSnap.data() as IUser
 
           const userData: IUser = {
@@ -367,6 +311,8 @@ function AuthProvider({ children }: AuthProviderProps) {
             premiumContractId,
             createdAt,
             updatedAt,
+            trainingStartDate, // Add appropriate value or keep null
+            trainingLevel, // Add appropriate value or keep null
           }
 
           await AsyncStorage.setItem(
@@ -501,14 +447,16 @@ function AuthProvider({ children }: AuthProviderProps) {
       name_insensitive: name.toLocaleLowerCase().trim(),
       birthdate,
       email,
-      whatsappNumber: '',
-      photo: '',
+      whatsappNumber: null,
+      photo: null,
       isNewUser: true,
       anonymousUser: false,
       selectedLanguage,
       premiumContractId,
       createdAt: updatedTime,
       updatedAt: updatedTime,
+      trainingStartDate: null, // Add appropriate value or keep null
+      trainingLevel: null, // Add appropriate value or keep null
     }
     const equipamentData = generateDefaultEquipamentData()
     const gymInfoData = generateDefaultGymInfoData()
@@ -678,7 +626,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         ),
       )
   }
-
+  // TODO
   async function updateUserForm(data: IUserFormProps) {
     setIsWaitingApiResponse(true)
     const userRef = collection(db, 'users')
@@ -834,260 +782,163 @@ function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function updateUserGoalPreffer(userGoal: IUserGoal) {
-    if (!user) return
-    if (!userGymInfo) return
+    if (!user || !userGymInfo) return
+
     const { goalSelectedData } = userGoal
-    const { id } = user
-    let fgoal: IUserGoal = { goalSelectedData: { 'pt-br': '', us: '' } }
-    if (userGymInfo.goal) {
-      fgoal = {
-        goalSelectedData,
-      }
-    }
-
-    if (!userGymInfo.goal) {
-      fgoal = {
-        goalSelectedData,
-      }
-    }
+    const fgoal = { goalSelectedData }
 
     setIsWaitingApiResponse(true)
-    const userRef = collection(db, 'users')
 
-    await updateDoc(doc(userRef, id), {
-      goal: fgoal,
-    })
-      .catch((err) => {
-        console.error(err)
-      })
-      .then(async () => {
-        if (!user) {
-          return
-        }
+    const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
+    const servertimestamp = serverTimestamp()
 
-        const updatedUser = { ...user, goal: { ...fgoal }, updatedAt }
-        if (fgoal) {
-          await AsyncStorage.setItem(
-            USER_SIGNIN_COLLECTION,
-            JSON.stringify(updatedUser),
-          ).then(() => {
-            setUser(updatedUser)
-          })
-        }
+    try {
+      await updateDoc(userRef, {
+        goal: fgoal,
+        updatedAt: servertimestamp,
       })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-        Alert.alert(
-          user?.selectedLanguage === 'pt-br'
-            ? 'Dados alterados com sucesso!'
-            : 'Data changed successfully!',
-        )
-      })
+
+      const updatedUser: IUserGymInfo = {
+        ...userGymInfo,
+        goal: { goalSelectedData },
+      }
+
+      saveUserGymInfo(updatedUser)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Dados alterados com sucesso!'
+          : 'Data changed successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
   }
-  // TODO
+
   async function updateUserGoalFocusMusclePreffer(
-    mucleFocus: IUserMuscleFocus,
+    muscleFocus: IUserMuscleFocus,
   ) {
-    if (!user) return
-    const { createdAt, muscleSelectedData, updatedAt } = mucleFocus
-    let fmuscleFocus: IUserMuscleFocus = {}
-    if (user.goal) {
-      fmuscleFocus = {
-        muscleSelectedData,
-        updatedAt,
-      }
-    }
+    if (!user || !userGymInfo) return
 
-    if (!user.goal) {
-      fmuscleFocus = {
-        muscleSelectedData,
-        updatedAt,
-        createdAt,
-      }
-    }
+    const { muscleSelectedData } = muscleFocus
+    const fmuscleFocus = { muscleSelectedData }
 
     setIsWaitingApiResponse(true)
-    const userRef = collection(db, 'users')
 
-    const { id } = user
+    const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
+    const servertimestamp = serverTimestamp()
 
-    await updateDoc(doc(userRef, id), {
-      muscleFocus: fmuscleFocus,
-      updatedAt,
-    })
-      .catch((err) => {
-        console.error(err)
+    try {
+      await updateDoc(userRef, {
+        muscleFocus: fmuscleFocus,
+        updatedAt: servertimestamp,
       })
-      .then(async () => {
-        if (!user || !updatedAt) {
-          return
-        }
 
-        const updatedUser = {
-          ...user,
-          muscleFocus: { ...fmuscleFocus },
-          updatedAt,
-        }
-        if (fmuscleFocus) {
-          await AsyncStorage.setItem(
-            USER_SIGNIN_COLLECTION,
-            JSON.stringify(updatedUser),
-          ).then(() => {
-            setUser(updatedUser)
-          })
-        }
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-        Alert.alert(
-          user?.selectedLanguage === 'pt-br'
-            ? 'Dados alterados com sucesso!'
-            : 'Data changed successfully!',
-        )
-      })
+      const updatedUser: IUserGymInfo = {
+        ...userGymInfo,
+        muscleFocus: { muscleSelectedData },
+      }
+
+      saveUserGymInfo(updatedUser)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Dados alterados com sucesso!'
+          : 'Data changed successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
   }
-  // TODO
+
   async function updateUserFrequencyByWeekPreffer(
     userSessionsByWeek: IUserSessionsByWeek,
   ) {
-    if (!user) return
-    const {
-      createdAt,
-      sessionsByWeekSelectedData,
-      sessionsByWeekNumber,
-      updatedAt,
-    } = userSessionsByWeek
+    if (!user || !userGymInfo) return
 
-    let fbyweek: IUserSessionsByWeek = {}
-    if (user.sessionsByWeek) {
-      fbyweek = {
-        sessionsByWeekSelectedData,
-        sessionsByWeekNumber,
-        updatedAt,
-      }
-    }
-
-    if (!user.sessionsByWeek) {
-      fbyweek = {
-        sessionsByWeekSelectedData,
-        sessionsByWeekNumber,
-        updatedAt,
-        createdAt,
-      }
-    }
+    const { sessionsByWeekSelectedData, sessionsByWeekNumber } =
+      userSessionsByWeek
+    const fbyweek = { sessionsByWeekSelectedData, sessionsByWeekNumber }
 
     setIsWaitingApiResponse(true)
-    const userRef = collection(db, 'users')
 
-    const { id } = user
+    const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
+    const servertimestamp = serverTimestamp()
 
-    await updateDoc(doc(userRef, id), {
-      sessionsByWeek: fbyweek,
-      updatedAt,
-    })
-      .catch((err) => {
-        console.error(err)
+    try {
+      await updateDoc(userRef, {
+        sessionsByWeek: fbyweek,
+        updatedAt: servertimestamp,
       })
-      .then(async () => {
-        if (!user || !updatedAt) {
-          setIsWaitingApiResponse(false)
-          return
-        }
 
-        const updatedUser = {
-          ...user,
-          sessionsByWeek: { ...fbyweek },
-          updatedAt,
-        }
-        if (fbyweek) {
-          await AsyncStorage.setItem(
-            USER_SIGNIN_COLLECTION,
-            JSON.stringify(updatedUser),
-          ).then(() => {
-            setUser(updatedUser)
-          })
-        }
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-        Alert.alert(
-          user?.selectedLanguage === 'pt-br'
-            ? 'Dados alterados com sucesso!'
-            : 'Data changed successfully!',
-        )
-      })
+      const updatedUser: IUserGymInfo = {
+        ...userGymInfo,
+        sessionsByWeek: { sessionsByWeekSelectedData, sessionsByWeekNumber },
+      }
+
+      saveUserGymInfo(updatedUser)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Dados alterados com sucesso!'
+          : 'Data changed successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
   }
-  // TODO
+
   async function updateUserTimeBySessionPreffer(
     userTimeBySession: IUserTimeBySession,
   ) {
-    if (!user) return
-    const {
-      createdAt,
-      timeBySessionByWeekRangeNumber,
+    if (!user || !userGymInfo) return
+
+    const { timeBySessionSelectedData, timeBySessionByWeekRangeNumber } =
+      userTimeBySession
+    const fbysession = {
       timeBySessionSelectedData,
-      updatedAt,
-    } = userTimeBySession
-
-    let fbysession: IUserTimeBySession = {}
-    if (user.sessionsByWeek) {
-      fbysession = {
-        timeBySessionByWeekRangeNumber,
-        timeBySessionSelectedData,
-        updatedAt,
-      }
-    }
-
-    if (!user.sessionsByWeek) {
-      fbysession = {
-        timeBySessionByWeekRangeNumber,
-        timeBySessionSelectedData,
-        updatedAt,
-        createdAt,
-      }
+      timeBySessionByWeekRangeNumber,
     }
 
     setIsWaitingApiResponse(true)
-    const userRef = collection(db, 'users')
 
-    const { id } = user
+    const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
+    const servertimestamp = serverTimestamp()
 
-    await updateDoc(doc(userRef, id), {
-      timeBySession: fbysession,
-      updatedAt,
-    })
-      .catch((err) => {
-        console.error(err)
+    try {
+      await updateDoc(userRef, {
+        timeBySession: fbysession,
+        updatedAt: servertimestamp,
       })
-      .then(async () => {
-        if (!user || !updatedAt) {
-          setIsWaitingApiResponse(false)
-          return
-        }
 
-        const updatedUser = {
-          ...user,
-          timeBySession: { ...fbysession },
-          updatedAt,
-        }
-        if (fbysession) {
-          await AsyncStorage.setItem(
-            USER_SIGNIN_COLLECTION,
-            JSON.stringify(updatedUser),
-          ).then(() => {
-            setUser(updatedUser)
-          })
-        }
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-        Alert.alert(
-          user?.selectedLanguage === 'pt-br'
-            ? 'Dados alterados com sucesso!'
-            : 'Data changed successfully!',
-        )
-      })
+      const updatedUser: IUserGymInfo = {
+        ...userGymInfo,
+        timeBySession: {
+          timeBySessionSelectedData,
+          timeBySessionByWeekRangeNumber,
+        },
+      }
+
+      saveUserGymInfo(updatedUser)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Dados alterados com sucesso!'
+          : 'Data changed successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
   }
+
   async function fetchMuscleOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
 
@@ -1498,36 +1349,42 @@ function AuthProvider({ children }: AuthProviderProps) {
       return null
     }
   }
-  // TODO
+
+  async function fetchPulleyOptionData() {
+    const pulleySelectDataRef = doc(db, 'selectOptionsData', `pulley`)
+
+    const docSnapshot = await getDoc(pulleySelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as IPulleySelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
   async function updateUserFreePreffer(data: IFreeSelectItem) {
+    if (!userEquipaments) return
     if (!user) return
 
-    const servertimestamp = serverTimestamp()
-
-    let freeData: IFreeSelectData = {}
-
-    if (user.pulleyData) {
-      freeData = {
-        data,
-        updatedAt: servertimestamp,
-      }
+    const freeData = {
+      data,
     }
 
-    if (!user.pulleyData) {
-      freeData = {
-        data,
-        updatedAt: servertimestamp,
-        createdAt: servertimestamp,
-      }
-    }
     if (!freeData) return
-
-    const userRef = collection(db, 'users')
-    const { id } = user
+    /// users/bST2FN4W7sTLMlvWZlhPez288FD2/equipamentData/equipamentFilter
+    const userRef = doc(
+      db,
+      'users',
+      user.id,
+      'equipamentData',
+      'equipamentFilter',
+    ) // rota
+    const servertimestamp = serverTimestamp()
 
     setIsWaitingApiResponse(true)
 
-    await updateDoc(doc(userRef, id), {
+    await updateDoc(userRef, {
       freeData,
       updatedAt: servertimestamp,
     })
@@ -1541,93 +1398,13 @@ function AuthProvider({ children }: AuthProviderProps) {
           return
         }
 
-        const updatedUser = {
-          ...user,
+        const updatedFreeData: IUserEquipamentData = {
+          ...userEquipaments,
           freeData,
           updatedAt: servertimestamp,
         }
-        await AsyncStorage.setItem(
-          USER_SIGNIN_COLLECTION,
-          JSON.stringify(updatedUser),
-        ).then(() => {
-          setUser(updatedUser)
-        })
-      })
-      .finally(() => {
-        setIsWaitingApiResponse(false)
-        Alert.alert(
-          user?.selectedLanguage === 'pt-br'
-            ? 'Dados alterados com sucesso!'
-            : 'Data changed successfully!',
-        )
-      })
-  }
-  async function fetchPulleyOptionData() {
-    const pulleySelectDataRef = doc(db, 'selectOptionsData', `pulley`)
 
-    const docSnapshot = await getDoc(pulleySelectDataRef)
-
-    if (docSnapshot.exists()) {
-      const initialData = docSnapshot.data() as IPulleySelectData
-      return initialData
-    } else {
-      return null
-    }
-  }
-  // TODO
-  async function updateUserPulleyPreffer(data: IPulleySelectItem) {
-    if (!user) return
-
-    const servertimestamp = serverTimestamp()
-
-    let pulleyData: IPulleySelectData = {}
-
-    if (user.pulleyData) {
-      pulleyData = {
-        data,
-        updatedAt: servertimestamp,
-      }
-    }
-
-    if (!user.pulleyData) {
-      pulleyData = {
-        data,
-        updatedAt: servertimestamp,
-        createdAt: servertimestamp,
-      }
-    }
-    if (!pulleyData) return
-
-    const userRef = collection(db, 'users')
-    const { id } = user
-
-    setIsWaitingApiResponse(true)
-
-    await updateDoc(doc(userRef, id), {
-      pulleyData,
-      updatedAt: servertimestamp,
-    })
-      .catch((err) => {
-        console.error(err)
-        setIsWaitingApiResponse(false)
-      })
-      .then(async () => {
-        if (!user) {
-          setIsWaitingApiResponse(false)
-          return
-        }
-
-        const updatedUser = {
-          ...user,
-          pulleyData,
-          updatedAt: servertimestamp,
-        }
-        await AsyncStorage.setItem(
-          USER_SIGNIN_COLLECTION,
-          JSON.stringify(updatedUser),
-        ).then(() => {
-          setUser(updatedUser)
-        })
+        saveUserEquipments(updatedFreeData)
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
@@ -1658,29 +1435,89 @@ function AuthProvider({ children }: AuthProviderProps) {
       throw error
     }
   }
-  // TODO
+
+  async function updateUserPulleyPreffer(data: IPulleySelectItem) {
+    if (!userEquipaments) return
+    if (!user) return
+
+    const servertimestamp = serverTimestamp()
+
+    const pulleyData = {
+      data,
+    }
+
+    if (!pulleyData) return
+    /// users/bST2FN4W7sTLMlvWZlhPez288FD2/equipamentData/equipamentFilter
+    const userRef = doc(
+      db,
+      'users',
+      user.id,
+      'equipamentData',
+      'equipamentFilter',
+    ) // rota
+
+    setIsWaitingApiResponse(true)
+
+    await updateDoc(userRef, {
+      pulleyData,
+      updatedAt: servertimestamp,
+    })
+      .then(async () => {
+        if (!user) {
+          setIsWaitingApiResponse(false)
+          return
+        }
+
+        const updatedPulleyData: IUserEquipamentData = {
+          ...userEquipaments,
+          pulleyData,
+          updatedAt: servertimestamp,
+        }
+
+        saveUserEquipments(updatedPulleyData)
+
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
+      })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+      })
+  }
   async function updateUserMachinePreffer(data: IMachineSelectItem) {
+    if (!userEquipaments) return
+
     if (!user) return
 
     const servertimestamp = serverTimestamp()
 
     let machineData: IMachineSelectData = {}
 
-    if (user.machineData) {
+    if (userEquipaments.machineData) {
       machineData = {
         data,
-        updatedAt: servertimestamp,
       }
     }
 
     if (!machineData) return
 
-    const userRef = collection(db, 'users')
-    const { id } = user
+    const userRef = doc(
+      db,
+      'users',
+      user.id,
+      'equipamentData',
+      'equipamentFilter',
+    ) // rota
 
     setIsWaitingApiResponse(true)
 
-    await updateDoc(doc(userRef, id), {
+    await updateDoc(userRef, {
       machineData,
       updatedAt: servertimestamp,
     })
@@ -1694,17 +1531,13 @@ function AuthProvider({ children }: AuthProviderProps) {
           return
         }
 
-        const updatedUser = {
-          ...user,
+        const updatedMachineData: IUserEquipamentData = {
+          ...userEquipaments,
           machineData,
           updatedAt: servertimestamp,
         }
-        await AsyncStorage.setItem(
-          USER_SIGNIN_COLLECTION,
-          JSON.stringify(updatedUser),
-        ).then(() => {
-          setUser(updatedUser)
-        })
+
+        saveUserEquipments(updatedMachineData)
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
@@ -1741,7 +1574,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   ) {
     setIsWaitingApiResponse(true)
 
-    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     const contractDoc = collection(db, 'premiumUsersContracts')
     const today = new Date()
     const formattedProfileUpdatedAt = format(today, 'dd/MM/yyyy')
@@ -2504,6 +2336,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function apagarCached() {
     AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
   }
+  console.log(`userGymInfo ->`, userGymInfo)
 
   // fazer se inspirando no notes
   async function loadCachedUserGymInfo(userId: string) {
@@ -2513,10 +2346,19 @@ function AuthProvider({ children }: AuthProviderProps) {
       const storedCachedGymInfoString =
         await AsyncStorage.getItem(storageGymInfoKey)
 
+      if (!storedCachedGymInfoString) {
+        const response = await loadUserGymInfo()
+        if (response) {
+          saveUserGymInfo(response)
+        }
+      }
+
       if (storedCachedGymInfoString) {
         const gymInfoData = JSON.parse(storedCachedGymInfoString)
 
-        setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
+        if (gymInfoData) {
+          setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
+        }
       }
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
@@ -2529,6 +2371,13 @@ function AuthProvider({ children }: AuthProviderProps) {
       const storedCachedEquipamentsString = await AsyncStorage.getItem(
         storageEquipamentsKey,
       )
+
+      if (!storedCachedEquipamentsString) {
+        const response = await loadUserEquipments()
+        if (response) {
+          saveUserEquipments(response)
+        }
+      }
 
       if (storedCachedEquipamentsString) {
         const equipamentsData = JSON.parse(storedCachedEquipamentsString)
@@ -2546,7 +2395,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   ) {
     if (!user) return null
     const userId = user.id
-
     const storageCachedVideoTableKey = `@myfitflow:userlocal-cachedvideotable-${userId}`
 
     if (cachedVideoTable) {

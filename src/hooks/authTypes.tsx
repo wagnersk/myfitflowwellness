@@ -158,24 +158,27 @@ export type IUser2 = {
 
   createdAt: ServerTimestamp
   updatedAt: ServerTimestamp
-}
+} /*       trainingStartDate: '', // formato: 'YYYY-MM-DD' ou timestamp
+trainingLevel: '', // 'iniciante' | 'intermediario' | 'avancado' */
 export type IUser = {
   id: string
-  name: string
-  name_insensitive: string
-  birthdate: string
-  email: string
-  whatsappNumber: string
-  photo: string
+  name: string | null
+  name_insensitive: string | null
+  birthdate: string | null
+  email: string | null
+
+  whatsappNumber: string | null
+  photo: string | null
+  trainingStartDate: string | null
+  trainingLevel: string | null
 
   isNewUser: boolean
   anonymousUser: boolean
   selectedLanguage: 'pt-br' | 'us'
 
-  premiumContractId: string
-
-  createdAt: ServerTimestamp
-  updatedAt: ServerTimestamp
+  premiumContractId: string | null
+  createdAt: ServerTimestamp | null
+  updatedAt: ServerTimestamp | null
 }
 /* IUserPersonalTrainerContract IUserGymInfo IUserEquipamentData */
 // criar doc dentro de user
@@ -353,6 +356,7 @@ t
 
 export interface ICardExerciseData {
   isEnabled: boolean
+  id?: string
 
   workoutExerciseId?: string
   workoutExerciseIndex?: number
@@ -414,7 +418,7 @@ export interface IWorkoutExercisesFirebase {
 export interface IWorkoutsData {
   index: number
   cardExerciseLabel: string
-  cardExerciseData: ICardExerciseData[]
+  cardExerciseData: IFormattedCardExerciseData[]
   cardExerciseUniquesMuscles: IptBrUs[]
 }
 
@@ -523,8 +527,8 @@ export interface IMyfitflowWorkoutInUse {
   }
 
   // ---
-  createdAt?: ServerTimestamp
-  updatedAt?: ServerTimestamp
+  createdAt?: { seconds: number; nanoseconds: number }
+  updatedAt?: { seconds: number; nanoseconds: number }
 }
 
 export interface IMyfitflowWorkoutInUseData {

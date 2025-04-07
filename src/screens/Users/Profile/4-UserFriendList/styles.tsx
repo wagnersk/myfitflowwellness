@@ -90,7 +90,8 @@ export const SettingsWrapper = styled.View`
 
 export const TittleWrapper = styled.View`
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 `
 export const Tittle = styled.Text`

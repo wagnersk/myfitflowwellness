@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import React, { useCallback, useEffect, useState } from 'react'
-import { BackHandler, SafeAreaView } from 'react-native'
+import { BackHandler, SafeAreaView, ScrollView } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
@@ -42,6 +42,7 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
+import { TittleWrapper } from '../4-UserFriendList/styles'
 
 export function UserPrefferences() {
   const {
@@ -66,23 +67,23 @@ export function UserPrefferences() {
   }
 
   function handleOpenList({ dataType }: IUserPrefferencesSelectListNavigation) {
-    navigation.navigate('userEquipaments', { dataType })
+    navigation.navigate('userPrefferencesSelectList', { dataType })
   }
 
-  function handleOpenFilterFreeEquipamentList({
-    dataType,
-  }: IUserSelectFreeEquipamentListNavigation) {
-    navigation.navigate('userSelectFreeEquipamentList', { dataType })
-  }
-  function handleOpenFilterPulleyEquipamentList({
-    dataType,
-  }: IUserSelectPulleyEquipamentListNavigation) {
-    navigation.navigate('userSelectPulleyEquipamentList', { dataType })
-  }
-  function handleOpenFilterMachineEquipamentList({
-    dataType,
-  }: IUserSelectMachineEquipamentListNavigation) {
-    navigation.navigate('userSelectMachineEquipamentList', { dataType })
+  function handleOpenFilterEquipamentList({ dataType }: { dataType: string }) {
+    switch (dataType) {
+      case 'Livre':
+        navigation.navigate('userSelectFreeEquipamentList', { dataType })
+        break
+      case 'Polia':
+        navigation.navigate('userSelectPulleyEquipamentList', { dataType })
+        break
+      case 'Máquina':
+        navigation.navigate('userSelectMachineEquipamentList', { dataType })
+        break
+      default:
+        console.error(`Tipo de equipamento desconhecido: ${dataType}`)
+    }
   }
   async function muscleGroupAndEquips() {
     if (!cachedWorkoutsExercises) return
@@ -240,11 +241,25 @@ export function UserPrefferences() {
                     disabled={isWaitingApiResponse}
                   />
                 </SettingsWrapper>
-                <Title>Preferencias: </Title>
+                <TittleWrapper>
+                  <Title>Preferencias: </Title>
+                </TittleWrapper>
                 <Body>
-                  <SelectContentWrapper>
+                  <ScrollView
+                    contentContainerStyle={{ gap: 16 }}
+                    showsVerticalScrollIndicator={false}
+                  >
                     <SelectWrapper>
                       <ButtonWrapper>
+                        <ButtonTitle>Nivel: </ButtonTitle>
+                        <WhiteButton
+                          tittle={formattedGoal}
+                          onPress={() =>
+                            handleOpenList({ dataType: 'Objetivo' })
+                          }
+                          bordertype="up-down"
+                          iconStyle="crosshair"
+                        />
                         <ButtonTitle>Objetivo: </ButtonTitle>
                         <WhiteButton
                           tittle={formattedGoal}
@@ -290,50 +305,44 @@ export function UserPrefferences() {
                         <ButtonTitle>Tempo de cada treino: </ButtonTitle>
                       </ButtonWrapper>
                     </SelectWrapper>
-                  </SelectContentWrapper>
-                  {!userPersonalTrainerContract && (
-                    <FooterWrapper>
-                      <Title>Equipamentos disponíveis</Title>
-                      <FooterContainer>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Livre`}
-                            onPress={() => {
-                              handleOpenFilterFreeEquipamentList({
-                                dataType: 'Livre',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Polia`}
-                            onPress={() => {
-                              handleOpenFilterPulleyEquipamentList({
-                                dataType: 'Polia',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                        <SelectFilterButtonWrapper>
-                          <SelectFilterButton
-                            title={`Máquina`}
-                            onPress={() => {
-                              handleOpenFilterMachineEquipamentList({
-                                dataType: 'Máquina',
-                              })
-                            }}
-                            enabled={true}
-                            loading={false}
-                          />
-                        </SelectFilterButtonWrapper>
-                      </FooterContainer>
-                    </FooterWrapper>
-                  )}
+
+                    <SelectWrapper>
+                      <ButtonWrapper>
+                        <ButtonTitle>Equipamentos disponíveis </ButtonTitle>
+
+                        <WhiteButton
+                          tittle={'Livre'}
+                          onPress={() =>
+                            handleOpenFilterEquipamentList({
+                              dataType: 'Livre',
+                            })
+                          }
+                          bordertype="up"
+                          iconStyle="checkcicle"
+                        />
+                        <WhiteButton
+                          tittle={'Polia'}
+                          onPress={() =>
+                            handleOpenFilterEquipamentList({
+                              dataType: 'Polia',
+                            })
+                          }
+                          bordertype="none"
+                          iconStyle="clock"
+                        />
+                        <WhiteButton
+                          tittle={'Máquina'}
+                          onPress={() =>
+                            handleOpenFilterEquipamentList({
+                              dataType: 'Máquina',
+                            })
+                          }
+                          bordertype="down"
+                          iconStyle="clock"
+                        />
+                      </ButtonWrapper>
+                    </SelectWrapper>
+                  </ScrollView>
                 </Body>
               </BodyWrapper>
             </SafeAreaView>

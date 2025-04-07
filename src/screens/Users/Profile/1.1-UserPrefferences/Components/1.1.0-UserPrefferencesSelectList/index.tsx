@@ -62,7 +62,6 @@ export function UserPrefferencesSelectList() {
     fetchTimeBySessionOptionData,
   } = useAuth()
   const theme = useTheme()
-
   const navigation = useNavigation()
   const route = useRoute()
 
@@ -162,7 +161,9 @@ export function UserPrefferencesSelectList() {
     if (dataType === `Objetivo`) {
       const formattedData = selectedData.find((v) => v.selected === true)
 
+      console.log(`1`)
       if (formattedData) {
+        console.log(`2`)
         const fdata: IUserGoal = {
           goalSelectedData: formattedData.tittle,
         }
@@ -170,6 +171,7 @@ export function UserPrefferencesSelectList() {
         await updateUserGoalPreffer(fdata).then(() => {
           handleGoBack()
         })
+        console.log(`3`)
       }
     }
 
@@ -291,9 +293,9 @@ export function UserPrefferencesSelectList() {
         const muscleOptionData = await fetchMuscleOptionData()
         if (!muscleOptionData) return
         if (!userGymInfo) return
+        console.log(`fetchMuscleOptionData`, fetchMuscleOptionData)
         const { data } = muscleOptionData
         const { muscleFocus } = userGymInfo
-
         const balancedData = {
           muscle_insensitive: {
             'pt-br': `equilibrado`,
@@ -487,7 +489,6 @@ export function UserPrefferencesSelectList() {
     <Container>
       <BodyImageWrapper>
         <BodyImageBackground />
-
         <ImageBackgroundContainer>
           <SafeAreaProvider style={{ width: `100%` }}>
             <SafeAreaView style={{ flex: 1 }}>

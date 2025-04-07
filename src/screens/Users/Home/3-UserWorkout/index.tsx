@@ -36,6 +36,7 @@ import {
   OpacityBackgroundPositionAbsolute,
   ContentWrapper,
 } from './styles'
+
 import { setStatusBarStyle } from 'expo-status-bar'
 import { WorkoutDataWithSelectedWorkout } from '@src/@types/navigation'
 import { getTrimmedName } from '@utils/getTrimmedName'
@@ -56,6 +57,7 @@ export function UserWorkout() {
     data,
     // workoutLength,
     // selectedWorkoutExerciseIndex,
+
     muscleGroupsLabel,
     letter,
     cardIndex,

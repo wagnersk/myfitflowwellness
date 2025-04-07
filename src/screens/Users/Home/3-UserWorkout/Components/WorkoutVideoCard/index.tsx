@@ -20,7 +20,6 @@ import {
   ICachedSetsProps,
 } from '@hooks/authTypes'
 
-import { OverLayWaterMarkButton } from '@components/OverLayWaterMarkButton'
 import { WorkoutUserSetsModal } from '@components/Modals/WorkoutUserSetsModal'
 import { WorkoutUserRangeOfSetsModal } from '@components/Modals/WorkoutUserRangeOfSetsModal'
 import { WorkoutUserNotesModal } from '@components//Modals/WorkoutUserNotesModal'
@@ -726,36 +725,7 @@ modalCachedCardExerciseData.notes.value
     console.log(`dateEnd`, dateEnd)
     updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow)
   }
-  /* 
 
-
- -> IR DENTRO DE DoneWorkout ( ou tudo q atualiza algo)
-
-
-criar updatedAt e createdAt nessa estrutura baixo
-e toda vez q for atualizar qualquer item do subnivel refletir aqui tbm
-      -> cachedUserWorkoutsLog {
-       "userId": "hM7GEloty3dBVSsDOaD5cJHsC3R2", 
-      "workoutsLog": [{"workoutCardsLogData": [Array], "workoutId": "FVSytF9Cl8z3zmuxogNj"}]
-      }
-conferir se toda atualizacao reflete no updatedAt do pai
-
- esse updaterdAt do pai q eu vou trackear no primeiro nivel do cache
-
- e gbuscar a data desse ultimo track
-
- comparar e deixar o botao de updated do treino Cinza ou ativo
-
-
-
- sobre compartilhar , apenas criar alert dizendo q foi clicado
-
-
- -> fazer tela de amigos , listar , ver treino ativo dele ( ai sim eu vejo como eu faco o botao de 
- compartilhar , pq vou precisar do link , o mesmo q vou usar la , so q la ja vou ter 
- amadurecido mais a ideia de como vou estruturar )
-
-*/
   async function saveFastCachedWorkoutData(
     copyProgression: ICachedCardExerciseData,
     _workoutId: string,
@@ -1410,18 +1380,6 @@ conferir se toda atualizacao reflete no updatedAt do pai
   }
 
   // ok
-  function handlePressGuessUser() {
-    Alert.alert(
-      user?.selectedLanguage === 'pt-br' ? 'Alerta' : 'Alert',
-      user?.selectedLanguage === 'pt-br'
-        ? 'Disponível apenas para usuários cadastrados'
-        : 'Available only for registered users',
-      [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
-      { cancelable: false },
-    )
-  }
-
-  // ok
   function buttonText() {
     if (!modalCachedCardExerciseData.workoutExerciseSets) return
 
@@ -1600,7 +1558,7 @@ conferir se toda atualizacao reflete no updatedAt do pai
           disabled={isRunning}
         />
       )}
-      <WorkoutInfoWrapper>
+      <WorkoutInfoWrapper pointerEvents={user?.anonymousUser ? 'none' : 'auto'}>
         {user?.selectedLanguage &&
           modalCachedCardExerciseData &&
           firstIncompleteIndex !== undefined &&
@@ -1681,9 +1639,7 @@ conferir se toda atualizacao reflete no updatedAt do pai
             </BlurViewWrapper>
           </WorkoutButtonConfirm>
         </WorkoutUserNotesAndConfirmButtonWrapper>
-        {exerciseIndex !== 0 && user?.anonymousUser && (
-          <OverLayWaterMarkButton onPress={handlePressGuessUser} />
-        )}
+
         <BulletsCronometerAndCTAButtonWrapper>
           <WorkoutCronometerWrapper>
             <WorkoutCronometer

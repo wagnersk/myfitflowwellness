@@ -33,6 +33,8 @@ import {
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
+import { fakeMyWorkout } from './mock/fakeMyWorkout'
+import { fakeMyWorkoutDataArray } from './mock/fakeMyWorkoutDataArray'
 
 export function UserHome() {
   const navigation = useNavigation()
@@ -56,6 +58,9 @@ export function UserHome() {
     fetchworkoutDataCache,
   } = useAuth()
 
+  // console.log(`myWorkout`, JSON.stringify(myWorkout)) // hardcodded usuario anomimo
+  // console.log(`myWorkoutDataArray`, JSON.stringify(myWorkoutDataArray)) // hardcodded
+
   const [getWorkoutArrayData, setGetWorkoutArrayData] =
     useState<IWorkoutInfo | null>(null)
 
@@ -70,6 +75,7 @@ export function UserHome() {
     const currentDate = new Date()
     daysPassed = differenceInDays(currentDate, startDate)
   }
+
   const theme = useTheme()
   const firstName = user?.name?.split(' ')
 
@@ -86,6 +92,26 @@ export function UserHome() {
       workoutId: findMyWorkoutDataArray.id,
       data,
       workoutLength: findMyWorkoutDataArray.data.workoutsData.length,
+      cardIndex,
+    })
+  }
+
+  async function handleNextStepAnnomimousUser(
+    data: IWorkoutsData,
+    cardIndex: number,
+  ) {
+    if (!fakeMyWorkoutDataArray) return
+    if (!fakeMyWorkout) return
+
+    const findFakeMyWorkoutDataArray = fakeMyWorkoutDataArray.data.find(
+      (v) => v.id === fakeMyWorkout.activeData[0].id,
+    )
+    if (!findFakeMyWorkoutDataArray) return
+
+    navigation.navigate('userWorkoutList', {
+      workoutId: findFakeMyWorkoutDataArray.id,
+      data,
+      workoutLength: findFakeMyWorkoutDataArray.data.workoutsData.length,
       cardIndex,
     })
   }
@@ -189,21 +215,51 @@ export function UserHome() {
   }, [])
 
   useEffect(() => {
-    if (
-      user &&
-      myWorkout &&
-      myWorkoutDataArray &&
-      myWorkoutDataArray.data &&
-      myWorkout.data &&
-      myWorkout.activeData &&
-      myWorkout.data[0] &&
-      myWorkout.activeData[0]
-    ) {
-      const workoutData = myWorkoutDataArray.data.find(
-        (v) => v.id === myWorkout.activeData[0].id,
-      )
-      if (workoutData) {
-        setGetWorkoutArrayData(workoutData.data)
+    if (user && user.anonymousUser) {
+      renderAnonymousUserFakeData()
+    }
+    if (user && !user.anonymousUser) {
+      renderUserData()
+    }
+    function renderAnonymousUserFakeData() {
+      if (
+        user &&
+        user.anonymousUser &&
+        fakeMyWorkout &&
+        fakeMyWorkoutDataArray &&
+        fakeMyWorkoutDataArray.data &&
+        fakeMyWorkout.data &&
+        fakeMyWorkout.activeData &&
+        fakeMyWorkout.data[0] &&
+        fakeMyWorkout.activeData[0]
+      ) {
+        const fakeWorkoutData = fakeMyWorkoutDataArray.data.find(
+          (v) => v.id === fakeMyWorkout.activeData[0].id,
+        )
+        if (fakeWorkoutData) {
+          setGetWorkoutArrayData(fakeWorkoutData.data)
+        }
+      }
+    }
+
+    function renderUserData() {
+      if (
+        user &&
+        !user.anonymousUser &&
+        myWorkout &&
+        myWorkoutDataArray &&
+        myWorkoutDataArray.data &&
+        myWorkout.data &&
+        myWorkout.activeData &&
+        myWorkout.data[0] &&
+        myWorkout.activeData[0]
+      ) {
+        const workoutData = myWorkoutDataArray.data.find(
+          (v) => v.id === myWorkout.activeData[0].id,
+        )
+        if (workoutData) {
+          setGetWorkoutArrayData(workoutData.data)
+        }
       }
     }
   }, [myWorkoutDataArray, myWorkout, user])
@@ -301,7 +357,7 @@ export function UserHome() {
               )}
           </BodyTopWrapper>
 
-          {!myWorkoutDataArray && (
+          {user && !user.anonymousUser && !myWorkoutDataArray && (
             <View
               style={{
                 flex: 1,
@@ -331,12 +387,17 @@ export function UserHome() {
           {isLoadingUserStorageData ? (
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
+            user &&
             getWorkoutArrayData &&
             getWorkoutArrayData.workoutsData &&
             getWorkoutArrayData.workoutsData.length > 0 && (
               <WorkoutBlueCardList
                 data={getWorkoutArrayData}
-                handleNextStep={handleNextStep}
+                handleNextStep={(data: IWorkoutsData, cardIndex: number) => {
+                  user?.anonymousUser
+                    ? handleNextStepAnnomimousUser(data, cardIndex)
+                    : handleNextStep(data, cardIndex)
+                }}
               />
             )
           )}

@@ -11,12 +11,13 @@ export const BodyWrapper = styled.View`
 `
 
 export const Body = styled.View`
+  /* justify-content: space-between;
+  align-items: center; */
   width: 100%;
   height: 100%;
-  gap: 32px;
   flex: 1;
-  justify-content: flex-start;
-  align-items: flex-start;
+  gap: 32px;
+  padding-top: 32px;
 `
 
 export const SelectContentWrapper = styled.View`
@@ -62,7 +63,6 @@ export const FooterWrapper = styled.View`
   width: 100%;
   justify-content: space-between;
   flex-direction: column;
-  gap: 20px;
 `
 export const FooterContainer = styled.View`
   flex-direction: row;
