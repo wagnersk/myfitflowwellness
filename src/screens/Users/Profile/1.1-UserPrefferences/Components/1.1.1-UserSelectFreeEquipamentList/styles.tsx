@@ -42,8 +42,13 @@ export const ImageBackgroundContainer = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
+  position: absolute;
 `
-
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`
 /*   width: 100%;
   border: 2px ${({ theme }) => theme.COLORS.BLUE_STROKE}; */
 export const ButtonWrapper = styled(TouchableOpacity)<Props>`

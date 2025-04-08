@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { ImageBackground, BackHandler } from 'react-native'
+import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import backgroundImg from '../../../../../../../assets/back.png'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import Check from '@assets/Check.svg'
 
 import {
@@ -23,6 +23,7 @@ import {
   IconWrapper,
   ListTitle,
   ListSubTitle,
+  Header,
 } from './styles'
 
 import { CTAButton } from '@components/Buttons/CTAButton'
@@ -363,76 +364,46 @@ export function UserSelectPulleyEquipamentList() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SettingsWrapper>
-              <BackButton
-                onPress={handleGoBack}
-                changeColor
-                disabled={isWaitingApiResponse}
-              />
-            </SettingsWrapper>
-            <ListName>{dataType}</ListName>
-            <Body>
-              <ScrollView
-                contentContainerStyle={{ gap: 64 }}
-                showsVerticalScrollIndicator={false}
-              >
-                {selectedPulley && (
-                  <ListTitle>Selecionar Tipos de polia</ListTitle>
-                )}
-                <ListWrapper>
-                  <ListSubTitle>Tenho tudo</ListSubTitle>
+            <SafeAreaProvider style={{ width: `100%` }}>
+              <SafeAreaView style={{ flex: 1 }}>
+                <Header>
+                  <SettingsWrapper>
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={isWaitingApiResponse}
+                    />
+                  </SettingsWrapper>
+                  <ListName>{dataType}</ListName>
+                </Header>
+                <Body>
+                  <ScrollView
+                    contentContainerStyle={{ gap: 64 }}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {selectedPulley && (
+                      <ListSubTitle>Marque aqui caso tenha todas</ListSubTitle>
+                    )}
+                    <ListWrapper>
+                      <ListSubTitle>Tenho tudo</ListSubTitle>
 
-                  {selectedAllPulleyData && (
-                    <ButtonWrapper
-                      key={selectedAllPulleyData.index}
-                      onPress={() => handleSetAllPulleyChecked()}
-                    >
-                      <ContentWrapper>
-                        <ItemTitle>
-                          {selectedAllPulleyData &&
-                            selectedLanguage &&
-                            selectedAllPulleyData.allPulley_insensitive &&
-                            selectedAllPulleyData.allPulley_insensitive[
-                              selectedLanguage
-                            ]}
-                        </ItemTitle>
-
-                        <IconWrapper>
-                          {selectedAllPulleyData.selected && (
-                            <Check
-                              width={32}
-                              height={32}
-                              stroke={theme.COLORS.BLUE_STROKE}
-                              strokeWidth={2}
-                            />
-                          )}
-                        </IconWrapper>
-                      </ContentWrapper>
-                    </ButtonWrapper>
-                  )}
-                </ListWrapper>
-                <ListWrapper>
-                  {selectedPulley && (
-                    <ListSubTitle>Polias Disponíveis</ListSubTitle>
-                  )}
-
-                  {selectedPulley &&
-                    selectedPulley.map((v) => {
-                      return (
+                      {selectedAllPulleyData && (
                         <ButtonWrapper
-                          key={v.index}
-                          onPress={() => handleSetPulleyChecked(v.index)}
+                          key={selectedAllPulleyData.index}
+                          onPress={() => handleSetAllPulleyChecked()}
                         >
                           <ContentWrapper>
                             <ItemTitle>
-                              {v &&
+                              {selectedAllPulleyData &&
                                 selectedLanguage &&
-                                v.pulley_insensitive &&
-                                v.pulley_insensitive[selectedLanguage]}
+                                selectedAllPulleyData.allPulley_insensitive &&
+                                selectedAllPulleyData.allPulley_insensitive[
+                                  selectedLanguage
+                                ]}
                             </ItemTitle>
 
                             <IconWrapper>
-                              {v.selected && (
+                              {selectedAllPulleyData.selected && (
                                 <Check
                                   width={32}
                                   height={32}
@@ -443,57 +414,97 @@ export function UserSelectPulleyEquipamentList() {
                             </IconWrapper>
                           </ContentWrapper>
                         </ButtonWrapper>
-                      )
-                    })}
-                </ListWrapper>
-                <ListWrapper>
-                  {selectedPulleyHandles && (
-                    <ListSubTitle>Puxadores de Polia Disponíveis </ListSubTitle>
-                  )}
+                      )}
+                    </ListWrapper>
+                    <ListWrapper>
+                      {selectedPulley && (
+                        <ListSubTitle>Ou selecione quais você tem</ListSubTitle>
+                      )}
 
-                  {selectedPulleyHandles &&
-                    selectedPulleyHandles.map((va) => {
-                      return (
-                        <ButtonWrapper
-                          key={va.index}
-                          onPress={() =>
-                            handleSetPulleyHandlerChecked(va.index)
-                          }
-                        >
-                          <ContentWrapper>
-                            <ItemTitle>
-                              {va &&
-                                selectedLanguage &&
-                                va.pulleyHandler_insensitive &&
-                                va.pulleyHandler_insensitive[selectedLanguage]}
-                            </ItemTitle>
+                      {selectedPulley &&
+                        selectedPulley.map((v) => {
+                          return (
+                            <ButtonWrapper
+                              key={v.index}
+                              onPress={() => handleSetPulleyChecked(v.index)}
+                            >
+                              <ContentWrapper>
+                                <ItemTitle>
+                                  {v &&
+                                    selectedLanguage &&
+                                    v.pulley_insensitive &&
+                                    v.pulley_insensitive[selectedLanguage]}
+                                </ItemTitle>
 
-                            <IconWrapper>
-                              {va.selected && (
-                                <Check
-                                  width={32}
-                                  height={32}
-                                  stroke={theme.COLORS.BLUE_STROKE}
-                                  strokeWidth={2}
-                                />
-                              )}
-                            </IconWrapper>
-                          </ContentWrapper>
-                        </ButtonWrapper>
-                      )
-                    })}
-                </ListWrapper>
-              </ScrollView>
+                                <IconWrapper>
+                                  {v.selected && (
+                                    <Check
+                                      width={32}
+                                      height={32}
+                                      stroke={theme.COLORS.BLUE_STROKE}
+                                      strokeWidth={2}
+                                    />
+                                  )}
+                                </IconWrapper>
+                              </ContentWrapper>
+                            </ButtonWrapper>
+                          )
+                        })}
+                    </ListWrapper>
+                    <ListWrapper>
+                      {selectedPulleyHandles && (
+                        <ListSubTitle>
+                          Puxadores de Polia Disponíveis{' '}
+                        </ListSubTitle>
+                      )}
 
-              <CTAButton
-                style={{ marginBottom: 54 }}
-                onPress={handleUpdateInfo}
-                changeColor
-                title="Salvar"
-                loading={isWaitingApiResponse}
-                enabled={!isWaitingApiResponse}
-              />
-            </Body>
+                      {selectedPulleyHandles &&
+                        selectedPulleyHandles.map((va) => {
+                          return (
+                            <ButtonWrapper
+                              key={va.index}
+                              onPress={() =>
+                                handleSetPulleyHandlerChecked(va.index)
+                              }
+                            >
+                              <ContentWrapper>
+                                <ItemTitle>
+                                  {va &&
+                                    selectedLanguage &&
+                                    va.pulleyHandler_insensitive &&
+                                    va.pulleyHandler_insensitive[
+                                      selectedLanguage
+                                    ]}
+                                </ItemTitle>
+
+                                <IconWrapper>
+                                  {va.selected && (
+                                    <Check
+                                      width={32}
+                                      height={32}
+                                      stroke={theme.COLORS.BLUE_STROKE}
+                                      strokeWidth={2}
+                                    />
+                                  )}
+                                </IconWrapper>
+                              </ContentWrapper>
+                            </ButtonWrapper>
+                          )
+                        })}
+                    </ListWrapper>
+                  </ScrollView>
+
+                  <CTAButton
+                    style={{ marginBottom: 54 }}
+                    onPress={handleUpdateInfo}
+                    changeColor
+                    title="Salvar"
+                    loading={isWaitingApiResponse}
+                    enabled={!isWaitingApiResponse}
+                  />
+                </Body>
+              </SafeAreaView>
+            </SafeAreaProvider>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

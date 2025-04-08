@@ -2,6 +2,7 @@ import { FieldValue, Timestamp, serverTimestamp } from 'firebase/firestore'
 import { ReactNode } from 'react'
 import {
   IFreeSelectItem,
+  ILevelSelectData,
   IMachineSelectItem,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
@@ -49,6 +50,9 @@ export interface FinalDataItem {
 
 export type IUserGoal = {
   goalSelectedData: IptBrUs
+}
+export interface IUserLevel {
+  levelSelectedData: IptBrUs
 }
 
 export type IEquipamentsFilters = {
@@ -196,12 +200,13 @@ export interface IUserPersonalTrainerContract {
 // criar doc dentro de user
 export interface IUserGymInfo {
   goal: IUserGoal | null
+  level: IUserLevel | null
   sessionsByWeek: IUserSessionsByWeek | null
   timeBySession: IUserTimeBySession | null
   muscleFocus: IUserMuscleFocus | null
 
-  gymName: string
-  whenStartedAtGym: string
+  gymName: null
+  whenStartedAtGym: null
 
   createdAt: FieldValue
   updatedAt: FieldValue
@@ -938,11 +943,11 @@ export interface AuthContextData {
   ) => Promise<void>
   updateUserSelectedLanguage: (language: 'pt-br' | 'us') => Promise<void>
 
-  loadUserGymInfo: () => Promise<IUserGymInfo | null>
-  saveUserGymInfo: (gymInfo: IUserGymInfo) => Promise<void>
-
   loadUserEquipments: () => Promise<IUserEquipamentData | null>
   saveUserEquipments: (equipamentsInfo: IUserEquipamentData) => Promise<void>
+
+  fetchLevelOptionData: () => Promise<ILevelSelectData | null>
+  updateUserLevelPreffer: (data: IUserLevel) => Promise<void>
 
   fetchGoalOptionData: () => Promise<IGoalSelectData | null>
   updateUserGoalPreffer: (data: IUserGoal) => Promise<void>

@@ -25,6 +25,8 @@ interface Props {
     | 'none'
     | 'barbell'
     | 'camera'
+    | 'settings'
+    | 'boxing-glove'
 }
 
 export const ContentWrapper = styled.View`
@@ -36,12 +38,14 @@ export const ContentWrapper = styled.View`
   padding: 12px;
   height: 48px;
 `
+
 export const ListTitleWrapper = styled.View`
   flex: 1;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 `
+
 export const ListTitle = styled.Text<Props>`
   color: ${({ theme, iconStyle }) =>
     iconStyle === 'trash'

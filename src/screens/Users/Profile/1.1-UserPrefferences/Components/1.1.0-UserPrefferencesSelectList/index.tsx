@@ -23,6 +23,7 @@ import {
   ContentWrapper,
   IconWrapper,
   ListTitle,
+  Header,
 } from './styles'
 import { CTAButton } from '@components/Buttons/CTAButton'
 import { IUserPrefferencesSelectListNavigation } from '@src/@types/navigation'
@@ -30,6 +31,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import {
   IptBrUs,
   IUserGoal,
+  IUserLevel,
   IUserMuscleFocus,
   IUserSessionsByWeek,
   IUserTimeBySession,
@@ -55,11 +57,13 @@ export function UserPrefferencesSelectList() {
     updateUserGoalFocusMusclePreffer,
     updateUserFrequencyByWeekPreffer,
     updateUserTimeBySessionPreffer,
+    updateUserLevelPreffer,
 
     fetchMuscleOptionData,
     fetchGoalOptionData,
     fetchFrequencyByWeekOptionData,
     fetchTimeBySessionOptionData,
+    fetchLevelOptionData,
   } = useAuth()
   const theme = useTheme()
   const navigation = useNavigation()
@@ -158,6 +162,22 @@ export function UserPrefferencesSelectList() {
   async function handleUpdateInfo() {
     if (!selectedData) return
 
+    if (dataType === `Level`) {
+      const formattedData = selectedData.find((v) => v.selected === true)
+
+      console.log(`1`)
+      if (formattedData) {
+        console.log(`2`)
+        const fdata: IUserLevel = {
+          levelSelectedData: formattedData.tittle,
+        }
+
+        await updateUserLevelPreffer(fdata).then(() => {
+          handleGoBack()
+        })
+        console.log(`3`)
+      }
+    }
     if (dataType === `Objetivo`) {
       const formattedData = selectedData.find((v) => v.selected === true)
 
@@ -248,6 +268,47 @@ export function UserPrefferencesSelectList() {
     async function fetchSelectOptionsData({
       dataType,
     }: IUserPrefferencesSelectListNavigation) {
+      if (dataType === `Level`) {
+        const levelOptionData = await fetchLevelOptionData()
+        if (!levelOptionData) return
+
+        const { data } = levelOptionData
+
+        const userSelectedLevelOption = userGymInfo?.level
+
+        let formattedData: IUserSelect[] = [] // Ajustado para ser uma lista
+
+        if (!userSelectedLevelOption) {
+          formattedData = data.map((v, i) => {
+            return {
+              tittle: v.level_insensitive,
+              id: i,
+              selected: false,
+            }
+          })
+        } else {
+          formattedData = data.map((v, i) => {
+            if (
+              userSelectedLevelOption.levelSelectedData &&
+              selectedLanguage &&
+              userSelectedLevelOption.levelSelectedData[
+                selectedLanguage
+              ].includes(v.level_insensitive[selectedLanguage])
+            ) {
+              return { tittle: v.level_insensitive, id: i, selected: true }
+            } else {
+              return {
+                tittle: v.level_insensitive,
+                id: i,
+                selected: false,
+              }
+            }
+          })
+        }
+
+        setSelectedData(formattedData)
+      }
+
       if (dataType === `Objetivo`) {
         const goalOptionData = await fetchGoalOptionData()
         if (!goalOptionData) return
@@ -489,17 +550,20 @@ export function UserPrefferencesSelectList() {
     <Container>
       <BodyImageWrapper>
         <BodyImageBackground />
+
         <ImageBackgroundContainer>
           <SafeAreaProvider style={{ width: `100%` }}>
             <SafeAreaView style={{ flex: 1 }}>
-              <SettingsWrapper>
-                <BackButton
-                  onPress={handleGoBack}
-                  changeColor
-                  disabled={isWaitingApiResponse}
-                />
-              </SettingsWrapper>
-              <UserName>{dataType}</UserName>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>{dataType}</UserName>
+              </Header>
               <Body>
                 <ScrollView showsVerticalScrollIndicator={false}>
                   <ListWrapper>

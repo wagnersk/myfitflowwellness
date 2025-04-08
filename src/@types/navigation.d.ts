@@ -280,6 +280,7 @@ export interface IUserFriendProfile {
 
 export interface IUserPrefferencesSelectListNavigation {
   dataType:
+    | `Level`
     | `Objetivo`
     | `Foco em`
     | `Treinos por semana`

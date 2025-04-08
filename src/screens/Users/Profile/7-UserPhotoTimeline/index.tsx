@@ -24,6 +24,7 @@ import {
   ContainerTittle,
   ContainerTittleWrapper,
   CardsWrapper,
+  Header,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -90,18 +91,20 @@ export function UserPhotoTimeline() {
           <ImageBackgroundContainer>
             <SafeAreaProvider style={{ width: `100%` }}>
               <SafeAreaView style={{ flex: 1 }}>
-                <SettingsWrapper>
-                  <BackButton
-                    onPress={handleGoBack}
-                    changeColor
-                    disabled={isWaitingApiResponse}
-                  />
-                </SettingsWrapper>
-                <UserName>
-                  {user?.selectedLanguage === 'pt-br'
-                    ? `Linha do Tempo`
-                    : `Timeline`}
-                </UserName>
+                <Header>
+                  <SettingsWrapper>
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={isWaitingApiResponse}
+                    />
+                  </SettingsWrapper>
+                  <UserName>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? `Linha do Tempo`
+                      : `Timeline`}
+                  </UserName>
+                </Header>
                 <Body>
                   <ScrollView showsVerticalScrollIndicator={false}>
                     <ListWrapper>

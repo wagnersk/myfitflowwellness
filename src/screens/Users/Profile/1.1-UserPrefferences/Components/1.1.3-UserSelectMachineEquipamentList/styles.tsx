@@ -42,6 +42,7 @@ export const ImageBackgroundContainer = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
+  position: absolute;
 `
 
 /*   width: 100%;
@@ -69,6 +70,11 @@ export const ContentWrapper = styled.View`
   padding: 12px;
   height: 48px;
   flex: 1;
+`
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 `
 export const ListName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

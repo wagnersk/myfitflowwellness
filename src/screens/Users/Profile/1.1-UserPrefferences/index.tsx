@@ -23,6 +23,7 @@ import {
   ButtonTitle,
   ButtonWrapper,
   BodyWrapper,
+  Header,
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
@@ -172,8 +173,24 @@ export function UserPrefferences() {
       return true
     })
   }, [])
+
+  console.log('userGymInfo', userGymInfo)
   /*   userEquipaments,
     userGymInfo, */
+  const formattedLevel =
+    selectedLanguage &&
+    userGymInfo &&
+    userGymInfo.level &&
+    userGymInfo.level.levelSelectedData &&
+    userGymInfo.level.levelSelectedData[selectedLanguage]
+      ? userGymInfo.level.levelSelectedData[selectedLanguage]
+          .charAt(0)
+          .toUpperCase() +
+        userGymInfo.level.levelSelectedData[selectedLanguage].slice(1)
+      : selectedLanguage === 'pt-br'
+        ? 'Selecione seu nível'
+        : 'Select a level'
+
   const formattedGoal =
     selectedLanguage &&
     userGymInfo &&
@@ -234,16 +251,18 @@ export function UserPrefferences() {
           <SafeAreaProvider style={{ width: `100%` }}>
             <SafeAreaView style={{ flex: 1 }}>
               <BodyWrapper>
-                <SettingsWrapper>
-                  <BackButton
-                    onPress={handleGoBack}
-                    changeColor
-                    disabled={isWaitingApiResponse}
-                  />
-                </SettingsWrapper>
-                <TittleWrapper>
-                  <Title>Preferencias: </Title>
-                </TittleWrapper>
+                <Header>
+                  <SettingsWrapper>
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={isWaitingApiResponse}
+                    />
+                  </SettingsWrapper>
+                  <TittleWrapper>
+                    <Title>Preferencias: </Title>
+                  </TittleWrapper>
+                </Header>
                 <Body>
                   <ScrollView
                     contentContainerStyle={{ gap: 16 }}
@@ -253,13 +272,16 @@ export function UserPrefferences() {
                       <ButtonWrapper>
                         <ButtonTitle>Nivel: </ButtonTitle>
                         <WhiteButton
-                          tittle={formattedGoal}
-                          onPress={() =>
-                            handleOpenList({ dataType: 'Objetivo' })
-                          }
+                          tittle={formattedLevel}
+                          onPress={() => handleOpenList({ dataType: 'Level' })}
                           bordertype="up-down"
                           iconStyle="crosshair"
                         />
+                      </ButtonWrapper>
+                    </SelectWrapper>
+
+                    <SelectWrapper>
+                      <ButtonWrapper>
                         <ButtonTitle>Objetivo: </ButtonTitle>
                         <WhiteButton
                           tittle={formattedGoal}

@@ -17,26 +17,36 @@ export const Body = styled.View`
 `
 export const PhillsRowContainer = styled.View`
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 100%;
+  gap: 8px;
+`
+export const LeftContent = styled.View`
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+  flex: 1;
+`
+export const RightContent = styled.View`
+  flex-direction: row;
+  justify-content: flex-start;
   gap: 8px;
 `
 
 export const InputWrapper = styled.View`
   flex-direction: row;
   justify-content: flex-start;
-  width: 100%;
   gap: 8px;
   border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
   border-radius: 24px;
   height: 48px;
   padding-left: 24px;
+  width: 100%;
 `
 export const InputSearchFriend = styled(TextInput)`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(14)}px;
-  width: 100%;
   border-radius: 24px;
   height: 48px;
 `
@@ -55,10 +65,11 @@ export const PhillsWrapper = styled.TouchableOpacity<{ selected: boolean }>`
     ${({ selected, theme }) =>
       selected ? theme.COLORS.BLUE_STROKE : theme.COLORS.BLUE_STROKE};
 `
+
 export const AddFriendButton = styled.TouchableOpacity`
   justify-content: center;
   align-items: center;
-  height: 48px;
+  width: 48px;
 `
 
 export const PhillItem = styled.Text<{ selected: boolean }>`
@@ -86,6 +97,7 @@ export const ImageBackgroundContainer = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
+  position: absolute;
 `
 
 export const TittleWrapper = styled.View`
@@ -98,4 +110,9 @@ export const Tittle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(28)}px;
+`
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 `

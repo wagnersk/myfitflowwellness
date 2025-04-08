@@ -32,6 +32,7 @@ export const Body = styled.View`
   justify-content: flex-start;
   align-items: flex-start;
   padding: 8px;
+  padding-top: 16px;
   width: 100%;
   flex-direction: column;
 `

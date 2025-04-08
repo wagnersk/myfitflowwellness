@@ -72,10 +72,12 @@ import {
   IUserEquipamentData,
   IUserGymInfo,
   IUserPersonalTrainerContract,
+  IUserLevel,
 } from './authTypes'
 
 import {
   IFreeSelectItem,
+  ILevelSelectData,
   IMachineSelectItem,
   IptBrUs,
   IPulleySelectItem,
@@ -558,8 +560,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         ],
       }
 
-      const gymName = ''
-      const whenStartedAtGym = ''
+      const gymName = null
+      const whenStartedAtGym = null
 
       const gymInfoData: IUserGymInfo = {
         goal,
@@ -781,6 +783,41 @@ function AuthProvider({ children }: AuthProviderProps) {
     )
   }
 
+  async function updateUserLevelPreffer(userLevel: IUserLevel) {
+    if (!user || !userGymInfo) return
+
+    const { levelSelectedData } = userLevel
+    const flevel = { levelSelectedData }
+
+    setIsWaitingApiResponse(true)
+
+    const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
+    const servertimestamp = serverTimestamp()
+
+    try {
+      await updateDoc(userRef, {
+        level: flevel,
+        updatedAt: servertimestamp,
+      })
+
+      const updatedUser: IUserGymInfo = {
+        ...userGymInfo,
+        level: { levelSelectedData },
+      }
+
+      saveUserGymInfo(updatedUser)
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Dados alterados com sucesso!'
+          : 'Data changed successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
+  }
   async function updateUserGoalPreffer(userGoal: IUserGoal) {
     if (!user || !userGymInfo) return
 
@@ -1298,6 +1335,19 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function fetchLevelOptionData() {
+    const muscleSelectDataRef = doc(db, 'selectOptionsData', `level`)
+
+    const docSnapshot = await getDoc(muscleSelectDataRef)
+
+    if (docSnapshot.exists()) {
+      const initialData = docSnapshot.data() as ILevelSelectData
+      return initialData
+    } else {
+      return null
+    }
+  }
+
   async function fetchGoalOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `goal`)
 
@@ -1490,6 +1540,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setIsWaitingApiResponse(false)
       })
   }
+
   async function updateUserMachinePreffer(data: IMachineSelectItem) {
     if (!userEquipaments) return
 
@@ -1649,6 +1700,65 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function loadUserPersonalTrainerContract(): Promise<IUserPersonalTrainerContract | null> {
+    const userId = user?.id
+    if (!userId) return null
+    const userPersonalTrainerContractDoc = doc(
+      db,
+      'users',
+      userId,
+      'personalTrainerData',
+      'personalTrainerContract',
+    )
+
+    const personalTrainerContractSnap = await getDoc(
+      userPersonalTrainerContractDoc,
+    )
+
+    if (!personalTrainerContractSnap.exists()) {
+      console.error('Informações do Personal não encontrados.')
+      return null
+    }
+
+    const {
+      createdAt,
+      anabol,
+      clientId,
+      personalTrainerContractId,
+      personalTrainerId,
+      restrictions,
+      submissionPending,
+      updatedAt,
+    } = personalTrainerContractSnap.data() as IUserPersonalTrainerContract
+
+    return {
+      createdAt,
+      anabol,
+      clientId,
+      personalTrainerContractId,
+      personalTrainerId,
+      restrictions,
+      submissionPending,
+      updatedAt,
+    }
+  }
+  async function saveUserPersonalTrainerContract(
+    personalTrainerContract: IUserPersonalTrainerContract,
+  ) {
+    if (!personalTrainerContract) return
+    const userId = user?.id
+    if (!userId) return
+
+    const USER_PERSONALTRIANERCONTRACT_COLLECTION = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
+
+    if (personalTrainerContract) {
+      setUserPersonalTrainerContract(personalTrainerContract)
+      await AsyncStorage.setItem(
+        USER_PERSONALTRIANERCONTRACT_COLLECTION,
+        JSON.stringify(personalTrainerContract),
+      )
+    }
+  }
   async function loadUserGymInfo(): Promise<IUserGymInfo | null> {
     const userId = user?.id
     if (!userId) return null
@@ -1669,6 +1779,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       sessionsByWeek,
       timeBySession,
       updatedAt,
+      level,
+
       whenStartedAtGym,
     } = gymInfoSnap.data() as IUserGymInfo
 
@@ -1680,6 +1792,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       sessionsByWeek,
       timeBySession,
       updatedAt,
+      level,
       whenStartedAtGym,
     }
   }
@@ -2359,6 +2472,30 @@ function AuthProvider({ children }: AuthProviderProps) {
         if (gymInfoData) {
           setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
         }
+      }
+    } catch (error) {
+      // console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+  async function loadCachedUserPersonalContract(userId: string) {
+    const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
+
+    try {
+      const storedCachedEquipamentsString = await AsyncStorage.getItem(
+        storageEquipamentsKey,
+      )
+
+      if (!storedCachedEquipamentsString) {
+        const response = await loadUserPersonalTrainerContract()
+        if (response) {
+          saveUserPersonalTrainerContract(response)
+        }
+      }
+
+      if (storedCachedEquipamentsString) {
+        const equipamentsData = JSON.parse(storedCachedEquipamentsString)
+
+        setUserEquipaments(equipamentsData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
@@ -3563,7 +3700,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     await loadCachedVideoTable(userId)
     await loadCachedUserGymInfo(userId)
     await loadCachedUserEquipaments(userId)
-    //  await loadCachedUserPersonalContract(userId)  > Criar
+    await loadCachedUserPersonalContract(userId)
   }
 
   useEffect(() => {
@@ -3623,6 +3760,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateUserSelectedLanguage,
         updateLocalCacheAnonymousUserSelectedLanguage,
         updateUserGoalPreffer,
+        updateUserLevelPreffer,
         updateUserGoalFocusMusclePreffer,
         updateUserFrequencyByWeekPreffer,
         updateUserTimeBySessionPreffer,
@@ -3635,6 +3773,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         fetchFriendRequestsList,
         fetchFrequencyByWeekOptionData,
         fetchGoalOptionData,
+        fetchLevelOptionData,
         fetchTimeBySessionOptionData,
 
         fetchPulleyOptionData,

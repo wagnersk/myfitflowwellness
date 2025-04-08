@@ -31,6 +31,9 @@ import {
   AddFriendButton,
   InputWrapper,
   InputSearchFriend,
+  Header,
+  LeftContent,
+  RightContent,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
@@ -262,50 +265,63 @@ export function UserFriendList() {
             <ImageBackgroundContainer>
               <SafeAreaProvider style={{ width: `100%` }}>
                 <SafeAreaView style={{ flex: 1, gap: 16 }}>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <TittleWrapper>
+                  <Header>
+                    <SettingsWrapper>
+                      <BackButton
+                        onPress={handleGoBack}
+                        changeColor
+                        disabled={isWaitingApiResponse}
+                      />
+                    </SettingsWrapper>
                     <Tittle>Amigos</Tittle>
+                  </Header>
+                  <TittleWrapper>
                     {/*           <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
                      */}
 
-                    <AddFriendButton onPress={handleSetInputVisible}>
+                    {/*         <AddFriendButton onPress={handleSetInputVisible}>
                       <Search
                         width={32}
                         height={32}
                         fill={theme.COLORS.BLUE_STROKE}
                       />
-                    </AddFriendButton>
+                    </AddFriendButton> */}
                   </TittleWrapper>
                   <PhillsRowContainer>
-                    {isVisibleInput ? (
-                      <InputWrapper>
-                        <InputSearchFriend
-                          textAlign="left"
-                          placeholder="Procurar um amigo"
-                          placeholderTextColor="rgba(27, 7, 127, 0.5)" // Azul escuro com 0.6 de opacidade
-                          onChangeText={handleSearchFriend}
-                          value={search}
+                    <LeftContent>
+                      {isVisibleInput ? (
+                        <InputWrapper>
+                          <InputSearchFriend
+                            textAlign="left"
+                            placeholder="Procurar um amigo"
+                            placeholderTextColor="rgba(27, 7, 127, 0.5)" // Azul escuro com 0.6 de opacidade
+                            onChangeText={handleSearchFriend}
+                            value={search}
+                          />
+                        </InputWrapper>
+                      ) : (
+                        items.map((item) => (
+                          <PhillsWrapper
+                            key={item}
+                            selected={selectedItem === item}
+                            onPress={() => setSelectedItem(item)}
+                          >
+                            <PhillItem selected={selectedItem === item}>
+                              {item}
+                            </PhillItem>
+                          </PhillsWrapper>
+                        ))
+                      )}
+                    </LeftContent>
+                    <RightContent>
+                      <AddFriendButton onPress={handleSetInputVisible}>
+                        <Search
+                          width={32}
+                          height={32}
+                          fill={theme.COLORS.BLUE_STROKE}
                         />
-                      </InputWrapper>
-                    ) : (
-                      items.map((item) => (
-                        <PhillsWrapper
-                          key={item}
-                          selected={selectedItem === item}
-                          onPress={() => setSelectedItem(item)}
-                        >
-                          <PhillItem selected={selectedItem === item}>
-                            {item}
-                          </PhillItem>
-                        </PhillsWrapper>
-                      ))
-                    )}
+                      </AddFriendButton>
+                    </RightContent>
                   </PhillsRowContainer>
 
                   <Body>

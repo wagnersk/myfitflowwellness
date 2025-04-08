@@ -22,6 +22,8 @@ import PersonSimple from '@assets/Person-simple.svg'
 import Users from '@assets/Users.svg'
 import Barbell from '@assets/Barbell.svg'
 import Camera from '@assets/Camera.svg'
+import Settings from '@assets/Settings.svg'
+import BoxingGlove from '@assets/BoxingGlove.svg'
 
 interface Props {
   bordertype?: 'up' | 'down' | 'up-down' | 'none'
@@ -45,6 +47,8 @@ interface Props {
     | 'none'
     | 'barbell'
     | 'camera'
+    | 'settings'
+    | 'boxing-glove'
 }
 
 export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
@@ -59,6 +63,22 @@ export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
       <ContentWrapper>
         <ListTitleWrapper>
           <IconWrapper>
+            {iconStyle === 'boxing-glove' && (
+              <BoxingGlove
+                width={28}
+                height={28}
+                fill={'#0c17bb'}
+                transform="rotate(90)"
+              />
+            )}
+            {iconStyle === 'settings' && (
+              <Settings
+                width={36}
+                height={36}
+                strokeWidth="1.5"
+                stroke={'#0c17bb'}
+              />
+            )}
             {iconStyle === 'barbell' && (
               <Barbell width={28} height={28} fill={'#0c17bb'} />
             )}

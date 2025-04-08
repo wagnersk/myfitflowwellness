@@ -42,6 +42,12 @@ export const ImageBackgroundContainer = styled.View`
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
+  position: absolute;
+`
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 `
 export const ContainerWrapper = styled.View`
   width: 100%;

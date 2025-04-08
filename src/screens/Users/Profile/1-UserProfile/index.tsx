@@ -318,10 +318,6 @@ export function UserProfile() {
                   />
                 </Body>
                 <Body>
-                  <BodyText>
-                    {selectedLanguage === 'pt-br' ? 'Filtros' : 'Filters'}
-                  </BodyText>
-
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -330,7 +326,7 @@ export function UserProfile() {
                     }
                     onPress={handlePreferencesStep}
                     bordertype="up"
-                    iconStyle="plan"
+                    iconStyle="settings"
                   />
                   {/*  'Informações Pessoais' = GymInfo 
                   testar se ta tudo funfando
@@ -346,19 +342,15 @@ export function UserProfile() {
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
-                        ? 'Informações Pessoais'
-                        : 'Personal Information'
+                        ? 'Personal Trainer'
+                        : 'Personal Trainer'
                     }
                     onPress={() => {}}
                     bordertype="down"
-                    iconStyle="support"
+                    iconStyle="boxing-glove"
                   />
                 </Body>
                 <Body>
-                  <BodyText>
-                    {selectedLanguage === 'pt-br' ? 'Pagamento' : 'Payment'}
-                  </BodyText>
-
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'

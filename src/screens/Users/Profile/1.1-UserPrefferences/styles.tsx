@@ -53,11 +53,16 @@ export const ImageBackgroundContainer = styled.View`
   flex: 1;
 `
 
+export const Header = styled.View`
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+`
 export const SettingsWrapper = styled.View`
   align-items: flex-start;
   width: 100%;
+  position: absolute;
 `
-
 export const FooterWrapper = styled.View`
   flex-direction: row;
   width: 100%;
@@ -92,7 +97,6 @@ export const ButtonTitle = styled.Text`
 `
 export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(24)}px;
-  margin-bottom: 48px;
 `
