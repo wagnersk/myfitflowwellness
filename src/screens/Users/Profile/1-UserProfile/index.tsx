@@ -83,8 +83,14 @@ export function UserProfile() {
   function handleMyPlanNextStep() {
     navigation.navigate('userPlan')
   }
+  function handlePersonalTrainerNextStep() {
+    navigation.navigate('userPersonalTrainer')
+  }
   function handleMyWorkoutsNextStep() {
     navigation.navigate('userWorkouts')
+  }
+  function handleChallengesNextStep() {
+    navigation.navigate('userChallenges')
   }
   function handleMyPhotosNextStep() {
     navigation.navigate('userPhotoTimeline')
@@ -250,7 +256,7 @@ export function UserProfile() {
               <ProfileWrapper>
                 <PhotoBorderWrapper>
                   <Photo
-                    defaultPhotoBase64={user?.photo}
+                    photo={user && user.photo}
                     defaultText={
                       selectedLanguage === 'pt-br' ? `Não há foto` : `No Photo`
                     }
@@ -284,18 +290,6 @@ export function UserProfile() {
                       ? 'Seja bem-vindo ao seu perfil'
                       : 'Welcome to your profile'}
                   </BodyText>
-
-                  <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Meus Amigos'
-                        : 'My Friends'
-                    }
-                    onPress={handleMyFriendListNextStep}
-                    bordertype="up"
-                    iconStyle="friendlist"
-                  />
-
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -303,9 +297,31 @@ export function UserProfile() {
                         : 'My Workouts'
                     }
                     onPress={handleMyWorkoutsNextStep}
-                    bordertype="none"
+                    bordertype="up"
                     iconStyle="barbell"
                   />
+
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meus Desafios'
+                        : 'My Challenges'
+                    }
+                    onPress={handleChallengesNextStep}
+                    bordertype="none"
+                    iconStyle="trophy"
+                  />
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meus Amigos'
+                        : 'My Friends'
+                    }
+                    onPress={handleMyFriendListNextStep}
+                    bordertype="none"
+                    iconStyle="friendlist"
+                  />
+
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -345,7 +361,7 @@ export function UserProfile() {
                         ? 'Personal Trainer'
                         : 'Personal Trainer'
                     }
-                    onPress={() => {}}
+                    onPress={handlePersonalTrainerNextStep}
                     bordertype="down"
                     iconStyle="boxing-glove"
                   />

@@ -27,11 +27,18 @@ import {
 import {
   sendPasswordResetEmail,
   createUserWithEmailAndPassword,
-  signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
   sendEmailVerification,
 } from 'firebase/auth'
+
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage'
 
 import {
   ICachedWorkoutsWithLastUpdatedTimestamp,
@@ -73,6 +80,7 @@ import {
   IUserGymInfo,
   IUserPersonalTrainerContract,
   IUserLevel,
+  IUserPhotoProps,
 } from './authTypes'
 
 import {
@@ -82,7 +90,9 @@ import {
   IptBrUs,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
+
 import { IWorkoutCategory } from '@src/@types/navigation'
+
 import {
   addDaysToTimestamp,
   addWeeksToTimestamp,
@@ -628,21 +638,62 @@ function AuthProvider({ children }: AuthProviderProps) {
         ),
       )
   }
-  // TODO
+
+  // TODO upload foto server and deleter
+
+  async function uploadUserProfilePhoto(filePath: string) {
+    if (!user) return null
+    const userId = user?.id
+    // setIsWaitingApiResponse(true)
+    console.log(` entreou em uploadcartegoryimage...`)
+    const storage = getStorage()
+    if (!user) return null
+
+    const imagesReference = ref(storage, `/users/${userId}/photo/${userId}`)
+    const imageResponse = await fetch(filePath)
+    const imageBlob = await imageResponse.blob()
+
+    const responsePhotoUrlDownload = await uploadBytes(
+      imagesReference,
+      imageBlob,
+    ).then(async (image_response) => {
+      const imagePath = image_response.metadata.fullPath
+      const photoUrlDownload = await getDownloadURL(ref(storage, imagePath))
+      console.log(`atualizando foto...`)
+
+      return photoUrlDownload
+    })
+    return responsePhotoUrlDownload
+  }
+
+  // TODO vai servir quando deletar o perfil
+  async function deleteUserProfilePhoto(
+    fileName: string,
+    MIME: string,
+    oldThumbnailUrlDownload: string,
+  ) {
+    const storage = getStorage()
+
+    if (!user) return
+    const userId = user?.id
+
+    const imageReference = ref(storage, `/users/${userId}/photo/${userId}`)
+
+    if (oldThumbnailUrlDownload) {
+      await deleteObject(imageReference)
+      console.log(`deletando foto... deleteWorkoutCategoryImageIfExists`)
+    } else {
+      console.log(
+        `else dentro de deleteWorkoutImageIfExists em FirebaseContext, nao deletou`,
+      )
+    }
+  }
+
   async function updateUserForm(data: IUserFormProps) {
     setIsWaitingApiResponse(true)
     const userRef = collection(db, 'users')
 
-    const {
-      photoBase64,
-      name,
-      birthdate,
-      whatsappNumber,
-      gym,
-      anabol,
-      whenStartedAtGym,
-      restrictions,
-    } = data
+    const { name, birthdate, whatsappNumber } = data
 
     if (!user) return
     const { id } = user
@@ -651,14 +702,9 @@ function AuthProvider({ children }: AuthProviderProps) {
     const updatedAt = serverTimestamp()
 
     await updateDoc(doc(userRef, id), {
-      anabol,
-      birthdate,
-      gym,
       name,
-      photoBase64,
-      restrictions,
+      birthdate,
       whatsappNumber,
-      whenStartedAtGym,
       updatedAt,
     })
       .catch((err) => {
@@ -671,14 +717,61 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         const updatedUser = {
           ...user,
-          anabol,
-          birthdate,
-          gym,
           name,
-          photoBase64,
-          restrictions,
+          birthdate,
           whatsappNumber,
-          whenStartedAtGym,
+          updatedAt,
+        }
+
+        if (updatedUser) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+      })
+
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Dados alterados com sucesso!'
+            : 'Data changed successfully!',
+        )
+      })
+  }
+
+  async function updateUserPhoto(data: IUserPhotoProps) {
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+
+    const { photo } = data
+
+    if (!user) return
+    const { id } = user
+
+    // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
+    const updatedAt = serverTimestamp()
+
+    // criar hook que jogaa foto e recebe a url
+
+    await updateDoc(doc(userRef, id), {
+      photo,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user) {
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          photo,
           updatedAt,
         }
 
@@ -818,6 +911,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       setIsWaitingApiResponse(false)
     }
   }
+
   async function updateUserGoalPreffer(userGoal: IUserGoal) {
     if (!user || !userGymInfo) return
 
@@ -990,7 +1084,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function fetchUserProfile(friendId: string) {
+  async function checkIfFriendAlreadyAccepted(friendId: string) {
     if (!user) return null
 
     const userId = user.id
@@ -998,7 +1092,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       db,
       'users',
       userId,
-      'friendRequest',
+      'friendRequests',
       friendId,
     )
 
@@ -1039,6 +1133,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return null
     }
   }
+
   async function fetchFriendRequestsList() {
     if (!user) return null
 
@@ -1061,6 +1156,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     return receivedRequests
   }
+
   async function fetchReceivedRequestsList() {
     if (!user) return null
 
@@ -1263,6 +1359,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       return false
     }
   }
+
   async function declineReceivedRequest(friendId: string) {
     if (!user) return null
 
@@ -1715,10 +1812,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       userPersonalTrainerContractDoc,
     )
 
-    if (!personalTrainerContractSnap.exists()) {
-      console.error('Informações do Personal não encontrados.')
-      return null
-    }
+    if (!personalTrainerContractSnap.exists()) return null
 
     const {
       createdAt,
@@ -3072,7 +3166,7 @@ function AuthProvider({ children }: AuthProviderProps) {
               createdAt: updatedAt,
               updatedAt,
               isShared: false,
-              isActive: false,
+              isActive: true,
               isExpired: false,
               isCopied: false,
             },
@@ -3757,6 +3851,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         cancelNewContractWithPersonalUpdateUserClientId,
 
         updateUserForm,
+        updateUserPhoto,
+        uploadUserProfilePhoto,
         updateUserSelectedLanguage,
         updateLocalCacheAnonymousUserSelectedLanguage,
         updateUserGoalPreffer,
@@ -3768,7 +3864,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         getLastUpdatedAtUserWorkoutCache,
 
         fetchMuscleOptionData,
-        fetchUserProfile,
+        checkIfFriendAlreadyAccepted,
+
         fetchFriendList,
         fetchFriendRequestsList,
         fetchFrequencyByWeekOptionData,

@@ -1,45 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react'
-
 import { Image } from 'expo-image'
-
 import { Container, PhotoBorderWrapper, PhotoNotFound } from './styles'
 import { useAuth } from '@hooks/auth'
 
 type Props = {
-  defaultPhotoBase64?: string
-  newDefaultPhotoBase64?: string
   defaultText: string
+  photo: string | null
+  newDefaultPhoto?: string
 }
 
-export function Photo({
-  defaultPhotoBase64,
-  newDefaultPhotoBase64,
-  defaultText,
-}: Props) {
+export function Photo({ photo, newDefaultPhoto, defaultText }: Props) {
   const { user } = useAuth()
-  const [displayedImage, setDisplayedImage] = useState<string | undefined>(
-    defaultPhotoBase64,
+  const [displayedImage, setDisplayedImage] = useState<string | null>(
+    photo || null,
   )
+  console.log('photo', photo)
+  console.log('newDefaultPhoto', newDefaultPhoto)
   const imageKeyRef = useRef(false)
 
   useEffect(() => {
     imageKeyRef.current = !imageKeyRef.current
-  }, [user?.photoBase64])
+  }, [user?.photo])
 
   useEffect(() => {
-    if (newDefaultPhotoBase64) {
-      setDisplayedImage(newDefaultPhotoBase64)
-    } else {
-      setDisplayedImage(defaultPhotoBase64)
-    }
-  }, [newDefaultPhotoBase64, defaultPhotoBase64])
-
-  const getFormattedImage = (base64Image?: string) => {
-    if (base64Image && !base64Image.startsWith('data:image')) {
-      return `data:image/jpeg;base64,${base64Image}`
-    }
-    return base64Image
-  }
+    setDisplayedImage(newDefaultPhoto || photo || null)
+  }, [newDefaultPhoto, photo])
 
   return (
     <Container>
@@ -48,7 +33,7 @@ export function Photo({
 
         {!!displayedImage && (
           <Image
-            source={{ uri: getFormattedImage(displayedImage) }}
+            source={{ uri: displayedImage }}
             style={{
               width: 180,
               height: 180,

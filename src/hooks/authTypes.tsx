@@ -34,8 +34,10 @@ export type IUserFormProps = {
   birthdate: string
   email: string
   name: string
-  photo: string
   whatsappNumber: string
+}
+export type IUserPhotoProps = {
+  photo: string
 }
 
 export interface FilterItem {
@@ -938,6 +940,9 @@ export interface AuthContextData {
     clientId: string,
   ) => Promise<IContract | null>
   updateUserForm: (data: IUserFormProps) => Promise<void>
+  updateUserPhoto: (data: IUserPhotoProps) => Promise<void>
+  uploadUserProfilePhoto: (filePath: string) => Promise<string | null>
+
   updateLocalCacheAnonymousUserSelectedLanguage: (
     language: 'pt-br' | 'us',
   ) => Promise<void>
@@ -990,7 +995,7 @@ export interface AuthContextData {
   fetchFriendList: () => Promise<{ id: string }[] | null>
   fetchFriendRequestsList: () => Promise<{ id: string }[] | null>
 
-  fetchUserProfile: (id: string) => Promise<null | {
+  checkIfFriendAlreadyAccepted: (id: string) => Promise<null | {
     accepted: boolean
   }>
   sendFriendRequest: (friendId: string) => Promise<{

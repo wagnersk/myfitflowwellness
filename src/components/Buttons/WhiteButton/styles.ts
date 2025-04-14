@@ -9,6 +9,7 @@ interface Props {
   bordertype?: 'up' | 'down' | 'up-down' | 'none'
   iconStyle?:
     | 'email'
+    | 'trophy'
     | 'question'
     | 'trash'
     | 'support'

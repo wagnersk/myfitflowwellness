@@ -310,7 +310,6 @@ export declare global {
 
       marketPlaceHome: undefined
       userAllCategories: undefined
-      userPrefferences: undefined
       userPrefferencesSelectList: IUserPrefferencesSelectListNavigation
       marketPlaceWorkoutList: IMarketPlaceWorkoutListNavigation
       marketPlaceWorkoutDetail: IMarketPlaceWorkoutDetailNavigation
@@ -326,12 +325,17 @@ export declare global {
       camera: undefined
 
       userFormEditProfile: undefined
-      userSupport: undefined
-      userFriendProfile: IUserFriendProfile
-      userPlan: undefined
-      userFriendList: undefined
       userWorkouts: undefined
+      userChallenges: undefined
+      userFriendList: undefined
+      userFriendProfile: IUserFriendProfile
       userPhotoTimeline: undefined
+
+      userPrefferences: undefined
+      userPersonalTrainer: undefined
+
+      userPlan: undefined
+      userSupport: undefined
 
       userSelectFreeEquipamentList: IUserSelectFreeEquipamentListNavigation
       userSelectPulleyEquipamentList: IUserSelectPulleyEquipamentListNavigation

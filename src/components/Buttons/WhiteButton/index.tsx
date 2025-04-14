@@ -24,12 +24,14 @@ import Barbell from '@assets/Barbell.svg'
 import Camera from '@assets/Camera.svg'
 import Settings from '@assets/Settings.svg'
 import BoxingGlove from '@assets/BoxingGlove.svg'
+import Trophy from '@assets/Trophy.svg'
 
 interface Props {
   bordertype?: 'up' | 'down' | 'up-down' | 'none'
   tittle: string
   onPress: (data?: string) => void
   iconStyle?:
+    | 'trophy'
     | 'email'
     | 'question'
     | 'trash'
@@ -63,6 +65,9 @@ export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
       <ContentWrapper>
         <ListTitleWrapper>
           <IconWrapper>
+            {iconStyle === 'trophy' && (
+              <Trophy width={28} height={28} fill={'#0c17bb'} />
+            )}
             {iconStyle === 'boxing-glove' && (
               <BoxingGlove
                 width={28}

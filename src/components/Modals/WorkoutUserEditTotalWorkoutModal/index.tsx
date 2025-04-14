@@ -106,7 +106,6 @@ export function WorkoutUserEditTotalWorkoutModal({
                     ? 'Compartilhamento Ativo'
                     : 'Compartilhar Treino'}
                 </TitteText>
-                <TitteText>{data.id}</TitteText>
                 <ToggleSwitch
                   selected={data.isShared}
                   onPress={() => onShare(data.id)}
