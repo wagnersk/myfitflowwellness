@@ -70,6 +70,7 @@ export function EmailInput({
           editable={editable}
           autoCapitalize="none"
           onBlur={Keyboard.dismiss}
+          selectionColor={'white'}
         />
       </ContainerWrapper>
     </Container>

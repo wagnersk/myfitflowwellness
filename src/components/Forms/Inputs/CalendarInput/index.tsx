@@ -78,6 +78,7 @@ export function CalendarInput({
           returnKeyType="done"
           type={type}
           onBlur={Keyboard.dismiss}
+          selectionColor={'white'}
         />
       </ContainerWrapper>
     </Container>

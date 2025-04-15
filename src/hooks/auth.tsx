@@ -4,7 +4,7 @@ import { Alert } from 'react-native'
 
 import { firebaseApp, auth } from '../../firebase-config'
 
-import { addDays, format } from 'date-fns'
+import { addDays, format, set } from 'date-fns'
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -475,8 +475,12 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const responseUserData = await setDoc(userDoc, userData)
       .then(async () => {
-        await setDoc(usersEquipamentDoc, equipamentData)
-        await setDoc(usersGymInfoDoc, gymInfoData)
+        await setDoc(usersEquipamentDoc, equipamentData).then(() => {
+          setUserEquipaments(equipamentData)
+        })
+        await setDoc(usersGymInfoDoc, gymInfoData).then(() => {
+          setUserGymInfo(gymInfoData)
+        })
         Alert.alert(
           selectedLanguage === 'pt-br'
             ? 'Conta criada com sucesso!'
@@ -572,9 +576,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       const gymName = null
       const whenStartedAtGym = null
+      const level = null
 
       const gymInfoData: IUserGymInfo = {
         goal,
+        level, // Add the 'level' property with a default value
         sessionsByWeek,
         timeBySession,
         muscleFocus,
@@ -644,7 +650,8 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function uploadUserProfilePhoto(filePath: string) {
     if (!user) return null
     const userId = user?.id
-    // setIsWaitingApiResponse(true)
+    setIsWaitingApiResponse(true)
+
     console.log(` entreou em uploadcartegoryimage...`)
     const storage = getStorage()
     if (!user) return null
@@ -656,13 +663,19 @@ function AuthProvider({ children }: AuthProviderProps) {
     const responsePhotoUrlDownload = await uploadBytes(
       imagesReference,
       imageBlob,
-    ).then(async (image_response) => {
-      const imagePath = image_response.metadata.fullPath
-      const photoUrlDownload = await getDownloadURL(ref(storage, imagePath))
-      console.log(`atualizando foto...`)
+    )
+      .then(async (image_response) => {
+        const imagePath = image_response.metadata.fullPath
+        const photoUrlDownload = await getDownloadURL(ref(storage, imagePath))
+        setIsWaitingApiResponse(false)
+        console.log(`atualizando foto...`)
 
-      return photoUrlDownload
-    })
+        return photoUrlDownload
+      })
+      .catch((err) => {
+        setIsWaitingApiResponse(false)
+        console.error(err)
+      })
     return responsePhotoUrlDownload
   }
 
@@ -804,14 +817,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
     const updatedAt = serverTimestamp()
-
+    setIsWaitingApiResponse(true)
     await updateDoc(doc(userRef, id), {
       selectedLanguage: language,
       updatedAt,
     })
-      .catch((err) => {
-        console.error(err)
-      })
       .then(async () => {
         if (!user) {
           return
@@ -831,6 +841,9 @@ function AuthProvider({ children }: AuthProviderProps) {
             setUser(updatedUser)
           })
         }
+      })
+      .catch((err) => {
+        console.error(err)
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
@@ -858,13 +871,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       await AsyncStorage.setItem(
         USER_SIGNIN_COLLECTION,
         JSON.stringify(updatedUser),
-      )
-        .then(() => {
-          setUser(updatedUser)
-        })
-        .finally(() => {
-          setIsWaitingApiResponse(false)
-        })
+      ).then(() => {
+        setUser(updatedUser)
+      })
     }
 
     // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
@@ -878,7 +887,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function updateUserLevelPreffer(userLevel: IUserLevel) {
     if (!user || !userGymInfo) return
-
+    console.log('updateUserLevelPreffer')
     const { levelSelectedData } = userLevel
     const flevel = { levelSelectedData }
 
@@ -886,6 +895,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const userRef = doc(db, 'users', user.id, 'gymData', 'gymInfo')
     const servertimestamp = serverTimestamp()
+    console.log('updateUserLevelPreffer 1')
 
     try {
       await updateDoc(userRef, {
@@ -899,6 +909,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
 
       saveUserGymInfo(updatedUser)
+      console.log('updateUserLevelPreffer 2')
 
       Alert.alert(
         user?.selectedLanguage === 'pt-br'
@@ -1072,21 +1083,22 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function fetchMuscleOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `muscle`)
-
+    setIsWaitingApiResponse(true)
     const docSnapshot = await getDoc(muscleSelectDataRef)
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IMuscleSelectData
-
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function checkIfFriendAlreadyAccepted(friendId: string) {
     if (!user) return null
-
+    setIsWaitingApiResponse(true)
     const userId = user.id
     const friendRequestStatusDataRef = doc(
       db,
@@ -1100,18 +1112,19 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as { accepted: boolean }
-
+      setIsWaitingApiResponse(false)
       return {
         accepted: initialData.accepted,
       }
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchFriendList() {
     if (!user) return null
-
+    setIsWaitingApiResponse(true)
     const userId = user.id
     const friendListCollectionRef = collection(
       db,
@@ -1126,17 +1139,17 @@ function AuthProvider({ children }: AuthProviderProps) {
         id: doc.id,
         ...doc.data(),
       }))
-
+      setIsWaitingApiResponse(false)
       return friendList
     } catch (error) {
       console.error('Erro ao buscar a lista de amigos:', error)
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchFriendRequestsList() {
     if (!user) return null
-
     const userId = user.id
     const friendRequestCollectionRef = collection(
       db,
@@ -1147,13 +1160,14 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const q = query(friendRequestCollectionRef, where('accepted', '==', false))
 
+    setIsWaitingApiResponse(true)
     const querySnapshot = await getDocs(q)
 
     const receivedRequests = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
-
+    setIsWaitingApiResponse(false)
     return receivedRequests
   }
 
@@ -1169,12 +1183,14 @@ function AuthProvider({ children }: AuthProviderProps) {
     )
     const q = query(friendRequestCollectionRef, where('accepted', '==', false))
 
+    setIsWaitingApiResponse(true)
     const querySnapshot = await getDocs(q)
 
     const receivedRequests = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
+    setIsWaitingApiResponse(false)
 
     return receivedRequests
   }
@@ -1182,8 +1198,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function sendFriendRequest(friendId: string) {
     if (!user) return null
     const userId = user.id
-    console.log('userId', userId)
-    console.log('friendId', friendId)
+    setIsWaitingApiResponse(true)
 
     const timeNow = new Date().getTime()
 
@@ -1201,9 +1216,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       // Salva nos dois usuários
       await Promise.all([setDoc(sentRef, data), setDoc(receivedRef, data)])
+      setIsWaitingApiResponse(false)
 
       return data
     } catch (error) {
+      setIsWaitingApiResponse(false)
       console.error(error)
       return null
     }
@@ -1212,8 +1229,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function acceptFriendRequest(friendId: string) {
     if (!user) return null
     const userId = user.id
-    console.log('userId', userId)
-    console.log('friendId', friendId)
+    setIsWaitingApiResponse(true)
 
     const timeNow = new Date().getTime()
 
@@ -1230,8 +1246,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       const addSuccess = await addToFriendList(userId, friendId, timeNow)
       if (!addSuccess) return false
 
+      setIsWaitingApiResponse(false)
       return true
     } catch (error) {
+      setIsWaitingApiResponse(false)
+
       console.error(error)
       return false
     }
@@ -1260,7 +1279,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         updatedAt: timeNow,
         creted: timeNow,
       }
-
+      setIsWaitingApiResponse(true)
       const updateResults = await Promise.allSettled([
         setDoc(ownRequestRef, data2),
         updateDoc(sentRequestRef, data),
@@ -1275,9 +1294,11 @@ function AuthProvider({ children }: AuthProviderProps) {
           'Erro ao atualizar as solicitações de amizade:',
           updateErrors,
         )
+        setIsWaitingApiResponse(false)
         return false
       }
 
+      setIsWaitingApiResponse(false)
       return true
     }
 
@@ -1306,7 +1327,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         createdAt: timeNow,
         updatedAt: timeNow,
       }
-
+      setIsWaitingApiResponse(true)
       const addResults = await Promise.allSettled([
         setDoc(friendListUserRef, friendData),
         setDoc(friendListFriendRef, userFriendData),
@@ -1317,16 +1338,17 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
       if (addErrors.length > 0) {
         console.error('Erro ao adicionar à lista de amigos:', addErrors)
+        setIsWaitingApiResponse(false)
         return false
       }
-
+      setIsWaitingApiResponse(false)
       return true
     }
   }
 
   async function cancelFriendRequest(friendId: string) {
     if (!user) return null
-
+    setIsWaitingApiResponse(true)
     const userId = user.id
 
     // Referências para deletar a solicitação nos dois usuários
@@ -1352,9 +1374,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         deleteDoc(receivedRequestsDataRef),
       ])
       console.log(`usuario ${userId} - amigo ${friendId}`)
-
+      setIsWaitingApiResponse(false)
       return true
     } catch (error) {
+      setIsWaitingApiResponse(false)
       console.error(error)
       return false
     }
@@ -1362,6 +1385,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function declineReceivedRequest(friendId: string) {
     if (!user) return null
+    setIsWaitingApiResponse(true)
 
     const userId = user.id
 
@@ -1389,8 +1413,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       ])
       console.log(`usuario ${userId} - amigo ${friendId}`)
 
+      setIsWaitingApiResponse(false)
       return true
     } catch (error) {
+      setIsWaitingApiResponse(false)
+
       console.error(error)
       return false
     }
@@ -1398,6 +1425,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function fetchListOfUsers(text: string) {
     if (!user) return null
+    setIsWaitingApiResponse(true)
     const userId = user.id
     const usersCollectionRef = collection(db, 'users')
     const q = query(
@@ -1414,33 +1442,40 @@ function AuthProvider({ children }: AuthProviderProps) {
     })) as IUser[]
 
     const removeCurrentUser = fetchUsers.filter((fuser) => fuser.id !== userId)
-
+    setIsWaitingApiResponse(false)
     return removeCurrentUser
   }
 
   async function fetchUserInfo(id: string) {
     if (!user) return null
+    setIsWaitingApiResponse(true)
+
     const usersCollectionRef = doc(db, 'users', id)
 
     const docSnapshot = await getDoc(usersCollectionRef)
 
     if (docSnapshot.exists()) {
+      setIsWaitingApiResponse(false)
       const initialData = docSnapshot.data() as IUser
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchLevelOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `level`)
+    setIsWaitingApiResponse(true)
 
     const docSnapshot = await getDoc(muscleSelectDataRef)
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as ILevelSelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
@@ -1448,32 +1483,36 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function fetchGoalOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `goal`)
 
+    setIsWaitingApiResponse(true)
     const docSnapshot = await getDoc(muscleSelectDataRef)
-
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IGoalSelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchFrequencyByWeekOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `frequencybyweek`)
-    /** OG  workoutId
- LOG  2B4bjSpS8ulI67l2qjMA */
+    setIsWaitingApiResponse(true)
     const docSnapshot = await getDoc(muscleSelectDataRef)
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IFrequencybyweekSelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchTimeBySessionOptionData() {
     const muscleSelectDataRef = doc(db, 'selectOptionsData', `timebysession`)
+    setIsWaitingApiResponse(true)
 
     const docSnapshot = await getDoc(muscleSelectDataRef)
 
@@ -1487,25 +1526,31 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function fetchFreeOptionData() {
     const freeSelectDataRef = doc(db, 'selectOptionsData', `free`)
+    setIsWaitingApiResponse(true)
 
     const docSnapshot = await getDoc(freeSelectDataRef)
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IFreeSelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
 
   async function fetchPulleyOptionData() {
     const pulleySelectDataRef = doc(db, 'selectOptionsData', `pulley`)
+    setIsWaitingApiResponse(true)
 
     const docSnapshot = await getDoc(pulleySelectDataRef)
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IPulleySelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
@@ -1535,10 +1580,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       freeData,
       updatedAt: servertimestamp,
     })
-      .catch((err) => {
-        console.error(err)
-        setIsWaitingApiResponse(false)
-      })
       .then(async () => {
         if (!user) {
           setIsWaitingApiResponse(false)
@@ -1552,6 +1593,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         }
 
         saveUserEquipments(updatedFreeData)
+      })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
       })
       .finally(() => {
         setIsWaitingApiResponse(false)
@@ -1567,17 +1612,20 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (!user) return null
     try {
       const paginatedCategoriesRef = doc(db, 'selectOptionsData', 'machine')
-
+      setIsWaitingApiResponse(true)
       const docSnapshot = await getDoc(paginatedCategoriesRef)
       if (docSnapshot.exists()) {
         //  const _machineData = docSnapshot.data() as IMachineSelectItem[]
         const _machineData = docSnapshot.data() as IMachineSelectData
+        setIsWaitingApiResponse(false)
         return _machineData
       } else {
+        setIsWaitingApiResponse(false)
         console.log('Nenhum contrato encontrado.')
         return null
       }
     } catch (error) {
+      setIsWaitingApiResponse(false)
       console.error('Error fetching machineData:', error)
       throw error
     }
@@ -1669,10 +1717,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       machineData,
       updatedAt: servertimestamp,
     })
-      .catch((err) => {
-        console.error(err)
-        setIsWaitingApiResponse(false)
-      })
       .then(async () => {
         if (!user) {
           setIsWaitingApiResponse(false)
@@ -1687,6 +1731,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         saveUserEquipments(updatedMachineData)
       })
+      .catch((err) => {
+        console.error(err)
+        setIsWaitingApiResponse(false)
+      })
       .finally(() => {
         setIsWaitingApiResponse(false)
         Alert.alert(
@@ -1699,7 +1747,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function fetchCachedWorkoutsExercises() {
     const q = query(collection(db, 'cachedWorkoutsExercises'))
-
+    setIsWaitingApiResponse(true)
     const querySnapshot = await getDocs(q)
     let cachedWorkoutsExercises: ICachedExerciseList = {} as ICachedExerciseList
 
@@ -1713,6 +1761,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     })
     setCachedWorkoutsExercises(cachedWorkoutsExercises)
+    setIsWaitingApiResponse(false)
     // fazer um fetch aqui passando qual eu quero , no caso vai receber 2 parametros
     // o grupo muscular e o tipo , free, pulley ou machine
   }
@@ -1756,6 +1805,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         return clientData.id
       })
       .catch((error) => {
+        setIsWaitingApiResponse(false)
+
         console.log(error.code)
         return null
       })
@@ -1785,14 +1836,16 @@ function AuthProvider({ children }: AuthProviderProps) {
       'premiumUsersContracts',
       premiumUsersContractId,
     )
-
+    setIsWaitingApiResponse(true)
     const docSnapshot = await getDoc(muscleSelectDataRef)
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as IPremiumUserContract
       savePremiumUserData(initialData)
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
@@ -1807,12 +1860,17 @@ function AuthProvider({ children }: AuthProviderProps) {
       'personalTrainerData',
       'personalTrainerContract',
     )
+    setIsWaitingApiResponse(true)
 
     const personalTrainerContractSnap = await getDoc(
       userPersonalTrainerContractDoc,
     )
 
-    if (!personalTrainerContractSnap.exists()) return null
+    if (!personalTrainerContractSnap.exists()) {
+      setIsWaitingApiResponse(false)
+
+      return null
+    }
 
     const {
       createdAt,
@@ -1825,6 +1883,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       updatedAt,
     } = personalTrainerContractSnap.data() as IUserPersonalTrainerContract
 
+    setIsWaitingApiResponse(false)
     return {
       createdAt,
       anabol,
@@ -1836,6 +1895,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       updatedAt,
     }
   }
+
   async function saveUserPersonalTrainerContract(
     personalTrainerContract: IUserPersonalTrainerContract,
   ) {
@@ -1853,15 +1913,17 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
     }
   }
+
   async function loadUserGymInfo(): Promise<IUserGymInfo | null> {
     const userId = user?.id
     if (!userId) return null
     const usersGymInfoDoc = doc(db, 'users', userId, 'gymData', 'gymInfo')
-
+    setIsWaitingApiResponse(true)
     const gymInfoSnap = await getDoc(usersGymInfoDoc)
 
     if (!gymInfoSnap.exists()) {
       console.error('Informações da academia não encontradas.')
+      setIsWaitingApiResponse(false)
       return null
     }
 
@@ -1877,7 +1939,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       whenStartedAtGym,
     } = gymInfoSnap.data() as IUserGymInfo
-
+    setIsWaitingApiResponse(false)
     return {
       createdAt,
       goal,
@@ -1890,6 +1952,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       whenStartedAtGym,
     }
   }
+
   async function saveUserGymInfo(gymInfo: IUserGymInfo) {
     if (!gymInfo) return
     const userId = user?.id
@@ -1916,15 +1979,18 @@ function AuthProvider({ children }: AuthProviderProps) {
       'equipamentData',
       'equipamentFilter',
     )
+    setIsWaitingApiResponse(true)
     const equipamentSnap = await getDoc(usersEquipamentDoc)
 
     if (!equipamentSnap.exists()) {
+      setIsWaitingApiResponse(false)
       console.error('Equipamentos não encontrados.')
       return null
     }
 
     const { createdAt, freeData, machineData, pulleyData, updatedAt } =
       equipamentSnap.data() as IUserEquipamentData
+    setIsWaitingApiResponse(false)
 
     return {
       createdAt,
@@ -1969,7 +2035,11 @@ function AuthProvider({ children }: AuthProviderProps) {
     const formattedProfileUpdatedAt = format(new Date(), 'dd/MM/yyyy')
     const updatedAt = serverTimestamp()
     const userId = user?.id
+    const name = user?.id
+    const birthdate = user?.id
     if (!userId) return
+    if (!name) return
+    if (!birthdate) return
 
     const newContract = {
       createdAt: updatedAt,
@@ -1977,8 +2047,8 @@ function AuthProvider({ children }: AuthProviderProps) {
       submissionPending: true,
       submissionApproved: false,
       userId,
-      userName: user.name,
-      birthdate: user.birthdate,
+      userName: name,
+      birthdate,
     }
 
     await addDoc(contractDoc, newContract)
@@ -2012,6 +2082,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         })
       })
       .catch((error) => {
+        setIsWaitingApiResponse(false)
         console.log(error.code)
       })
       .finally(() => {
@@ -2070,10 +2141,11 @@ function AuthProvider({ children }: AuthProviderProps) {
         })
       })
       .catch((error) => {
+        setIsWaitingApiResponse(false)
         console.log(error.code)
       })
       .finally(() => {
-        // setIsWaitingApiResponse(false)
+        setIsWaitingApiResponse(false)
         Alert.alert(
           user?.selectedLanguage === 'pt-br'
             ? 'Convite cancelado.'
@@ -2088,9 +2160,8 @@ function AuthProvider({ children }: AuthProviderProps) {
     personalTrainerContractId: string,
     clientId: string,
   ) {
-    //    setIsWaitingApiResponse(true)
+    setIsWaitingApiResponse(true)
 
-    /// personalTrainerContracts/MZrIB3mchpH4WrYMvP7A/clients/kr69Ff8R3fvrxlP3j8lg
     try {
       const contractDoc = doc(
         db,
@@ -2117,12 +2188,16 @@ function AuthProvider({ children }: AuthProviderProps) {
           updatedState = null
         }
         setContract(updatedState)
+        setIsWaitingApiResponse(false)
+
         return updatedState
       } else {
         console.log('Nenhum contrato encontrado.')
+        setIsWaitingApiResponse(false)
         return null
       }
     } catch (error) {
+      setIsWaitingApiResponse(false)
       console.error('Erro ao buscar contrato:', error)
       // Retorna um array vazio em caso de erro
       return null
@@ -2131,6 +2206,12 @@ function AuthProvider({ children }: AuthProviderProps) {
   // TODO
   async function loadPersonalTrainerData() {
     if (!user) return null
+
+    console.log(
+      `carregar personal trainer data, falta fazer , carregar os dados do personal trainer`,
+    )
+
+    return
     const personalTrainerId = user.personalTrainerId
     if (!personalTrainerId) return null
     //    setIsWaitingApiResponse(true)
@@ -2155,7 +2236,11 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function savePersonalTrainerData(data: IPersonal) {
     if (!user) return
+    console.log(
+      `save 2239 personal trainer data, falta fazer , carregar os dados do personal trainer`,
+    )
 
+    return
     const storagePersonalDataKey = `@myfitflow:userlocaldata-personaldata-${user.id}`
 
     if (data) {
@@ -2543,7 +2628,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   async function apagarCached() {
     AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
   }
-  console.log(`userGymInfo ->`, userGymInfo)
 
   // fazer se inspirando no notes
   async function loadCachedUserGymInfo(userId: string) {
@@ -2595,6 +2679,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
   }
+
   async function loadCachedUserEquipaments(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
 
@@ -2817,6 +2902,8 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       return true
     } else {
+      setIsWaitingApiResponse(false)
+
       Alert.alert(
         user?.selectedLanguage === 'pt-br' ? 'Opa' : 'Oops',
         user?.selectedLanguage === 'pt-br'
@@ -2917,6 +3004,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataMyWorkout',
       'myWorkoutData',
     )
+    setIsWaitingApiResponse(true)
 
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
@@ -2934,7 +3022,10 @@ function AuthProvider({ children }: AuthProviderProps) {
         })
       }
       await setDoc(workoutUpdatedDataCacheDoc, data)
+      setIsWaitingApiResponse(false)
     } catch (error) {
+      setIsWaitingApiResponse(false)
+
       console.log(error)
     }
   }
@@ -2944,7 +3035,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     updatedAt: number,
   ) {
     if (!user) return
-    console.log(`utilizando `, updatedAt)
 
     const userId = user.id
 
@@ -2963,6 +3053,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataCache',
       'cachedData',
     )
+    setIsWaitingApiResponse(true)
 
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
@@ -2984,7 +3075,10 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
       data.updatedAt = updatedAt
       await setDoc(workoutCacheDoc, data)
+      setIsWaitingApiResponse(false)
     } catch (error) {
+      setIsWaitingApiResponse(false)
+
       console.log(error)
     }
   }
@@ -3001,19 +3095,36 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataCache',
       'updatedData',
     )
+    setIsWaitingApiResponse(true)
 
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
 
-      if (!docSnap.exists()) return null
+      if (!docSnap.exists()) {
+        setIsWaitingApiResponse(false)
+
+        return null
+      }
 
       const data = docSnap.data() as IWorkoutLog
 
-      if (!data) return null
-      if (!data.updatedAt) return null
+      if (!data) {
+        setIsWaitingApiResponse(false)
+
+        return null
+      }
+      if (!data.updatedAt) {
+        setIsWaitingApiResponse(false)
+
+        return null
+      }
 
       const getDateFromTimeStamp = new Date(
         data.updatedAt.seconds * 1000 + data.updatedAt.nanoseconds / 1000000,
+      )
+      console.log(
+        `TODO getDateFromTimeStamp tem algo? 3125 `,
+        getDateFromTimeStamp,
       )
       return getDateFromTimeStamp.getTime()
     } catch (error) {
@@ -3034,15 +3145,24 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataCache',
       'cachedData',
     )
-
+    setIsWaitingApiResponse(true)
     try {
       const docSnap = await getDoc(workoutCacheDoc)
 
-      if (!docSnap.exists()) return null
+      if (!docSnap.exists()) {
+        setIsWaitingApiResponse(false)
+
+        return null
+      }
 
       const data = docSnap.data() as IUserWorkoutsLog
 
-      if (!data) return null
+      if (!data) {
+        setIsWaitingApiResponse(false)
+
+        return null
+      }
+      setIsWaitingApiResponse(false)
 
       return data
     } catch (error) {
@@ -3355,10 +3475,12 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Dados necessários para carregar treino estão ausentes.')
       return
     }
+    setIsWaitingApiResponse(true)
 
     await resetStateCache()
     await deleteExerciseDataInCache(userId, workoutId)
     await deleteMyWorkoutInCache(userId, workoutId)
+    setIsWaitingApiResponse(false)
 
     Alert.alert(
       user?.selectedLanguage === 'pt-br' ? 'Opa!' : 'Oops!',
@@ -3426,6 +3548,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  // TODO nemto iusando
   async function premiumUserUpdateProfileUpdatedAt(workoutId: string) {
     if (!workoutId || !user || !user.id) {
       return
@@ -3497,6 +3620,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       workoutCategoryId,
       'workouts',
     )
+    setIsWaitingApiResponse(true)
 
     const q = query(userColcRef)
     const formattedData = await getDocs(q)
@@ -3519,7 +3643,9 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         return formattedData
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        console.log(error)
+      })
 
     if (formattedData) {
       setWorkouts(formattedData)

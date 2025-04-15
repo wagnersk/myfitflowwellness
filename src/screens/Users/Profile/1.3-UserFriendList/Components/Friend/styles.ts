@@ -8,7 +8,6 @@ export const FriendCardWrapper = styled.View`
   display: flex;
   flex-direction: row;
 `
-export const FriendPhotoWrapper = styled.View``
 export const FriendPhotoImage = styled.View`
   width: 52px;
   height: 52px;
@@ -16,7 +15,11 @@ export const FriendPhotoImage = styled.View`
   overflow: hidden;
   background-color: red;
 `
-export const FriendPhoto = styled.Image``
+export const FriendPhoto = styled.Image`
+  height: 64px;
+  width: 64px;
+  border-radius: 32px;
+`
 export const FriendContentWrapper = styled.View`
   border-bottom-width: 0.3px;
   border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
@@ -49,4 +52,13 @@ export const ActFriendButton = styled.TouchableOpacity`
   align-items: center;
   height: 48px;
   width: 48px;
+`
+export const FriendPhotoWrapper = styled.View`
+  border-width: 1px;
+  width: 52px;
+  height: 52px;
+  border-radius: 32px;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `

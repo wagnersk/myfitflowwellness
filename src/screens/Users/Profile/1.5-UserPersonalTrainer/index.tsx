@@ -11,13 +11,24 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useAuth } from '@hooks/auth'
 import {
+  Body,
   BodyImageWrapper,
   BodyWrapper,
   Container,
   Header,
   ImageBackgroundContainer,
+  ListTitle,
+  ManagePlanButton,
+  ManagePlanButtonText,
+  PersonalTrainerCard,
+  SelectButton,
   SettingsWrapper,
   Title,
+  TrainerInfo,
+  TrainerName,
+  TrainerRating,
+  TrainerSpecialty,
+  TrainerImage,
 } from './styles'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -94,90 +105,73 @@ export function UserPersonalTrainer() {
                       disabled={false}
                     />
                   </SettingsWrapper>
-                  <View>
-                    <Title>Personal: </Title>
-                  </View>
-                </Header>
-                {/* Header */}
-                <View style={styles.header}>
-                  <Text style={styles.headerTitle}>
+                  <Title>
                     {user?.selectedLanguage === 'pt-br'
                       ? 'Seu Personal Trainer'
                       : 'Your Personal Trainer'}
-                  </Text>
-                </View>
+                  </Title>
+                </Header>
+                <Body>
+                  <PersonalTrainerCard>
+                    <TrainerImage
+                      alt=""
+                      source={{ uri: selectedTrainer.image }}
+                    />
+                    <TrainerInfo>
+                      <TrainerName>{selectedTrainer.name}</TrainerName>
+                      <TrainerSpecialty>
+                        {selectedTrainer.specialty}
+                      </TrainerSpecialty>
+                      <TrainerRating>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? `Avaliação: ${selectedTrainer.rating}`
+                          : `Rating: ${selectedTrainer.rating}`}
+                      </TrainerRating>
+                    </TrainerInfo>
+                    <ManagePlanButton onPress={handleManagePlan}>
+                      <ManagePlanButtonText>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Gerenciar'
+                          : 'Manage'}
+                      </ManagePlanButtonText>
+                    </ManagePlanButton>
+                  </PersonalTrainerCard>
 
-                {/* Plano com o Personal Trainer Escolhido */}
-                <View style={styles.selectedTrainerCard}>
-                  <Image
-                    source={{ uri: selectedTrainer.image }}
-                    style={styles.trainerImage}
+                  {/* Lista de Personal Trainers */}
+                  <ListTitle>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Todos os Personal Trainers'
+                      : 'All Personal Trainers'}
+                  </ListTitle>
+                  <FlatList
+                    data={trainers}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                      <PersonalTrainerCard>
+                        <TrainerImage alt="" source={{ uri: item.image }} />
+                        <TrainerInfo>
+                          <TrainerName>{item.name}</TrainerName>
+                          <TrainerSpecialty>{item.specialty}</TrainerSpecialty>
+                          <TrainerRating>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? `Avaliação: ${item.rating}`
+                              : `Rating: ${item.rating}`}
+                          </TrainerRating>
+                        </TrainerInfo>
+                        <SelectButton
+                          onPress={() => handleSelectTrainer(item.id)}
+                        >
+                          <ManagePlanButtonText>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Selecionar'
+                              : 'Select'}
+                          </ManagePlanButtonText>
+                        </SelectButton>
+                      </PersonalTrainerCard>
+                    )}
+                    contentContainerStyle={{ paddingBottom: 20 }}
                   />
-                  <View style={styles.trainerInfo}>
-                    <Text style={styles.trainerName}>
-                      {selectedTrainer.name}
-                    </Text>
-                    <Text style={styles.trainerSpecialty}>
-                      {selectedTrainer.specialty}
-                    </Text>
-                    <Text style={styles.trainerRating}>
-                      {user?.selectedLanguage === 'pt-br'
-                        ? `Avaliação: ${selectedTrainer.rating}`
-                        : `Rating: ${selectedTrainer.rating}`}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.managePlanButton}
-                    onPress={handleManagePlan}
-                  >
-                    <Text style={styles.managePlanButtonText}>
-                      {user?.selectedLanguage === 'pt-br'
-                        ? 'Gerenciar Plano'
-                        : 'Manage Plan'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Lista de Personal Trainers */}
-                <Text style={styles.listTitle}>
-                  {user?.selectedLanguage === 'pt-br'
-                    ? 'Todos os Personal Trainers'
-                    : 'All Personal Trainers'}
-                </Text>
-                <FlatList
-                  data={trainers}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => (
-                    <View style={styles.trainerCard}>
-                      <Image
-                        source={{ uri: item.image }}
-                        style={styles.trainerImage}
-                      />
-                      <View style={styles.trainerInfo}>
-                        <Text style={styles.trainerName}>{item.name}</Text>
-                        <Text style={styles.trainerSpecialty}>
-                          {item.specialty}
-                        </Text>
-                        <Text style={styles.trainerRating}>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? `Avaliação: ${item.rating}`
-                            : `Rating: ${item.rating}`}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.selectTrainerButton}
-                        onPress={() => handleSelectTrainer(item.id)}
-                      >
-                        <Text style={styles.selectTrainerButtonText}>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Selecionar'
-                            : 'Select'}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                  contentContainerStyle={styles.listContainer}
-                />
+                </Body>
               </BodyWrapper>
             </SafeAreaView>
           </SafeAreaProvider>
@@ -186,98 +180,3 @@ export function UserPersonalTrainer() {
     </Container>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  selectedTrainerCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    width: '100%',
-  },
-  trainerImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 15,
-  },
-  trainerInfo: {
-    flex: 1,
-  },
-  trainerName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  trainerSpecialty: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
-  },
-  trainerRating: {
-    fontSize: 12,
-    color: '#999',
-  },
-  managePlanButton: {
-    backgroundColor: '#4caf50',
-    padding: 10,
-    borderRadius: 5,
-  },
-  managePlanButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  trainerCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  selectTrainerButton: {
-    backgroundColor: '#2196f3',
-    padding: 10,
-    borderRadius: 5,
-  },
-  selectTrainerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-})

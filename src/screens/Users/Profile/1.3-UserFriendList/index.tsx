@@ -5,6 +5,7 @@ import {
   Keyboard,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -276,9 +277,6 @@ export function UserFriendList() {
                     <Tittle>Amigos</Tittle>
                   </Header>
                   <TittleWrapper>
-                    {/*           <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
-                     */}
-
                     {/*         <AddFriendButton onPress={handleSetInputVisible}>
                       <Search
                         width={32}
@@ -325,6 +323,15 @@ export function UserFriendList() {
                   </PhillsRowContainer>
 
                   <Body>
+                    {/* entender pq ta renderizando tudo 2x 
+               -> nao preciso do active quando aceito / recuso
+               nao preciso quando => tirar active de baixco ActivityIndicator */}
+                    {isWaitingApiResponse && (
+                      <ActivityIndicator
+                        size="large"
+                        color={theme.COLORS.BLUE_STROKE}
+                      />
+                    )}
                     {!isVisibleInput ? (
                       <ScrollView
                         style={{

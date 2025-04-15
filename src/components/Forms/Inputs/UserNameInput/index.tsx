@@ -73,6 +73,7 @@ export function UserNameInput({
           keyboardType="default"
           returnKeyType="done"
           onBlur={Keyboard.dismiss}
+          selectionColor={'white'}
         />
       </ContainerWrapper>
     </Container>

@@ -19,6 +19,19 @@ export const Body = styled.View`
   gap: 32px;
   padding-top: 32px;
 `
+export const PersonalTrainerCard = styled.View`
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+`
+
+export const TrainerInfo = styled.View`
+  flex: 1;
+`
 
 export const SelectContentWrapper = styled.View`
   flex-direction: column;
@@ -99,4 +112,49 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(24)}px;
+`
+
+export const TrainerName = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-size: ${RFValue(18)}px;
+`
+export const TrainerSpecialty = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-size: ${RFValue(14)}px;
+  margin-bottom: 5px;
+  opacity: 0.7;
+`
+export const TrainerRating = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-size: ${RFValue(12)}px;
+  opacity: 0.5;
+`
+export const ManagePlanButtonText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  color: white;
+  font-size: ${RFValue(14)}px;
+`
+export const ListTitle = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-size: ${RFValue(18)}px;
+`
+export const SelectButton = styled.TouchableOpacity`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_BLUE};
+  padding: 10px;
+  border-radius: 5px;
+`
+export const ManagePlanButton = styled.TouchableOpacity`
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+  padding: 10px;
+  border-radius: 5px;
+`
+export const TrainerImage = styled.Image`
+  height: 80px;
+  width: 80px;
+  border-radius: 40px;
+  margin-right: 15px;
 `

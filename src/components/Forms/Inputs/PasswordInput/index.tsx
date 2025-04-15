@@ -72,6 +72,7 @@ export function PasswordInput({
           type={type}
           editable={editable}
           onBlur={Keyboard.dismiss}
+          selectionColor={'white'}
         />
       </ContainerWrapper>
 
