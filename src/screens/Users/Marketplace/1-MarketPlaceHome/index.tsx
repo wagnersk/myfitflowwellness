@@ -37,7 +37,6 @@ import { CTAButton } from '@components/Buttons/CTAButton'
 import { Photo } from '@components/Photo'
 import { WhatsappButton } from '@components/Buttons/WhatsappButton'
 import { IWorkoutCategory } from '@src/@types/navigation'
-import { SettingsButton } from '@components/Buttons/SettingsButton'
 import { WorkoutsCardItem } from '@components/Cards/WorkoutsCard/WorkoutsCardItem'
 
 export function MarketPlaceHome() {
@@ -271,7 +270,11 @@ export function MarketPlaceHome() {
             />
             <MyWorkoutWrapper>
               <MyWorkoutTittleWrapper>
-                <Tittle>Meu treino Atual</Tittle>
+                <Tittle>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? `Meu treino Atual`
+                    : `My current workout`}
+                </Tittle>
               </MyWorkoutTittleWrapper>
 
               {activeWorkout && (
@@ -335,7 +338,7 @@ export function MarketPlaceHome() {
                     ? `Não há foto`
                     : `No Photo`
                 }
-                defaultPhotoBase64={personalData ? personalData.photo : ''}
+                photo={personalData ? personalData.photo : ''}
               />
               <Text
                 style={{

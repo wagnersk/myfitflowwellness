@@ -57,21 +57,25 @@ export function UserProfile() {
     user?.selectedLanguage || 'us',
   )
   async function handleDeleteAccountTimer() {
-    console.log(`mudar para deletar conta em 7 dias e abrir contagem`)
+    console.log(`Configurar para deletar conta em 7 dias e abrir contagem`)
     if (!user) return
     Alert.alert(
       user.selectedLanguage === 'pt-br' ? 'Tem certeza?' : 'Are you sure?',
       user.selectedLanguage === 'pt-br'
-        ? 'Se você sair, irá precisar de internet para conectar-se novamente.'
-        : 'If you leave, you will need internet to connect again.',
+        ? 'Sua conta será marcada para exclusão e será deletada permanentemente em 7 dias. Você pode cancelar a exclusão fazendo login novamente antes do prazo.'
+        : 'Your account will be scheduled for deletion and permanently deleted in 7 days. You can cancel the deletion by logging in again before the deadline.',
       [
         {
           text: user.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
           onPress: () => {},
+          style: 'cancel',
         },
         {
-          text: user.selectedLanguage === 'pt-br' ? 'Sair' : 'Sign Out',
-          onPress: () => firebaseSignOut(),
+          text: user.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+          onPress: () => {
+            console.log('Conta marcada para exclusão em 7 dias')
+            // Aqui você pode adicionar a lógica para marcar a conta para exclusão
+          },
         },
       ],
     )
@@ -302,6 +306,7 @@ export function UserProfile() {
                   />
 
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Meus Desafios'
@@ -323,6 +328,7 @@ export function UserProfile() {
                   />
 
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Minhas Fotos'
@@ -335,10 +341,11 @@ export function UserProfile() {
                 </Body>
                 <Body>
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
-                        ? 'Preferencias de treino'
-                        : 'Preferences of workout'
+                        ? 'Preferencias'
+                        : 'Preferences'
                     }
                     onPress={handlePreferencesStep}
                     bordertype="up"
@@ -356,6 +363,7 @@ export function UserProfile() {
                   
                   e seguranca das fotos */}
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Personal Trainer'
@@ -368,6 +376,7 @@ export function UserProfile() {
                 </Body>
                 <Body>
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Meu Plano'
@@ -378,6 +387,7 @@ export function UserProfile() {
                     iconStyle="plan"
                   />
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
                     }
@@ -395,6 +405,7 @@ export function UserProfile() {
                   {/* so por botao logout facil */}
 
                   <WhiteButton
+                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Deletar conta'

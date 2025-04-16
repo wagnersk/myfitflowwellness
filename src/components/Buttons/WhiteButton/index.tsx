@@ -1,4 +1,6 @@
 import {
+  BetaTag,
+  BetaText,
   ButtonWrapper,
   ContentWrapper,
   IconWrapper,
@@ -30,6 +32,7 @@ interface Props {
   bordertype?: 'up' | 'down' | 'up-down' | 'none'
   tittle: string
   onPress: (data?: string) => void
+  betaMode?: boolean
   iconStyle?:
     | 'trophy'
     | 'email'
@@ -53,7 +56,13 @@ interface Props {
     | 'boxing-glove'
 }
 
-export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
+export function WhiteButton({
+  betaMode,
+  onPress,
+  tittle,
+  bordertype,
+  iconStyle,
+}: Props) {
   return (
     <ButtonWrapper
       iconStyle={iconStyle}
@@ -141,6 +150,13 @@ export function WhiteButton({ onPress, tittle, bordertype, iconStyle }: Props) {
           </IconWrapper>
           <ListTitle iconStyle={iconStyle}>{tittle}</ListTitle>
         </ListTitleWrapper>
+        {betaMode && (
+          <IconWrapper>
+            <BetaTag colors={['#FFFFFF', '#000000']}>
+              <BetaText>BETA</BetaText>
+            </BetaTag>
+          </IconWrapper>
+        )}
         <IconWrapper>
           {iconStyle !== 'trash' && iconStyle !== 'none' && (
             <Forward width={36} height={36} stroke={'#1B077F'} />

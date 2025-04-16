@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { BackHandler, ActivityIndicator, Alert, View } from 'react-native'
+import {
+  BackHandler,
+  ActivityIndicator,
+  Alert,
+  View,
+  TouchableOpacity,
+} from 'react-native'
 import { useTheme } from 'styled-components/native'
 
 import { useAuth } from '@hooks/auth'
@@ -116,6 +122,9 @@ export function UserHome() {
     })
   }
 
+  async function handleOpenAllCategories() {
+    navigation.navigate('userAllCategories')
+  }
   async function handleOpenCamera() {
     navigation.navigate('camera')
   }
@@ -366,20 +375,31 @@ export function UserHome() {
                 top: -20,
               }}
             >
-              <SmileySad width={180} height={180} fill={svgColor} />
+              <TouchableOpacity
+                onPress={handleOpenAllCategories}
+                style={{
+                  padding: 40,
+                  borderRadius: 5,
+                  borderWidth: 1,
+                  borderColor: theme.COLORS.BLUE_STROKE,
+                  borderStyle: 'dashed', // Define a borda como tracejada
+                }}
+              >
+                <SmileySad width={180} height={180} fill={svgColor} />
 
-              <NoWorkoutFoundWrapper>
-                <Warning>
-                  {user?.selectedLanguage === 'pt-br'
-                    ? 'Ops! Nenhum treino encontrado.'
-                    : 'Oops! No workout found.'}
-                </Warning>
-                <WarningGreetings>
-                  {user?.selectedLanguage === 'pt-br'
-                    ? 'Que tal escolher um treino?'
-                    : 'How about choosing a workout?'}
-                </WarningGreetings>
-              </NoWorkoutFoundWrapper>
+                <NoWorkoutFoundWrapper>
+                  <Warning>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Ops! Nenhum treino encontrado.'
+                      : 'Oops! No workout found.'}
+                  </Warning>
+                  <WarningGreetings>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Que tal escolher um treino?'
+                      : 'How about choosing a workout?'}
+                  </WarningGreetings>
+                </NoWorkoutFoundWrapper>
+              </TouchableOpacity>
             </View>
           )}
           {/*         {console.log(`JSON.stringify(findWorkoutDataLog)`)}

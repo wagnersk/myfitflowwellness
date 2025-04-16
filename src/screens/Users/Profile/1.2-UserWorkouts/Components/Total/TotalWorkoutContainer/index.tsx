@@ -14,8 +14,6 @@ export default function TotalWorkoutContainer({
   user,
   handleOnPressTotalWorkout,
 }: WorkoutContainerProps) {
-  // sxzaber se ativo o unao
-  console.log(`mytotalWorkouts`, myTotalWorkouts)
   return (
     <ContainerWrapper>
       <CardsWrapper>

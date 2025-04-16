@@ -1005,6 +1005,7 @@ export interface AuthContextData {
   } | null>
   cancelFriendRequest: (friendId: string) => Promise<boolean | null>
   declineReceivedRequest: (friendId: string) => Promise<boolean | null>
+  deleteFriend: (friendId: string) => Promise<boolean | null>
   acceptFriendRequest: (friendId: string) => Promise<boolean | null>
 
   user: IUser | null

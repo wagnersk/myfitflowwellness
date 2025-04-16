@@ -18,11 +18,6 @@ export const FriendPhotoWrapper = styled.View`
   border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `
 
-export const FriendPhoto = styled.Image`
-  height: 64px;
-  width: 64px;
-  border-radius: 32px;
-`
 export const FriendContentWrapper = styled.View`
   border-bottom-width: 0.3px;
   border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};

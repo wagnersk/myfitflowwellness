@@ -58,13 +58,20 @@ export function UserFriendList() {
     cancelFriendRequest,
     declineReceivedRequest,
     acceptFriendRequest,
+    checkIfFriendAlreadyAccepted,
+    user,
   } = useAuth()
   const navigation = useNavigation()
   const theme = useTheme()
 
-  const items = ['Solicitações', 'Amigos', 'Envios']
+  const items =
+    user?.selectedLanguage === 'pt-br'
+      ? ['Solicitações', 'Amigos', 'Envios']
+      : ['Requests', 'Friends', 'Sent']
 
-  const [selectedItem, setSelectedItem] = useState<string | null>('Amigos')
+  const [selectedItem, setSelectedItem] = useState<string | null>(
+    user?.selectedLanguage === 'pt-br' ? 'Amigos' : 'Friends',
+  )
   const [isVisibleInput, setIsVisibleInput] = useState(false)
   const [listOfSearchUsers, setListOfSearchUsers] = useState<IUser[]>([])
   const [userRequestList, setUserRequestList] = useState<IUser[]>([])
@@ -79,9 +86,38 @@ export function UserFriendList() {
   }
 
   function handleOpenFriendProfile(friend: IUser) {
-    navigation.navigate('userFriendProfile', { friend })
-  }
+    async function start() {
+      const responseFriends = await checkIfFriendAlreadyAccepted(friend.id)
 
+      let isAlreadyFriend = false
+      let isPendingRequest = false
+
+      if (responseFriends === null) {
+        return
+      }
+
+      if (responseFriends.accepted === true) {
+        isAlreadyFriend = true
+        isPendingRequest = false
+
+        return
+      }
+
+      if (responseFriends.accepted === false) {
+        isAlreadyFriend = false
+        isPendingRequest = true
+        return
+      }
+
+      const finalData = {
+        friend,
+        isAlreadyFriend,
+        isPendingRequest,
+      }
+    }
+    navigation.navigate('userFriendProfile', { friend })
+    start()
+  }
   async function handleAcceptFriend(friendId: string) {
     const sucess = await acceptFriendRequest(friendId)
 
@@ -113,20 +149,57 @@ export function UserFriendList() {
   }
 
   async function handleOnCancelRequest(friendId: string) {
-    const sucess = await cancelFriendRequest(friendId)
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br'
+        ? 'Cancelar Convite'
+        : 'Cancel Request',
+      user?.selectedLanguage === 'pt-br'
+        ? 'Tem certeza de que deseja cancelar este convite?'
+        : 'Are you sure you want to cancel this request?',
+      [
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+          style: 'cancel', // Estilo de botão para cancelar
+        },
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+          onPress: async () => {
+            const success = await cancelFriendRequest(friendId)
 
-    if (!sucess) return
+            if (!success) {
+              Alert.alert(
+                user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Não foi possível cancelar o convite. Tente novamente mais tarde.'
+                  : 'Unable to cancel the request. Please try again later.',
+                [{ text: 'OK' }],
+              )
+              return
+            }
 
-    const userRequest = userRequestList.filter(
-      (request) => request.id !== friendId,
+            const userRequest = userRequestList.filter(
+              (request) => request.id !== friendId,
+            )
+
+            setUserRequestList(userRequest)
+            setUserFriendList((prev) => prev) // teste
+
+            Alert.alert(
+              user?.selectedLanguage === 'pt-br'
+                ? 'Cancelamento'
+                : 'Cancellation',
+              user?.selectedLanguage === 'pt-br'
+                ? 'Convite cancelado com sucesso!'
+                : 'Request successfully canceled!',
+              [{ text: 'OK' }],
+            )
+          },
+        },
+      ],
+      { cancelable: false },
     )
-
-    setUserRequestList(userRequest)
-    setUserFriendList((prev) => prev) // teste
-
-    // userRequestList
-    Alert.alert(`Convite cancelado com sucesso`)
   }
+
   function handleSetInputVisible() {
     setIsVisibleInput((prev) => !prev)
   }
@@ -153,7 +226,7 @@ export function UserFriendList() {
   const renderFriendList = () => {
     if (search !== '') return null
 
-    if (selectedItem === 'Solicitações') {
+    if (selectedItem === 'Solicitações' || selectedItem === 'Requests') {
       return userReceivedList.map((friend, friendIndex) => (
         <FriendReceived
           key={friendIndex}
@@ -164,7 +237,7 @@ export function UserFriendList() {
       ))
     }
 
-    if (selectedItem === 'Amigos') {
+    if (selectedItem === 'Amigos' || selectedItem === 'Friends') {
       return userFriendList.map((friend, friendIndex) => (
         <FriendList
           key={friendIndex}
@@ -174,7 +247,7 @@ export function UserFriendList() {
       ))
     }
 
-    if (selectedItem === 'Envios') {
+    if (selectedItem === 'Envios' || selectedItem === 'Sent') {
       return userRequestList.map((friend, friendIndex) => (
         <FriendRequest
           key={friendIndex}
@@ -186,64 +259,58 @@ export function UserFriendList() {
 
     return null
   }
-
   useEffect(() => {
-    async function fetchReceivedRequests() {
-      if (userRequestList.length > 0) return
+    if (!selectedItem) return
+    if (!userRequestList) return
 
-      const getUserRequestList = await fetchReceivedRequestsList()
-      if (getUserRequestList) {
-        const userRequests = (await Promise.all(
-          getUserRequestList.map(async (request) => {
-            const userProfile = await fetchUserInfo(request.id)
-            return { ...request, ...userProfile }
-          }),
-        )) as IUser[]
+    async function fetchData() {
+      if (selectedItem === 'Solicitações' || selectedItem === 'Requests') {
+        if (userRequestList.length > 0) return
 
-        setUserReceivedList(userRequests)
-        console.log(`getUserRequestList`, userRequests)
+        const getUserRequestList = await fetchReceivedRequestsList()
+        if (getUserRequestList && getUserRequestList.length > 0) {
+          const userRequests = (await Promise.all(
+            getUserRequestList.map(async (request) => {
+              const userProfile = await fetchUserInfo(request.id)
+              return { ...request, ...userProfile }
+            }),
+          )) as IUser[]
+
+          setUserReceivedList(userRequests)
+        }
+      } else if (selectedItem === 'Amigos' || selectedItem === 'Friends') {
+        if (userFriendList.length > 0) return
+
+        const getUserRequestList = await fetchFriendList()
+        if (getUserRequestList && getUserRequestList.length > 0) {
+          const userRequests = (await Promise.all(
+            getUserRequestList.map(async (request) => {
+              const userProfile = await fetchUserInfo(request.id)
+              return { ...request, ...userProfile }
+            }),
+          )) as IUser[]
+
+          setUserFriendList(userRequests)
+        }
+      } else if (selectedItem === 'Envios' || selectedItem === 'Sent') {
+        if (userFriendList.length > 0) return
+
+        const getUserRequestList = await fetchFriendRequestsList()
+        if (getUserRequestList && getUserRequestList.length > 0) {
+          const userRequests = (await Promise.all(
+            getUserRequestList.map(async (request) => {
+              const userProfile = await fetchUserInfo(request.id)
+              return { ...request, ...userProfile }
+            }),
+          )) as IUser[]
+
+          setUserRequestList(userRequests)
+        }
       }
     }
-    fetchReceivedRequests()
-  }, [selectedItem === 'Solicitações'])
 
-  useEffect(() => {
-    async function fetchRequests() {
-      if (userFriendList.length > 0) return
-      const getUserRequestList = await fetchFriendList()
-      if (getUserRequestList) {
-        const userRequests = (await Promise.all(
-          getUserRequestList.map(async (request) => {
-            const userProfile = await fetchUserInfo(request.id)
-            return { ...request, ...userProfile }
-          }),
-        )) as IUser[]
-
-        setUserFriendList(userRequests)
-        console.log(`getUserRequestList a`, userRequests)
-      }
-    }
-    fetchRequests()
-  }, [selectedItem === 'Amigos'])
-
-  useEffect(() => {
-    async function fetchRequests() {
-      if (userFriendList.length > 0) return
-      const getUserRequestList = await fetchFriendRequestsList()
-      if (getUserRequestList) {
-        const userRequests = (await Promise.all(
-          getUserRequestList.map(async (request) => {
-            const userProfile = await fetchUserInfo(request.id)
-            return { ...request, ...userProfile }
-          }),
-        )) as IUser[]
-
-        setUserRequestList(userRequests)
-        console.log(`getUserRequestList`, userRequests)
-      }
-    }
-    fetchRequests()
-  }, [selectedItem === 'Envios'])
+    fetchData()
+  }, [selectedItem])
 
   useFocusEffect(
     useCallback(() => {
@@ -274,17 +341,13 @@ export function UserFriendList() {
                         disabled={isWaitingApiResponse}
                       />
                     </SettingsWrapper>
-                    <Tittle>Amigos</Tittle>
+                    <Tittle>
+                      {user?.selectedLanguage === 'pt-br'
+                        ? 'Amigos'
+                        : 'Friends'}
+                    </Tittle>
                   </Header>
-                  <TittleWrapper>
-                    {/*         <AddFriendButton onPress={handleSetInputVisible}>
-                      <Search
-                        width={32}
-                        height={32}
-                        fill={theme.COLORS.BLUE_STROKE}
-                      />
-                    </AddFriendButton> */}
-                  </TittleWrapper>
+                  <TittleWrapper></TittleWrapper>
                   <PhillsRowContainer>
                     <LeftContent>
                       {isVisibleInput ? (
@@ -323,15 +386,6 @@ export function UserFriendList() {
                   </PhillsRowContainer>
 
                   <Body>
-                    {/* entender pq ta renderizando tudo 2x 
-               -> nao preciso do active quando aceito / recuso
-               nao preciso quando => tirar active de baixco ActivityIndicator */}
-                    {isWaitingApiResponse && (
-                      <ActivityIndicator
-                        size="large"
-                        color={theme.COLORS.BLUE_STROKE}
-                      />
-                    )}
                     {!isVisibleInput ? (
                       <ScrollView
                         style={{
@@ -343,7 +397,12 @@ export function UserFriendList() {
                         }}
                       >
                         {/*! isVisibleInput && quando  search tiver algo nao mostarr o q tinha antes  */}
-
+                        {isWaitingApiResponse && (
+                          <ActivityIndicator
+                            size="large"
+                            color={theme.COLORS.BLUE_STROKE}
+                          />
+                        )}
                         {renderFriendList()}
                       </ScrollView>
                     ) : (

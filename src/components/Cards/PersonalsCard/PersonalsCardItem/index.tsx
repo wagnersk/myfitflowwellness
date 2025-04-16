@@ -36,7 +36,7 @@ export function PersonalsCardItem({ data, handleNextStep, ...rest }: Props) {
   const { user, contract } = useAuth()
   return (
     <Container {...rest} onPress={() => handleNextStep(data)}>
-      <ContainerGradient colors={[]}>
+      <ContainerGradient colors={['#ffffff', '#000000']}>
         <PhotoImageWrapper size={size}>
           <PhotoPreLoadingImageBackground size={size} />
           {data && data.photo && (

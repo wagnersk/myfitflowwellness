@@ -16,6 +16,7 @@ import {
   FriendPhoto,
 } from './styles'
 import { IUser } from '@hooks/authTypes'
+import { Photo } from '@components/Photo'
 
 interface FriendCardProps {
   friend: IUser
@@ -39,7 +40,9 @@ export default function FriendReceived({
   return (
     <FriendCardWrapper>
       <FriendPhotoWrapper>
-        {friend.photo && <FriendPhoto src={friend.photo} />}
+        {friend.photo && (
+          <Photo size={48} defaultText={` `} photo={friend.photo} />
+        )}
         {!friend.photo && <User width={44} height={44} fill={'#1B077F'} />}
       </FriendPhotoWrapper>
       <FriendContentWrapper>

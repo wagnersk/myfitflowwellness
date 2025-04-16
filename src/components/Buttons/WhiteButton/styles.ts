@@ -1,4 +1,5 @@
 import { RFValue } from '@utils/RFValue'
+import { LinearGradient } from 'expo-linear-gradient'
 import { ReactNode } from 'react'
 import { TouchableOpacity } from 'react-native'
 import styled, { css } from 'styled-components/native'
@@ -100,4 +101,21 @@ export const IconWrapper = styled.View`
   align-items: center;
   height: 48px;
   width: 48px;
+`
+
+export const BetaText = styled.Text`
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+`
+export const BetaTag = styled(LinearGradient).attrs(({ theme }) => ({
+  colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
+  start: { x: 0, y: 1 },
+  end: { x: 1, y: 0 },
+}))`
+  position: absolute;
+  border-radius: 4px;
+  padding: 4px 4px;
+  align-items: center;
+  justify-content: center;
 `

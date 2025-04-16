@@ -97,12 +97,17 @@ export function UserWorkouts() {
 
   const [isDataOrderChanged, setIsDataOrderChanged] = useState(false)
   const [showScreen, setShowScreen] = useState<
-    'Em uso' | 'Meus treinos' | 'Compartilhado'
-  >('Em uso')
-  const [showScreen2, setShowScreen2] = useState<'Ativos' | 'Expirados'>(
-    'Ativos',
-  )
+    | 'Em uso'
+    | 'Meus treinos'
+    | 'Compartilhado'
+    | 'In Use'
+    | 'My Workouts'
+    | 'Shared'
+  >(user?.selectedLanguage === 'pt-br' ? 'Em uso' : 'In Use')
 
+  const [showScreen2, setShowScreen2] = useState<
+    'Ativos' | 'Expirados' | 'Active' | 'Expired'
+  >(user?.selectedLanguage === 'pt-br' ? 'Ativos' : 'Active')
   const [workouts, setWorkouts] = useState<IMyWorkouts | null>(myWorkout)
 
   const [copiedWorkouts, setCopiedWorkouts] = useState<
@@ -126,12 +131,36 @@ export function UserWorkouts() {
   const screenWidth = Dimensions.get('window').width
   const paddingSize = 36
   const TAB_WIDTH = (screenWidth - paddingSize) / 3 // screenWidth / 2
-  const TABS: ('Em uso' | 'Meus treinos' | 'Compartilhado')[] = [
-    'Em uso',
-    'Meus treinos',
-    'Compartilhado',
-  ]
-  const TABS2: ('Ativos' | 'Expirados')[] = ['Ativos', 'Expirados']
+
+  /* 
+  const TABS: ('Em uso' | 'Meus treinos' | 'Compartilhado' | 'In Use' | 'My Workouts' | 'Shared')[] =
+  user?.selectedLanguage === 'pt-br'
+    ? ['Em uso', 'Meus treinos', 'Compartilhado']
+    : ['In Use', 'My Workouts', 'Shared']
+
+const TABS2: ('Ativos' | 'Expirados' | 'Active' | 'Expired')[] =
+  user?.selectedLanguage === 'pt-br'
+    ? ['Ativos', 'Expirados']
+    : ['Active', 'Expired']
+  */
+
+  const TABS: (
+    | 'Em uso'
+    | 'Meus treinos'
+    | 'Compartilhado'
+    | 'In Use'
+    | 'My Workouts'
+    | 'Shared'
+  )[] =
+    user?.selectedLanguage === 'pt-br'
+      ? ['Em uso', 'Meus treinos', 'Compartilhado']
+      : ['In Use', 'My Workouts', 'Shared']
+
+  const TABS2: ('Ativos' | 'Expirados' | 'Active' | 'Expired')[] =
+    user?.selectedLanguage === 'pt-br'
+      ? ['Ativos', 'Expirados']
+      : ['Active', 'Expired']
+
   const offset = useSharedValue<number>(0)
   const offset2 = useSharedValue<number>(50)
   const animatedStyles = useAnimatedStyle(() => ({
@@ -936,14 +965,25 @@ export function UserWorkouts() {
     }))
   }
 
-  function handlePress(tab: 'Em uso' | 'Meus treinos' | 'Compartilhado') {
+  function handlePress(
+    tab:
+      | 'Em uso'
+      | 'Meus treinos'
+      | 'Compartilhado'
+      | 'In Use'
+      | 'My Workouts'
+      | 'Shared',
+  ) {
     const newOffset = (() => {
       switch (tab) {
         case 'Em uso':
+        case 'In Use':
           return 0
         case 'Meus treinos':
+        case 'My Workouts':
           return TAB_WIDTH
         case 'Compartilhado':
+        case 'Shared':
           return TAB_WIDTH + TAB_WIDTH
         default:
           return 0
@@ -958,14 +998,15 @@ export function UserWorkouts() {
     offset.value = withTiming(newOffset)
   }
 
-  function handlePress2(tab: 'Ativos' | 'Expirados') {
+  function handlePress2(tab: 'Ativos' | 'Expirados' | 'Active' | 'Expired') {
     const newOffset = (() => {
       switch (tab) {
         case 'Ativos':
+        case 'Active':
           return 50
         case 'Expirados':
+        case 'Expired':
           return screenWidth / 2 - 16
-
         default:
           return 0
       }
@@ -975,7 +1016,6 @@ export function UserWorkouts() {
 
     offset2.value = withTiming(newOffset)
   }
-
   function handleGoBack() {
     if (isDataOrderChanged) {
       Alert.alert(
@@ -1078,7 +1118,11 @@ export function UserWorkouts() {
                       />
                     </SettingsWrapper>
                     <TittleWrapper>
-                      <ContainerTittle>Treinos</ContainerTittle>
+                      <ContainerTittle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Treinos'
+                          : 'Workouts'}
+                      </ContainerTittle>
                     </TittleWrapper>
                     <IconWrapper></IconWrapper>
                   </ContainerTittleWrapper>
@@ -1105,69 +1149,74 @@ export function UserWorkouts() {
                         />
                       </SelectScreenWrapper>
 
-                      {showScreen === 'Em uso' && workouts && (
-                        <>
-                          <SelectScreenWrapper2>
-                            <Underline2
-                              tabWidth={screenWidth / 3}
-                              style={animatedStyles2}
-                            />
-                            <RowWrapper2>
-                              {TABS2.map((tab) => (
-                                <SelectScreenButton2
-                                  tabWidth={screenWidth / 3}
-                                  key={tab}
-                                  onPress={() => handlePress2(tab)}
-                                >
-                                  <SelectScreenButtonText2
-                                    isSelected={showScreen2 === tab}
+                      {(showScreen === 'Em uso' || showScreen === 'In Use') &&
+                        workouts && (
+                          <>
+                            <SelectScreenWrapper2>
+                              <Underline2
+                                tabWidth={screenWidth / 3}
+                                style={animatedStyles2}
+                              />
+                              <RowWrapper2>
+                                {TABS2.map((tab) => (
+                                  <SelectScreenButton2
+                                    tabWidth={screenWidth / 3}
+                                    key={tab}
+                                    onPress={() => handlePress2(tab)}
                                   >
-                                    {tab}
-                                  </SelectScreenButtonText2>
-                                </SelectScreenButton2>
-                              ))}
-                            </RowWrapper2>
-                          </SelectScreenWrapper2>
+                                    <SelectScreenButtonText2
+                                      isSelected={showScreen2 === tab}
+                                    >
+                                      {tab}
+                                    </SelectScreenButtonText2>
+                                  </SelectScreenButton2>
+                                ))}
+                              </RowWrapper2>
+                            </SelectScreenWrapper2>
 
-                          <InUseWorkoutContainer
-                            activeData={workouts.activeData}
-                            expiredData={workouts.expiredData}
-                            activeworkouts={activeworkouts}
-                            expiredworkouts={expiredworkouts}
-                            showScreen2={showScreen2}
+                            <InUseWorkoutContainer
+                              activeData={workouts.activeData}
+                              expiredData={workouts.expiredData}
+                              activeworkouts={activeworkouts}
+                              expiredworkouts={expiredworkouts}
+                              showScreen2={showScreen2}
+                              user={user}
+                              isOpenSettingsMode={isOpenSettingsMode}
+                              handleOnPressExpiredInUseWorkout={(id) =>
+                                handleOnPressWorkout(id, 'expiredWorkout')
+                              }
+                              handleOnPressActiveInUseWorkout={(id) =>
+                                handleOnPressWorkout(id, 'activeWorkout')
+                              }
+                              handleMoveUp={handleMoveUp}
+                              handleMoveDown={handleMoveDown}
+                            />
+                          </>
+                        )}
+
+                      {(showScreen === 'Meus treinos' ||
+                        showScreen === 'My Workouts') &&
+                        workouts && (
+                          <TotalWorkoutContainer
+                            myTotalWorkouts={myTotalWorkouts}
                             user={user}
-                            isOpenSettingsMode={isOpenSettingsMode}
-                            handleOnPressExpiredInUseWorkout={(id) =>
-                              handleOnPressWorkout(id, 'expiredWorkout')
+                            handleOnPressTotalWorkout={(id) =>
+                              handleOnPressWorkout(id, 'totalWorkout')
                             }
-                            handleOnPressActiveInUseWorkout={(id) =>
-                              handleOnPressWorkout(id, 'activeWorkout')
-                            }
-                            handleMoveUp={handleMoveUp}
-                            handleMoveDown={handleMoveDown}
                           />
-                        </>
-                      )}
-
-                      {showScreen === 'Meus treinos' && workouts && (
-                        <TotalWorkoutContainer
-                          myTotalWorkouts={myTotalWorkouts}
-                          user={user}
-                          handleOnPressTotalWorkout={(id) =>
-                            handleOnPressWorkout(id, 'totalWorkout')
-                          }
-                        />
-                      )}
-                      {showScreen === 'Compartilhado' && workouts && (
-                        <SharedWorkoutContainer
-                          data={workouts}
-                          sharedWorkouts={sharedWorkouts}
-                          user={user}
-                          handleOnPressShareWorkout={(id) =>
-                            handleOnPressWorkout(id, 'shareWorkout')
-                          }
-                        />
-                      )}
+                        )}
+                      {(showScreen === 'Compartilhado' ||
+                        showScreen === 'Shared') &&
+                        workouts && (
+                          <SharedWorkoutContainer
+                            data={workouts}
+                            sharedWorkouts={sharedWorkouts}
+                            user={user}
+                            handleOnPressShareWorkout={(id) =>
+                              handleOnPressWorkout(id, 'shareWorkout')
+                            }
+                          />
+                        )}
                     </ListWrapper>
                   </ScrollView>
 

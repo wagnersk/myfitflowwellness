@@ -436,27 +436,31 @@ export function UserFormEditProfile() {
                               editable={!isWaitingApiResponse}
                               onFocus={() => {}}
                               type="blue"
-                              borderDesign="up-down"
-                              order="middle"
-                              topPosition={2}
-                            />
-                            <WhatsappInput
-                              mask={
-                                user?.selectedLanguage === 'pt-br'
-                                  ? '(99) 99999-9999'
-                                  : '(999) 99999-9999'
-                              }
-                              handleChangeWhatsapp={handleChangeWhatsappNumber}
-                              value={userForm.whatsappNumber.value}
-                              errorBoolean={
-                                userForm.whatsappNumber.errorBoolean
-                              }
-                              editable={!isWaitingApiResponse}
-                              onFocus={() => {}}
-                              type="blue"
                               borderDesign="down"
                               order="bottom"
+                              topPosition={2}
                             />
+                            {false && (
+                              <WhatsappInput
+                                mask={
+                                  user?.selectedLanguage === 'pt-br'
+                                    ? '(99) 99999-9999'
+                                    : '(999) 99999-9999'
+                                }
+                                handleChangeWhatsapp={
+                                  handleChangeWhatsappNumber
+                                }
+                                value={userForm.whatsappNumber.value}
+                                errorBoolean={
+                                  userForm.whatsappNumber.errorBoolean
+                                }
+                                editable={!isWaitingApiResponse}
+                                onFocus={() => {}}
+                                type="blue"
+                                borderDesign="down"
+                                order="bottom"
+                              />
+                            )}
                           </InputWrapper>
                         </FormWrapper>
                       )}

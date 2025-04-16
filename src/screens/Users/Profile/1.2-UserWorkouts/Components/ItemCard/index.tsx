@@ -49,6 +49,7 @@ interface Props extends TouchableOpacityProps {
   handleMoveUp: (id: string) => void
   handleMoveDown: (id: string) => void
   isOpenSettingsMode?: boolean
+  selectedLanguage: 'pt-br' | 'us'
 }
 export function ItemCard({
   data,
@@ -63,11 +64,10 @@ export function ItemCard({
   firstElement,
   secondElement,
   lastElement,
+  selectedLanguage,
   ...rest
 }: Props) {
   const size = 80
-  const { user } = useAuth()
-  const selectedLanguage = user?.selectedLanguage
 
   function getColor(data: IMyfitflowWorkoutInUseData | null) {
     if (!data) return 'red'

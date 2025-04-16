@@ -16,7 +16,7 @@ export const Container = styled.View`
 export const BioInfoWrapper = styled.View`
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex: 1;
 
   padding-left: 32px;
@@ -47,7 +47,7 @@ export const BioInfo = styled.View`
 export const BioInfoLetter = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(22)}px;
+  font-size: ${RFValue(30)}px;
 `
 
 export const MyWorkoutTittleWrapper = styled.View`

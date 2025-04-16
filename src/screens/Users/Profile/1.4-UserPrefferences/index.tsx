@@ -260,7 +260,11 @@ export function UserPrefferences() {
                     />
                   </SettingsWrapper>
                   <TittleWrapper>
-                    <Title>Preferencias: </Title>
+                    <Title>
+                      {user?.selectedLanguage === 'pt-br'
+                        ? 'Preferências:'
+                        : 'Preferences:'}
+                    </Title>
                   </TittleWrapper>
                 </Header>
                 <Body>
@@ -270,7 +274,11 @@ export function UserPrefferences() {
                   >
                     <SelectWrapper>
                       <ButtonWrapper>
-                        <ButtonTitle>Nivel: </ButtonTitle>
+                        <ButtonTitle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Nivel '
+                            : 'Level '}
+                        </ButtonTitle>
                         <WhiteButton
                           tittle={formattedLevel}
                           onPress={() => handleOpenList({ dataType: 'Level' })}
@@ -282,7 +290,11 @@ export function UserPrefferences() {
 
                     <SelectWrapper>
                       <ButtonWrapper>
-                        <ButtonTitle>Objetivo: </ButtonTitle>
+                        <ButtonTitle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Objetivo '
+                            : 'Goal '}
+                        </ButtonTitle>
                         <WhiteButton
                           tittle={formattedGoal}
                           onPress={() =>
@@ -305,7 +317,11 @@ export function UserPrefferences() {
 
                     <SelectWrapper>
                       <ButtonWrapper>
-                        <ButtonTitle>Treinos por semana: </ButtonTitle>
+                        <ButtonTitle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Treinos por semana: '
+                            : 'Workouts per week: '}
+                        </ButtonTitle>
                         <WhiteButton
                           tittle={formattedFrequencyByWeek}
                           onPress={() =>
@@ -324,16 +340,27 @@ export function UserPrefferences() {
                           bordertype="down"
                           iconStyle="clock"
                         />
-                        <ButtonTitle>Tempo de cada treino: </ButtonTitle>
+                        <ButtonTitle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Tempo de cada treino:  '
+                            : 'Time of each workout: '}
+                        </ButtonTitle>
                       </ButtonWrapper>
                     </SelectWrapper>
 
                     <SelectWrapper>
                       <ButtonWrapper>
-                        <ButtonTitle>Equipamentos disponíveis </ButtonTitle>
-
+                        <ButtonTitle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Equipamentos disponíveis '
+                            : 'Available equipment: '}
+                        </ButtonTitle>
                         <WhiteButton
-                          tittle={'Livre'}
+                          tittle={
+                            user?.selectedLanguage === 'pt-br'
+                              ? 'Livre'
+                              : 'Free'
+                          }
                           onPress={() =>
                             handleOpenFilterEquipamentList({
                               dataType: 'Livre',
@@ -343,7 +370,11 @@ export function UserPrefferences() {
                           iconStyle="checkcicle"
                         />
                         <WhiteButton
-                          tittle={'Polia'}
+                          tittle={
+                            user?.selectedLanguage === 'pt-br'
+                              ? 'Polia'
+                              : 'Pulley'
+                          }
                           onPress={() =>
                             handleOpenFilterEquipamentList({
                               dataType: 'Polia',
@@ -353,7 +384,11 @@ export function UserPrefferences() {
                           iconStyle="clock"
                         />
                         <WhiteButton
-                          tittle={'Máquina'}
+                          tittle={
+                            user?.selectedLanguage === 'pt-br'
+                              ? 'Máquina'
+                              : 'Machine'
+                          }
                           onPress={() =>
                             handleOpenFilterEquipamentList({
                               dataType: 'Máquina',

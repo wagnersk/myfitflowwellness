@@ -7,15 +7,19 @@ type Props = {
   defaultText: string
   photo: string | null
   newDefaultPhoto?: string
+  size?: number
 }
 
-export function Photo({ photo, newDefaultPhoto, defaultText }: Props) {
+export function Photo({
+  photo,
+  newDefaultPhoto,
+  defaultText,
+  size = 180,
+}: Props) {
   const { user } = useAuth()
   const [displayedImage, setDisplayedImage] = useState<string | null>(
     photo || null,
   )
-  console.log('photo', photo)
-  console.log('newDefaultPhoto', newDefaultPhoto)
   const imageKeyRef = useRef(false)
 
   useEffect(() => {
@@ -28,16 +32,16 @@ export function Photo({ photo, newDefaultPhoto, defaultText }: Props) {
 
   return (
     <Container>
-      <PhotoBorderWrapper>
+      <PhotoBorderWrapper size={size + 4}>
         {!displayedImage && <PhotoNotFound>{defaultText}</PhotoNotFound>}
 
         {!!displayedImage && (
           <Image
             source={{ uri: displayedImage }}
             style={{
-              width: 180,
-              height: 180,
-              borderRadius: 90,
+              width: size,
+              height: size,
+              borderRadius: size / 2,
             }}
             contentFit="cover"
             cachePolicy={'memory-disk'}

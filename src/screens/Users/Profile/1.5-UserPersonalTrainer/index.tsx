@@ -38,38 +38,80 @@ import { setStatusBarStyle } from 'expo-status-bar'
 export function UserPersonalTrainer() {
   const { user } = useAuth()
   const navigation = useNavigation()
+  const [selectedTrainer, setSelectedTrainer] = useState(
+    user?.selectedLanguage === 'pt-br'
+      ? {
+          id: 1,
+          name: 'João Silva',
+          specialty: 'Musculação e Cardio',
+          rating: 4.8,
+          image:
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj-CcjqvRBrCvwU7uAn4IP0ra2LPIuUgKCzA&s',
+        }
+      : {
+          id: 1,
+          name: 'John Silva',
+          specialty: 'Weightlifting and Cardio',
+          rating: 4.8,
+          image:
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj-CcjqvRBrCvwU7uAn4IP0ra2LPIuUgKCzA&s',
+        },
+  )
 
-  const [selectedTrainer, setSelectedTrainer] = useState({
-    id: 1,
-    name: 'João Silva',
-    specialty: 'Musculação e Cardio',
-    rating: 4.8,
-    image: 'https://via.placeholder.com/150',
-  })
-
-  const trainers = [
-    {
-      id: 1,
-      name: 'João Silva',
-      specialty: 'Musculação e Cardio',
-      rating: 4.8,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 2,
-      name: 'Maria Oliveira',
-      specialty: 'Yoga e Pilates',
-      rating: 4.6,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 3,
-      name: 'Carlos Santos',
-      specialty: 'Crossfit e HIIT',
-      rating: 4.9,
-      image: 'https://via.placeholder.com/150',
-    },
-  ]
+  const trainers =
+    user?.selectedLanguage === 'pt-br'
+      ? [
+          {
+            id: 1,
+            name: 'João Silva',
+            specialty: 'Musculação e Cardio',
+            rating: 4.8,
+            image:
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj-3xemvkCCe4QDvf3w2N0jSy4S3t2sbNluA&s',
+          },
+          {
+            id: 2,
+            name: 'Maria Oliveira',
+            specialty: 'Yoga e Pilates',
+            rating: 4.6,
+            image:
+              'https://ogimg.infoglobo.com.br/in/25209322-ef7-e13/FT1086A/meme-chloe.png',
+          },
+          {
+            id: 3,
+            name: 'Carlos Santos',
+            specialty: 'Crossfit e HIIT',
+            rating: 4.9,
+            image:
+              'https://bordalo.observador.pt/v2/q:60/rs:fill:980/c:770:433:nowe:0:0/plain/https://s3.observador.pt/wp-content/uploads/2016/09/29124952/meme_770x433_acf_cropped.jpg',
+          },
+        ]
+      : [
+          {
+            id: 1,
+            name: 'John Silva',
+            specialty: 'Weightlifting and Cardio',
+            rating: 4.8,
+            image:
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj-3xemvkCCe4QDvf3w2N0jSy4S3t2sbNluA&s',
+          },
+          {
+            id: 2,
+            name: 'Mary Oliveira',
+            specialty: 'Yoga and Pilates',
+            rating: 4.6,
+            image:
+              'https://ogimg.infoglobo.com.br/in/25209322-ef7-e13/FT1086A/meme-chloe.png',
+          },
+          {
+            id: 3,
+            name: 'Charles Santos',
+            specialty: 'Crossfit and HIIT',
+            rating: 4.9,
+            image:
+              'https://bordalo.observador.pt/v2/q:60/rs:fill:980/c:770:433:nowe:0:0/plain/https://s3.observador.pt/wp-content/uploads/2016/09/29124952/meme_770x433_acf_cropped.jpg',
+          },
+        ]
 
   function handleManagePlan() {
     console.log('Gerenciar plano com o personal trainer selecionado')

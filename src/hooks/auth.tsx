@@ -1124,7 +1124,6 @@ function AuthProvider({ children }: AuthProviderProps) {
 
   async function fetchFriendList() {
     if (!user) return null
-    setIsWaitingApiResponse(true)
     const userId = user.id
     const friendListCollectionRef = collection(
       db,
@@ -1139,7 +1138,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         id: doc.id,
         ...doc.data(),
       }))
-      setIsWaitingApiResponse(false)
       return friendList
     } catch (error) {
       console.error('Erro ao buscar a lista de amigos:', error)
@@ -1160,14 +1158,12 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const q = query(friendRequestCollectionRef, where('accepted', '==', false))
 
-    setIsWaitingApiResponse(true)
     const querySnapshot = await getDocs(q)
 
     const receivedRequests = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
-    setIsWaitingApiResponse(false)
     return receivedRequests
   }
 
@@ -1183,14 +1179,12 @@ function AuthProvider({ children }: AuthProviderProps) {
     )
     const q = query(friendRequestCollectionRef, where('accepted', '==', false))
 
-    setIsWaitingApiResponse(true)
     const querySnapshot = await getDocs(q)
 
     const receivedRequests = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
-    setIsWaitingApiResponse(false)
 
     return receivedRequests
   }
@@ -1417,6 +1411,56 @@ function AuthProvider({ children }: AuthProviderProps) {
       return true
     } catch (error) {
       setIsWaitingApiResponse(false)
+
+      console.error(error)
+      return false
+    }
+  }
+
+  async function deleteFriend(friendId: string) {
+    if (!user) return null
+    setIsWaitingApiResponse(true)
+
+    const userId = user.id
+
+    const userFriendListRef = doc(db, 'users', userId, 'friendList', friendId)
+    const friendFriendListRef = doc(db, 'users', friendId, 'friendList', userId)
+
+    const ownRqRef = doc(db, 'users', userId, 'friendRequests', friendId) // convite aceito
+    const friendRqRef = doc(db, 'users', friendId, 'friendRequests', userId) // convite feito
+
+    const ownRvdRef = doc(db, 'users', userId, 'receivedRequests', friendId) // convite aceito
+    const friendRvdRef = doc(db, 'users', friendId, 'receivedRequests', userId) // convite feito
+
+    setIsWaitingApiResponse(true)
+    try {
+      const updateResults = await Promise.allSettled([
+        deleteDoc(userFriendListRef),
+        deleteDoc(friendFriendListRef),
+
+        deleteDoc(ownRqRef),
+        deleteDoc(friendRqRef),
+
+        deleteDoc(ownRvdRef),
+        deleteDoc(friendRvdRef),
+      ])
+      const errors = updateResults.filter(
+        (result) => result.status === 'rejected',
+      )
+      if (errors.length > 0) {
+        console.error('Erro ao deletar referências de amizade:', errors)
+        setIsWaitingApiResponse(false)
+        return false
+      }
+
+      console.log(
+        `Amizade removida com sucesso: usuário ${userId} - amigo ${friendId}`,
+      )
+      setIsWaitingApiResponse(false)
+      return true
+    } catch (error) {
+      setIsWaitingApiResponse(false)
+      console.error('Erro inesperado ao deletar amizade:', error)
 
       console.error(error)
       return false
@@ -4026,6 +4070,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         acceptFriendRequest,
         cancelFriendRequest,
         declineReceivedRequest,
+        deleteFriend,
         fetchReceivedRequestsList,
 
         loadUserGymInfo,

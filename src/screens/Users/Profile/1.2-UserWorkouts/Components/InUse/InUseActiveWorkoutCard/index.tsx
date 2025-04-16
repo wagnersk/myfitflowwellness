@@ -18,6 +18,7 @@ interface PlanCardProps {
   handleMoveDown: (id: string) => void
   index: number
   isOpenSettingsMode: boolean
+  selectedLanguage: 'pt-br' | 'us'
 }
 
 export function InUseActiveWorkoutCard({
@@ -28,6 +29,7 @@ export function InUseActiveWorkoutCard({
   isOpenSettingsMode,
   index,
   handleOnPressActiveWorkout,
+  selectedLanguage,
 }: PlanCardProps) {
   function handleOnPressWorkout(id: string) {
     handleOnPressActiveWorkout(id)
@@ -50,6 +52,7 @@ export function InUseActiveWorkoutCard({
               firstElement={index === 0}
               secondElement={index === 1}
               lastElement={index === activeData.length - 1}
+              selectedLanguage={selectedLanguage}
             />
           )}
         </BodyWraper>

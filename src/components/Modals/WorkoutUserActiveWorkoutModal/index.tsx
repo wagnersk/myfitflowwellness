@@ -109,7 +109,9 @@ export function WorkoutUserActiveWorkoutModal({
                         disabled={!isMorethenTwoElementsAtQueue}
                       >
                         <ToggleSwitchText selected={data.isActive}>
-                          Editar Fila
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Editar Fila'
+                            : 'Edit Queue'}{' '}
                         </ToggleSwitchText>
                       </BlueSmallButton>
                     )}

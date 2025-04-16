@@ -4,6 +4,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
+  Alert,
 } from 'react-native'
 
 import {
@@ -48,15 +49,16 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { IUserFriendProfile } from '@src/@types/navigation'
 import { diffInAge } from '@utils/diffInAge'
+import { set } from 'date-fns'
 
 export function UserFriendProfile() {
   const {
     user,
     isWaitingApiResponse,
     checkIfFriendAlreadyAccepted,
-    fetchUserFriendList,
     sendFriendRequest,
     cancelFriendRequest,
+    deleteFriend,
   } = useAuth()
   const route = useRoute()
   const theme = useTheme()
@@ -71,20 +73,167 @@ export function UserFriendProfile() {
     navigation.goBack()
   }
 
-  function handleDeleteFriend() {
-    // navigation.goBack()
+  async function handleDeleteFriend() {
+    try {
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Remover Amizade'
+          : 'Remove Friendship',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Tem certeza de que deseja remover esta amizade?'
+          : 'Are you sure you want to remove this friendship?',
+        [
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+            onPress: async () => {
+              const responseSuccess = await deleteFriend(dataParams.friend.id)
+              if (responseSuccess) {
+                setIsAlreadyFriend(false)
+                Alert.alert(
+                  user?.selectedLanguage === 'pt-br'
+                    ? 'Amizade Removida'
+                    : 'Friendship Removed',
+                  user?.selectedLanguage === 'pt-br'
+                    ? 'A amizade foi removida com sucesso!'
+                    : 'The friendship was successfully removed!',
+                  [
+                    {
+                      text: 'OK',
+                      onPress: () => navigation.goBack(),
+                    },
+                  ],
+                  { cancelable: false },
+                )
+              } else {
+                Alert.alert(
+                  user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+                  user?.selectedLanguage === 'pt-br'
+                    ? 'Não foi possível remover a amizade. Tente novamente mais tarde.'
+                    : 'Unable to remove the friendship. Please try again later.',
+                  [{ text: 'OK' }],
+                )
+              }
+            },
+          },
+        ],
+        { cancelable: false },
+      )
+    } catch (error) {
+      console.error('Erro ao tentar remover a amizade:', error)
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Ocorreu um erro inesperado. Tente novamente mais tarde.'
+          : 'An unexpected error occurred. Please try again later.',
+        [{ text: 'OK' }],
+      )
+    }
   }
-  function handleCancelFriendRequest() {
-    cancelFriendRequest(dataParams.friend.id)
-    setIsPendingRequest(false)
-    // navigation.goBack()
-  }
-  function handleSendFriendRequest() {
-    // NMRDMVRHlAeWx2BIJJWE6XOcSnm1
-    sendFriendRequest(dataParams.friend.id)
-    setIsPendingRequest(true)
 
-    // navigation.goBack()
+  async function handleCancelFriendRequest() {
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br'
+        ? 'Cancelar Convite'
+        : 'Cancel Request',
+      user?.selectedLanguage === 'pt-br'
+        ? 'Tem certeza de que deseja cancelar este convite?'
+        : 'Are you sure you want to cancel this request?',
+      [
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+          onPress: async () => {
+            const responseSuccess = await cancelFriendRequest(
+              dataParams.friend.id,
+            )
+            if (responseSuccess) {
+              setIsPendingRequest(false)
+              Alert.alert(
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Cancelamento'
+                  : 'Cancellation',
+                user?.selectedLanguage === 'pt-br'
+                  ? 'O convite foi cancelado com sucesso!'
+                  : 'The request was successfully canceled!',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => navigation.goBack(),
+                  },
+                ],
+                { cancelable: false },
+              )
+            } else {
+              Alert.alert(
+                user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Não foi possível cancelar o convite. Tente novamente mais tarde.'
+                  : 'Unable to cancel the request. Please try again later.',
+                [{ text: 'OK' }],
+              )
+            }
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+
+  async function handleSendFriendRequest() {
+    Alert.alert(
+      user?.selectedLanguage === 'pt-br' ? 'Enviar Convite' : 'Send Request',
+      user?.selectedLanguage === 'pt-br'
+        ? 'Tem certeza de que deseja enviar este convite?'
+        : 'Are you sure you want to send this request?',
+      [
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Cancelar' : 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: user?.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
+          onPress: async () => {
+            const responseSuccess = await sendFriendRequest(
+              dataParams.friend.id,
+            )
+            if (responseSuccess) {
+              setIsPendingRequest(true)
+              Alert.alert(
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Convite Enviado'
+                  : 'Request Sent',
+                user?.selectedLanguage === 'pt-br'
+                  ? 'O convite foi enviado com sucesso!'
+                  : 'The request was successfully sent!',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => navigation.goBack(),
+                  },
+                ],
+                { cancelable: false },
+              )
+            } else {
+              Alert.alert(
+                user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+                user?.selectedLanguage === 'pt-br'
+                  ? 'Não foi possível enviar o convite. Tente novamente mais tarde.'
+                  : 'Unable to send the request. Please try again later.',
+                [{ text: 'OK' }],
+              )
+            }
+          },
+        },
+      ],
+      { cancelable: false },
+    )
   }
 
   useFocusEffect(
@@ -99,7 +248,6 @@ export function UserFriendProfile() {
       const responseFriends = await checkIfFriendAlreadyAccepted(
         dataParams.friend.id,
       )
-      console.log(`responseIsFriends`, responseFriends)
       if (responseFriends === null) {
         setIsAlreadyFriend(false)
         setIsPendingRequest(false)
@@ -116,7 +264,7 @@ export function UserFriendProfile() {
     }
 
     start()
-  }, [dataParams.friend.id, checkIfFriendAlreadyAccepted])
+  }, [dataParams.friend.id])
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -211,10 +359,32 @@ export function UserFriendProfile() {
                       >
                         <InputWrapper>
                           <CopyWorkoutButton>
-                            <ButtonText>Treinos Personalizados</ButtonText>
+                            <ButtonText>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Copiar treinos Personalizados'
+                                : 'Copy Custom Workouts'}
+                            </ButtonText>
                           </CopyWorkoutButton>
                           <CopyWorkoutButton>
-                            <ButtonText>Frequencia</ButtonText>
+                            <ButtonText>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Frequência'
+                                : 'Frequency'}
+                            </ButtonText>
+                          </CopyWorkoutButton>
+                          <CopyWorkoutButton>
+                            <ButtonText>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Fotos'
+                                : 'Photos'}
+                            </ButtonText>
+                          </CopyWorkoutButton>
+                          <CopyWorkoutButton>
+                            <ButtonText>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Criar Desafio'
+                                : 'Create Challenge'}
+                            </ButtonText>
                           </CopyWorkoutButton>
                         </InputWrapper>
                       </ScrollView>

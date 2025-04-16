@@ -21,7 +21,7 @@ interface WorkoutContainerProps {
   activeworkouts: IMyfitflowWorkoutInUseData[] | null
   expiredworkouts: IMyfitflowWorkoutInUseData[] | null
   user: IUser | null
-  showScreen2: 'Ativos' | 'Expirados'
+  showScreen2: 'Ativos' | 'Expirados' | 'Active' | 'Expired'
   isOpenSettingsMode: boolean
   handleOnPressExpiredInUseWorkout: (id: string) => void
   handleOnPressActiveInUseWorkout: (id: string) => void
@@ -52,47 +52,64 @@ export default function InUseWorkoutContainer({
 
   return (
     <ContainerWrapper>
-      {showScreen2 === 'Ativos' && (
-        <CardsWrapper>
-          {activeworkouts &&
-            activeData &&
-            activeworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
-              <CardContainer key={i}>
-                {i === 0 && <CardTittle>Atual:</CardTittle>}
-                {i === 1 && <CardTittle>Próximos:</CardTittle>}
+      {showScreen2 === 'Ativos' ||
+        (showScreen2 === 'Active' && (
+          <CardsWrapper>
+            {activeworkouts &&
+              activeData &&
+              activeworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
+                <CardContainer key={i}>
+                  {i === 0 && (
+                    <CardTittle>
+                      {user?.selectedLanguage === 'pt-br'
+                        ? 'Atual:'
+                        : 'Current:'}
+                    </CardTittle>
+                  )}
+                  {i === 1 && (
+                    <CardTittle>
+                      {user?.selectedLanguage === 'pt-br'
+                        ? 'Próximos:'
+                        : 'Next:'}
+                    </CardTittle>
+                  )}
+                  <InUseActiveWorkoutCard
+                    activeData={activeData}
+                    //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
+                    data={v || null}
+                    index={i}
+                    handleOnPressActiveWorkout={() =>
+                      onPressActiveInUseWorkout(v.id)
+                    }
+                    handleMoveUp={handleMoveUp}
+                    handleMoveDown={handleMoveDown}
+                    isOpenSettingsMode={isOpenSettingsMode}
+                    selectedLanguage={user?.selectedLanguage || 'pt-br'}
+                  />
+                </CardContainer>
+              ))}
+          </CardsWrapper>
+        ))}
 
-                <InUseActiveWorkoutCard
-                  activeData={activeData}
-                  //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
-                  data={v || null}
-                  index={i}
-                  handleOnPressActiveWorkout={() =>
-                    onPressActiveInUseWorkout(v.id)
-                  }
-                  handleMoveUp={handleMoveUp}
-                  handleMoveDown={handleMoveDown}
-                  isOpenSettingsMode={isOpenSettingsMode}
-                />
-              </CardContainer>
-            ))}
-        </CardsWrapper>
-      )}
-
-      {showScreen2 === 'Expirados' && expiredData && (
-        <CardsWrapper>
-          {expiredworkouts &&
-            expiredworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
-              <InUseExpiredWorkoutCard
-                expiredData={expiredData}
-                //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
-                key={i}
-                data={v || null}
-                selectedLanguage={user?.selectedLanguage || 'pt-br'}
-                handleOnPressExpiredWorkout={() => onPressExpiredWorkout(v.id)}
-              />
-            ))}
-        </CardsWrapper>
-      )}
+      {showScreen2 === 'Expirados' ||
+        (showScreen2 === 'Expired' && expiredData && (
+          <CardsWrapper>
+            {expiredworkouts &&
+              expiredworkouts.map(
+                (v: IMyfitflowWorkoutInUseData, i: number) => (
+                  <InUseExpiredWorkoutCard
+                    //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
+                    key={i}
+                    data={v || null}
+                    selectedLanguage={user?.selectedLanguage || 'pt-br'}
+                    handleOnPressExpiredWorkout={() =>
+                      onPressExpiredWorkout(v.id)
+                    }
+                  />
+                ),
+              )}
+          </CardsWrapper>
+        ))}
     </ContainerWrapper>
   )
 }

@@ -14,6 +14,7 @@ interface PlanCardProps {
 export function SharedWorkoutCard({
   data,
   handleOnPressShareWorkout,
+  selectedLanguage,
   isActive,
 }: PlanCardProps) {
   function handleOnPressWorkout(id: string) {
@@ -24,6 +25,7 @@ export function SharedWorkoutCard({
       <ButtonContainer>
         <BodyWraper>
           <ItemCard
+            selectedLanguage={selectedLanguage}
             data={data}
             handleNextStep={() => data && handleOnPressWorkout(data.id)}
             isActive={isActive}

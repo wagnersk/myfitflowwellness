@@ -13,6 +13,7 @@ interface PlanCardProps {
 export function TotalWorkoutCard({
   data,
   handleOnPressTotalWorkout,
+  selectedLanguage,
   index,
 }: PlanCardProps) {
   function handleOnPressWorkout(index: number) {
@@ -24,6 +25,7 @@ export function TotalWorkoutCard({
       <ButtonContainer>
         <BodyWraper>
           <ItemCard
+            selectedLanguage={selectedLanguage}
             data={data}
             handleNextStep={() => handleOnPressWorkout(index)}
             isActive={data?.isActive || false}

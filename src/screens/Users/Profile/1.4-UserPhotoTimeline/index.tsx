@@ -42,20 +42,36 @@ export function UserPhotoTimeline() {
     console.log(`Uploading ${type} photo for ${month}`)
   }
 
-  const months = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ]
+  const months =
+    user?.selectedLanguage === 'pt-br'
+      ? [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ]
+      : [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ]
 
   useFocusEffect(
     useCallback(() => {
@@ -105,6 +121,7 @@ export function UserPhotoTimeline() {
                             >
                               {photos[month]?.profile ? (
                                 <Image
+                                  alt=""
                                   source={{ uri: photos[month].profile }}
                                   style={styles.photo}
                                 />
@@ -131,6 +148,7 @@ export function UserPhotoTimeline() {
                             >
                               {photos[month]?.side ? (
                                 <Image
+                                  alt=""
                                   source={{ uri: photos[month].side }}
                                   style={styles.photo}
                                 />
