@@ -184,7 +184,6 @@ export function ItemCard({
                 />
               )}
             </GenderIconWrapper>
-
             <ActiveBall color={getColor(data)} />
             <ShareIconWrapper>
               {data?.isShared && <ShareNetwork height={12} width={12} />}

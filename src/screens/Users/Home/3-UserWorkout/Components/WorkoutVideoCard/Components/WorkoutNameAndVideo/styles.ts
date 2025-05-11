@@ -57,15 +57,19 @@ export const WorkoutNameWrapper = styled.View`
   width: 100%;
   justify-content: center;
   align-items: center;
+  height: 34px;
 `
 
 export const WorkoutName = styled.Text`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
   font-size: ${RFValue(14)}px;
-  padding-bottom: 8px;
 `
-
+export const WorkoutTechieTittle = styled.Text`
+  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_YELLOW};
+  font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
+  font-size: ${RFValue(12)}px;
+`
 export const WorkoutVideoPlayerButton = styled(TouchableOpacity)<Props>`
   align-items: center;
   justify-content: center;

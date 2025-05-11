@@ -20,19 +20,18 @@ interface PropsToReduceHeight {
   isFocused: boolean
 }
 
-const cardHeight = Dimensions.get('window').height / 1.5 // 426
+const cardHeight = Dimensions.get('window').height / 1.3 // 426
 const cardWidth = Dimensions.get('window').width * 0.8 - 20 // 294.40000000000003
 
 const bottomCardHeight = cardHeight * 0.6 // 170.4
 
 const confirmButtonHeight = 36 // 170.4
-const confirmButtonWidth = cardWidth / 1.4 // 170.4
+const confirmButtonWidth = cardWidth / 1.6 // 170.4
 
 export const WorkoutInfoWrapper = styled.View`
   height: 100%;
   width: 100%;
   height: ${bottomCardHeight}px;
-  gap: 8px;
 `
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
@@ -40,7 +39,7 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   end: { x: 1, y: 0 },
 }))<PropsToReduceHeight>`
   flex: 1;
-  padding: 12px;
+  padding: 12px 16px 20px 16px;
   margin: 0 10px;
 
   align-items: center;
@@ -129,6 +128,7 @@ export const WorkoutUserNotesAndConfirmButtonWrapper = styled.View`
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
+  gap: 16px;
 `
 
 export const WorkoutUserNotesWrapper = styled.View`
@@ -161,4 +161,6 @@ export const BulletsCronometerAndCTAButtonWrapper = styled.View`
   justify-content: center;
 `
 
-export const WorkoutCronometerWrapper = styled.View``
+export const WorkoutCronometerWrapper = styled.View`
+  gap: 12px;
+`

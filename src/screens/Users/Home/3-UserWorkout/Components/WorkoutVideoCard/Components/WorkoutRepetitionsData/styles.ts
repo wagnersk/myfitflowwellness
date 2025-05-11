@@ -171,24 +171,34 @@ export const WorkoutIndexButton = styled(TouchableOpacity)<Props>`
   align-items: center;
 `
 
-export const WorkoutWeightMetric = styled.Text<{ activedGreenColor: boolean }>`
+export const WorkoutWeightMetric = styled.Text<{
+  activedGreenColor: boolean
+  activeWeightIndex: boolean
+}>`
+  font-size: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `${RFValue(14)}px` : `${RFValue(14)}px`};
+
   color: ${({ theme, activedGreenColor }) =>
     activedGreenColor
       ? theme.COLORS.AUX_GOOGLE_GREEN
       : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
   font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${({ activedGreenColor }) =>
-    activedGreenColor ? `${RFValue(14)}px` : `${RFValue(14)}px`};
+
+  font-family: ${({ theme, activeWeightIndex }) =>
+    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
 `
 
-export const WorkoutSerieValue = styled.Text<{ activeWeightIndex: boolean }>`
+export const WorkoutSerieValue = styled.Text<{
+  activeWeightIndex: boolean
+}>`
   color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 
   font-family: ${({ theme, activeWeightIndex }) =>
     activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
 
   font-size: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? `${RFValue(18)}px` : `${RFValue(14)}px`};
+    activeWeightIndex ? `${RFValue(18)}px` : `${RFValue(16)}px`};
 `
 
 export const WorkoutButtonConfirm = styled(TouchableOpacity)<Props>`
@@ -274,7 +284,11 @@ export const BulletsCronometerAndCTAButtonWrapper = styled.View`
 export const WorkoutWeightText = styled.Text<{
   activedGreenColor: boolean
   alreadySelected: boolean
+  activeWeightIndex: boolean
 }>`
+  font-size: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `${RFValue(16)}px` : `${RFValue(14)}px`};
+
   font-family: ${({ theme, alreadySelected }) =>
     alreadySelected ? theme.FONTS.BUTTON : theme.FONTS.BODY};
   color: ${({ theme, activedGreenColor }) =>
@@ -286,7 +300,6 @@ export const WorkoutWeightText = styled.Text<{
   ${({ alreadySelected }) =>
     alreadySelected &&
     css`
-      text-decoration: underline;
       text-decoration-color: ${({ theme }) =>
         theme.COLORS.NEUTRA_LETTER_AND_STROKE};
     `};

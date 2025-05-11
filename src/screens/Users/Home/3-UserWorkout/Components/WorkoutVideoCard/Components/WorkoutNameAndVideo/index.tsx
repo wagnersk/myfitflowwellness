@@ -7,6 +7,7 @@ import {
   WorkoutNameWrapper,
   WorkoutName,
   WorkoutVideoPlayerButton,
+  WorkoutTechieTittle,
 } from './styles'
 import PlayVideo from '@assets/PlayVideo.svg'
 import { getTrimmedName } from '@utils/getTrimmedName'
@@ -211,6 +212,19 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
               item.workoutExerciseName[selectedLanguage],
           )}
         </WorkoutName>
+        {item &&
+          item.workoutTechiesTittle &&
+          item.workoutTechiesTittle[selectedLanguage] && (
+            <WorkoutTechieTittle>
+              {getTrimmedName(
+                23,
+                item &&
+                  selectedLanguage &&
+                  item.workoutTechiesTittle &&
+                  item.workoutTechiesTittle[selectedLanguage],
+              )}
+            </WorkoutTechieTittle>
+          )}
       </WorkoutNameWrapper>
 
       {item.workoutExerciseThumbnailUrl && (

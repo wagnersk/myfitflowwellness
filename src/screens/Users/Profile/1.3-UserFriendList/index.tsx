@@ -259,14 +259,13 @@ export function UserFriendList() {
 
     return null
   }
+
   useEffect(() => {
     if (!selectedItem) return
     if (!userRequestList) return
 
     async function fetchData() {
       if (selectedItem === 'Solicitações' || selectedItem === 'Requests') {
-        if (userRequestList.length > 0) return
-
         const getUserRequestList = await fetchReceivedRequestsList()
         if (getUserRequestList && getUserRequestList.length > 0) {
           const userRequests = (await Promise.all(
@@ -279,8 +278,6 @@ export function UserFriendList() {
           setUserReceivedList(userRequests)
         }
       } else if (selectedItem === 'Amigos' || selectedItem === 'Friends') {
-        if (userFriendList.length > 0) return
-
         const getUserRequestList = await fetchFriendList()
         if (getUserRequestList && getUserRequestList.length > 0) {
           const userRequests = (await Promise.all(
@@ -293,8 +290,6 @@ export function UserFriendList() {
           setUserFriendList(userRequests)
         }
       } else if (selectedItem === 'Envios' || selectedItem === 'Sent') {
-        if (userFriendList.length > 0) return
-
         const getUserRequestList = await fetchFriendRequestsList()
         if (getUserRequestList && getUserRequestList.length > 0) {
           const userRequests = (await Promise.all(
@@ -319,8 +314,6 @@ export function UserFriendList() {
     }, []),
   )
 
-  /*   const userAge = diffInAge(user?.birthdate)
-   */
   return (
     <TouchableWithoutFeedback onPress={handleClickOutArea}>
       <Container>
@@ -397,12 +390,7 @@ export function UserFriendList() {
                         }}
                       >
                         {/*! isVisibleInput && quando  search tiver algo nao mostarr o q tinha antes  */}
-                        {isWaitingApiResponse && (
-                          <ActivityIndicator
-                            size="large"
-                            color={theme.COLORS.BLUE_STROKE}
-                          />
-                        )}
+
                         {renderFriendList()}
                       </ScrollView>
                     ) : (

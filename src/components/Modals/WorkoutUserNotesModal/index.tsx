@@ -5,6 +5,7 @@ import {
   Keyboard,
   TextInputProps,
   Platform,
+  ScrollView,
 } from 'react-native'
 
 import {
@@ -22,24 +23,31 @@ import {
   OverLayBottom,
   SubTitle,
   Title,
+  TechiesWrapper,
+  TitleTechiesWrapper,
+  TitleTechies,
+  SubTitleTechies,
 } from './styles'
 import { useAuth } from '@hooks/auth'
+import { IFormattedCardExerciseData, IPropsSets } from '@hooks/authTypes'
 
 interface InputProps extends TextInputProps {
   closeModal: () => void
   handleUpdateNotes: (notes: string) => void
   notes: string
-  workoutExerciseId?: string
-  exerciseName?: string
+  item?: IFormattedCardExerciseData
+  selectedLanguage: 'pt-br' | 'us'
 }
 
 export function WorkoutUserNotesModal({
   closeModal,
   handleUpdateNotes,
-  exerciseName,
+  selectedLanguage,
   notes,
+  item,
   ...rest
 }: InputProps) {
+  console.log(`item`, item)
   const [isFocused, setIsFocused] = useState(false)
   const [newNotes, setNewNotes] = useState(notes)
   const { cachedNotesTable } = useAuth()
@@ -75,10 +83,30 @@ export function WorkoutUserNotesModal({
       <OverLayBottom>
         <Container>
           <TipsNoteBodyWrapper>
+            {item?.workoutTechiesTittle?.[selectedLanguage] && (
+              <TechiesWrapper>
+                <TitleTechiesWrapper>
+                  <TitleTechies>
+                    {item?.workoutTechiesTittle?.[selectedLanguage]}
+                  </TitleTechies>
+                </TitleTechiesWrapper>
+                <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                  {item?.workoutExerciseSets?.map((v, i) => {
+                    return (
+                      <SubTitleTechies key={i}>
+                        {i + 1} - {v.techiesData.description[selectedLanguage]}
+                      </SubTitleTechies>
+                    )
+                  })}
+                </ScrollView>
+              </TechiesWrapper>
+            )}
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <Title>Anotações</Title>
-                <SubTitle>{exerciseName}</SubTitle>
+                <SubTitle>
+                  {item?.workoutExerciseName?.[selectedLanguage] || ''}
+                </SubTitle>
               </TipsTitleNoteWrapper>
 
               <TipsInputNotes

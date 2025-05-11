@@ -33,6 +33,9 @@ export const TipsNoteBodyWrapper = styled.View`
   gap: 12px;
 `
 
+export const TechiesWrapper = styled.View`
+  gap: 12px;
+`
 export const TipsNoteWrapper = styled.View`
   gap: 12px;
 `
@@ -42,10 +45,29 @@ export const TipsTitleNoteWrapper = styled.View`
   padding: 8px;
   align-items: center;
 `
+export const TitleTechiesWrapper = styled.View`
+  width: 100%;
+  padding: 8px;
+  align-items: center;
+`
 
 export const Title = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(20)}px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const TitleTechies = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(20)}px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding-bottom: 4px;
+  justify-content: flex-start;
+`
+export const SubTitleTechies = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
   justify-content: flex-start;

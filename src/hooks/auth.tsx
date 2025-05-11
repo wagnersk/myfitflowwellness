@@ -97,6 +97,7 @@ import {
   addDaysToTimestamp,
   addWeeksToTimestamp,
 } from '@utils/calculeEndDateWithWeeks'
+import { ca } from 'date-fns/locale'
 
 const db = getFirestore(firebaseApp)
 
@@ -1185,7 +1186,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       id: doc.id,
       ...doc.data(),
     }))
-
+    console.log(`receivedRequests`, receivedRequests)
     return receivedRequests
   }
 
@@ -1562,8 +1563,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     if (docSnapshot.exists()) {
       const initialData = docSnapshot.data() as ITimeBySessionSelectData
+      setIsWaitingApiResponse(false)
       return initialData
     } else {
+      setIsWaitingApiResponse(false)
       return null
     }
   }
@@ -2012,6 +2015,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
     }
   }
+
   async function loadUserEquipments(): Promise<IUserEquipamentData | null> {
     const userId = user?.id
     if (!userId) return null
@@ -2044,6 +2048,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       updatedAt,
     }
   }
+
   async function saveUserEquipments(equipamentsInfo: IUserEquipamentData) {
     if (!equipamentsInfo) return
     const userId = user?.id
@@ -2699,6 +2704,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
   }
+
   async function loadCachedUserPersonalContract(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
 
@@ -2879,6 +2885,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
                 workoutExerciseName_insensitive:
                   myExerciseFileToAdd.exerciseName_insensitive,
+                // dicas do exericio em si , TODO 10/05/2025
                 workoutExerciseInfo: myExerciseFileToAdd.exerciseInfo,
 
                 workoutExerciseVideoMIME: myExerciseFileToAdd.exerciseVideoMIME,
@@ -3027,7 +3034,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     }
   }
-
   async function saveFirebaseMyWorkout(data: IMyWorkouts, _updatedAt: number) {
     if (!user) return
 
@@ -3049,22 +3055,28 @@ function AuthProvider({ children }: AuthProviderProps) {
       'myWorkoutData',
     )
     setIsWaitingApiResponse(true)
+    console.log(`->>                - saveFirebaseMyWorkout`)
 
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
+      console.log(`->>         00       - saveFirebaseMyWorkout`)
 
       const getDateFromTimeStamp = new Date(_updatedAt)
+      console.log(`->>         01       - saveFirebaseMyWorkout`)
 
       if (!docSnap.exists()) {
+        console.log(`->>              1  - saveFirebaseMyWorkout - 1`)
         await setDoc(workoutDataCacheDoc, {
           createdAt: getDateFromTimeStamp,
           updatedAt: getDateFromTimeStamp,
         })
       } else {
+        console.log(`->>              1  - saveFirebaseMyWorkout - 2`)
         await updateDoc(workoutDataCacheDoc, {
           updatedAt: getDateFromTimeStamp,
         })
       }
+
       await setDoc(workoutUpdatedDataCacheDoc, data)
       setIsWaitingApiResponse(false)
     } catch (error) {
@@ -3105,14 +3117,11 @@ function AuthProvider({ children }: AuthProviderProps) {
       const getDateFromTimeStamp = new Date(updatedAt)
 
       if (!docSnap.exists()) {
-        console.log(`n existe`)
         await setDoc(workoutDataCacheDoc, {
           createdAt: getDateFromTimeStamp,
           updatedAt: getDateFromTimeStamp,
         })
       } else {
-        console.log(`  existe`)
-
         await updateDoc(workoutDataCacheDoc, {
           updatedAt: getDateFromTimeStamp,
         })
@@ -3260,8 +3269,10 @@ function AuthProvider({ children }: AuthProviderProps) {
       let myWorkoutExercises: IMyWorkouts | null
 
       if (myWorkout) {
+        console.log(`updating ->>>>>>`)
         myWorkoutExercises = updateExistingWorkout(workoutData, updatedAt)
       } else {
+        console.log(`creating ->>>>>>`)
         myWorkoutExercises = createNewWorkoutData(
           userId,
           workoutData,
@@ -3295,13 +3306,26 @@ function AuthProvider({ children }: AuthProviderProps) {
         } else {
           // Adiciona um novo workout
 
+          if (copyMyWorkout.data.length === 0) {
+            copyMyWorkout.activeData.push({
+              id: workoutData.workoutId || '',
+              createdAt: updatedAt,
+              updatedAt,
+              workoutStartAt: updatedAt,
+              workoutEndsAt: addWeeksToTimestamp(
+                updatedAt,
+                workoutData.workoutPeriod.periodNumber,
+              ),
+            })
+          }
+
           copyMyWorkout.data.push({
             id: workoutData.workoutId || '',
             data: workoutData,
             createdAt: updatedAt,
             updatedAt,
             isShared: false,
-            isActive: false,
+            isActive: copyMyWorkout.data.length === 0,
             isExpired: false,
             isCopied: false,
           })

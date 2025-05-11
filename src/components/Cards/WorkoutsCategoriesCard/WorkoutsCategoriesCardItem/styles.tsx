@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 
 export const Container = styled.View`
   position: relative;
+  width: 100px;
+  height: 100px;
 `
 
 export const InfoAndButtonAndBottomLineWrapper = styled.View`
@@ -23,6 +25,8 @@ export const InfoWrapper = styled.View`
 export const WorkoutCategoryNameWrapper = styled.View`
   justify-content: center;
   align-items: center;
+  width: 100%;
+  background-color: white;
 `
 
 export const WorkoutCategoryName = styled.Text`
@@ -39,6 +43,7 @@ export const PhotoImageWrapper = styled.View`
   align-items: center;
   width: 100%;
   height: 80px;
+  position: relative;
 `
 
 export const PhotoPreLoadingImageBackground = styled.View`
@@ -52,7 +57,7 @@ export const PhotoPreLoadingImageBackground = styled.View`
   position: absolute;
 `
 
-export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
+export const ContainerGradient2 = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [
     theme.COLORS.GRADIENT_CARD_SERIE[0],
     theme.COLORS.GRADIENT_CARD_SERIE[1],
@@ -69,8 +74,17 @@ export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   border-radius: 8px;
 
   border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  width: 100%;
+  background-color: red;
 `
+
+export const ContainerGradient = styled.View`
+  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border-radius: 8px;
+
+  border-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  background-color: white;
+`
+
 export const CircleCounterWrapper = styled.View`
   display: flex;
   justify-content: center;

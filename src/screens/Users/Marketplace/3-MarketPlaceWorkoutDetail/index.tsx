@@ -241,7 +241,7 @@ export function MarketPlaceWorkoutDetail() {
                     </SubTitle>
                   </InfoDescriptionWrapper>
                 )}
-
+                {/* uasr isso na web */}
                 <InfoBoxesWrapper>
                   <EquipamentsInfo
                     data={dataParam.data.workoutsUniquesFilters}

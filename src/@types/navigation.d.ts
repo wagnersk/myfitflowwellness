@@ -68,6 +68,7 @@ export interface ICardExerciseData {
 export interface IFormattedCardExerciseData extends ICardExerciseData {
   workoutExerciseName_insensitive: IptBrUs
   workoutExerciseInfo: IptBrUs
+
   workoutExerciseVideoMIME: string | undefined
   workoutExerciseVideoFileName: string | undefined
   workoutExerciseVideoUrl: string | undefined

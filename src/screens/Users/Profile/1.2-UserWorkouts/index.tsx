@@ -132,18 +132,6 @@ export function UserWorkouts() {
   const paddingSize = 36
   const TAB_WIDTH = (screenWidth - paddingSize) / 3 // screenWidth / 2
 
-  /* 
-  const TABS: ('Em uso' | 'Meus treinos' | 'Compartilhado' | 'In Use' | 'My Workouts' | 'Shared')[] =
-  user?.selectedLanguage === 'pt-br'
-    ? ['Em uso', 'Meus treinos', 'Compartilhado']
-    : ['In Use', 'My Workouts', 'Shared']
-
-const TABS2: ('Ativos' | 'Expirados' | 'Active' | 'Expired')[] =
-  user?.selectedLanguage === 'pt-br'
-    ? ['Ativos', 'Expirados']
-    : ['Active', 'Expired']
-  */
-
   const TABS: (
     | 'Em uso'
     | 'Meus treinos'

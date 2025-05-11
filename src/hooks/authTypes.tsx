@@ -339,10 +339,6 @@ export interface ITchiesProps {
     us: string
     'pt-br': string
   }
-  title: {
-    'pt-br': string
-    us: string
-  }
 }
 
 export interface ICachedTchiesProps extends ITchiesProps {
@@ -354,21 +350,16 @@ export interface IPropsSets {
   restTimeData: IRestTimeProps // { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
   techiesData: ITchiesProps // { description: { us: string; 'pt-br': string }; title: { 'pt-br': string; us: string } }
 }
-/* 
-repetitionData-> [1,2,3]
-restTimeData-> { restTime_insensitive: { 'pt-br': string; us: string }; restTimeNumber: number }
-t
-
-*/
 
 export interface ICardExerciseData {
-  isEnabled: boolean
+  // isEnabled: boolean
   id?: string
 
   workoutExerciseId?: string
   workoutExerciseIndex?: number
   workoutExerciseName?: IptBrUs
   workoutExerciseName_insensitive?: IptBrUs
+  workoutTechiesTittle?: IptBrUs
   workoutExerciseSets?: IPropsSets[]
 
   workoutExerciseTypes?: string

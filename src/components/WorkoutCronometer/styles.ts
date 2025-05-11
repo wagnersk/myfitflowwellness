@@ -8,7 +8,7 @@ interface WorkoutCronometerWrapper {
 
 export const WorkoutCronometerWrapper = styled.View`
   width: 100%;
-  gap: 2px;
+  gap: 16px;
 `
 
 export const Top = styled.View`

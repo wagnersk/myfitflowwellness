@@ -56,7 +56,7 @@ interface Props {
   exerciseIndex: number // Supino reto.... exercicios
   workoutCardIndex: number // A B ou C
   workoutId: string
-  isFocused: boolean
+  isFocused: boolean | null
   scrollToNextCard: () => void
 }
 function WorkoutVideoCardComponent({
@@ -1544,12 +1544,15 @@ modalCachedCardExerciseData.notes.value
   }, [startCronometer])
 
   return (
-    <ContainerGradient colors={['#000000', '#FFFFFF']} isFocused={isFocused}>
+    <ContainerGradient
+      colors={['#000000', '#FFFFFF']}
+      isFocused={isFocused || false}
+    >
       {user?.selectedLanguage && modalCachedCardExerciseData && (
         <WorkoutNameAndVideo
           closeModal={closeModal}
           isOpenModalVideoPlayer={defaultModalState.isOpenModalVideoPlayer}
-          isFocused={isFocused}
+          isFocused={isFocused || false}
           item={item}
           selectedLanguage={user?.selectedLanguage}
           exerciseIndex={exerciseIndex}
@@ -1565,7 +1568,7 @@ modalCachedCardExerciseData.notes.value
           lastCompletedIndex !== undefined &&
           allItensCompleted !== undefined && (
             <WorkoutRepetitionsData
-              isFocused={isFocused}
+              isFocused={isFocused || false}
               modalCachedCardExerciseData={modalCachedCardExerciseData}
               defaultModalState={defaultModalState}
               selectedLanguage={user?.selectedLanguage}
@@ -1591,14 +1594,19 @@ modalCachedCardExerciseData.notes.value
           <WorkoutUserNotesButton
             disabled={exerciseIndex !== 0 && user?.anonymousUser}
             onPress={() => isFocused && openModal('notes')}
-            enabled={isFocused}
+            enabled={isFocused || false}
             style={{ opacity: isFocused ? 1 : 0.4 }}
           >
             <BlurViewAddSecondsWrapper intensity={30}>
               <FileText
                 width={28}
                 height={28}
-                fill={theme.COLORS.NEUTRA_LETTER_AND_STROKE}
+                fill={
+                  item.workoutTechiesTittle?.['pt-br'] ||
+                  item.workoutTechiesTittle?.us
+                    ? theme.COLORS.AUX_GOOGLE_YELLOW
+                    : theme.COLORS.NEUTRA_LETTER_AND_STROKE
+                }
               />
             </BlurViewAddSecondsWrapper>
           </WorkoutUserNotesButton>
@@ -1649,7 +1657,7 @@ modalCachedCardExerciseData.notes.value
                   defaultModalState.activeWeightIndex
                 ].restTimeData.restTimeNumber,
               )}
-              enabled={isFocused}
+              enabled={isFocused || false}
               onRestart={() => {
                 onTimerManage('skip')
               }}
@@ -1770,14 +1778,9 @@ modalCachedCardExerciseData.notes.value
         <WorkoutUserNotesModal
           closeModal={() => closeModal('notes')}
           handleUpdateNotes={handleUpdateNotes}
-          workoutExerciseId={item.workoutExerciseId}
           notes={modalCachedCardExerciseData.notes.value}
-          exerciseName={
-            item.workoutExerciseName
-              ? user?.selectedLanguage &&
-                item.workoutExerciseName?.[user?.selectedLanguage]
-              : ''
-          }
+          item={item}
+          selectedLanguage={user?.selectedLanguage || 'pt-br'}
         />
       </Modal>
     </ContainerGradient>

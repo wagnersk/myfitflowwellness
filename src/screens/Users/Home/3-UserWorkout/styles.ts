@@ -17,7 +17,7 @@ export const BioInfoWrapper = styled.View`
   align-items: center;
   width: 100%;
   flex-direction: row;
-  padding-bottom: 16px;
+  //padding-bottom: 16px;
 `
 
 export const BioInfoLetter = styled.Text`
@@ -49,6 +49,7 @@ export const BodyImageContainer = styled.View`
 
 export const BodyImageBackgroundContainerSpaceBetween = styled.View`
   flex: 1;
+  padding-top: 12px;
 `
 
 export const FlatListWrapper = styled.View``

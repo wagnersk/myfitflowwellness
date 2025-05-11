@@ -200,13 +200,21 @@ export function MarketPlaceHome() {
   const categoriesGuestUserOrNo = user?.anonymousUser
     ? workoutsCategories
     : categoriesWithoutGuest
-
+  // ordena sort pela data dew criacao
   const filteredByActiveWorkoutCategoriesList = categoriesGuestUserOrNo
-    ? categoriesGuestUserOrNo.filter((v) => v.workoutCategoryActive)
+    ? categoriesGuestUserOrNo
+        .filter((v) => v.workoutCategoryActive)
+        .sort((a, b) => Number(a.createdAt ?? 0) - Number(b.createdAt ?? 0)) // Substitua "creationDate" pelo nome correto do campo
     : []
 
   let activeWorkout
-  if (myWorkout && myWorkout.activeData) {
+  if (
+    myWorkout &&
+    myWorkout.activeData &&
+    myWorkout.activeData[0] &&
+    myWorkout.activeData[0].id &&
+    myWorkout.activeData.length > 0
+  ) {
     const getIdFromActiveWorkout = myWorkout.activeData[0].id
     activeWorkout = myWorkout?.data.find((v) => v.id === getIdFromActiveWorkout)
   }
@@ -249,19 +257,13 @@ export function MarketPlaceHome() {
               contentContainerStyle={{
                 padding: 16,
                 flexDirection: 'row',
-                gap: 12,
+                gap: 20,
               }}
               data={filteredByActiveWorkoutCategoriesList}
               renderItem={({ item }) => (
                 <WorkoutsCategoriesCardList
                   item={item}
                   handleNextStep={handleWorkouts}
-                  isGuestCategory={
-                    item.workoutCategoryName_insensitive['pt-br'] ===
-                      categoryToRemoveIfArentGuest['pt-br'] &&
-                    item.workoutCategoryName_insensitive.us ===
-                      categoryToRemoveIfArentGuest.us
-                  }
                 />
               )}
               keyExtractor={(_, i) => i.toString()}

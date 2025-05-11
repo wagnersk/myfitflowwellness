@@ -20,13 +20,11 @@ import { IWorkoutCategory } from '@src/@types/navigation'
 
 interface DataProps {
   data: IWorkoutCategory
-  isGuestCategory: boolean
   handleNextStep: (data: IWorkoutCategory) => void
 }
 export function WorkoutsCategoriesCardItem({
   data,
   handleNextStep,
-  isGuestCategory,
 }: DataProps) {
   const { user } = useAuth()
   const selectedLanguage = user?.selectedLanguage
@@ -38,14 +36,13 @@ export function WorkoutsCategoriesCardItem({
         <CircleCounter>{data?.total}</CircleCounter>
       </CircleCounterWrapper>
       <TouchableOpacity
-        disabled={isAnonymousUser && isAnonymousUser !== isGuestCategory}
+        disabled={isAnonymousUser}
         onPress={() => handleNextStep(data)}
         style={{
-          opacity:
-            isAnonymousUser && isAnonymousUser !== isGuestCategory ? 0.3 : 1,
+          opacity: isAnonymousUser ? 0.3 : 1,
         }}
       >
-        <ContainerGradient colors={['#f8caca', '#FFFFFF']}>
+        <ContainerGradient>
           <PhotoImageWrapper>
             <PhotoPreLoadingImageBackground />
             {data.workoutCategoryPhoto.workoutCategoryPhotoUrlDownload && (
@@ -57,7 +54,7 @@ export function WorkoutsCategoriesCardItem({
                 alt=""
                 contentFit="cover"
                 style={{
-                  width: 100,
+                  width: 98,
                   height: 80,
                   borderTopRightRadius: 8,
                   borderTopLeftRadius: 8,

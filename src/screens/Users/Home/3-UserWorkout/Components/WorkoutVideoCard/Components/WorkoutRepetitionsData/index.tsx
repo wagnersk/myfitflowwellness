@@ -60,6 +60,20 @@ export default function WorkoutRepetitionsData({
 }: WorkoutRepetitionAndSerieProps) {
   const theme = useTheme()
 
+  const repetitionText =
+    modalCachedCardExerciseData.workoutExerciseSets?.reduce(
+      (acc, set, index) => {
+        return (
+          acc +
+          (index > 0 ? ', ' : '') +
+          set.repetitionData.map((rep) => rep.sets_insensitive).join('-')
+        )
+      },
+      '',
+    )
+
+  console.log(repetitionText) // Example usage to avoid unused variable error
+
   return (
     <WorkoutRepetitionAndSerieWrapper
       pointerEvents={isFocused && !disabled ? 'auto' : 'none'}
@@ -109,67 +123,37 @@ export default function WorkoutRepetitionsData({
                     disabled={exerciseIndex !== 0}
                     onPress={() => {
                       isFocused && // card
-                      v.repetitionData[0] &&
-                      v.repetitionData[1] &&
                       v.repetitionData &&
                       v.repetitionData.length > 0 &&
-                      v.repetitionData[0].isReps &&
-                      v.repetitionData[1].isReps &&
                       v.selectedRepetitionData.checkedSet
                         ? openSetBetweenSets(i)
                         : openSets(i)
                     }}
                   >
-                    {isFocused && // card visivel
-                    v.repetitionData[0] &&
-                    v.repetitionData[1] &&
-                    v.repetitionData &&
-                    v.repetitionData.length > 0 &&
-                    v.repetitionData[0].isReps &&
-                    v.repetitionData[1].isReps &&
-                    v.selectedRepetitionData.checkedSet ? (
-                      <WorkoutWeightText
-                        activedGreenColor={false}
-                        alreadySelected={
-                          defaultModalState.activeWeightIndex === i && isFocused
-                        }
-                      >
-                        {v.selectedRepetitionData.checkedSet}
-                      </WorkoutWeightText>
-                    ) : (
-                      <WorkoutWeightText
-                        alreadySelected={
-                          defaultModalState.activeWeightIndex === i && isFocused
-                        }
-                        activedGreenColor={
-                          v.repetitionData[0] &&
-                          v.repetitionData[1] &&
-                          v.repetitionData[0].isReps &&
-                          v.repetitionData[1].isReps
-                        }
-                      >
-                        {v.repetitionData[0] &&
-                        v.repetitionData[1] &&
-                        v.repetitionData[0].isReps &&
-                        v.repetitionData[1].isReps
-                          ? v.repetitionData
-                              .map((v) => v.sets_insensitive)
-                              .join('-')
-                          : v.repetitionData
-                              .map((v) => v.sets_insensitive)
-                              .join(', ')}
-                      </WorkoutWeightText>
-                    )}
-
-                    <WorkoutWeightMetric
+                    <WorkoutWeightText
+                      activeWeightIndex={
+                        defaultModalState.activeWeightIndex === i
+                      }
+                      alreadySelected={
+                        defaultModalState.activeWeightIndex === i && isFocused
+                      }
                       activedGreenColor={
-                        defaultModalState.activeWeightIndex === i &&
-                        defaultModalState.isOpenModalUserSets
+                        v.repetitionData[0].isReps && v.repetitionData[1].isReps
                       }
                     >
-                      {' '}
-                      rep
-                    </WorkoutWeightMetric>
+                      {v.repetitionData
+                        .map((rep) => {
+                          if (rep.isReps) {
+                            return `${rep.sets_insensitive}x`
+                          } else if (rep.isTime) {
+                            return `${rep.timeInSeconds}'s`
+                          }
+                          return ''
+                        })
+                        .join(
+                          `${v.repetitionData[0].isReps && v.repetitionData[1].isReps ? ' a ' : ' + '}`,
+                        )}
+                    </WorkoutWeightText>
                   </WorkoutWeightValue>
                 </WorkoutWeightValueAndTextWrapper>
                 <ButtonsWrapper>
@@ -181,6 +165,9 @@ export default function WorkoutRepetitionsData({
                       }}
                     >
                       <WorkoutWeightText
+                        activeWeightIndex={
+                          defaultModalState.activeWeightIndex === i
+                        }
                         alreadySelected={
                           defaultModalState.activeWeightIndex === i && isFocused
                         }
@@ -192,6 +179,9 @@ export default function WorkoutRepetitionsData({
                         {v.weightData.value}
                       </WorkoutWeightText>
                       <WorkoutWeightMetric
+                        activeWeightIndex={
+                          defaultModalState.activeWeightIndex === i
+                        }
                         activedGreenColor={
                           defaultModalState.activeWeightIndex === i &&
                           defaultModalState.isOpenModalUserWeight

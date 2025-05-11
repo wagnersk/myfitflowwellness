@@ -31,6 +31,7 @@ export const RightContent = styled.View`
   flex-direction: row;
   justify-content: flex-start;
   gap: 8px;
+  height: 48px;
 `
 
 export const InputWrapper = styled.View`
@@ -40,7 +41,6 @@ export const InputWrapper = styled.View`
   border: 2px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
   border-radius: 24px;
   height: 48px;
-  padding-left: 24px;
   width: 100%;
 `
 export const InputSearchFriend = styled(TextInput)`
@@ -49,6 +49,8 @@ export const InputSearchFriend = styled(TextInput)`
   font-size: ${RFValue(14)}px;
   border-radius: 24px;
   height: 48px;
+  width: 100%;
+  padding: 0 16px;
 `
 
 export const PhillsWrapper = styled.TouchableOpacity<{ selected: boolean }>`
@@ -59,7 +61,7 @@ export const PhillsWrapper = styled.TouchableOpacity<{ selected: boolean }>`
       ? theme.COLORS.BLUE_STROKE
       : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 24px;
   border: 1px solid
     ${({ selected, theme }) =>
@@ -78,7 +80,7 @@ export const PhillItem = styled.Text<{ selected: boolean }>`
       ? theme.COLORS.NEUTRA_LETTER_AND_STROKE
       : theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(12)}px;
+  font-size: ${RFValue(14)}px;
 `
 
 export const BodyImageWrapper = styled.View`

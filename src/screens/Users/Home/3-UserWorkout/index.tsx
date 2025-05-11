@@ -41,6 +41,7 @@ import { setStatusBarStyle } from 'expo-status-bar'
 import { WorkoutDataWithSelectedWorkout } from '@src/@types/navigation'
 import { getTrimmedName } from '@utils/getTrimmedName'
 import { useAuth } from '@hooks/auth'
+import { IPropsSets } from '@hooks/authTypes'
 
 interface ChangeWorkoutCardProps {
   viewableItems: ViewToken[]
@@ -49,7 +50,6 @@ interface ChangeWorkoutCardProps {
 
 export function UserWorkout() {
   const { user } = useAuth()
-
   const selectedLanguage = user?.selectedLanguage
   const route = useRoute()
   const {
@@ -66,21 +66,21 @@ export function UserWorkout() {
   const { width } = useWindowDimensions()
   const navigation = useNavigation()
 
-  const [workoutCardInfo, setWorkoutCardInfo] = useState({
-    workoutCardIndex: 0,
-    workoutExerciseTechniqueTitle: { 'pt-br': '', us: '' },
-    workoutExerciseTechniqueDescription: { 'pt-br': '', us: '' },
-  })
+  interface IStateCardSets {
+    workoutCardIndex: number
+    workoutExerciseSets: IPropsSets[]
+  }
+  const [workoutCardInfo, setWorkoutCardInfo] = useState<IStateCardSets | null>(
+    null,
+  )
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: ChangeWorkoutCardProps) => {
       viewableItems.forEach((item) => {
+        console.log('item', JSON.stringify(item, null, 2))
         setWorkoutCardInfo({
           workoutCardIndex: item.index ? item.index : 0,
-          workoutExerciseTechniqueTitle:
-            item.item.workoutExerciseTechniqueTitle,
-          workoutExerciseTechniqueDescription:
-            item.item.workoutExerciseTechniqueDescription,
+          workoutExerciseSets: item.item.workoutExerciseSets,
         })
       })
     },
@@ -101,7 +101,9 @@ export function UserWorkout() {
 
   function scrollToNextCard() {
     if (flatListRef.current) {
-      const nextIndex = workoutCardInfo.workoutCardIndex + 1
+      const nextIndex = workoutCardInfo
+        ? workoutCardInfo.workoutCardIndex + 1
+        : 0
       if (nextIndex < data.cardExerciseData.length) {
         flatListRef.current.scrollToIndex({ index: nextIndex, animated: true })
       }
@@ -145,64 +147,6 @@ export function UserWorkout() {
       <BodyImageContainer>
         <BodyImageBackground />
         <BodyImageBackgroundContainerSpaceBetween>
-          <TipsWrapper>
-            {Platform.OS === 'ios'
-              ? !!workoutCardInfo.workoutExerciseTechniqueTitle &&
-                selectedLanguage && (
-                  <IosBackgroundBlurViewTipsWrapper intensity={80} tint="light">
-                    <ContentWrapper>
-                      <ScrollView>
-                        <TipsTitleWrapper>
-                          <TipsTitle>
-                            {
-                              workoutCardInfo.workoutExerciseTechniqueTitle[
-                                selectedLanguage
-                              ]
-                            }
-                          </TipsTitle>
-                        </TipsTitleWrapper>
-                        <TipsTextWrapper>
-                          <TipsText>
-                            {
-                              workoutCardInfo
-                                .workoutExerciseTechniqueDescription[
-                                selectedLanguage
-                              ]
-                            }
-                          </TipsText>
-                        </TipsTextWrapper>
-                      </ScrollView>
-                    </ContentWrapper>
-                  </IosBackgroundBlurViewTipsWrapper>
-                )
-              : !!workoutCardInfo.workoutExerciseTechniqueTitle &&
-                selectedLanguage && (
-                  <AndroidBackgroundTipsWrapper>
-                    <OpacityBackgroundPositionAbsolute />
-                    <ContentWrapper>
-                      <TipsTitleWrapper>
-                        <TipsTitle>
-                          {
-                            workoutCardInfo.workoutExerciseTechniqueTitle[
-                              selectedLanguage
-                            ]
-                          }
-                        </TipsTitle>
-                      </TipsTitleWrapper>
-                      <TipsTextWrapper>
-                        <TipsText>
-                          {
-                            workoutCardInfo.workoutExerciseTechniqueDescription[
-                              selectedLanguage
-                            ]
-                          }
-                        </TipsText>
-                      </TipsTextWrapper>
-                    </ContentWrapper>
-                  </AndroidBackgroundTipsWrapper>
-                )}
-          </TipsWrapper>
-
           <FlatListWrapper>
             <FlatList
               ref={flatListRef}
@@ -217,7 +161,7 @@ export function UserWorkout() {
                     exerciseIndex={index} // Supino reto.... exercicios
                     workoutCardIndex={cardIndex}
                     workoutId={workoutId}
-                    isFocused={workoutCardInfo.workoutCardIndex === index}
+                    isFocused={workoutCardInfo?.workoutCardIndex === index}
                     scrollToNextCard={scrollToNextCard}
                   />
                 )
@@ -236,11 +180,13 @@ export function UserWorkout() {
               windowSize={10} // TESTE:  Número de itens a serem mantidos na lista virtualizada
             />
           </FlatListWrapper>
-
-          <BulletList
-            data={data.cardExerciseData}
-            workoutCardIndex={workoutCardInfo.workoutCardIndex}
-          />
+          {workoutCardInfo &&
+            workoutCardInfo.workoutCardIndex !== undefined && (
+              <BulletList
+                data={data.cardExerciseData}
+                workoutCardIndex={workoutCardInfo.workoutCardIndex}
+              />
+            )}
         </BodyImageBackgroundContainerSpaceBetween>
       </BodyImageContainer>
     </Container>
