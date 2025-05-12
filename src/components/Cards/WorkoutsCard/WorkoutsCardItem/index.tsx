@@ -133,14 +133,14 @@ export function WorkoutsCardItem({
               <DateWrapper>
                 {getMyWorkoutOrder?.workoutStartAt === 0 &&
                   'Treino ainda não iniciado'}
-
+                {/* 
                 {getMyWorkoutOrder?.workoutStartAt !== 0 &&
                   index !== 0 &&
                   `${formatTimestampToDate(
                     getMyWorkoutOrder?.workoutStartAt ?? 0,
                   )} - ${formatTimestampToDate(
                     getMyWorkoutOrder?.workoutEndsAt ?? 0,
-                  )}`}
+                  )}`} */}
               </DateWrapper>
             </InfoWrapper>
             <IconTopWrapper>

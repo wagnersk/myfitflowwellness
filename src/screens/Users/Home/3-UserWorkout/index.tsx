@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import {
   useWindowDimensions,
   FlatList,
@@ -57,7 +57,7 @@ export function UserWorkout() {
     data,
     // workoutLength,
     // selectedWorkoutExerciseIndex,
-
+    selectedWorkoutExerciseIndex,
     muscleGroupsLabel,
     letter,
     cardIndex,
@@ -125,6 +125,27 @@ export function UserWorkout() {
   if (workoutCardInfo) {
     //  console.log(workoutCardInfo)
   }
+  function scrollToNextCard2(index: number) {
+    if (flatListRef.current) {
+      if (index >= 0 && index < data.cardExerciseData.length) {
+        flatListRef.current.scrollToIndex({ index, animated: true })
+      } else {
+        console.warn('Índice fora do intervalo válido.')
+      }
+    }
+  }
+  useEffect(() => {
+    // selectedWorkoutExerciseIndex\
+    if (data.cardExerciseData.length > 0) {
+      console.log(selectedWorkoutExerciseIndex)
+
+      setTimeout(() => {
+        scrollToNextCard2(selectedWorkoutExerciseIndex || 0)
+      }, 1000) // Tenta novamente após um pequeno atraso
+    }
+
+    //
+  }, [])
 
   return (
     <Container>
@@ -175,9 +196,6 @@ export function UserWorkout() {
                 viewAreaCoveragePercentThreshold: 50,
                 minimumViewTime: 0,
               }}
-              initialNumToRender={3} // TESTE:  Número inicial de itens a serem renderizados
-              maxToRenderPerBatch={5} // TESTE:  Número máximo de itens a serem renderizados por lote
-              windowSize={10} // TESTE:  Número de itens a serem mantidos na lista virtualizada
             />
           </FlatListWrapper>
           {workoutCardInfo &&

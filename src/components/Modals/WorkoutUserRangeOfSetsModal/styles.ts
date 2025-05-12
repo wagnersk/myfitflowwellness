@@ -1,13 +1,8 @@
 import styled, { css } from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { TextInput, TouchableOpacity } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
+import { TouchableOpacity } from 'react-native'
 
 import { ReactNode } from 'react'
-
-interface Props {
-  isFocused?: boolean
-}
 
 type TouchableOpacityButtonProps = {
   children: ReactNode

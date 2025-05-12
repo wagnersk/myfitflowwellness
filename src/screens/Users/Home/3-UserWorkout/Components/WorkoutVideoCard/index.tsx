@@ -216,7 +216,6 @@ function WorkoutVideoCardComponent({
   >(null)
  */
 
-  // ok
   function handleUpdateWeight(_weight: string, type: 'all' | 'single') {
     if (type === 'single') {
       onUpdateSingleWeight(_weight)
@@ -292,7 +291,6 @@ function WorkoutVideoCardComponent({
     }
   }
 
-  // ok
   function handleUpdateNotes(value: string) {
     console.log(`notes -> `, value)
     if (!value) return
@@ -330,7 +328,6 @@ modalCachedCardExerciseData.notes.value
     closeModal('notes')
   }
 
-  // DONE
   function handleUpdateSets(
     type: 'update' | 'delete',
     value?: ICachedSetsProps[],
@@ -338,7 +335,8 @@ modalCachedCardExerciseData.notes.value
     console.log(`type -> `, type)
     console.log(`value -> `, value)
 
-    const getTime = new Date().getTime()
+    const date = new Date()
+    const completedTimestamp = date.getTime()
 
     if (type === 'update' && value !== undefined) {
       const copyProgression = { ...modalCachedCardExerciseData }
@@ -350,6 +348,14 @@ modalCachedCardExerciseData.notes.value
       ].repetitionData = value
 
       setModalCachedCardExerciseData(copyProgression)
+
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
       closeModal('sets')
     }
 
@@ -387,8 +393,8 @@ modalCachedCardExerciseData.notes.value
           createdAt:
             copyProgression.workoutExerciseSets[
               defaultModalState.activeWeightIndex
-            ].selectedRepetitionData.createdAt || getTime,
-          updatedAt: getTime,
+            ].selectedRepetitionData.createdAt || completedTimestamp,
+          updatedAt: completedTimestamp,
         }
 
         setModalCachedCardExerciseData(copyProgression)
@@ -397,9 +403,8 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok
   function handleUpdateRangeSelect(type: 'update' | 'delete', value: string) {
-    const getTime = new Date().getTime()
+    const completedTimestamp = new Date().getTime()
 
     if (type === 'update' && value !== undefined) {
       const copyProgression = { ...modalCachedCardExerciseData }
@@ -413,8 +418,8 @@ modalCachedCardExerciseData.notes.value
         createdAt:
           copyProgression.workoutExerciseSets[
             defaultModalState.activeWeightIndex
-          ].selectedRepetitionData.createdAt || getTime,
-        updatedAt: getTime,
+          ].selectedRepetitionData.createdAt || completedTimestamp,
+        updatedAt: completedTimestamp,
       }
 
       setModalCachedCardExerciseData(copyProgression)
@@ -465,7 +470,6 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok
   function handlePushOrPopRepetition(type: 'push' | 'pop') {
     if (type === 'push') {
       Alert.alert(
@@ -604,7 +608,6 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok , falta so cronometro
   function handleDoneWorkout() {
     if (verifyIfCronometerIsRunning()) return
     if (verifyAndProceed()) return
@@ -1251,7 +1254,7 @@ modalCachedCardExerciseData.notes.value
       }
     }
   }
-  // ok
+
   function focusOnNextRepetititonLine() {
     if (modalCachedCardExerciseData === undefined) return
     if (modalCachedCardExerciseData.workoutExerciseSets === undefined) return
@@ -1271,12 +1274,10 @@ modalCachedCardExerciseData.notes.value
     })
   }
 
-  // ok
   function timerOnExpire() {
     focusOnNextRepetititonLine()
   }
 
-  // ok
   function handleChangeRepetitionFocus(index: number) {
     if (index !== defaultModalState.activeWeightIndex) {
       setDefaultModalState((prevState) => ({
@@ -1292,7 +1293,6 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok
   function openModal(
     type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',
     index?: number,
@@ -1336,7 +1336,6 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok
   function closeModal(
     type: 'videoplayer' | 'weight' | 'sets' | 'notes' | 'rangeOfSets',
   ) {
@@ -1379,7 +1378,6 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  // ok
   function buttonText() {
     if (!modalCachedCardExerciseData.workoutExerciseSets) return
 
@@ -1407,7 +1405,6 @@ modalCachedCardExerciseData.notes.value
       : 'Register repetition'
   }
 
-  // ok
   function onTimerManage(type: 'pause' | 'play' | 'skip' | 'add' | 'subtract') {
     if (type === 'pause') {
       pause()
@@ -1730,11 +1727,13 @@ modalCachedCardExerciseData.notes.value
         }}
       >
         <WorkoutUserSetsModal
+          visible={defaultModalState.isOpenModalUserSets}
           handleUpdateSets={(set) => handleUpdateSets('update', set)}
           closeModal={() => closeModal('sets')}
           modalCachedCardExerciseData={modalCachedCardExerciseData}
           activeIndex={defaultModalState.activeWeightIndex}
           selectedLanguage={user?.selectedLanguage || 'pt-br'}
+          item={item}
         />
       </Modal>
 

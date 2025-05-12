@@ -52,6 +52,8 @@ export function MarketPlaceWorkoutDetail() {
     myWorkout,
     loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
     deleteMyWorkoutAndmyWorkoutDataArray,
+    saveCachedUserWorkoutsLog,
+    cachedUserWorkoutsLog,
   } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
@@ -115,6 +117,15 @@ export function MarketPlaceWorkoutDetail() {
   }
 
   async function handleDeleteWorkout(workoutId?: string) {
+    // cachedUserWorkoutsLog
+
+    if (!cachedUserWorkoutsLog) return
+    const filteredCachedUserWorkoutsLog = {
+      ...cachedUserWorkoutsLog,
+      workoutsLog: cachedUserWorkoutsLog.workoutsLog.filter(
+        (v) => v.workoutId !== workoutId,
+      ),
+    }
     if (!workoutId) return
     Alert.alert(
       user?.selectedLanguage === 'pt-br'
@@ -130,6 +141,8 @@ export function MarketPlaceWorkoutDetail() {
           text: user?.selectedLanguage === 'pt-br' ? 'Sim' : 'Yes',
           onPress: async () => {
             await deleteMyWorkoutAndmyWorkoutDataArray(workoutId)
+
+            await saveCachedUserWorkoutsLog(filteredCachedUserWorkoutsLog)
             navigation.navigate('marketPlaceHome')
           },
         },

@@ -130,10 +130,7 @@ export function WorkoutUserRangeOfSetsModal({
           <TipsNoteBodyWrapper>
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
-                <TitteText>
-                  {tittle}
-                  {/* ( {sets.map((v) => v.sets_insensitive).join('-')} ) */}
-                </TitteText>
+                <TitteText>{tittle}</TitteText>
                 <SubTittleWrapper>
                   <SubTitteText>{subTittle}</SubTitteText>
                   <DeleteButton

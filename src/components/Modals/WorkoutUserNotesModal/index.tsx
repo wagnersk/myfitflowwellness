@@ -47,7 +47,6 @@ export function WorkoutUserNotesModal({
   item,
   ...rest
 }: InputProps) {
-  console.log(`item`, item)
   const [isFocused, setIsFocused] = useState(false)
   const [newNotes, setNewNotes] = useState(notes)
   const { cachedNotesTable } = useAuth()
@@ -86,6 +85,9 @@ export function WorkoutUserNotesModal({
             {item?.workoutTechiesTittle?.[selectedLanguage] && (
               <TechiesWrapper>
                 <TitleTechiesWrapper>
+                  <Title>
+                    {item?.workoutExerciseName?.[selectedLanguage] || ''}
+                  </Title>
                   <TitleTechies>
                     {item?.workoutTechiesTittle?.[selectedLanguage]}
                   </TitleTechies>
@@ -104,11 +106,7 @@ export function WorkoutUserNotesModal({
             <TipsNoteWrapper>
               <TipsTitleNoteWrapper>
                 <Title>Anotações</Title>
-                <SubTitle>
-                  {item?.workoutExerciseName?.[selectedLanguage] || ''}
-                </SubTitle>
               </TipsTitleNoteWrapper>
-
               <TipsInputNotes
                 value={newNotes}
                 onChangeText={changeNotes}

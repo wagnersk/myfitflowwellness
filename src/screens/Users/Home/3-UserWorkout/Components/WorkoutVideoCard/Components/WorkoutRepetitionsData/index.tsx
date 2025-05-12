@@ -72,8 +72,6 @@ export default function WorkoutRepetitionsData({
       '',
     )
 
-  console.log(repetitionText) // Example usage to avoid unused variable error
-
   return (
     <WorkoutRepetitionAndSerieWrapper
       pointerEvents={isFocused && !disabled ? 'auto' : 'none'}
@@ -84,6 +82,7 @@ export default function WorkoutRepetitionsData({
           {modalCachedCardExerciseData.workoutExerciseSets &&
             modalCachedCardExerciseData.workoutExerciseSets.map((v, i) => (
               <WorkoutSerieWrapper
+                activeWeightIndex={defaultModalState.activeWeightIndex === i}
                 key={i}
                 style={{
                   opacity:
@@ -138,59 +137,73 @@ export default function WorkoutRepetitionsData({
                         defaultModalState.activeWeightIndex === i && isFocused
                       }
                       activedGreenColor={
-                        v.repetitionData[0].isReps && v.repetitionData[1].isReps
+                        v.repetitionData[0] &&
+                        v.repetitionData[1] &&
+                        v.repetitionData[0].isReps &&
+                        v.repetitionData[1].isReps
                       }
                     >
-                      {v.repetitionData
-                        .map((rep) => {
-                          if (rep.isReps) {
-                            return `${rep.sets_insensitive}x`
-                          } else if (rep.isTime) {
-                            return `${rep.timeInSeconds}'s`
-                          }
-                          return ''
-                        })
-                        .join(
-                          `${v.repetitionData[0].isReps && v.repetitionData[1].isReps ? ' a ' : ' + '}`,
-                        )}
+                      {v.repetitionData[0]?.isReps
+                        ? v.repetitionData
+                            .map((rep, i) => {
+                              if (rep.isReps) {
+                                return `${rep.sets_insensitive}x` // Exibe repetições com "x"
+                              } else if (rep.isTime) {
+                                return `${rep.timeInSeconds}s` // Exibe tempo com "s"
+                              }
+                              return ''
+                            })
+                            .filter((text) => text !== '') // Remove valores vazios
+                            .join(
+                              v.repetitionData[0]?.isReps &&
+                                v.repetitionData[1]?.isReps
+                                ? ' a ' // Usa "a" se ambos forem repetições
+                                : ' + ', // Usa "+" se forem diferentes
+                            )
+                        : v.repetitionData.map((rep, i) => {
+                            return `${rep.sets_insensitive}` // Exibe tempo com "s"
+                          })}
                     </WorkoutWeightText>
                   </WorkoutWeightValue>
                 </WorkoutWeightValueAndTextWrapper>
                 <ButtonsWrapper>
                   <WorkoutWeightValueAndTextWrapper>
-                    <WorkoutWeightValue
-                      disabled={exerciseIndex !== 0}
-                      onPress={() => {
-                        isFocused && openWeight(i)
-                      }}
-                    >
-                      <WorkoutWeightText
-                        activeWeightIndex={
-                          defaultModalState.activeWeightIndex === i
-                        }
-                        alreadySelected={
-                          defaultModalState.activeWeightIndex === i && isFocused
-                        }
-                        activedGreenColor={
-                          defaultModalState.activeWeightIndex === i &&
-                          defaultModalState.isOpenModalUserWeight
-                        }
+                    {v.repetitionData[0].isReps && (
+                      <WorkoutWeightValue
+                        disabled={exerciseIndex !== 0}
+                        onPress={() => {
+                          isFocused && openWeight(i)
+                        }}
                       >
-                        {v.weightData.value}
-                      </WorkoutWeightText>
-                      <WorkoutWeightMetric
-                        activeWeightIndex={
-                          defaultModalState.activeWeightIndex === i
-                        }
-                        activedGreenColor={
-                          defaultModalState.activeWeightIndex === i &&
-                          defaultModalState.isOpenModalUserWeight
-                        }
-                      >
-                        {' '}
-                        kg
-                      </WorkoutWeightMetric>
-                    </WorkoutWeightValue>
+                        <WorkoutWeightText
+                          activeWeightIndex={
+                            defaultModalState.activeWeightIndex === i
+                          }
+                          alreadySelected={
+                            defaultModalState.activeWeightIndex === i &&
+                            isFocused
+                          }
+                          activedGreenColor={
+                            defaultModalState.activeWeightIndex === i &&
+                            defaultModalState.isOpenModalUserWeight
+                          }
+                        >
+                          {v.weightData.value}
+                        </WorkoutWeightText>
+                        <WorkoutWeightMetric
+                          activeWeightIndex={
+                            defaultModalState.activeWeightIndex === i
+                          }
+                          activedGreenColor={
+                            defaultModalState.activeWeightIndex === i &&
+                            defaultModalState.isOpenModalUserWeight
+                          }
+                        >
+                          {' '}
+                          kg
+                        </WorkoutWeightMetric>
+                      </WorkoutWeightValue>
+                    )}
                   </WorkoutWeightValueAndTextWrapper>
                   <WorkoutButton
                     disabled={
@@ -229,7 +242,7 @@ export default function WorkoutRepetitionsData({
                 </ButtonsWrapper>
               </WorkoutSerieWrapper>
             ))}
-          <WorkoutSerieWrapper>
+          <WorkoutSerieWrapper activeWeightIndex={false}>
             <WorkoutWeightValueAndTextWrapper>
               <WorkoutIndexButton
                 disabled={

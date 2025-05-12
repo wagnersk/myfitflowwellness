@@ -940,7 +940,6 @@ export function UserWorkouts() {
       { cancelable: false },
     )
   }
-  console.log(`workouts`, JSON.stringify(workouts))
 
   function closeModal() {
     setDefaultModalState((prevState) => ({

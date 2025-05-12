@@ -82,7 +82,7 @@ export const HeaderTittle = styled.Text`
 `
 export const HeaderSubTittle = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(20)}px;
+  font-size: ${RFValue(14)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
   justify-content: flex-start;

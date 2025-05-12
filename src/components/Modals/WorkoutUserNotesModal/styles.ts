@@ -38,13 +38,16 @@ export const TechiesWrapper = styled.View`
 `
 export const TipsNoteWrapper = styled.View`
   gap: 12px;
+  width: 100%;
+  padding: 8px;
 `
 
 export const TipsTitleNoteWrapper = styled.View`
   width: 100%;
   padding: 8px;
-  align-items: center;
+  align-items: flex-start;
 `
+
 export const TitleTechiesWrapper = styled.View`
   width: 100%;
   padding: 8px;
@@ -60,7 +63,7 @@ export const Title = styled.Text`
 `
 export const TitleTechies = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(20)}px;
+  font-size: ${RFValue(18)}px;
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   padding-bottom: 4px;
   justify-content: flex-start;

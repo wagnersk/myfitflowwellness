@@ -106,8 +106,8 @@ export const LinearGradientBehindMask = styled(LinearGradient).attrs(
 export const WorkoutCardName = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  padding-bottom: 4px;
+  font-size: ${RFValue(12)}px;
+  padding-bottom: 2px;
 `
 
 export const WorkoutCardRepeatAndQuantityWrapper = styled.View`
@@ -120,8 +120,9 @@ export const WorkoutCardRepeatAndQuantityWrapper = styled.View`
 export const WorkoutCardRepeatAndQuantity = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
+  font-size: ${RFValue(12)}px;
   opacity: 0.5;
+  flex: 1;
 `
 
 export const WorkoutMuscleGroupWrapper = styled.View`

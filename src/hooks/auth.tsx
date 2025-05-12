@@ -97,7 +97,6 @@ import {
   addDaysToTimestamp,
   addWeeksToTimestamp,
 } from '@utils/calculeEndDateWithWeeks'
-import { ca } from 'date-fns/locale'
 
 const db = getFirestore(firebaseApp)
 

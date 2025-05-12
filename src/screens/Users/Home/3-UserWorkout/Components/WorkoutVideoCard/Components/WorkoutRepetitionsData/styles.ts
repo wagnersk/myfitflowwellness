@@ -28,12 +28,6 @@ const bottomCardHeight = cardHeight * 0.6 // 170.4
 const confirmButtonHeight = 36 // 170.4
 const confirmButtonWidth = cardWidth / 1.4 // 170.4
 
-export const WorkoutSerieWrapper = styled.View`
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
-  width: 100%;
-`
 export const TableWrapper = styled.View`
   align-items: center;
   justify-content: center;
@@ -171,36 +165,6 @@ export const WorkoutIndexButton = styled(TouchableOpacity)<Props>`
   align-items: center;
 `
 
-export const WorkoutWeightMetric = styled.Text<{
-  activedGreenColor: boolean
-  activeWeightIndex: boolean
-}>`
-  font-size: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? `${RFValue(14)}px` : `${RFValue(14)}px`};
-
-  color: ${({ theme, activedGreenColor }) =>
-    activedGreenColor
-      ? theme.COLORS.AUX_GOOGLE_GREEN
-      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-
-  font-family: ${({ theme, activeWeightIndex }) =>
-    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
-`
-
-export const WorkoutSerieValue = styled.Text<{
-  activeWeightIndex: boolean
-}>`
-  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-
-  font-family: ${({ theme, activeWeightIndex }) =>
-    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
-
-  font-size: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? `${RFValue(18)}px` : `${RFValue(16)}px`};
-`
-
 export const WorkoutButtonConfirm = styled(TouchableOpacity)<Props>`
   justify-content: center;
   align-items: center;
@@ -281,13 +245,57 @@ export const BulletsCronometerAndCTAButtonWrapper = styled.View`
   justify-content: center;
 `
 
+export const WorkoutSerieWrapper = styled.View<{
+  activeWeightIndex: boolean
+}>`
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+
+  border-radius: 12px;
+`
+export const WorkoutWeightMetric = styled.Text<{
+  activedGreenColor: boolean
+  activeWeightIndex: boolean
+}>`
+  font-size: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `${RFValue(14)}px` : `${RFValue(14)}px`};
+
+  color: ${({ theme, activedGreenColor }) =>
+    activedGreenColor
+      ? theme.COLORS.AUX_GOOGLE_GREEN
+      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+
+  font-family: ${({ theme, activeWeightIndex }) =>
+    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
+  border-bottom-width: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `1px  ` : 'none'};
+
+  border-bottom-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+`
+
+export const WorkoutSerieValue = styled.Text<{
+  activeWeightIndex: boolean
+}>`
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
+
+  font-family: ${({ theme, activeWeightIndex }) =>
+    activeWeightIndex ? theme.FONTS.BUTTON : theme.FONTS.BODY};
+
+  font-size: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `${RFValue(18)}px` : `${RFValue(16)}px`};
+`
+
 export const WorkoutWeightText = styled.Text<{
   activedGreenColor: boolean
   alreadySelected: boolean
   activeWeightIndex: boolean
 }>`
   font-size: ${({ activeWeightIndex }) =>
-    activeWeightIndex ? `${RFValue(16)}px` : `${RFValue(14)}px`};
+    activeWeightIndex ? `${RFValue(14)}px` : `${RFValue(12)}px`};
 
   font-family: ${({ theme, alreadySelected }) =>
     alreadySelected ? theme.FONTS.BUTTON : theme.FONTS.BODY};
@@ -296,6 +304,10 @@ export const WorkoutWeightText = styled.Text<{
       ? theme.COLORS.AUX_GOOGLE_GREEN
       : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   text-align: center;
+  border-bottom-width: ${({ activeWeightIndex }) =>
+    activeWeightIndex ? `1px  ` : 'none'};
+
+  border-bottom-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
 
   ${({ alreadySelected }) =>
     alreadySelected &&

@@ -31,6 +31,8 @@ export function InUseActiveWorkoutCard({
   handleOnPressActiveWorkout,
   selectedLanguage,
 }: PlanCardProps) {
+  // const { user } = useAuth()
+  console.log(`activeData -> `, activeData)
   function handleOnPressWorkout(id: string) {
     handleOnPressActiveWorkout(id)
   }

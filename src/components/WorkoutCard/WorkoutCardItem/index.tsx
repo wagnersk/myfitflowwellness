@@ -73,15 +73,19 @@ export function WorkoutCardItem({ item, index, isEnd, ...rest }: Props) {
           </WorkoutCardName>
           <WorkoutCardRepeatAndQuantityWrapper>
             <WorkoutCardRepeatAndQuantity>
-              {item &&
-                item.workoutExerciseSets &&
-                `${item && item.workoutExerciseSets && item.workoutExerciseSets.length} de ${item && item.workoutExerciseSets && item.workoutExerciseSets[index] && item.workoutExerciseSets[index].repetitionData && item.workoutExerciseSets[index].repetitionData.map((v) => v.sets_insensitive).join(`-`)} `}
-
-              {item &&
+              {item?.workoutExerciseSets &&
+                `${item.workoutExerciseSets.length}x -> ${item.workoutExerciseSets
+                  .map((set) =>
+                    set.repetitionData
+                      ?.map((rep) => rep.sets_insensitive)
+                      .join('-'),
+                  )
+                  .join(', ')}`}
+              {/*      {item &&
                 selectedLanguage &&
                 !item.workoutExerciseSets &&
                 item.workoutExerciseInfo &&
-                getTrimmedName(23, item.workoutExerciseInfo[selectedLanguage])}
+                getTrimmedName(23, item.workoutExerciseInfo[selectedLanguage])} */}
             </WorkoutCardRepeatAndQuantity>
             <WorkoutMuscleGroupRowWrapper>
               <WorkoutMuscleGroupWrapper>

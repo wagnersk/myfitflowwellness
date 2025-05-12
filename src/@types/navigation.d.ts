@@ -38,10 +38,6 @@ export interface ITchiesProps {
     us: string
     'pt-br': string
   }
-  title: {
-    'pt-br': string
-    us: string
-  }
 }
 export interface IPropsSets {
   repetitionData: ISetsProps[]
@@ -49,7 +45,7 @@ export interface IPropsSets {
   techiesData: ITchiesProps
 }
 export interface ICardExerciseData {
-  isEnabled: boolean
+  // isEnabled: boolean
 
   workoutExerciseId?: string
   workoutExerciseIndex?: number
@@ -57,6 +53,7 @@ export interface ICardExerciseData {
   workoutExerciseName_insensitive?: IptBrUs
   workoutExerciseRepetition?: string
   workoutExerciseSets?: IPropsSets[]
+  workoutTechiesTittle?: IptBrUs
 
   workoutExerciseTypes?: string
   workoutExercisePrimaryMuscleGroup?: IptBrUs

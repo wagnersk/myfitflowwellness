@@ -32,6 +32,7 @@ export const WorkoutInfoWrapper = styled.View`
   height: 100%;
   width: 100%;
   height: ${bottomCardHeight}px;
+  gap: 8px;
 `
 export const ContainerGradient = styled(LinearGradient).attrs(({ theme }) => ({
   colors: [theme.COLORS.GRADIENT_CARD[0], theme.COLORS.GRADIENT_CARD[1]],
@@ -128,7 +129,7 @@ export const WorkoutUserNotesAndConfirmButtonWrapper = styled.View`
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  gap: 16px;
+  gap: 8px;
 `
 
 export const WorkoutUserNotesWrapper = styled.View`
@@ -161,6 +162,4 @@ export const BulletsCronometerAndCTAButtonWrapper = styled.View`
   justify-content: center;
 `
 
-export const WorkoutCronometerWrapper = styled.View`
-  gap: 12px;
-`
+export const WorkoutCronometerWrapper = styled.View``
