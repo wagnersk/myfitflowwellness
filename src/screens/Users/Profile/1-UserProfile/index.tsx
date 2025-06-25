@@ -304,7 +304,28 @@ export function UserProfile() {
                     bordertype="up"
                     iconStyle="barbell"
                   />
-
+                  <WhiteButton
+                    betaMode
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Meu Plano'
+                        : 'My Plan'
+                    }
+                    onPress={handleMyPlanNextStep}
+                    bordertype="none"
+                    iconStyle="plan"
+                  />
+                  <WhiteButton
+                    betaMode
+                    tittle={
+                      user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
+                    }
+                    onPress={handleSuporteNextStep}
+                    bordertype="down"
+                    iconStyle="support"
+                  />
+                </Body>
+                {/* 
                   <WhiteButton
                     betaMode
                     tittle={
@@ -315,7 +336,7 @@ export function UserProfile() {
                     onPress={handleChallengesNextStep}
                     bordertype="none"
                     iconStyle="trophy"
-                  />
+                  /> 
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -338,9 +359,9 @@ export function UserProfile() {
                     bordertype="down"
                     iconStyle="camera"
                   />
-                </Body>
-                <Body>
-                  <WhiteButton
+                  */}
+
+                {/*        <Body>   <WhiteButton
                     betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -350,8 +371,8 @@ export function UserProfile() {
                     onPress={handlePreferencesStep}
                     bordertype="up"
                     iconStyle="settings"
-                  />
-                  {/*  'Informações Pessoais' = GymInfo 
+                  /> */}
+                {/*  'Informações Pessoais' = GymInfo 
                   testar se ta tudo funfando
                   inclusive form do aluno
                   criar conceito de add foto
@@ -362,7 +383,7 @@ export function UserProfile() {
                   fazer build 
                   
                   e seguranca das fotos */}
-                  <WhiteButton
+                {/*      <WhiteButton
                     betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -372,30 +393,7 @@ export function UserProfile() {
                     onPress={handlePersonalTrainerNextStep}
                     bordertype="down"
                     iconStyle="boxing-glove"
-                  />
-                </Body>
-                <Body>
-                  <WhiteButton
-                    betaMode
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Meu Plano'
-                        : 'My Plan'
-                    }
-                    onPress={handleMyPlanNextStep}
-                    bordertype="up"
-                    iconStyle="plan"
-                  />
-                  <WhiteButton
-                    betaMode
-                    tittle={
-                      user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
-                    }
-                    onPress={handleSuporteNextStep}
-                    bordertype="down"
-                    iconStyle="support"
-                  />
-                </Body>
+                  />    </Body> */}
 
                 <Body>
                   <BodyText>
@@ -416,141 +414,6 @@ export function UserProfile() {
                     iconStyle="trash"
                   />
                 </Body>
-
-                {/* nao mostar pois vou transfromar em botoes */}
-                {user?.anonymousUser && (
-                  <ProfileInfoWrapper>
-                    <Title>
-                      {selectedLanguage === 'pt-br' ? 'Objetivo' : 'Goal'}:
-                    </Title>
-                    <ProfileInfoText>
-                      {formattedGoal}
-                      {formattedGoal && ', '}
-                      {formattedMuscleFocus &&
-                        (selectedLanguage === 'pt-br'
-                          ? 'foco em: '
-                          : 'focus on: ')}
-                      {formattedMuscleFocus}
-                    </ProfileInfoText>
-
-                    {userPersonalTrainerContract &&
-                      userPersonalTrainerContract.personalTrainerContractId && (
-                        <>
-                          {/* criar state personalcontract igual userGymInfo  */}
-                          <ProfileInfoDivisor />
-                          <Title>
-                            {selectedLanguage === 'pt-br'
-                              ? 'Tempo de treino'
-                              : 'Training time'}
-                            :{' '}
-                          </Title>
-                          <ProfileInfoText>
-                            {experienceTime}{' '}
-                            {experienceTime &&
-                              (selectedLanguage === 'pt-br' ? 'anos' : 'years')}
-                          </ProfileInfoText>
-                          <ProfileInfoDivisor />
-                        </>
-                      )}
-
-                    {userPersonalTrainerContract &&
-                      userPersonalTrainerContract.personalTrainerContractId && (
-                        <>
-                          <Title>
-                            {selectedLanguage === 'pt-br' ? 'Academia' : 'Gym'}:
-                          </Title>
-                          <ProfileInfoText>
-                            {userGymInfo && userGymInfo.gymName}
-                          </ProfileInfoText>
-                        </>
-                      )}
-
-                    <ProfileInfoDivisor />
-                    <Title>
-                      {selectedLanguage === 'pt-br' ? 'Por semana' : 'Per week'}
-                      :{' '}
-                    </Title>
-                    <ProfileInfoText>
-                      {formattedFrequencyByWeek || ''}
-                      {formattedFrequencyByWeek &&
-                        (selectedLanguage === 'pt-br' ? ' de ' : ' of ')}
-                      {formattedTimeBySession || ''}
-                      {formattedTimeBySession &&
-                        (selectedLanguage === 'pt-br' ? ' cada' : ' each')}
-                    </ProfileInfoText>
-                    <ProfileInfoDivisor />
-                    {userPersonalTrainerContract &&
-                      userPersonalTrainerContract.personalTrainerContractId && (
-                        <>
-                          <Title>
-                            {selectedLanguage === 'pt-br'
-                              ? 'Anabolizante'
-                              : 'Anabolic'}
-                            :
-                          </Title>
-                          <ProfileInfoText>
-                            {/* isso vem do state personalContract */}
-                            {userPersonalTrainerContract &&
-                            userPersonalTrainerContract.anabol
-                              ? userPersonalTrainerContract.anabol
-                              : selectedLanguage === 'pt-br'
-                                ? 'Nenhum'
-                                : 'None'}
-                          </ProfileInfoText>
-                          <ProfileInfoDivisor />
-                          <Title>
-                            {selectedLanguage === 'pt-br'
-                              ? 'Restrições'
-                              : 'Restrictions'}
-                            :
-                          </Title>
-                          <ProfileInfoText>
-                            {userPersonalTrainerContract &&
-                            userPersonalTrainerContract.restrictions
-                              ? userPersonalTrainerContract.restrictions
-                              : selectedLanguage === 'pt-br'
-                                ? 'Nenhuma'
-                                : 'None'}
-                          </ProfileInfoText>
-                          <ProfileInfoDivisor />
-                          <Title>
-                            {selectedLanguage === 'pt-br'
-                              ? 'Equipamentos disponíveis'
-                              : 'Available equipment'}
-                            :
-                          </Title>
-                          <View
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: 8,
-                            }}
-                          >
-                            {auxDataUnicFiltersText.map((val, i) => {
-                              return (
-                                <LabelWrapper key={i}>
-                                  {val.data.length > 0 &&
-                                    val.data.map((_val, _i) => {
-                                      if (_val.value) {
-                                        return (
-                                          <LabelWrapper key={_i}>
-                                            <Label>
-                                              {_val.key}: {_val.value}
-                                            </Label>
-                                          </LabelWrapper>
-                                        )
-                                      } else {
-                                        return null
-                                      }
-                                    })}
-                                </LabelWrapper>
-                              )
-                            })}
-                          </View>
-                        </>
-                      )}
-                  </ProfileInfoWrapper>
-                )}
               </BodyWrapper>
             </ScrollView>
           </ImageBackgroundContainer>

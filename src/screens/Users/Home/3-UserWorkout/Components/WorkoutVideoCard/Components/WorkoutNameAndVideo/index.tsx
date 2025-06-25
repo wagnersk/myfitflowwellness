@@ -49,20 +49,6 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
 
   useEffect(() => {
     if (user.anonymousUser) return
-    if (!cachedVideoTable) {
-      startDownload(
-        item.workoutExerciseVideoUrl,
-        item.workoutExerciseVideoFileName,
-        item.workoutExerciseVideoMIME,
-        item.workoutExerciseId,
-      )
-    }
-
-    const mySelectedCachedWorkoutIndex = cachedVideoTable?.findIndex(
-      (v) => v.workoutExerciseId === item.workoutExerciseId,
-    )
-
-    const isNewCachedVideo = mySelectedCachedWorkoutIndex === -1
 
     const {
       workoutExerciseVideoUrl,
@@ -71,49 +57,68 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
       workoutExerciseId,
     } = item
 
-    if (isNewCachedVideo) {
+    if (!cachedVideoTable) {
+      console.log('cachedVideoTable is empty, starting download...')
       startDownload(
         workoutExerciseVideoUrl,
         workoutExerciseVideoFileName,
         workoutExerciseVideoMIME,
         workoutExerciseId,
       )
+      return
     }
 
-    if (
-      !isNewCachedVideo &&
-      !!cachedVideoTable &&
-      mySelectedCachedWorkoutIndex !== undefined
-    ) {
-      const getPath =
+    const mySelectedCachedWorkoutIndex = cachedVideoTable.findIndex(
+      (v) => v.workoutExerciseId === workoutExerciseId,
+    )
+
+    const isNewCachedVideo = mySelectedCachedWorkoutIndex === -1
+
+    if (isNewCachedVideo) {
+      console.log('isNewCachedVideo ->', isNewCachedVideo)
+      startDownload(
+        workoutExerciseVideoUrl,
+        workoutExerciseVideoFileName,
+        workoutExerciseVideoMIME,
+        workoutExerciseId,
+      )
+      return
+    }
+
+    if (!isNewCachedVideo && mySelectedCachedWorkoutIndex !== undefined) {
+      const cachedPath =
         cachedVideoTable[mySelectedCachedWorkoutIndex].cachedLocalPathVideo
+      validateCachedPath(
+        cachedPath,
+        workoutExerciseVideoUrl,
+        workoutExerciseVideoFileName,
+        workoutExerciseVideoMIME,
+        workoutExerciseId,
+      )
+      setModalVideoLocalPathState(cachedPath)
+    }
 
-      checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists()
-
-      async function checkIfPathIsValidAndDownloadAgainIfNothandleCheckFileExists() {
-        const fileExists = await checkFileExists(getPath)
-
-        if (!fileExists) {
-          startDownload(
-            workoutExerciseVideoUrl,
-            workoutExerciseVideoFileName,
-            workoutExerciseVideoMIME,
-            workoutExerciseId,
-          )
-        }
-
-        async function checkFileExists(path: string) {
-          try {
-            const fileInfo = await FileSystem.getInfoAsync(path)
-            return fileInfo.exists
-          } catch (error) {
-            console.error('Erro ao verificar arquivo:', error)
-            return false
-          }
-        }
+    async function validateCachedPath(
+      path: string,
+      url?: string,
+      name?: string,
+      mime?: string,
+      id?: string,
+    ) {
+      const fileExists = await checkFileExists(path)
+      if (!fileExists) {
+        startDownload(url, name, mime, id)
       }
+    }
 
-      setModalVideoLocalPathState(getPath)
+    async function checkFileExists(path: string): Promise<boolean> {
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(path)
+        return fileInfo.exists
+      } catch (error) {
+        console.error('Error checking file existence:', error)
+        return false
+      }
     }
 
     async function startDownload(
@@ -123,16 +128,15 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
       id?: string,
     ) {
       if (!url || !name || !mime || !id) return
-      // const cachedVideo = await downloadAndCacheVideo(name, mime, url, id)
-      const videoPath = await downloadVideo(name, mime, url)
 
-      if (videoPath) {
-        await cacheVideo(videoPath, id)
-        return videoPath
-      }
-
-      if (videoPath) {
-        setModalVideoLocalPathState(videoPath)
+      try {
+        const videoPath = await downloadVideo(name, mime, url)
+        if (videoPath) {
+          await cacheVideo(videoPath, id)
+          setModalVideoLocalPathState(videoPath)
+        }
+      } catch (error) {
+        console.error('Error during video download:', error)
       }
     }
 
@@ -143,7 +147,7 @@ const WorkoutNameAndVideo: React.FC<WorkoutNameAndVideoProps> = ({
       try {
         await updateCachedVideoTable(videoPath, exerciseId)
       } catch (error) {
-        console.error('Erro ao salvar o vídeo no cache:', error)
+        console.error('Error saving video to cache:', error)
       }
     }
   }, [cachedVideoTable, cachedVideoTable?.length])

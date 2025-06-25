@@ -11,8 +11,7 @@ export const CardsWrapper = styled.View`
   gap: 12px;
 `
 export const CardContainer = styled.View`
-  gap: 8px;
-  border-radius: 12px;
+  gap: 4px;
 `
 
 export const CardTittle = styled.Text`

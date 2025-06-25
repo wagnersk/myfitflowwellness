@@ -117,15 +117,18 @@ export function MarketPlaceWorkoutDetail() {
   }
 
   async function handleDeleteWorkout(workoutId?: string) {
+    // TODO RECEBER  outra coisa par ter o creatredAt
     // cachedUserWorkoutsLog
 
     if (!cachedUserWorkoutsLog) return
+
     const filteredCachedUserWorkoutsLog = {
       ...cachedUserWorkoutsLog,
       workoutsLog: cachedUserWorkoutsLog.workoutsLog.filter(
         (v) => v.workoutId !== workoutId,
       ),
     }
+
     if (!workoutId) return
     Alert.alert(
       user?.selectedLanguage === 'pt-br'

@@ -26,9 +26,9 @@ import {
 import { ICachedCardExerciseData } from '@hooks/authTypes'
 
 interface InputProps extends TextInputProps {
-  handleUpdateRangeOfSets: (selecteSet: string) => void
+  handleUpdateRangeOfSets: (selecteSet: string, dateNow: Date) => void
   closeModal: () => void
-  handleDeleteRangeOfSets: () => void
+  handleDeleteRangeOfSets: (dateNow: Date) => void
   modalCachedCardExerciseData: ICachedCardExerciseData
   activeIndex: number
   selectedLanguage: 'pt-br' | 'us'
@@ -74,13 +74,15 @@ export function WorkoutUserRangeOfSetsModal({
     setRangeOfSets(updatedRangeOfSets)
 
     const selecteSet = rangeOfSets[index].value
+    const dateNow = new Date()
 
-    handleUpdateRangeOfSets(selecteSet)
+    handleUpdateRangeOfSets(selecteSet, dateNow)
     handleOverlayPress()
   }
 
   async function deleteRangeOfSets() {
-    handleDeleteRangeOfSets()
+    const dateNow = new Date()
+    handleDeleteRangeOfSets(dateNow)
   }
 
   function generateRange(rangeArray: string[]) {

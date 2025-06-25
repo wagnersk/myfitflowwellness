@@ -702,7 +702,6 @@ export interface IWorkoutLog {
   createdAt: number
   updatedAt: number
 }
-
 export interface IUserWorkoutsLog {
   workoutsLog: IWorkoutLog[]
   userId: string
@@ -870,8 +869,6 @@ export interface AuthContextData {
     workoutCategoryId: string,
   ) => Promise<ICachedWorkoutsWithLastUpdatedTimestamp | null>
 
-  /// eliminiar isso pois vou usar o sumary
-
   loadCachedExerciseHistoryData: (userId: string) => Promise<void>
 
   updateStartAndEndDateFromMyWorkoutInCache: (
@@ -898,13 +895,10 @@ export interface AuthContextData {
   ) => Promise<void>
 
   // firebasefetchworkoutDataCache
-  updateUserFirebaseWorkoutCache: (
-    data: IUserWorkoutsLog,
-    updatedAt: number,
-  ) => Promise<void>
+  updateUserFirebaseWorkoutCache: (data: IUserWorkoutsLog) => Promise<void>
   fetchworkoutDataCache: () => Promise<IUserWorkoutsLog | null>
 
-  getLastUpdatedAtUserWorkoutCache: () => Promise<number | null>
+  getLastUpdatedAtUserWorkoutCache: () => Promise<number>
 
   loadCachedVideoTable: (userId: string) => Promise<void>
   updateCachedVideoTable: (

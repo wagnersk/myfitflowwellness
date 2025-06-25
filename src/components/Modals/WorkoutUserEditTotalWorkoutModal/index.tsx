@@ -100,7 +100,7 @@ export function WorkoutUserEditTotalWorkoutModal({
                 </ToggleSwitch>
               </InputsWrapper>
 
-              <InputsWrapper>
+              {/*  <InputsWrapper>
                 <TitteText>
                   {data.isShared
                     ? 'Compartilhamento Ativo'
@@ -114,7 +114,7 @@ export function WorkoutUserEditTotalWorkoutModal({
                     {data.isShared ? 'ON' : 'OFF'}
                   </ToggleSwitchText>
                 </ToggleSwitch>
-              </InputsWrapper>
+              </InputsWrapper> */}
 
               <InputsWrapper>
                 <DeleteButton onPress={() => onDelete(data.id)}>

@@ -57,6 +57,7 @@ export function UserHome() {
     loadPersonalTrainerClientContract,
     loadPersonalTrainerData,
     savePersonalTrainerData,
+
     getLastUpdatedAtUserWorkoutCache,
     updateUserFirebaseWorkoutCache,
     saveCachedUserWorkoutsLog,
@@ -285,42 +286,59 @@ export function UserHome() {
   useEffect(() => {
     start()
     /* 
- agora q ta sincronizandi com o servidor
- ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
+    agora q ta sincronizandi com o servidor
+    ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
     */
     async function start() {
       if (!cachedUserWorkoutsLog) return
 
-      const lastupdated = await getLastUpdatedAtUserWorkoutCache()
-      if (!lastupdated) return
-      console.log(`servidor:`, lastupdated)
-      console.log(`cache lo:`, cachedUserWorkoutsLog.updatedAt)
+      /* 
+      cachedUserWorkoutsLog -> ja ta feito , preciso ver
+      como ele ta sendo montado , onde eu mexo nesse data 
+      aqui eu so vou enviarele compactado, a manipulacao eh feita
+      antes
+      
+      */
 
-      // lastupdated 1742250984000
-      // cachedUserWorkoutsLog.updatedAt 1742250984871
-      if (lastupdated > cachedUserWorkoutsLog.updatedAt) {
+      console.log(`
+        
+      VER COMO VOU SALVAR O CACHEDDATA > workoutsLog
+      
+      workoutId +  createdAt
+
+      PORQUE SE ELE SALVAR NOVAMENTE O MESMO TREINO ele 
+      nao fica igual ,
+
+      ao salvar o treino devo pegar o createdAt do myWorkout ativo
+
+      pelo workoutId consigo comparar e buscar
+
+      ao salvar e buscar sempre vou precisar do createdAtx
+        
+        `)
+
+      const serverLastupdated = await getLastUpdatedAtUserWorkoutCache()
+
+      console.log(`cache servidor:`, serverLastupdated)
+      console.log(`cache armazenado:`, cachedUserWorkoutsLog.updatedAt)
+
+      if (serverLastupdated === null) return
+
+      // BUSCA DO SERVIDOR
+      if (serverLastupdated > cachedUserWorkoutsLog.updatedAt) {
         const updatedCache = await fetchworkoutDataCache() // busca noivo
         if (updatedCache) {
           // TODO criar fetch
           console.log(`updated do servidor ta mais atual asd`, updatedCache)
-
           // esse ta funcionando
-
-          updatedCache.updatedAt = lastupdated
+          updatedCache.updatedAt = serverLastupdated
           saveCachedUserWorkoutsLog(updatedCache)
           // salvar no cache
         }
       }
-      if (cachedUserWorkoutsLog.updatedAt > lastupdated) {
-        console.log(
-          `updated local  ta mais atual`,
-          cachedUserWorkoutsLog.updatedAt,
-        )
-
-        updateUserFirebaseWorkoutCache(
-          cachedUserWorkoutsLog,
-          cachedUserWorkoutsLog.updatedAt,
-        )
+      // ENVIA PRO SERVIDOR
+      if (cachedUserWorkoutsLog.updatedAt > serverLastupdated) {
+        updateUserFirebaseWorkoutCache(cachedUserWorkoutsLog)
       }
     }
   }, [cachedUserWorkoutsLog])

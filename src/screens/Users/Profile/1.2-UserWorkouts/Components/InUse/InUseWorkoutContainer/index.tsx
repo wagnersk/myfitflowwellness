@@ -91,13 +91,24 @@ export default function InUseWorkoutContainer({
         <CardsWrapper>
           {expiredworkouts &&
             expiredworkouts.map((v: IMyfitflowWorkoutInUseData, i: number) => (
-              <InUseExpiredWorkoutCard
-                //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
-                key={i}
-                data={v || null}
-                selectedLanguage={user?.selectedLanguage || 'pt-br'}
-                handleOnPressExpiredWorkout={() => onPressExpiredWorkout(v.id)}
-              />
+              <CardContainer key={i}>
+                {i === 0 && (
+                  <CardTittle>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Expirados:'
+                      : '`Expired:'}
+                  </CardTittle>
+                )}
+                <InUseExpiredWorkoutCard
+                  //  isWorkoutAlreadyStarted={currentWorkout?.workoutStartAt !== 0}
+                  key={i}
+                  data={v || null}
+                  selectedLanguage={user?.selectedLanguage || 'pt-br'}
+                  handleOnPressExpiredWorkout={() =>
+                    onPressExpiredWorkout(v.id)
+                  }
+                />
+              </CardContainer>
             ))}
         </CardsWrapper>
       )}

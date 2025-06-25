@@ -2474,6 +2474,8 @@ function AuthProvider({ children }: AuthProviderProps) {
           storedWeightDoneLogString,
         ) as IUserWorkoutsLog
 
+        console.log(`loadCachedUserWorkoutsLog`, summaryInfoData)
+
         if (summaryInfoData.userId !== userId) return null
         setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
       }
@@ -2490,7 +2492,12 @@ function AuthProvider({ children }: AuthProviderProps) {
     lastCompletedFormattedDate: string,
     cardIndex: number,
   ): Promise<void> {
+    /* TODO AQUI !!!!!   adcionar alevando em consideracao o createdAt  */
+
+    console.log(`fazer a partir daqui TODO`)
     console.log('updateCachedUserWorkoutsLog', workoutId)
+    console.log('updatedAt ->> ', updatedAt)
+    console.log('newExercise ->> ', JSON.stringify(newExercise, null, 2))
 
     const userId = getUserId()
     if (!userId) {
@@ -2499,8 +2506,12 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
-    const cachedLog =
-      cachedUserWorkoutsLog || (await createUserWorkoutLog(updatedAt))
+    const cachedLog = cachedUserWorkoutsLog || {
+      workoutsLog: [],
+      userId,
+      createdAt: updatedAt,
+      updatedAt,
+    }
     if (!cachedLog) return
 
     const logIndex = cachedLog.workoutsLog.findIndex(
@@ -2519,7 +2530,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         lastCompletedFormattedDate,
       }
 
-      const formattedData = {
+      const formattedData: IWorkoutLog = {
         workoutCardsLogData: [workoutCardsLogData],
         workoutId,
         createdAt: updatedAt,
@@ -2527,7 +2538,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
 
       cachedLog.workoutsLog.push(formattedData)
+      // OK ATE AKI
     } else {
+      // aalgum bug aqui em baixo
       // update
       const cardLogIndex = cachedLog.workoutsLog[
         logIndex
@@ -2562,80 +2575,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       /* funcao abaixo nao ta adicionando mais itens do array  */
     }
-
+    /* SALVAR E VER O FINAL SE TGA COMO E QUERO  */
     if (cachedLog) {
       await saveToStorage(storageKey, cachedLog)
       setCachedUserWorkoutsLog(cachedLog)
-    }
-
-    async function updateExistingWorkoutLog(
-      workoutLogs: IWorkoutLog[],
-      newExercise: ICachedCardExerciseData,
-      logIndex: number,
-      updatedAt: number,
-      lastCompletedFormattedDay: IptBrUs,
-      lastCompletedFormattedDate: string,
-      cardIndex: number,
-    ): Promise<IUserWorkoutsLog | null> {
-      const cardLogIndex = workoutLogs[logIndex].workoutCardsLogData.findIndex(
-        (log) => log.cardIndex === cardIndex,
-      )
-
-      const cardLog = workoutLogs[logIndex].workoutCardsLogData[cardLogIndex]
-
-      // Atualizar os dados existentes sem perder os anteriores
-      const existingExerciseIndex = cardLog.weightDoneLogs.findIndex(
-        (log) =>
-          log.workoutExerciseId === newExercise.workoutExerciseId &&
-          log.workoutExerciseIndex === newExercise.workoutExerciseIndex,
-      )
-
-      if (existingExerciseIndex !== -1) {
-        // Mesclar os dados do exercício existente com os novos dados
-        cardLog.weightDoneLogs[existingExerciseIndex] = {
-          ...cardLog.weightDoneLogs[existingExerciseIndex],
-          ...newExercise,
-        }
-      } else {
-        // Adicionar o novo exercício se não existir
-        cardLog.weightDoneLogs.push(newExercise)
-        workoutLogs[logIndex].updatedAt = updatedAt
-      }
-
-      cardLog.totalSessionsCompleted += 1
-      cardLog.updatedAt = updatedAt
-      cardLog.lastCompletedFormattedDay = lastCompletedFormattedDay
-      cardLog.lastCompletedFormattedDate = lastCompletedFormattedDate
-
-      const userId = getUserId()
-      if (!userId) return null
-      console.log(`isNewWorkoutLog`, existingExerciseIndex)
-
-      workoutLogs[logIndex].workoutCardsLogData[cardLogIndex] = cardLog
-
-      const finalData = {
-        workoutsLog: workoutLogs,
-        createdAt: cardLog.createdAt,
-        updatedAt,
-        userId,
-      }
-      return finalData
-    }
-
-    async function createUserWorkoutLog(
-      updatedAt: number,
-    ): Promise<IUserWorkoutsLog | null> {
-      const userId = getUserId()
-      if (!userId) return null
-
-      const newLog: IUserWorkoutsLog = {
-        workoutsLog: [],
-        userId,
-        createdAt: updatedAt,
-        updatedAt,
-      }
-
-      return newLog
     }
 
     async function saveToStorage(
@@ -2659,6 +2602,38 @@ function AuthProvider({ children }: AuthProviderProps) {
     const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
     await saveToStorage(storageKey, updatedCache)
     setCachedUserWorkoutsLog(updatedCache)
+
+    async function saveToStorage(
+      key: string,
+      data: IUserWorkoutsLog,
+    ): Promise<void> {
+      await AsyncStorage.setItem(key, JSON.stringify(data))
+    }
+
+    function getUserId(): string | null {
+      return user?.id || null
+    }
+  }
+
+  async function removeCachedUserWorkoutsLog(workoutId: string): Promise<void> {
+    if (!cachedUserWorkoutsLog) return
+    const copyOfCachedUserWorkoutsLog = { ...cachedUserWorkoutsLog }
+
+    const workoutIndex = copyOfCachedUserWorkoutsLog.workoutsLog.findIndex(
+      (log) => log.workoutId === workoutId,
+    )
+    if (workoutIndex === -1) return
+    // Remove the workout log from the cache
+    copyOfCachedUserWorkoutsLog.workoutsLog.splice(workoutIndex, 1)
+    copyOfCachedUserWorkoutsLog.updatedAt = Date.now()
+    // Save the updated cache back to storage
+
+    console.log(`removeCachedUserWorkoutsLog`, workoutId)
+
+    const userId = getUserId()
+    const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
+    await saveToStorage(storageKey, copyOfCachedUserWorkoutsLog)
+    setCachedUserWorkoutsLog(copyOfCachedUserWorkoutsLog)
 
     async function saveToStorage(
       key: string,
@@ -2726,6 +2701,56 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
+    }
+  }
+  async function checkIfActiveWorkoutHasExpired(getMyWorkout: IMyWorkouts) {
+    // console.log(JSON.stringify(myWorkoutDataArray?.data.map((v) => v.data)))
+    console.log(
+      JSON.stringify(
+        cachedUserWorkoutsLog?.workoutsLog.map((v) => v.workoutId),
+      ),
+    )
+
+    if (!getMyWorkout || !getMyWorkout.activeData.length) return
+
+    const currentTime = Date.now()
+    const firstActiveWorkout = getMyWorkout.activeData[0]
+
+    const workoutEndDate = firstActiveWorkout.workoutEndsAt
+
+    // Verifica se o treino ainda não expirou
+    if (currentTime < workoutEndDate) return
+
+    const workoutIndex = getMyWorkout.data.findIndex(
+      (workout) => workout.id === firstActiveWorkout.id,
+    )
+    if (workoutIndex === -1) return
+
+    // Cria uma cópia do objeto de treino
+    const updatedWorkouts = { ...getMyWorkout }
+    const expiredWorkout = updatedWorkouts.data[workoutIndex]
+
+    // Atualiza o status do treino
+    expiredWorkout.isExpired = true
+    expiredWorkout.isActive = false
+
+    // Move o treino para a lista de expirados
+    updatedWorkouts.expiredData.push({
+      id: expiredWorkout.id,
+      createdAt: expiredWorkout.createdAt,
+      updatedAt: expiredWorkout.updatedAt,
+    })
+
+    // Remove o treino da lista de ativos
+    updatedWorkouts.activeData = updatedWorkouts.activeData.filter(
+      (activeWorkout) => activeWorkout.id !== expiredWorkout.id,
+    )
+    // Atualiza o cache e o Firebase
+    try {
+      await updateMyWorkoutInCache(updatedWorkouts)
+      await saveFirebaseMyWorkout(updatedWorkouts, currentTime)
+    } catch (error) {
+      console.error('Error updating workout data:', error)
     }
   }
 
@@ -3033,6 +3058,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     }
   }
+
   async function saveFirebaseMyWorkout(data: IMyWorkouts, _updatedAt: number) {
     if (!user) return
 
@@ -3085,10 +3111,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function updateUserFirebaseWorkoutCache(
-    data: IUserWorkoutsLog,
-    updatedAt: number,
-  ) {
+  async function updateUserFirebaseWorkoutCache(data: IUserWorkoutsLog) {
     if (!user) return
 
     const userId = user.id
@@ -3113,7 +3136,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
 
-      const getDateFromTimeStamp = new Date(updatedAt)
+      const getDateFromTimeStamp = data.updatedAt
 
       if (!docSnap.exists()) {
         await setDoc(workoutDataCacheDoc, {
@@ -3125,7 +3148,6 @@ function AuthProvider({ children }: AuthProviderProps) {
           updatedAt: getDateFromTimeStamp,
         })
       }
-      data.updatedAt = updatedAt
       await setDoc(workoutCacheDoc, data)
       setIsWaitingApiResponse(false)
     } catch (error) {
@@ -3136,7 +3158,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   }
   // TODO
   async function getLastUpdatedAtUserWorkoutCache() {
-    if (!user) return null
+    if (!user) return 0
 
     const userId = user.id
 
@@ -3147,6 +3169,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataCache',
       'updatedData',
     )
+
     setIsWaitingApiResponse(true)
 
     try {
@@ -3154,8 +3177,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       if (!docSnap.exists()) {
         setIsWaitingApiResponse(false)
-
-        return null
+        return 0
       }
 
       const data = docSnap.data() as IWorkoutLog
@@ -3163,25 +3185,19 @@ function AuthProvider({ children }: AuthProviderProps) {
       if (!data) {
         setIsWaitingApiResponse(false)
 
-        return null
+        return 0
       }
       if (!data.updatedAt) {
         setIsWaitingApiResponse(false)
 
-        return null
+        return 0
       }
 
-      const getDateFromTimeStamp = new Date(
-        data.updatedAt.seconds * 1000 + data.updatedAt.nanoseconds / 1000000,
-      )
-      console.log(
-        `TODO getDateFromTimeStamp tem algo? 3125 `,
-        getDateFromTimeStamp,
-      )
-      return getDateFromTimeStamp.getTime()
+      setIsWaitingApiResponse(false)
+      return data.updatedAt
     } catch (error) {
       console.log(error)
-      return null
+      return 0
     }
   }
 
@@ -3197,7 +3213,9 @@ function AuthProvider({ children }: AuthProviderProps) {
       'workoutDataCache',
       'cachedData',
     )
+
     setIsWaitingApiResponse(true)
+
     try {
       const docSnap = await getDoc(workoutCacheDoc)
 
@@ -3246,7 +3264,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       await saveMyWorkoutInCache(_myWorkoutExercises)
 
       return _myWorkoutExercises
-      // upsertWorkoutCache
     }
 
     async function saveMyWorkoutInCache(_myWorkouts: IMyWorkouts) {
@@ -3258,6 +3275,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       await AsyncStorage.setItem(workoutKey, JSON.stringify(_myWorkouts))
       setMyWorkout(_myWorkouts)
     }
+
     async function upsertWorkoutCache(
       workoutData: IMyfitflowWorkoutInUse,
       updatedAt: number,
@@ -3832,6 +3850,7 @@ function AuthProvider({ children }: AuthProviderProps) {
           userLocalDataWorkout,
         ) as IMyWorkouts
         setMyWorkout(cachedUserLocalDataWorkouts)
+        return cachedUserLocalDataWorkouts
       } else {
         setMyWorkout(null)
       }
@@ -3977,10 +3996,15 @@ function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function loadLoginInitialCachedWorkoutsData(userId: string) {
-    await loadCachedUserWorkoutsLog(userId) // precsa de workoutjId
+    await loadCachedUserWorkoutsLog(userId)
     await loadCachedExerciseHistoryData(userId)
 
-    await loadMyWorkoutAndMyWorkoutExercises(userId)
+    await loadMyWorkoutAndMyWorkoutExercises(userId).then(async (v) => {
+      if (!v) return
+      // falta excluir o cache tbm
+      // de registros do dia
+      await checkIfActiveWorkoutHasExpired(v)
+    })
 
     await loadGraphicsAndStatistics(userId)
 

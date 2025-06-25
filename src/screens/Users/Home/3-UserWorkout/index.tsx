@@ -1,11 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
-import {
-  useWindowDimensions,
-  FlatList,
-  ViewToken,
-  Platform,
-  ScrollView,
-} from 'react-native'
+import { useWindowDimensions, FlatList, ViewToken } from 'react-native'
 
 import { useNavigation } from '@react-navigation/core'
 import { useFocusEffect, useRoute } from '@react-navigation/native'
@@ -26,15 +20,6 @@ import {
   BodyImageContainer,
   BodyImageBackgroundContainerSpaceBetween,
   FlatListWrapper,
-  IosBackgroundBlurViewTipsWrapper,
-  AndroidBackgroundTipsWrapper,
-  TipsTitleWrapper,
-  TipsTextWrapper,
-  TipsTitle,
-  TipsWrapper,
-  TipsText,
-  OpacityBackgroundPositionAbsolute,
-  ContentWrapper,
 } from './styles'
 
 import { setStatusBarStyle } from 'expo-status-bar'
@@ -77,7 +62,6 @@ export function UserWorkout() {
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: ChangeWorkoutCardProps) => {
       viewableItems.forEach((item) => {
-        console.log('item', JSON.stringify(item, null, 2))
         setWorkoutCardInfo({
           workoutCardIndex: item.index ? item.index : 0,
           workoutExerciseSets: item.item.workoutExerciseSets,
@@ -125,6 +109,7 @@ export function UserWorkout() {
   if (workoutCardInfo) {
     //  console.log(workoutCardInfo)
   }
+
   function scrollToNextCard2(index: number) {
     if (flatListRef.current) {
       if (index >= 0 && index < data.cardExerciseData.length) {
@@ -173,7 +158,7 @@ export function UserWorkout() {
               ref={flatListRef}
               horizontal
               data={data.cardExerciseData}
-              keyExtractor={(item) => String(item.workoutExerciseIndex)}
+              keyExtractor={(item, _index) => String(_index)}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item, index }) => {
                 return (

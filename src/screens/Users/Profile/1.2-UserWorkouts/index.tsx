@@ -99,7 +99,7 @@ export function UserWorkouts() {
   const [showScreen, setShowScreen] = useState<
     | 'Em uso'
     | 'Meus treinos'
-    | 'Compartilhado'
+    /* | 'Compartilhado' */
     | 'In Use'
     | 'My Workouts'
     | 'Shared'
@@ -130,19 +130,19 @@ export function UserWorkouts() {
 
   const screenWidth = Dimensions.get('window').width
   const paddingSize = 36
-  const TAB_WIDTH = (screenWidth - paddingSize) / 3 // screenWidth / 2
+  const TAB_WIDTH = (screenWidth - paddingSize) / 2 // mudar para 3 quando ativar shared
 
   const TABS: (
     | 'Em uso'
     | 'Meus treinos'
-    | 'Compartilhado'
+    /*    | 'Compartilhado' */
     | 'In Use'
     | 'My Workouts'
     | 'Shared'
   )[] =
     user?.selectedLanguage === 'pt-br'
-      ? ['Em uso', 'Meus treinos', 'Compartilhado']
-      : ['In Use', 'My Workouts', 'Shared']
+      ? ['Em uso', 'Meus treinos' /* , 'Compartilhado' */]
+      : ['In Use', 'My Workouts' /* , 'Shared' */]
 
   const TABS2: ('Ativos' | 'Expirados' | 'Active' | 'Expired')[] =
     user?.selectedLanguage === 'pt-br'
@@ -165,7 +165,6 @@ export function UserWorkouts() {
     if (index === undefined || index === -1) return
 
     if (index === 0) return
-    console.log(`index -> `, index)
 
     const copyWorkouts: IMyWorkouts = {
       userId: workouts?.userId || '',
@@ -540,7 +539,7 @@ export function UserWorkouts() {
                 )
             }
 
-            updateMyWorkoutInCache(copyWorkouts)
+            copyWorkouts
             saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },
@@ -609,6 +608,7 @@ export function UserWorkouts() {
       { cancelable: false },
     )
   }
+
   // expirados - remover da lista do expirados  OK
   async function handleInUseRemoveFromExpiredWorkout(id: string) {
     const index = workouts?.data.findIndex((v) => v.id === id)
@@ -1003,6 +1003,7 @@ export function UserWorkouts() {
 
     offset2.value = withTiming(newOffset)
   }
+
   function handleGoBack() {
     if (isDataOrderChanged) {
       Alert.alert(
@@ -1038,12 +1039,12 @@ export function UserWorkouts() {
       const copiedList = workouts.copiedWorkouts.filter((v) => v.id)
       const activeList = workouts.activeData.filter((v) => v.id)
       const expiredList = workouts.expiredData.filter((v) => v.id)
-      const sharedList = workouts.mySharedWorkouts.filter((v) => v.id)
+      // const sharedList = workouts.mySharedWorkouts.filter((v) => v.id)
 
       const copiedWorkouts: IMyfitflowWorkoutInUseData[] = []
       const activeWorkouts: IMyfitflowWorkoutInUseData[] = []
       const expiredWorkouts: IMyfitflowWorkoutInUseData[] = []
-      const sharedWorkouts: IMyfitflowWorkoutInUseData[] = []
+      // const sharedWorkouts: IMyfitflowWorkoutInUseData[] = []
 
       copiedList.forEach((item) => {
         const workout = workouts.data.find((v) => v.id === item.id)
@@ -1065,18 +1066,18 @@ export function UserWorkouts() {
         }
       })
 
-      sharedList.forEach((item) => {
+      /*   sharedList.forEach((item) => {
         const workout = workouts.data.find((v) => v.id === item.id)
         if (workout) {
           sharedWorkouts.push(workout)
         }
-      })
+      }) */
       setMyTotalWorkouts(workouts.data) // ok
 
       setCopiedWorkouts(copiedWorkouts) // ainda nao feito
       setActiveWorkouts(activeWorkouts) // fazer 1
       setExpiredWorkouts(expiredWorkouts) // fazer 2
-      setSharedWorkouts(sharedWorkouts) // fazer 3
+      // setSharedWorkouts(sharedWorkouts) // fazer 3
     }
   }, [workouts, workouts?.data, setShowScreen2])
 
@@ -1192,7 +1193,7 @@ export function UserWorkouts() {
                             }
                           />
                         )}
-                      {(showScreen === 'Compartilhado' ||
+                      {/*    {(showScreen === 'Compartilhado' ||
                         showScreen === 'Shared') &&
                         workouts && (
                           <SharedWorkoutContainer
@@ -1203,7 +1204,7 @@ export function UserWorkouts() {
                               handleOnPressWorkout(id, 'shareWorkout')
                             }
                           />
-                        )}
+                        )} */}
                     </ListWrapper>
                   </ScrollView>
 

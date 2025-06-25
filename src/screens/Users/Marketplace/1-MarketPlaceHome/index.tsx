@@ -149,6 +149,7 @@ export function MarketPlaceHome() {
 
   function handleViewAllCategoriesStep() {
     // jogar pra dentro do meu treino
+    return
     navigation.navigate('userAllCategories')
   }
 
@@ -247,11 +248,12 @@ export function MarketPlaceHome() {
                   : `Categories`}
               </Tittle>
 
-              <TouchableOpacity onPress={handleViewAllCategoriesStep}>
+              {/*         
+               <TouchableOpacity onPress={handleViewAllCategoriesStep}>
                 <ButtonText>
                   {user?.selectedLanguage === 'pt-br' ? `Ver mais` : `See more`}
                 </ButtonText>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </CategoriesWrapper>
             <FlatList
               contentContainerStyle={{

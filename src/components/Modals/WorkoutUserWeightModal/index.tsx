@@ -24,8 +24,8 @@ import {
 
 interface InputProps extends TextInputProps {
   closeModal: () => void
-  handleUpdateWeight: (weight: string) => void
-  handleUpdateAllWeight: (weight: string) => void
+  handleUpdateWeight: (weight: string, dateNow: Date) => void
+  handleUpdateAllWeight: (weight: string, dateNow: Date) => void
   weight: string
   weightIndex: number
   exerciseName?: string
@@ -93,8 +93,9 @@ export function WorkoutUserWeightModal({
     if (formattedValue.startsWith('.') || formattedValue.includes('..')) {
       return
     }
+    const timeNow = new Date()
 
-    handleUpdateWeight(formattedValue)
+    handleUpdateWeight(formattedValue, timeNow)
   }
   async function updateAllWeight() {
     const formattedValue = newWeight.replace(/^0+(?!$)/, '')
@@ -103,8 +104,9 @@ export function WorkoutUserWeightModal({
     if (formattedValue.startsWith('.') || formattedValue.includes('..')) {
       return
     }
+    const timeNow = new Date()
 
-    handleUpdateAllWeight(formattedValue)
+    handleUpdateAllWeight(formattedValue, timeNow)
   }
 
   return (

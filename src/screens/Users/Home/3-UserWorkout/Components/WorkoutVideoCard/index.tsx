@@ -69,10 +69,10 @@ function WorkoutVideoCardComponent({
 }: Props) {
   const theme = useTheme()
   const {
-    cachedUserWorkoutsLog, // log do peso pessoal do usuario, é o cache que carrega com os cards
-    myWorkout, // CACHE DO TREINO DIRETO DO FIREBASE
-    updateStartAndEndDateFromMyWorkoutInCache,
-    updateCachedUserWorkoutsLog,
+    updateCachedUserWorkoutsLog, // TODO -> ver como eu manipulo -> Buscar pelo createdAt + workoutId
+    cachedUserWorkoutsLog,
+    myWorkout,
+    updateStartAndEndDateFromMyWorkoutInCache, // TODO -> ver como eu manipulo -> Buscar pelo createdAt + workoutId
     user,
   } = useAuth()
   const time = new Date()
@@ -216,9 +216,13 @@ function WorkoutVideoCardComponent({
   >(null)
  */
 
-  function handleUpdateWeight(_weight: string, type: 'all' | 'single') {
+  function handleUpdateWeight(
+    type: 'all' | 'single',
+    tNow: Date,
+    _weight: string,
+  ) {
     if (type === 'single') {
-      onUpdateSingleWeight(_weight)
+      onUpdateSingleWeight(_weight, tNow)
     }
 
     if (type === 'all') {
@@ -228,7 +232,7 @@ function WorkoutVideoCardComponent({
         )
 
       if (allWeightsAreEqual) {
-        onUpdateAllWeight(_weight)
+        onUpdateAllWeight(_weight, tNow)
         closeModal('weight')
       } else {
         Alert.alert(
@@ -242,7 +246,7 @@ function WorkoutVideoCardComponent({
             {
               text: 'Confirmar',
               onPress: () => {
-                onUpdateAllWeight(_weight)
+                onUpdateAllWeight(_weight, tNow)
                 closeModal('weight')
               },
             },
@@ -271,16 +275,17 @@ function WorkoutVideoCardComponent({
         closeModal('weight')
       }
     }
-    function onUpdateAllWeight(_weight: string) {
+
+    function onUpdateAllWeight(_weight: string, tNow: Date) {
       const copyProgression = { ...modalCachedCardExerciseData }
-      const timeNow = new Date().getTime()
+      const timeNow = tNow.getTime()
 
       const copyProgressionRep =
         modalCachedCardExerciseData.workoutExerciseSets?.map((v) => ({
           ...v,
           weightData: {
             value: _weight,
-            createdAt: timeNow,
+            createdAt: v.weightData?.createdAt || timeNow, // Preserva o createdAt existente, se houver
             updatedAt: timeNow,
           },
         }))
@@ -292,20 +297,16 @@ function WorkoutVideoCardComponent({
   }
 
   function handleUpdateNotes(value: string) {
-    console.log(`notes -> `, value)
     if (!value) return
     const date = new Date()
     const completedTimestamp = date.getTime()
-    /*  
 
-modalCachedCardExerciseData.notes.value 
-
-*/
     const copyProgression = {
       ...modalCachedCardExerciseData,
       notes: {
         value,
-        createdAt: completedTimestamp,
+        createdAt:
+          modalCachedCardExerciseData.notes.createdAt || completedTimestamp,
         updatedAt: completedTimestamp,
       },
       updatedAt: completedTimestamp,
@@ -316,7 +317,7 @@ modalCachedCardExerciseData.notes.value
       ...prevState,
       isOpenModalUserNotes: !prevState.isOpenModalUserNotes,
     }))
-
+    // notes - aparemente ok
     saveFastCachedWorkoutData(
       copyProgression,
       workoutId,
@@ -330,13 +331,10 @@ modalCachedCardExerciseData.notes.value
 
   function handleUpdateSets(
     type: 'update' | 'delete',
+    dateNow: Date,
     value?: ICachedSetsProps[],
   ) {
-    console.log(`type -> `, type)
-    console.log(`value -> `, value)
-
-    const date = new Date()
-    const completedTimestamp = date.getTime()
+    const completedTimestamp = dateNow.getTime()
 
     if (type === 'update' && value !== undefined) {
       const copyProgression = { ...modalCachedCardExerciseData }
@@ -347,12 +345,18 @@ modalCachedCardExerciseData.notes.value
         defaultModalState.activeWeightIndex
       ].repetitionData = value
 
-      setModalCachedCardExerciseData(copyProgression)
+      copyProgression.workoutExerciseSets[
+        defaultModalState.activeWeightIndex
+      ].updatedAt = completedTimestamp
 
+      copyProgression.updatedAt = completedTimestamp
+
+      setModalCachedCardExerciseData(copyProgression)
+      // handleUpdateSets -ok aparentemente
       saveFastCachedWorkoutData(
         copyProgression,
         workoutId,
-        date,
+        dateNow,
         completedTimestamp,
         workoutCardIndex,
       )
@@ -403,7 +407,11 @@ modalCachedCardExerciseData.notes.value
     }
   }
 
-  function handleUpdateRangeSelect(type: 'update' | 'delete', value: string) {
+  function handleUpdateRangeSelect(
+    type: 'update' | 'delete',
+    dateNow: Date,
+    value: string,
+  ) {
     const completedTimestamp = new Date().getTime()
 
     if (type === 'update' && value !== undefined) {
@@ -540,20 +548,25 @@ modalCachedCardExerciseData.notes.value
       const date = new Date()
       const completedTimestamp = date.getTime()
 
-      const newRepetitionToAdd = {
+      const newRepetitionToAdd: ICachedUsingWorkoutData = {
         ...copyProgression.workoutExerciseSets[
           copyProgression.workoutExerciseSets.length - 1
         ],
         completedData: {
           isCompleted: false,
-          createdAt: completedTimestamp,
+          createdAt:
+            copyProgression.workoutExerciseSets[
+              copyProgression.workoutExerciseSets.length - 1
+            ]?.completedData?.createdAt || completedTimestamp,
           updatedAt: completedTimestamp,
         },
-        completedTimestamp: 0,
+        updatedAt: completedTimestamp,
+        createdAt: completedTimestamp,
       }
       copyProgression.workoutExerciseSets.push(newRepetitionToAdd)
       setModalCachedCardExerciseData(copyProgression)
 
+      // onAddRepetition - ok aparentemente
       saveFastCachedWorkoutData(
         copyProgression,
         workoutId,
@@ -597,7 +610,7 @@ modalCachedCardExerciseData.notes.value
       }
 
       setModalCachedCardExerciseData(copyProgression)
-
+      // onRemoveRepetition - ok aparentemente
       saveFastCachedWorkoutData(
         copyProgression,
         workoutId,
@@ -629,23 +642,30 @@ modalCachedCardExerciseData.notes.value
       /* so ta aparecendo proximo quando eu forco o render
       
       ver pq nao ta acojntecendo dew maneira natural */
+
       const date = new Date()
       const completedTimestamp = date.getTime()
 
       const copyProgression = { ...modalCachedCardExerciseData } // Copiar o estado atual
       if (copyProgression.workoutExerciseSets === undefined) return
+
       copyProgression.workoutExerciseSets[
         defaultModalState.activeWeightIndex
       ].completedData = {
         isCompleted: true,
-        createdAt: completedTimestamp,
+        createdAt:
+          copyProgression.workoutExerciseSets[
+            defaultModalState.activeWeightIndex
+          ].createdAt || completedTimestamp, // Preserva o createdAt existente, se houver
         updatedAt: completedTimestamp,
       }
+
       copyProgression.workoutExerciseSets[
         defaultModalState.activeWeightIndex
       ].updatedAt = completedTimestamp
 
       setModalCachedCardExerciseData(copyProgression)
+      // handleDoneWorkout - ok aparentemente
       saveFastCachedWorkoutData(
         copyProgression,
         workoutId,
@@ -723,9 +743,11 @@ modalCachedCardExerciseData.notes.value
     const dateEnd = addWeeksToTimestamp(dateNow, periodInWeekNumber)
 
     const getWorkoutInUse = myWorkout.data[0].data
+
     console.log(`getWorkoutInUse`, getWorkoutInUse)
     console.log(`dateNow`, dateNow)
     console.log(`dateEnd`, dateEnd)
+
     updateStartAndEndDateFromMyWorkoutInCache(getWorkoutInUse, dateNow)
   }
 
@@ -740,7 +762,19 @@ modalCachedCardExerciseData.notes.value
       'pt-br': format(date, 'EEEE', { locale: ptBR }),
       us: format(date, 'EEEE', { locale: enUS }),
     }
+
+    alert(`acabei eu acho , testar`)
+    return
+
     const lastCompletedDate = format(date, 'dd/MM/yyyy')
+    console.log(`copyProgression  createdAt`, copyProgression.createdAt)
+    console.log(`copyProgression  updatedAt`, copyProgression.updatedAt)
+    copyProgression.updatedAt = completedTimestamp
+
+    // map em todos createdAt e updatedAt
+
+    console.log(`JSON.stringify(copyProgression, null, 2)`)
+    console.log(JSON.stringify(copyProgression, null, 2))
 
     await updateCachedUserWorkoutsLog(
       copyProgression,
@@ -1071,8 +1105,8 @@ modalCachedCardExerciseData.notes.value
       }
     }
   } */
-  // ok
 
+  // ok
   function handleUncheckOrCheckRepetion(index: number) {
     const getIsActivedRangeOfSets =
       (modalCachedCardExerciseData?.workoutExerciseSets?.[index]?.repetitionData
@@ -1150,7 +1184,60 @@ modalCachedCardExerciseData.notes.value
 
       marcarItem(index)
     }
+    // ok
+    function marcarItem(index: number) {
+      const copyProgression = { ...modalCachedCardExerciseData }
+      if (copyProgression.workoutExerciseSets === undefined) return
 
+      const date = new Date()
+      const completedTimestamp = date.getTime()
+
+      copyProgression.workoutExerciseSets =
+        copyProgression.workoutExerciseSets.map((item, i) => {
+          if (i <= index) {
+            return {
+              ...item,
+              updatedAt: completedTimestamp,
+              completedData: {
+                ...item.completedData,
+                isCompleted: true,
+                updatedAt: completedTimestamp,
+                createdAt: item.completedData.createdAt || completedTimestamp,
+              },
+            }
+          }
+          return item
+        })
+
+      setModalCachedCardExerciseData(copyProgression)
+      setDefaultModalState((prev) => {
+        if (copyProgression.workoutExerciseSets === undefined) return prev
+        return {
+          ...prev,
+          lastActiveWeightIndex: defaultModalState.activeWeightIndex,
+          activeWeightIndex:
+            index + 1 < copyProgression.workoutExerciseSets.length
+              ? index + 1
+              : index,
+        }
+      })
+
+      // marcarItem - aparentemente ok
+      saveFastCachedWorkoutData(
+        copyProgression,
+        workoutId,
+        date,
+        completedTimestamp,
+        workoutCardIndex,
+      )
+
+      const find = myWorkout?.activeData.find((va) => va.id === workoutId)
+
+      if (find && find.workoutStartAt === 0) {
+        startWorkoutCounterDate()
+      }
+    }
+    // ok
     function desmarcarItem(index: number) {
       if (modalCachedCardExerciseData === undefined) return
 
@@ -1158,7 +1245,8 @@ modalCachedCardExerciseData.notes.value
 
       if (copyProgression.workoutExerciseSets === undefined) return
 
-      const completedTimestamp = new Date().getTime()
+      const date = new Date()
+      const completedTimestamp = date.getTime()
 
       copyProgression.workoutExerciseSets =
         copyProgression.workoutExerciseSets.map((item, i) => {
@@ -1179,7 +1267,6 @@ modalCachedCardExerciseData.notes.value
           }
           return item
         })
-      copyProgression.workoutExerciseSets[index].updatedAt = completedTimestamp
 
       setModalCachedCardExerciseData(copyProgression)
       setDefaultModalState((prev) => {
@@ -1190,7 +1277,7 @@ modalCachedCardExerciseData.notes.value
         }
       })
 
-      const date = new Date()
+      // desmarcarItem  - aparentemente ok
       saveFastCachedWorkoutData(
         copyProgression,
         workoutId,
@@ -1198,60 +1285,6 @@ modalCachedCardExerciseData.notes.value
         completedTimestamp,
         workoutCardIndex,
       )
-    }
-
-    function marcarItem(index: number) {
-      const copyProgression = { ...modalCachedCardExerciseData }
-      if (copyProgression.workoutExerciseSets === undefined) return
-
-      const completedTimestamp = new Date().getTime()
-
-      copyProgression.workoutExerciseSets =
-        copyProgression.workoutExerciseSets.map((item, i) => {
-          if (i <= index) {
-            const isExistingItem = item.completedData.createdAt !== 0
-            return {
-              ...item,
-              updatedAt: completedTimestamp,
-              completedData: {
-                ...item.completedData,
-                isCompleted: true,
-                updatedAt: completedTimestamp,
-                createdAt: isExistingItem
-                  ? item.completedData.createdAt
-                  : completedTimestamp,
-              },
-            }
-          }
-          return item
-        })
-      copyProgression.workoutExerciseSets[index].updatedAt = completedTimestamp
-
-      setModalCachedCardExerciseData(copyProgression)
-      setDefaultModalState((prev) => {
-        if (copyProgression.workoutExerciseSets === undefined) return prev
-        return {
-          ...prev,
-          lastActiveWeightIndex: defaultModalState.activeWeightIndex,
-          activeWeightIndex:
-            index + 1 < copyProgression.workoutExerciseSets.length
-              ? index + 1
-              : index,
-        }
-      })
-      const date = new Date()
-      saveFastCachedWorkoutData(
-        copyProgression,
-        workoutId,
-        date,
-        completedTimestamp,
-        workoutCardIndex,
-      )
-      const find = myWorkout?.activeData.find((va) => va.id === workoutId)
-
-      if (find && find.workoutStartAt === 0) {
-        startWorkoutCounterDate()
-      }
     }
   }
 
@@ -1494,8 +1527,6 @@ modalCachedCardExerciseData.notes.value
   }
 
   function onSaveNewTimer() {
-    console.log(`time`, time)
-
     if (time === null) return
 
     const date = new Date()
@@ -1510,10 +1541,15 @@ modalCachedCardExerciseData.notes.value
         defaultModalState.activeWeightIndex
       ].restTimeData,
       restTimeNumber: totalSeconds,
+      updatedAt: completedTimestamp,
     }
 
-    setModalCachedCardExerciseData(copyProgression)
+    copyProgression.workoutExerciseSets[
+      defaultModalState.activeWeightIndex
+    ].updatedAt = completedTimestamp
 
+    setModalCachedCardExerciseData(copyProgression)
+    // onSaveNewTimer - ok aparentemente
     saveFastCachedWorkoutData(
       copyProgression,
       workoutId,
@@ -1685,11 +1721,11 @@ modalCachedCardExerciseData.notes.value
       >
         <WorkoutUserWeightModal
           closeModal={() => closeModal('weight')}
-          handleUpdateWeight={(_weight) =>
-            handleUpdateWeight(_weight, 'single')
+          handleUpdateWeight={(_weight, tNow) =>
+            handleUpdateWeight('single', tNow, _weight)
           }
-          handleUpdateAllWeight={(_weight) =>
-            handleUpdateWeight(_weight, 'all')
+          handleUpdateAllWeight={(_weight, tNow) =>
+            handleUpdateWeight('all', tNow, _weight)
           }
           weight={
             (modalCachedCardExerciseData &&
@@ -1728,7 +1764,9 @@ modalCachedCardExerciseData.notes.value
       >
         <WorkoutUserSetsModal
           visible={defaultModalState.isOpenModalUserSets}
-          handleUpdateSets={(set) => handleUpdateSets('update', set)}
+          handleUpdateSets={(set, dateNow) =>
+            handleUpdateSets('update', dateNow, set)
+          }
           closeModal={() => closeModal('sets')}
           modalCachedCardExerciseData={modalCachedCardExerciseData}
           activeIndex={defaultModalState.activeWeightIndex}
@@ -1752,11 +1790,13 @@ modalCachedCardExerciseData.notes.value
         }}
       >
         <WorkoutUserRangeOfSetsModal
-          handleUpdateRangeOfSets={(selecteSet: string) =>
-            handleUpdateRangeSelect('update', selecteSet)
+          handleUpdateRangeOfSets={(selecteSet, dateNow) =>
+            handleUpdateRangeSelect('update', dateNow, selecteSet)
           }
           closeModal={() => closeModal('rangeOfSets')}
-          handleDeleteRangeOfSets={() => handleUpdateSets('delete')}
+          handleDeleteRangeOfSets={(dateNow) =>
+            handleUpdateSets('delete', dateNow)
+          }
           modalCachedCardExerciseData={modalCachedCardExerciseData}
           activeIndex={defaultModalState.activeWeightIndex}
           selectedLanguage={user?.selectedLanguage || 'pt-br'}

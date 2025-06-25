@@ -193,17 +193,11 @@ export function UserAllCategories() {
               contentContainerStyle={{
                 padding: 16,
               }}
-              data={workoutsCategories}
+              data={filteredByActiveWorkoutCategoriesList}
               renderItem={({ item }) => (
                 <WorkoutsCategoriesCardList
                   item={item}
                   handleNextStep={handleWorkouts}
-                  isGuestCategory={
-                    item.workoutCategoryName_insensitive['pt-br'] ===
-                      categoryToRemoveIfArentGuest['pt-br'] &&
-                    item.workoutCategoryName_insensitive.us ===
-                      categoryToRemoveIfArentGuest.us
-                  }
                 />
               )}
               keyExtractor={(item, i) => i.toString()}

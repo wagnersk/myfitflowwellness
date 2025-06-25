@@ -39,7 +39,7 @@ import { Picker } from '@react-native-picker/picker'
 
 interface InputProps extends TextInputProps {
   closeModal: () => void
-  handleUpdateSets: (newRangeData: ICachedSetsProps[]) => void
+  handleUpdateSets: (newRangeData: ICachedSetsProps[], dateNow: Date) => void
   modalCachedCardExerciseData: ICachedCardExerciseData
   activeIndex: number
   item: IFormattedCardExerciseData
@@ -366,6 +366,8 @@ export function WorkoutUserSetsModal({
   const exerciseName = item.workoutExerciseName?.[selectedLanguage]
 
   const [newSets, setNewSets] = useState<ICachedSetsProps[] | null>(null)
+  const [dateNow, setDateNow] = useState<Date | null>(null)
+  // cria um estado para gerenciar o timstamp
 
   const defaultRep = data.filter((v) => v.isReps)
   const defaultTime = data.filter((v) => v.isTime)
@@ -387,37 +389,48 @@ export function WorkoutUserSetsModal({
     // a diferenca entre os numeros naop pode ser maior que 4
     // se for maior, deve-se fazer um alerta
     if (!newSets) return
-    handleUpdateSets(newSets)
+    if (!dateNow) return
+    handleUpdateSets(newSets, dateNow)
   }
 
   function handleSetChange(value: string, rangeIndex: number) {
     if (!newSets) return
-
     const copy = [...newSets]
+    const date = new Date()
+    const time = date.getTime()
 
-    copy[rangeIndex].sets_insensitive = value
-
-    setNewSets(copy)
+    const formatted = copy.map((set, index) =>
+      index === rangeIndex
+        ? {
+            ...set,
+            sets_insensitive: value,
+            updatedAt: time, // Atualiza o timestamp de modificação
+          }
+        : set,
+    )
+    setDateNow(date) // Atualiza o timestamp atual
+    setNewSets(formatted)
   }
-
   function addNewSelector(type: 'time' | 'reps') {
     if (!newSets) return
     if (newSets.length >= 3) return
     const copy = [...newSets]
 
-    const time = new Date().getTime()
+    const date = new Date()
+    const time = date.getTime()
 
     const newSet = {
       isReps: type === 'reps',
       isTime: type === 'time',
       sets_insensitive: `1`,
       timeInSeconds: 0,
-      createdAt: time,
+      createdAt: newSets[newSets.length - 1]?.createdAt || time, // Preserva o createdAt do último item, se existir
       updatedAt: time,
     }
 
     copy.push(newSet)
 
+    setDateNow(date) // Atualiza o timestamp atual
     setNewSets(copy)
   }
 

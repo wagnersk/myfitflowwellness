@@ -70,7 +70,7 @@ export const IconWrapper = styled.View`
 export const RowWrapper = styled.View`
   flex-direction: row;
   width: 100%;
-  justify-content: space-between;
+  justify-content: center;
 `
 export const SelectScreenWrapper = styled.View`
   flex-direction: column;

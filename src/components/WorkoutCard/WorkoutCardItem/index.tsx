@@ -81,7 +81,9 @@ export function WorkoutCardItem({ item, index, isEnd, ...rest }: Props) {
                       .join('-'),
                   )
                   .join(', ')}`}
-              {/*      {item &&
+              {/*  
+              
+              {item &&
                 selectedLanguage &&
                 !item.workoutExerciseSets &&
                 item.workoutExerciseInfo &&
