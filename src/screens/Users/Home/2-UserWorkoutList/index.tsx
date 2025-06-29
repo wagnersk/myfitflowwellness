@@ -38,9 +38,20 @@ export function UserWorkoutList() {
   const navigation = useNavigation()
   const theme = useTheme()
   const route = useRoute()
-
-  const { workoutId, data, workoutLength, cardIndex } =
-    route.params as NavigationUserWorkoutListProps
+  /*     navigation.navigate('userWorkoutList', {
+      activeWorkoutId: activeWorkout.id,
+      activeWorkoutCreatedAt: activeWorkout.createdAt,
+      activeWorkoutDataLength: activeWorkout.data.workoutsData.length,
+      data: workoutData,
+      cardIndex: currentCardIndex,
+    }) */
+  const {
+    activeWorkoutId,
+    activeWorkoutCreatedAt,
+    data,
+    activeWorkoutDataLength,
+    cardIndex,
+  } = route.params as NavigationUserWorkoutListProps
 
   let muscleGroupsLabel = ''
 
@@ -60,9 +71,10 @@ export function UserWorkoutList() {
     if (!selectedData) return
 
     const workoutDataWithSelectedWorkout: WorkoutDataWithSelectedWorkout = {
-      workoutId,
+      activeWorkoutId,
+      activeWorkoutCreatedAt,
+      activeWorkoutDataLength,
       data,
-      workoutLength,
       selectedWorkoutExerciseIndex: selectedData?.workoutExerciseIndex,
       muscleGroupsLabel,
       letter,

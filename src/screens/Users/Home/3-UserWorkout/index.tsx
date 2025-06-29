@@ -35,12 +35,15 @@ interface ChangeWorkoutCardProps {
 
 export function UserWorkout() {
   const { user } = useAuth()
-  const selectedLanguage = user?.selectedLanguage
+
   const route = useRoute()
   const {
-    workoutId,
+    activeWorkoutId,
+    activeWorkoutCreatedAt,
+
+    activeWorkoutDataLength,
     data,
-    // workoutLength,
+    // activeWorkoutDataLength,
     // selectedWorkoutExerciseIndex,
     selectedWorkoutExerciseIndex,
     muscleGroupsLabel,
@@ -166,7 +169,8 @@ export function UserWorkout() {
                     item={item} // workoutExerciseId
                     exerciseIndex={index} // Supino reto.... exercicios
                     workoutCardIndex={cardIndex}
-                    workoutId={workoutId}
+                    activeWorkoutId={activeWorkoutId}
+                    activeWorkoutCreatedAt={activeWorkoutCreatedAt}
                     isFocused={workoutCardInfo?.workoutCardIndex === index}
                     scrollToNextCard={scrollToNextCard}
                   />

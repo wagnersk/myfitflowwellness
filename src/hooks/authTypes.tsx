@@ -887,7 +887,8 @@ export interface AuthContextData {
 
   updateCachedUserWorkoutsLog: (
     newExercise: ICachedCardExerciseData,
-    workoutId: string,
+    activeWorkoutId: string,
+    activeWorkoutCreatedAt: number,
     updatedAt: number,
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,

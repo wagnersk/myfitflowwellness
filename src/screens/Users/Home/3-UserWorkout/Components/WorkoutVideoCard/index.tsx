@@ -7,7 +7,7 @@ import { useTheme } from 'styled-components/native'
 import { useAuth } from '@hooks/auth'
 
 import { format } from 'date-fns'
-import { ptBR, enUS } from 'date-fns/locale'
+import { ptBR, enUS, fi } from 'date-fns/locale'
 import { useTimer } from 'react-timer-hook'
 
 import FileText from '@assets/FileText.svg'
@@ -55,7 +55,8 @@ interface Props {
   item: IFormattedCardExerciseData
   exerciseIndex: number // Supino reto.... exercicios
   workoutCardIndex: number // A B ou C
-  workoutId: string
+  activeWorkoutId: string
+  activeWorkoutCreatedAt: number
   isFocused: boolean | null
   scrollToNextCard: () => void
 }
@@ -63,7 +64,8 @@ function WorkoutVideoCardComponent({
   item,
   workoutCardIndex,
   exerciseIndex,
-  workoutId,
+  activeWorkoutId,
+  activeWorkoutCreatedAt,
   isFocused,
   scrollToNextCard,
 }: Props) {
@@ -94,7 +96,7 @@ function WorkoutVideoCardComponent({
     const defaultSets = item?.workoutExerciseSets || [] // cada repeticcao
 
     const cachedInfo = cachedUserWorkoutsLog?.workoutsLog
-      .find((v) => v.workoutId === workoutId)
+      .find((v) => v.workoutId === activeWorkoutId)
       ?.workoutCardsLogData.find((v) => v.cardIndex === workoutCardIndex)
       ?.weightDoneLogs.find((v) => v.workoutExerciseId === workoutExerciseId)
 
@@ -318,7 +320,8 @@ function WorkoutVideoCardComponent({
     // notes - ok REAL
     saveFastCachedWorkoutData(
       copyProgression,
-      workoutId,
+      activeWorkoutId,
+      activeWorkoutCreatedAt,
       date,
       completedTimestamp,
       workoutCardIndex,
@@ -351,7 +354,8 @@ function WorkoutVideoCardComponent({
       // handleUpdateSets -ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         dateNow,
         completedTimestamp,
         workoutCardIndex,
@@ -464,8 +468,8 @@ function WorkoutVideoCardComponent({
           createdAt:
             copyProgression.workoutExerciseSets[
               defaultModalState.activeWeightIndex
-            ].selectedRepetitionData.createdAt || getTime,
-          updatedAt: getTime,
+            ].selectedRepetitionData.createdAt || completedTimestamp,
+          updatedAt: completedTimestamp,
         }
 
         setModalCachedCardExerciseData(copyProgression)
@@ -586,7 +590,8 @@ function WorkoutVideoCardComponent({
       // onAddRepetition - ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         date,
         completedTimestamp,
         workoutCardIndex,
@@ -630,7 +635,8 @@ function WorkoutVideoCardComponent({
       // onRemoveRepetition - ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         date,
         completedTimestamp,
         workoutCardIndex,
@@ -649,50 +655,18 @@ function WorkoutVideoCardComponent({
     markAsCompletedGreenCheckAndCacheSave()
     onTimerManage('play')
 
-    const find = myWorkout?.activeData.find((va) => va.id === workoutId)
+    const find = myWorkout?.activeData.find((va) => va.id === activeWorkoutId)
 
     if (find && find.workoutStartAt === 0) {
       startWorkoutCounterDate()
     }
 
     function markAsCompletedGreenCheckAndCacheSave() {
-      /* so ta aparecendo proximo quando eu forco o render
-      
-      ver pq nao ta acojntecendo dew maneira natural */
-
       const date = new Date()
       const completedTimestamp = date.getTime()
 
       const copyProgression = { ...modalCachedCardExerciseData } // Copiar o estado atual
       if (copyProgression.workoutExerciseSets === undefined) return
-
-      /* const newRepetitionToAdd: ICachedUsingWorkoutData = {
-        selectedRepetitionData: {
-          checkedSet: '',
-          createdAt: completedTimestamp,
-          updatedAt: completedTimestamp,
-        },
-        repetitionData: [...(lastSet.repetitionData || [])],
-        restTimeData: {
-          restTimeNumber: lastSet.restTimeData?.restTimeNumber || 0,
-          restTime_insensitive:
-            lastSet.restTimeData?.restTime_insensitive || '',
-          createdAt: lastSet.restTimeData?.createdAt || completedTimestamp,
-          updatedAt: completedTimestamp,
-        },
-        weightData: {
-          value: '0',
-          createdAt: lastSet.weightData?.createdAt || completedTimestamp,
-          updatedAt: completedTimestamp,
-        },
-        completedData: {
-          isCompleted: false,
-          createdAt: completedTimestamp,
-          updatedAt: completedTimestamp,
-        },
-        updatedAt: completedTimestamp,
-        createdAt: completedTimestamp,
-      } */
 
       copyProgression.workoutExerciseSets[
         defaultModalState.activeWeightIndex
@@ -713,7 +687,8 @@ function WorkoutVideoCardComponent({
       // handleDoneWorkout - ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         date,
         completedTimestamp,
         workoutCardIndex,
@@ -739,6 +714,10 @@ function WorkoutVideoCardComponent({
         modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
           ?.repetitionData?.[0].isReps
 
+      const firstTime =
+        modalCachedCardExerciseData?.workoutExerciseSets?.[activeIndex]
+          ?.repetitionData?.[0].isTime
+
       let secondRep = false
 
       if (getIsActivedRangeOfSets) {
@@ -752,7 +731,7 @@ function WorkoutVideoCardComponent({
         return true
       }
 
-      if (getWeightValue === `0`) {
+      if (getWeightValue === `0` && !firstTime) {
         openModal('weight', activeIndex)
         return true
       }
@@ -798,7 +777,8 @@ function WorkoutVideoCardComponent({
 
   async function saveFastCachedWorkoutData(
     copyProgression: ICachedCardExerciseData,
-    _workoutId: string,
+    _activeWorkoutId: string,
+    _activeWorkoutCreatedAt: number,
     date: Date,
     completedTimestamp: number,
     _workoutCardIndex: number,
@@ -815,12 +795,10 @@ function WorkoutVideoCardComponent({
 
     // map em todos createdAt e updatedAt
 
-    console.log(`Depois de alterar ->`)
-    console.log(JSON.stringify(copyProgression, null, 2))
-    return
     await updateCachedUserWorkoutsLog(
       copyProgression,
-      _workoutId,
+      _activeWorkoutId,
+      _activeWorkoutCreatedAt,
       completedTimestamp,
       lastCompletedDay,
       lastCompletedDate,
@@ -1158,6 +1136,10 @@ function WorkoutVideoCardComponent({
       modalCachedCardExerciseData?.workoutExerciseSets?.[index]
         ?.repetitionData?.[0].isReps
 
+    const firstTime =
+      modalCachedCardExerciseData?.workoutExerciseSets?.[index]
+        ?.repetitionData?.[0].isTime
+
     let secondRep = false
 
     if (getIsActivedRangeOfSets) {
@@ -1219,7 +1201,7 @@ function WorkoutVideoCardComponent({
         return
       }
 
-      if (getWeightValue === `0`) {
+      if (getWeightValue === `0` && !firstTime) {
         openModal('weight', index)
         return
       }
@@ -1267,13 +1249,14 @@ function WorkoutVideoCardComponent({
       // marcarItem - ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         date,
         completedTimestamp,
         workoutCardIndex,
       )
 
-      const find = myWorkout?.activeData.find((va) => va.id === workoutId)
+      const find = myWorkout?.activeData.find((va) => va.id === activeWorkoutId)
 
       if (find && find.workoutStartAt === 0) {
         startWorkoutCounterDate()
@@ -1323,7 +1306,8 @@ function WorkoutVideoCardComponent({
       // desmarcarItem  - ok REAL
       saveFastCachedWorkoutData(
         copyProgression,
-        workoutId,
+        activeWorkoutId,
+        activeWorkoutCreatedAt,
         date,
         completedTimestamp,
         workoutCardIndex,
@@ -1546,7 +1530,8 @@ function WorkoutVideoCardComponent({
     // onSaveNewTimer - ok REAL
     saveFastCachedWorkoutData(
       copyProgression,
-      workoutId,
+      activeWorkoutId,
+      activeWorkoutCreatedAt,
       date,
       completedTimestamp,
       workoutCardIndex,

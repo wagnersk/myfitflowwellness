@@ -233,9 +233,11 @@ export type WorkoutsExercisesInfoProps = {
 }
 
 type WorkoutDataWithSelectedWorkout = {
-  workoutId: string
+  activeWorkoutId: string
+  activeWorkoutCreatedAt: number
+  activeWorkoutDataLength: number
+
   data: IWorkoutsData
-  workoutLength: number
   selectedWorkoutExerciseIndex: number | undefined
   muscleGroupsLabel: string
   letter: string
@@ -243,9 +245,10 @@ type WorkoutDataWithSelectedWorkout = {
 }
 
 export type NavigationUserWorkoutListProps = {
-  workoutId: string
+  activeWorkoutId: string
+  activeWorkoutCreatedAt: number
+  activeWorkoutDataLength: number
   data: IWorkoutsData
-  workoutLength: number
   cardIndex: number
 }
 

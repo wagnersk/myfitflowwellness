@@ -86,20 +86,25 @@ export function UserHome() {
   const theme = useTheme()
   const firstName = user?.name?.split(' ')
 
-  async function handleNextStep(data: IWorkoutsData, cardIndex: number) {
+  async function handleNextStep(
+    workoutData: IWorkoutsData,
+    currentCardIndex: number,
+  ) {
     if (!myWorkoutDataArray) return
     if (!myWorkout) return
 
-    const findMyWorkoutDataArray = myWorkoutDataArray.data.find(
-      (v) => v.id === myWorkout.activeData[0].id,
+    const activeWorkout = myWorkoutDataArray.data.find(
+      (workout) => workout.id === myWorkout.activeData[0].id,
     )
-    if (!findMyWorkoutDataArray) return
 
+    if (!activeWorkout) return
+    // myWorkoutDataArray
     navigation.navigate('userWorkoutList', {
-      workoutId: findMyWorkoutDataArray.id,
-      data,
-      workoutLength: findMyWorkoutDataArray.data.workoutsData.length,
-      cardIndex,
+      activeWorkoutId: activeWorkout.id,
+      activeWorkoutCreatedAt: activeWorkout.createdAt,
+      activeWorkoutDataLength: activeWorkout.data.workoutsData.length,
+      data: workoutData,
+      cardIndex: currentCardIndex,
     })
   }
 
@@ -116,9 +121,11 @@ export function UserHome() {
     if (!findFakeMyWorkoutDataArray) return
 
     navigation.navigate('userWorkoutList', {
-      workoutId: findFakeMyWorkoutDataArray.id,
+      activeWorkoutId: findFakeMyWorkoutDataArray.id,
+      activeWorkoutCreatedAt: findFakeMyWorkoutDataArray.createdAt,
+      activeWorkoutDataLength:
+        findFakeMyWorkoutDataArray.data.workoutsData.length,
       data,
-      workoutLength: findFakeMyWorkoutDataArray.data.workoutsData.length,
       cardIndex,
     })
   }
@@ -126,6 +133,7 @@ export function UserHome() {
   async function handleOpenAllCategories() {
     navigation.navigate('userAllCategories')
   }
+
   async function handleOpenCamera() {
     navigation.navigate('camera')
   }
@@ -267,6 +275,7 @@ export function UserHome() {
         const workoutData = myWorkoutDataArray.data.find(
           (v) => v.id === myWorkout.activeData[0].id,
         )
+
         if (workoutData) {
           setGetWorkoutArrayData(workoutData.data)
         }
@@ -282,45 +291,54 @@ export function UserHome() {
   )
 
   const svgColor = theme.COLORS.BLUE_STROKE
-
   useEffect(() => {
     start()
+
     /* 
     agora q ta sincronizandi com o servidor
     ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
     */
     async function start() {
-      if (!cachedUserWorkoutsLog) return
+      const serverLastupdated = await getLastUpdatedAtUserWorkoutCache()
+      if (!cachedUserWorkoutsLog) {
+        const updatedCache = await fetchworkoutDataCache() // busca noivo
+        if (updatedCache) {
+          // TODO criar fetch
+          console.log(`updated do servidor ta mais atual asd`, updatedCache)
+          // esse ta funcionando
+
+          updatedCache.updatedAt = serverLastupdated
+          saveCachedUserWorkoutsLog(updatedCache)
+          console.log(`asd`, cachedUserWorkoutsLog)
+
+          // salvar no cache
+        }
+        return
+      }
+
+      //  console.log(`cache servidor:`, serverLastupdated)
+      // console.log(`cache armazenado:`, cachedUserWorkoutsLog.updatedAt)
+      /*       console.log(
+        `myWorkout.activeData`,
+        JSON.stringify(myWorkout?.activeData, null, 2),
+      )
+      console.log(
+        `cachedUserWorkoutsLog.workoutsLog.length`,
+        cachedUserWorkoutsLog.workoutsLog.length,
+      )
+      console.log(
+        `cache armazenado:`,
+        JSON.stringify(cachedUserWorkoutsLog, null, 2),
+      ) */
+
+      // console.log(`myWorkoutDataArray created:`, myWorkoutDataArray)
 
       /* 
       cachedUserWorkoutsLog -> ja ta feito , preciso ver
       como ele ta sendo montado , onde eu mexo nesse data 
       aqui eu so vou enviarele compactado, a manipulacao eh feita
       antes
-      
       */
-
-      console.log(`
-        
-      VER COMO VOU SALVAR O CACHEDDATA > workoutsLog
-      
-      workoutId +  createdAt
-
-      PORQUE SE ELE SALVAR NOVAMENTE O MESMO TREINO ele 
-      nao fica igual ,
-
-      ao salvar o treino devo pegar o createdAt do myWorkout ativo
-
-      pelo workoutId consigo comparar e buscar
-
-      ao salvar e buscar sempre vou precisar do createdAtx
-        
-        `)
-
-      const serverLastupdated = await getLastUpdatedAtUserWorkoutCache()
-
-      console.log(`cache servidor:`, serverLastupdated)
-      console.log(`cache armazenado:`, cachedUserWorkoutsLog.updatedAt)
 
       if (serverLastupdated === null) return
 

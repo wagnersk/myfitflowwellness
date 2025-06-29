@@ -72,8 +72,6 @@ export function MarketPlaceWorkoutDetail() {
     }, []),
   )
 
-  console.log(`=>`, JSON.stringify(myWorkout))
-
   if (myWorkout && myWorkout.data) {
     const fcachedWorkout = myWorkout.data.find(
       (v) => v.id === selectedWorkoutId,
