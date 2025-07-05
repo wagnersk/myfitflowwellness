@@ -893,7 +893,7 @@ export interface AuthContextData {
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
-  ) => Promise<void>
+  ) => Promise<IUserWorkoutsLog | null>
 
   // firebasefetchworkoutDataCache
   updateUserFirebaseWorkoutCache: (data: IUserWorkoutsLog) => Promise<void>

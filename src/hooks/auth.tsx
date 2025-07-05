@@ -2461,6 +2461,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     setCachedExerciseHistoryData(data)
   }
+
   // oreciso receber o workoutId para identificar ocache
   async function loadCachedUserWorkoutsLog(userId: string) {
     const storageCachedExercisesWeightDoneLogDataKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
@@ -2473,8 +2474,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         const summaryInfoData = JSON.parse(
           storedWeightDoneLogString,
         ) as IUserWorkoutsLog
-
-        console.log(`loadCachedUserWorkoutsLog`, summaryInfoData)
 
         if (summaryInfoData.userId !== userId) return null
         setCachedUserWorkoutsLog(summaryInfoData) // Atualiza o estado com os dados carregados
@@ -2493,14 +2492,15 @@ function AuthProvider({ children }: AuthProviderProps) {
     lastCompletedFormattedDay: IptBrUs,
     lastCompletedFormattedDate: string,
     cardIndex: number,
-  ): Promise<void> {
+  ): Promise<IUserWorkoutsLog | null> {
     // falta conferir todos updatesAt
-
     /* quando troca de exercicio ele nao ta preservando o workoutsLog 
-    
+    ver se ta salvando realmente e icluir o updatedAt do firebase
     */
+
+    console.log(`updatedAt ->>> `, updatedAt)
     const userId = getUserId()
-    if (!userId) return
+    if (!userId) return null
     const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
 
     const cachedLog = await loadCachedUserWorkoutLog(userId)
@@ -2520,13 +2520,20 @@ function AuthProvider({ children }: AuthProviderProps) {
         createdAt: activeWorkoutCreatedAt,
         updatedAt,
       }
+      console.log(`Salvando depois de createWorkoutLog`)
+
       await saveToStorage(storageKey, newCachedWorkoutLog)
       setCachedUserWorkoutsLog(newCachedWorkoutLog)
+      return newCachedWorkoutLog
     } else {
       const responseUpdatedWorkoutLog = await updateCache(logIndex, cardIndex)
+      console.log(`Salvando depois de updateCache`)
+      responseUpdatedWorkoutLog.updatedAt = updatedAt
 
       await saveToStorage(storageKey, cachedLog)
       setCachedUserWorkoutsLog(responseUpdatedWorkoutLog)
+      console.log(`Salvo`)
+      return responseUpdatedWorkoutLog
     }
 
     async function loadCachedUserWorkoutLog(_userId: string) {
@@ -2541,14 +2548,28 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     async function createWorkoutLog(newExercise: ICachedCardExerciseData) {
       console.log(`createWorkoutLog @@`, newExercise)
-      const workoutCardsLogData: IWorkoutCardLogData = {
+
+      const preWorkoutCardsLogData = {
         cardIndex,
-        weightDoneLogs: [newExercise],
-        totalSessionsCompleted: 1,
+        weightDoneLogs: [newExercise], // map aqui , o q for true , soma e agamzena em total
         updatedAt,
         createdAt: activeWorkoutCreatedAt,
         lastCompletedFormattedDay,
         lastCompletedFormattedDate,
+      }
+
+      let counter = 0
+
+      const allTrue = newExercise.workoutExerciseSets?.every(
+        (rep) => rep.completedData.isCompleted,
+      )
+      if (allTrue) {
+        counter++
+      }
+
+      const workoutCardsLogData: IWorkoutCardLogData = {
+        ...preWorkoutCardsLogData,
+        totalSessionsCompleted: counter,
       }
 
       const newWorkoutLog: IWorkoutLog = {
@@ -2561,58 +2582,88 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     async function updateCache(_logIndex: number, _cardIndex: number) {
-      console.log(`updateCache @@`, _logIndex, _cardIndex, newExercise)
       // falta inspecionar esse fluxo , create ta Ok
+      // workoutCardsLogData
       const _cardLogIndex = cachedLog.workoutsLog[
         _logIndex
       ].workoutCardsLogData.findIndex((log) => log.cardIndex === _cardIndex)
 
       if (_cardLogIndex === -1) {
         const _response = await createNewCardLog(_logIndex, _cardIndex)
-        cachedLog.workoutsLog[_logIndex].workoutCardsLogData.push(_response)
+        return _response
 
-        return cachedLog
-      } else {
-        const responseMergedData = await updateCardLog(_logIndex, _cardLogIndex)
-
-        cachedLog.workoutsLog[_logIndex].workoutCardsLogData.push(
-          responseMergedData,
-        )
-        return cachedLog
-
-        async function updateCardLog(_logIndex: number, _cardLogIndex: number) {
-          const workoutLog = cachedLog.workoutsLog[_logIndex]
-          workoutLog.updatedAt = updatedAt
-
-          const cardLog = workoutLog.workoutCardsLogData[_cardLogIndex]
-          cardLog.updatedAt = updatedAt
-          const weightLog = cardLog.weightDoneLogs[_cardLogIndex]
-
-          const mergedExercise: ICachedCardExerciseData = {
-            ...weightLog,
-            ...newExercise,
-            updatedAt,
+        async function createNewCardLog(_logIndex: number, _cardIndex: number) {
+          let counter = 0
+          const allTrue = newExercise.workoutExerciseSets?.every(
+            (rep) => rep.completedData.isCompleted,
+          )
+          if (allTrue) {
+            counter++
           }
 
-          cardLog.weightDoneLogs[_cardLogIndex] = mergedExercise
+          const workoutCardsLogData: IWorkoutCardLogData = {
+            cardIndex: _cardIndex,
+            weightDoneLogs: [newExercise],
+            totalSessionsCompleted: counter,
+            updatedAt,
+            createdAt: updatedAt,
+            lastCompletedFormattedDay,
+            lastCompletedFormattedDate,
+          }
+          cachedLog.workoutsLog[_logIndex].workoutCardsLogData.push(
+            workoutCardsLogData,
+          )
+
           cachedLog.updatedAt = updatedAt
 
-          return cardLog
-        }
-      }
+          cachedLog.workoutsLog[_logIndex].updatedAt = updatedAt
 
-      async function createNewCardLog(_logIndex: number, _cardIndex: number) {
-        const workoutCardsLogData: IWorkoutCardLogData = {
-          cardIndex: _cardIndex,
-          weightDoneLogs: [newExercise],
-          totalSessionsCompleted: 1,
-          updatedAt,
-          createdAt: updatedAt,
-          lastCompletedFormattedDay,
-          lastCompletedFormattedDate,
-        }
+          cachedLog.workoutsLog[_logIndex].workoutCardsLogData[
+            _cardLogIndex
+          ].updatedAt = updatedAt
 
-        return workoutCardsLogData
+          return cachedLog
+        }
+      } else {
+        const responseMergedData = await updateCardLog(_logIndex, _cardLogIndex)
+        return responseMergedData
+
+        async function updateCardLog(_logIndex: number, _cardLogIndex: number) {
+          const cardLog =
+            cachedLog.workoutsLog[_logIndex].workoutCardsLogData[_cardLogIndex]
+
+          const _exerciseIndex = cardLog.weightDoneLogs.findIndex(
+            (log) => log.workoutExerciseId === newExercise.workoutExerciseId,
+          )
+          if (_exerciseIndex === -1) {
+            cardLog.weightDoneLogs.push(newExercise) // Adiciona novo exercício
+          } else {
+            cardLog.weightDoneLogs[_exerciseIndex] = newExercise // Atualiza exercício existente
+          }
+
+          let counter = 0
+          cardLog.weightDoneLogs.forEach((v) => {
+            const allTrue = v.workoutExerciseSets?.every(
+              (rep) => rep.completedData.isCompleted,
+            )
+            if (allTrue) {
+              counter++
+            }
+          })
+
+          cachedLog.updatedAt = updatedAt
+          cachedLog.workoutsLog[_logIndex].updatedAt = updatedAt
+          cachedLog.workoutsLog[_logIndex].workoutCardsLogData[
+            _cardLogIndex
+          ].updatedAt = updatedAt
+
+          cachedLog.workoutsLog[_logIndex].workoutCardsLogData[_cardLogIndex] =
+            cardLog
+
+          cardLog.totalSessionsCompleted = counter
+
+          return cachedLog
+        }
       }
     }
     async function saveToStorage(
@@ -3171,6 +3222,10 @@ function AuthProvider({ children }: AuthProviderProps) {
       const docSnap = await getDoc(workoutDataCacheDoc)
 
       const getDateFromTimeStamp = data.updatedAt
+      console.log(
+        `->>         01       - updateUserFirebaseWorkoutCache`,
+        getDateFromTimeStamp,
+      )
 
       if (!docSnap.exists()) {
         await setDoc(workoutDataCacheDoc, {

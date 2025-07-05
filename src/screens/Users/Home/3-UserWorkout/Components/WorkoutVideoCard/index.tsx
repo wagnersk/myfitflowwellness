@@ -71,6 +71,7 @@ function WorkoutVideoCardComponent({
 }: Props) {
   const theme = useTheme()
   const {
+    updateUserFirebaseWorkoutCache,
     updateCachedUserWorkoutsLog, // TODO -> ver como eu manipulo -> Buscar pelo createdAt + workoutId
     cachedUserWorkoutsLog,
     myWorkout,
@@ -786,16 +787,13 @@ function WorkoutVideoCardComponent({
     const lastCompletedDay = {
       'pt-br': format(date, 'EEEE', { locale: ptBR }),
       us: format(date, 'EEEE', { locale: enUS }),
-    } /* 
-    TODO ->
-    criar testes aqui do q ta vindo pro final comparando pelo booelan */
+    }
 
     const lastCompletedDate = format(date, 'dd/MM/yyyy')
     copyProgression.updatedAt = completedTimestamp
 
     // map em todos createdAt e updatedAt
-
-    await updateCachedUserWorkoutsLog(
+    const responseupdatedCache = await updateCachedUserWorkoutsLog(
       copyProgression,
       _activeWorkoutId,
       _activeWorkoutCreatedAt,
@@ -804,6 +802,9 @@ function WorkoutVideoCardComponent({
       lastCompletedDate,
       _workoutCardIndex,
     )
+
+    if (!responseupdatedCache) return
+    await updateUserFirebaseWorkoutCache(responseupdatedCache)
   }
 
   /*  function saveCachedHistoricDateWorkoutData() {
@@ -1215,34 +1216,41 @@ function WorkoutVideoCardComponent({
 
       const date = new Date()
       const completedTimestamp = date.getTime()
+      console.log(`antes `, copyProgression.workoutExerciseSets.length)
 
-      copyProgression.workoutExerciseSets =
-        copyProgression.workoutExerciseSets.map((item, i) => {
-          if (i <= index) {
-            return {
-              ...item,
-              updatedAt: completedTimestamp,
-              completedData: {
-                ...item.completedData,
-                isCompleted: true,
+      //  copyProgression.workoutExerciseSets[1].completedData.isCompleted
+
+      const formattedSets = copyProgression.workoutExerciseSets.map(
+        (item, i) => {
+          const shouldUpdate = i <= index // Define se o item deve ser atualizado
+
+          return shouldUpdate
+            ? {
+                ...item,
                 updatedAt: completedTimestamp,
-                createdAt: item.completedData.createdAt || completedTimestamp,
-              },
-            }
-          }
-          return item
-        })
+                completedData: {
+                  ...item.completedData,
+                  isCompleted: true,
+                  updatedAt: completedTimestamp,
+                  createdAt:
+                    item.completedData?.createdAt || completedTimestamp, // Preserva o createdAt existente
+                },
+              }
+            : item // Retorna o item original se não precisar ser atualizado
+        },
+      )
+
+      console.log(`depois `, formattedSets.length)
+      copyProgression.workoutExerciseSets = formattedSets
 
       setModalCachedCardExerciseData(copyProgression)
       setDefaultModalState((prev) => {
-        if (copyProgression.workoutExerciseSets === undefined) return prev
+        if (formattedSets === undefined) return prev
         return {
           ...prev,
           lastActiveWeightIndex: defaultModalState.activeWeightIndex,
           activeWeightIndex:
-            index + 1 < copyProgression.workoutExerciseSets.length
-              ? index + 1
-              : index,
+            index + 1 < formattedSets.length ? index + 1 : index,
         }
       })
 
@@ -1262,7 +1270,7 @@ function WorkoutVideoCardComponent({
         startWorkoutCounterDate()
       }
     }
-
+    console.log(`modalCachedCardExerciseData`, modalCachedCardExerciseData)
     // ok VALIDADO
     function desmarcarItem(index: number) {
       if (modalCachedCardExerciseData === undefined) return

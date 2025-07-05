@@ -72,6 +72,7 @@ export function WorkoutBlueCardItem({
     const findCachedCard = cachedUserWorkoutsLog.workoutsLog[
       workoutsLogIndex
     ].workoutCardsLogData.find((v) => v.cardIndex === cardIndex)
+    // console.log('findCachedCard', findCachedCard?.totalSessionsCompleted)
 
     totalSessionsCompleted = findCachedCard
       ? findCachedCard.totalSessionsCompleted

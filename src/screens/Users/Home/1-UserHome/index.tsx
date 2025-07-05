@@ -291,6 +291,7 @@ export function UserHome() {
   )
 
   const svgColor = theme.COLORS.BLUE_STROKE
+
   useEffect(() => {
     start()
 
@@ -298,6 +299,7 @@ export function UserHome() {
     agora q ta sincronizandi com o servidor
     ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
     */
+
     async function start() {
       const serverLastupdated = await getLastUpdatedAtUserWorkoutCache()
       if (!cachedUserWorkoutsLog) {
