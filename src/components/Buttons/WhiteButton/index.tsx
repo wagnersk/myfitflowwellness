@@ -41,7 +41,6 @@ interface Props {
     | 'support'
     | 'plan'
     | 'terms'
-    | 'privacy'
     | 'anamnese'
     | 'crosshair'
     | 'checkcicle'
@@ -120,9 +119,7 @@ export function WhiteButton({
             {iconStyle === 'anamnese' && (
               <Heartbeat width={28} height={28} fill={'#0c17bb'} />
             )}
-            {iconStyle === 'privacy' && (
-              <ShieldCheck width={28} height={28} fill={'#0c17bb'} />
-            )}
+
             {iconStyle === 'terms' && (
               <Scroll width={28} height={28} fill={'#0c17bb'} />
             )}

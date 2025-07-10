@@ -1,24 +1,16 @@
-import styled, { css } from 'styled-components/native'
+import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { ReactNode } from 'react'
-import { TouchableOpacity } from 'react-native'
-interface Props {
-  children: ReactNode
-  loading?: boolean
-  type?: 'up' | 'down' | 'up-down'
-}
 
 export const Container = styled.View`
   flex: 1;
 `
 
 export const Body = styled.View`
-  /* justify-content: space-between;
-  align-items: center; */
   width: 100%;
   height: 100%;
   flex: 1;
   gap: 32px;
+  padding-top: 16px;
 `
 
 export const ListWrapper = styled.View`

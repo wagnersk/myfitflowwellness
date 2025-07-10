@@ -325,6 +325,13 @@ export declare global {
 
       camera: undefined
 
+      frequentQuestions: undefined
+
+      termsAndConditions: undefined
+      privacyPolicy: undefined
+      parQ: undefined
+      anamnese: undefined
+
       userFormEditProfile: undefined
       userWorkouts: undefined
       userChallenges: undefined

@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import {
+  ImageBackground,
+  BackHandler,
+  SafeAreaView,
+  Linking,
+  Alert,
+} from 'react-native'
 
 import { useNavigation } from '@react-navigation/native'
 import { BackButton } from '@components/Buttons/BackButton'
@@ -39,6 +45,59 @@ export function UserSupport() {
   function handleGoBack() {
     navigation.goBack()
   }
+  function handleEmailPress() {
+    const email = 'suporte@myfitflow.com.br'
+    const subject = 'Dúvidas e Sugestões'
+    const body = 'Olá, gostaria de...'
+
+    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+
+    const errorMessage = {
+      'pt-br': 'Não foi possível abrir o app de e-mail.',
+      us: 'Could not open the email app.',
+    }
+
+    const selectedLanguage = user?.selectedLanguage || 'us' // Define 'us' como padrão caso undefined
+
+    Linking.openURL(url).catch(() =>
+      Alert.alert('Error', errorMessage[selectedLanguage]),
+    )
+  }
+  function handleFrequentQuestions() {
+    navigation.navigate('frequentQuestions')
+  }
+
+  function handlePrivacyPolicy() {
+    const url = 'https://www.myfitflow.com.br/privacy-policy' // Substitua pelo link desejado
+    Linking.openURL(url).catch((err) => {
+      console.error('Erro ao abrir o link:', err)
+    })
+  }
+  function handleTermsAndConditions() {
+    const url = 'https://www.myfitflow.com.br/terms-and-conditions' // Substitua pelo link desejado
+    Linking.openURL(url).catch((err) => {
+      console.error('Erro ao abrir o link:', err)
+    })
+  }
+  function handleRefund() {
+    const url = 'https://myfitflow.com.br/return-refund-policy' // Substitua pelo link desejado
+    Linking.openURL(url).catch((err) => {
+      console.error('Erro ao abrir o link:', err)
+    })
+  }
+  function handleDisclaimer() {
+    const url = 'https://myfitflow.com.br/disclaimer' // Substitua pelo link desejado
+    Linking.openURL(url).catch((err) => {
+      console.error('Erro ao abrir o link:', err)
+    })
+  }
+  function handleEULA() {
+    const url = 'https://myfitflow.com.br/eula' // Substitua pelo link desejado
+    Linking.openURL(url).catch((err) => {
+      console.error('Erro ao abrir o link:', err)
+    })
+  }
+
   useEffect(() => {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
@@ -86,7 +145,7 @@ export function UserSupport() {
                               ? 'Envie-nos um E-mail'
                               : 'Send us an E-mail'
                           }
-                          onPress={() => {}}
+                          onPress={handleEmailPress}
                           bordertype="up"
                           iconStyle="email"
                         />
@@ -96,11 +155,31 @@ export function UserSupport() {
                               ? 'Perguntas Frequentes'
                               : 'FAQ'
                           }
-                          onPress={() => {}}
+                          onPress={handleFrequentQuestions}
                           bordertype="down"
                           iconStyle="question"
                         />
                       </ContainerWrapper>
+                      {/*       <ContainerWrapper>
+                        <ContainerTittleWrapper>
+                          <ContainerTittle>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Minha saúde'
+                              : 'My Health'}
+                          </ContainerTittle>
+                        </ContainerTittleWrapper>
+
+                        <WhiteButton
+                          tittle={
+                            user?.selectedLanguage === 'pt-br'
+                              ? 'Anamnese'
+                              : 'Anamnesis'
+                          }
+                          onPress={handleParQ}
+                          bordertype="up-down"
+                          iconStyle="anamnese"
+                        />
+                      </ContainerWrapper> */}
 
                       <ContainerWrapper>
                         <ContainerTittleWrapper>
@@ -114,31 +193,50 @@ export function UserSupport() {
                         <WhiteButton
                           tittle={
                             user?.selectedLanguage === 'pt-br'
-                              ? 'Termos e Condições'
-                              : 'Terms and Conditions'
+                              ? 'Política de Privacidade'
+                              : 'Privacy Policy'
                           }
-                          onPress={() => {}}
+                          onPress={handlePrivacyPolicy}
                           bordertype="up"
                           iconStyle="terms"
                         />
                         <WhiteButton
                           tittle={
                             user?.selectedLanguage === 'pt-br'
-                              ? 'Política de Privacidade'
-                              : 'Privacy Policy'
+                              ? 'Termos e Condições'
+                              : 'Terms and Conditions'
                           }
-                          onPress={() => {}}
-                          iconStyle="privacy"
+                          onPress={handleTermsAndConditions}
+                          bordertype="none"
+                          iconStyle="terms"
                         />
                         <WhiteButton
                           tittle={
                             user?.selectedLanguage === 'pt-br'
-                              ? 'Anamnese'
-                              : 'Anamnesis'
+                              ? 'Política de Reembolso'
+                              : 'Refund Policy'
                           }
-                          onPress={() => {}}
+                          onPress={handleRefund}
+                          bordertype="none"
+                          iconStyle="terms"
+                        />
+                        <WhiteButton
+                          tittle={
+                            user?.selectedLanguage === 'pt-br'
+                              ? 'Contrato de Lic de Usuário F.'
+                              : 'End User License Agreement'
+                          }
+                          onPress={handleDisclaimer}
+                          bordertype="none"
+                          iconStyle="terms"
+                        />
+                        <WhiteButton
+                          tittle={
+                            user?.selectedLanguage === 'pt-br' ? 'EULA' : 'EULA'
+                          }
+                          onPress={handleEULA}
                           bordertype="down"
-                          iconStyle="anamnese"
+                          iconStyle="terms"
                         />
                       </ContainerWrapper>
                     </ListWrapper>

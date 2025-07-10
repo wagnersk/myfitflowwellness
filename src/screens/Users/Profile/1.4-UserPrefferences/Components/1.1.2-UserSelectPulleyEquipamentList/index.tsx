@@ -246,109 +246,97 @@ export function UserSelectPulleyEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!userEquipaments) return
-      const { pulleyData } = userEquipaments
-
+      // 1. Fetch all possible options from the server
       const pulleyDefaultSelectData = await fetchPulleyOptionData()
-      if (!pulleyDefaultSelectData) return
-      const { data } = pulleyDefaultSelectData
+      if (!pulleyDefaultSelectData?.data) return
 
+      // 2. Get user's saved preferences from context
+      const userSelectedPulleyOption = userEquipaments?.pulleyData
+
+      // Define the "all" option for reuse
       const allPulleyData = {
         allPulley_insensitive: {
           'pt-br': `todos`,
           us: `all`,
         },
       }
+      // Destructure all possible options for clarity
+      const { pulleySelectData, pulleyHandlerSelectData } =
+        pulleyDefaultSelectData.data
 
-      const userPulleyData =
-        pulleyData && pulleyData.data && pulleyData.data.pulleySelectData
+      let formattedAllPulleyData: IAllPulleyDataSelect
+      let formattedPulleyData: IPulleyDataSelect[]
+      let formattedPulleyHandlesData: IPulleyHandlerDataSelect[]
 
-      const userPulleyHandlerData =
-        pulleyData && pulleyData.data && pulleyData.data.pulleyHandlerSelectData
+      if (!userSelectedPulleyOption?.data) {
+        // CASE 1: User has no saved preferences. Initialize everything to false.
+        formattedAllPulleyData = { ...allPulleyData, index: 0, selected: false }
 
-      let formattedAllPulleyData = {} as IAllPulleyDataSelect // Ajustado para ser uma lista
-      let formattedPulleyData: IPulleyDataSelect[] = []
-      let formattedPulleyHandlesData: IPulleyHandlerDataSelect[] = []
+        formattedPulleyData = pulleySelectData.map((v, index) => ({
+          pulley_insensitive: v.pulley_insensitive,
+          index,
+          selected: false,
+        }))
 
-      if (data) {
-        if (!userPulleyData) return
-        const findPulley = userPulleyData.find(
-          (val) =>
-            selectedLanguage &&
-            val.pulley_insensitive[selectedLanguage] ===
-              allPulleyData.allPulley_insensitive[selectedLanguage],
+        formattedPulleyHandlesData = pulleyHandlerSelectData.map(
+          (v, index) => ({
+            pulleyHandler_insensitive: v.pulleyHandler_insensitive,
+            index,
+            selected: false,
+          }),
+        )
+      } else {
+        // CASE 2: User has saved preferences. Compare with the full list.
+        const userSelection = userSelectedPulleyOption.data
+
+        // Check if "all" is selected
+        const isAllSelected = userSelection.pulleySelectData?.some(
+          (val) => val.pulley_insensitive['pt-br'] === 'todos',
+        )
+        formattedAllPulleyData = {
+          ...allPulleyData,
+          index: 0,
+          selected: !!isAllSelected,
+        }
+
+        // Create sets for efficient lookup
+        const selectedPulleySet = new Set(
+          userSelection.pulleySelectData?.map(
+            (item) => item.pulley_insensitive[selectedLanguage!],
+          ),
+        )
+        const selectedPulleyHandlerSet = new Set(
+          userSelection.pulleyHandlerSelectData?.map(
+            (item) => item.pulleyHandler_insensitive[selectedLanguage!],
+          ),
         )
 
-        formattedAllPulleyData = findPulley
-          ? {
-              allPulley_insensitive: allPulleyData.allPulley_insensitive,
-              index: 0,
-              selected: true,
-            }
-          : {
-              allPulley_insensitive: allPulleyData.allPulley_insensitive,
-              index: 0,
-              selected: false,
-            }
+        // Map all options and check against the sets
+        formattedPulleyData = pulleySelectData.map((v, index) => ({
+          pulley_insensitive: v.pulley_insensitive,
+          index,
+          selected: selectedPulleySet.has(
+            v.pulley_insensitive[selectedLanguage!],
+          ),
+        }))
 
-        formattedPulleyData = data.pulleySelectData.map((v, index) => {
-          let findIt
-          if (userPulleyData && selectedLanguage) {
-            findIt = userPulleyData.find(
-              (val) =>
-                val.pulley_insensitive[selectedLanguage] ===
-                v.pulley_insensitive[selectedLanguage],
-            )
-          }
-
-          if (findIt) {
-            return {
-              pulley_insensitive: v.pulley_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              pulley_insensitive: v.pulley_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
-
-        formattedPulleyHandlesData = data.pulleyHandlerSelectData.map(
-          (v, index) => {
-            let findIt
-            if (userPulleyHandlerData && selectedLanguage) {
-              findIt = userPulleyHandlerData.find(
-                (val) =>
-                  val.pulleyHandler_insensitive[selectedLanguage] ===
-                  v.pulleyHandler_insensitive[selectedLanguage],
-              )
-            }
-
-            if (findIt) {
-              return {
-                pulleyHandler_insensitive: v.pulleyHandler_insensitive,
-                index,
-                selected: true,
-              }
-            } else {
-              return {
-                pulleyHandler_insensitive: v.pulleyHandler_insensitive,
-                index,
-                selected: false,
-              }
-            }
-          },
+        formattedPulleyHandlesData = pulleyHandlerSelectData.map(
+          (v, index) => ({
+            pulleyHandler_insensitive: v.pulleyHandler_insensitive,
+            index,
+            selected: selectedPulleyHandlerSet.has(
+              v.pulleyHandler_insensitive[selectedLanguage!],
+            ),
+          }),
         )
       }
 
+      // 3. Update component state
       setSelectedAllPulleyData(formattedAllPulleyData)
-
       setSelectedPulley(formattedPulleyData)
       setSelectedPulleyHandles(formattedPulleyHandlesData)
     }
+
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
     BackHandler.addEventListener('hardwareBackPress', () => {

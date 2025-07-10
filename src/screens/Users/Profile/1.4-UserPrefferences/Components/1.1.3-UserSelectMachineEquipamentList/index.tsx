@@ -178,75 +178,75 @@ export function UserSelectMachineEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!userEquipaments) return
-      const { machineData } = userEquipaments
-
+      // 1. Fetch all possible options from the server
       const machineDefaultSelectData = await fetchMachineOptionData()
-      if (!machineDefaultSelectData) return
-      const { data } = machineDefaultSelectData
+      if (!machineDefaultSelectData?.data) return
 
+      // 2. Get user's saved preferences from context
+      const userSelectedMachineOption = userEquipaments?.machineData
+
+      // Define the "all" option for reuse
       const allMachineData = {
         allMachine_insensitive: {
           'pt-br': `todos`,
           us: `all`,
         },
       }
+      // Destructure all possible options for clarity
+      const { machineSelectData } = machineDefaultSelectData.data
 
-      const userMachineData =
-        machineData && machineData.data && machineData.data.machineSelectData
+      let formattedAllMachineData: IAllMAchineDataSelect
+      let formattedMachineData: IMachineDataSelect[]
 
-      let formattedAllMachineData = {} as IAllMAchineDataSelect // Ajustado para ser uma lista
-      let formattedMachineData: IMachineDataSelect[] = []
+      if (!userSelectedMachineOption?.data) {
+        // CASE 1: User has no saved preferences. Initialize everything to false.
+        formattedAllMachineData = {
+          ...allMachineData,
+          index: 0,
+          selected: false,
+        }
 
-      if (data) {
-        if (!userMachineData) return
+        formattedMachineData = machineSelectData.map((v, index) => ({
+          machine_insensitive: v.machine_insensitive,
+          index,
+          selected: false,
+        }))
+      } else {
+        // CASE 2: User has saved preferences. Compare with the full list.
+        const userSelection = userSelectedMachineOption.data
 
-        const findIt = userMachineData.find(
-          (val) =>
-            selectedLanguage &&
-            val.machine_insensitive[selectedLanguage] ===
-              allMachineData.allMachine_insensitive[selectedLanguage],
+        // Check if "all" is selected
+        const isAllSelected = userSelection.machineSelectData?.some(
+          (val) => val.machine_insensitive['pt-br'] === 'todos',
+        )
+        formattedAllMachineData = {
+          ...allMachineData,
+          index: 0,
+          selected: !!isAllSelected,
+        }
+
+        // Create a set for efficient lookup
+        const selectedMachineSet = new Set(
+          userSelection.machineSelectData?.map(
+            (item) => item.machine_insensitive[selectedLanguage!],
+          ),
         )
 
-        formattedAllMachineData = findIt
-          ? {
-              allMachine_insensitive: allMachineData.allMachine_insensitive,
-              index: 0,
-              selected: true,
-            }
-          : {
-              allMachine_insensitive: allMachineData.allMachine_insensitive,
-              index: 0,
-              selected: false,
-            }
-
-        formattedMachineData = data.machineSelectData.map((v, index) => {
-          const findIt = userMachineData.find(
-            (val) =>
-              selectedLanguage &&
-              val.machine_insensitive[selectedLanguage] ===
-                v.machine_insensitive[selectedLanguage],
-          )
-
-          if (findIt) {
-            return {
-              machine_insensitive: v.machine_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              machine_insensitive: v.machine_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
-
-        setSelectedAllMachines(formattedAllMachineData)
-        setSelectedMachines(formattedMachineData)
+        // Map all options and check against the set
+        formattedMachineData = machineSelectData.map((v, index) => ({
+          machine_insensitive: v.machine_insensitive,
+          index,
+          selected: selectedMachineSet.has(
+            v.machine_insensitive[selectedLanguage!],
+          ),
+        }))
       }
+
+      // 3. Update component state
+      setSelectedAllMachines(formattedAllMachineData)
+      setSelectedMachines(formattedMachineData)
     }
+
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
     BackHandler.addEventListener('hardwareBackPress', () => {

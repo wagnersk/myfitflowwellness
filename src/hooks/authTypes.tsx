@@ -934,8 +934,8 @@ export interface AuthContextData {
   ) => Promise<void>
   updateUserSelectedLanguage: (language: 'pt-br' | 'us') => Promise<void>
 
-  loadUserEquipments: () => Promise<IUserEquipamentData | null>
-  saveUserEquipments: (equipamentsInfo: IUserEquipamentData) => Promise<void>
+  loadAndSaveUserGymInfo: () => Promise<null | void>
+  loadAndSaveUserEquipaments: () => Promise<null | void>
 
   fetchLevelOptionData: () => Promise<ILevelSelectData | null>
   updateUserLevelPreffer: (data: IUserLevel) => Promise<void>

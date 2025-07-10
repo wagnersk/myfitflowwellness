@@ -65,6 +65,9 @@ export function UserPrefferencesSelectList() {
     fetchTimeBySessionOptionData,
     fetchLevelOptionData,
   } = useAuth()
+
+  console.log('userGymInfo -> ', userGymInfo)
+
   const theme = useTheme()
   const navigation = useNavigation()
   const route = useRoute()
@@ -353,10 +356,10 @@ export function UserPrefferencesSelectList() {
       if (dataType === `Foco em`) {
         const muscleOptionData = await fetchMuscleOptionData()
         if (!muscleOptionData) return
-        if (!userGymInfo) return
-        console.log(`fetchMuscleOptionData`, fetchMuscleOptionData)
         const { data } = muscleOptionData
-        const { muscleFocus } = userGymInfo
+
+        const userSelectedMuscleFocusOption = userGymInfo?.muscleFocus
+
         const balancedData = {
           muscle_insensitive: {
             'pt-br': `equilibrado`,
@@ -366,74 +369,64 @@ export function UserPrefferencesSelectList() {
 
         let formattedBalancedData = {} as IUserSelect // Ajustado para ser uma lista
         let formattedMuscleData: IUserSelect[] = [] // Ajustado para ser uma lista
-        if (!muscleFocus) {
-          muscleDataNotFound()
 
-          function muscleDataNotFound() {
-            formattedBalancedData = {
-              tittle: balancedData.muscle_insensitive,
-              id: 0,
+        if (!userSelectedMuscleFocusOption) {
+          formattedBalancedData = {
+            tittle: balancedData.muscle_insensitive,
+            id: 0,
+            selected: false,
+          }
+
+          formattedMuscleData = data.map((v, i) => {
+            return {
+              tittle: v.muscle_insensitive,
+              id: i,
               selected: false,
             }
+          })
+        } else {
+          const { muscleSelectedData } = userSelectedMuscleFocusOption
+          if (!muscleSelectedData) return
 
-            formattedMuscleData = data.map((v, i) => {
+          const findIt = muscleSelectedData.find(
+            (val) =>
+              selectedLanguage &&
+              val[selectedLanguage] ===
+                balancedData.muscle_insensitive[selectedLanguage],
+          )
+
+          formattedBalancedData = findIt
+            ? {
+                tittle: balancedData.muscle_insensitive,
+                id: 0,
+                selected: true,
+              }
+            : {
+                tittle: balancedData.muscle_insensitive,
+                id: 0,
+                selected: false,
+              }
+
+          formattedMuscleData = data.map((v, i) => {
+            if (!translateMuscleGroupInfo) {
               return {
-                tittle: v.muscle_insensitive,
+                tittle: { 'pt-br': '', us: '' },
                 id: i,
                 selected: false,
               }
-            })
-          }
-        }
-
-        if (muscleFocus) {
-          muscleDataFound()
-
-          function muscleDataFound() {
-            if (!muscleFocus) return
-            const { muscleSelectedData } = muscleFocus
-            if (!muscleSelectedData) return
-
+            }
             const findIt = muscleSelectedData.find(
               (val) =>
                 selectedLanguage &&
                 val[selectedLanguage] ===
-                  balancedData.muscle_insensitive[selectedLanguage],
+                  v.muscle_insensitive[selectedLanguage],
             )
-
-            formattedBalancedData = findIt
-              ? {
-                  tittle: balancedData.muscle_insensitive,
-                  id: 0,
-                  selected: true,
-                }
-              : {
-                  tittle: balancedData.muscle_insensitive,
-                  id: 0,
-                  selected: false,
-                }
-
-            formattedMuscleData = data.map((v, i) => {
-              if (!translateMuscleGroupInfo) {
-                return {
-                  tittle: { 'pt-br': '', us: '' },
-                  id: i,
-                  selected: false,
-                }
-              }
-              const findIt = muscleSelectedData.find(
-                (val) =>
-                  selectedLanguage &&
-                  val[selectedLanguage] ===
-                    v.muscle_insensitive[selectedLanguage],
-              )
-              if (findIt) {
-                return { tittle: v.muscle_insensitive, id: i, selected: true }
-              } else {
-                return { tittle: v.muscle_insensitive, id: i, selected: false }
-              }
-            })
-          }
+            if (findIt) {
+              return { tittle: v.muscle_insensitive, id: i, selected: true }
+            } else {
+              return { tittle: v.muscle_insensitive, id: i, selected: false }
+            }
+          })
         }
 
         setSelectedData(formattedMuscleData)

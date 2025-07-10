@@ -1,26 +1,63 @@
-import styled, { css } from 'styled-components/native'
+// screens/Questionnaire/styles.ts
 import { RFValue } from '@utils/RFValue'
-import { ReactNode } from 'react'
-import { TouchableOpacity } from 'react-native'
-interface Props {
-  children: ReactNode
-  loading?: boolean
-  type?: 'up' | 'down' | 'up-down'
-}
+import styled from 'styled-components/native'
 
 export const Container = styled.View`
   flex: 1;
 `
 
+export const Subtitle = styled.Text`
+  font-size: 16px;
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+
+  margin-bottom: 16px;
+`
+
+export const ProgressBarWrapper = styled.View`
+  height: 8px;
+  width: 100%;
+  background-color: #eee;
+  border-radius: 4px;
+  margin-bottom: 20px;
+`
+
+export const ProgressBarFill = styled.View`
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 4px;
+`
+
+export const QuestionList = styled.View`
+  flex: 1;
+`
+
+export const Navigation = styled.View<{ singleButton?: boolean }>`
+  flex-direction: row;
+  justify-content: ${({ singleButton }) =>
+    singleButton ? 'flex-end' : 'space-between'};
+  gap: 10px;
+  margin-top: 16px;
+`
+
+export const NavButton = styled.TouchableOpacity`
+  padding: 12px 20px;
+  border-radius: 8px;
+  background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+`
+
+export const NavButtonText = styled.Text`
+  color: white;
+  font-weight: 600;
+`
+
 export const Body = styled.View`
-  /* justify-content: space-between;
-  align-items: center; */
   width: 100%;
   height: 100%;
   flex: 1;
   gap: 32px;
+  padding-top: 16px;
 `
-
 export const ListWrapper = styled.View`
   padding-top: 32px;
   gap: 16px;

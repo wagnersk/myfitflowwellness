@@ -1960,9 +1960,24 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function loadUserGymInfo(): Promise<IUserGymInfo | null> {
+  async function loadAndSaveUserGymInfo() {
+    // async function loadAndSaveUserGymInfo(): Promise<IUserGymInfo | null> {
+
     const userId = user?.id
     if (!userId) return null
+
+    try {
+      const response = await loadUserGymInfo(userId)
+      if (response) {
+        saveUserGymInfo(response)
+      }
+    } catch (error) {
+      console.log(`error`, error)
+      return null
+    }
+  }
+
+  async function loadUserGymInfo(userId: string): Promise<IUserGymInfo | null> {
     const usersGymInfoDoc = doc(db, 'users', userId, 'gymData', 'gymInfo')
     setIsWaitingApiResponse(true)
     const gymInfoSnap = await getDoc(usersGymInfoDoc)
@@ -2014,11 +2029,26 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
     }
   }
-
-  async function loadUserEquipments(): Promise<IUserEquipamentData | null> {
+  async function loadAndSaveUserEquipaments() {
     const userId = user?.id
     if (!userId) return null
 
+    try {
+      const response = await loadUserEquipments(userId)
+      if (!response) return null
+      setUserEquipaments(response)
+    } catch (error) {
+      console.log(`error`, error)
+      return null
+    }
+  }
+
+  /*   async function loadUserGymInfo(userId: string): Promise<IUserGymInfo | null> {
+
+   */
+  async function loadUserEquipments(
+    userId: string,
+  ): Promise<IUserEquipamentData | null> {
     const usersEquipamentDoc = doc(
       db,
       'users',
@@ -2738,7 +2768,27 @@ function AuthProvider({ children }: AuthProviderProps) {
   } */
 
   // fazer se inspirando no notes
+  console.log(`userGymInfo`)
+  console.log(userGymInfo)
   async function loadCachedUserGymInfo(userId: string) {
+    const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
+
+    try {
+      const storedCachedGymInfoString =
+        await AsyncStorage.getItem(storageGymInfoKey)
+
+      if (storedCachedGymInfoString) {
+        const gymDaya = JSON.parse(storedCachedGymInfoString) as IUserGymInfo
+
+        setUserGymInfo(gymDaya)
+      } else {
+        setUserGymInfo(null)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar o histórico de exercícios:', error)
+    }
+  }
+  /*  async function loadFromFirebaseFirstThenCachedUserGymInfo(userId: string) {
     const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
 
     try {
@@ -2749,6 +2799,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         const response = await loadUserGymInfo()
         if (response) {
           saveUserGymInfo(response)
+          setUserGymInfo(response)
         }
       }
 
@@ -2757,14 +2808,39 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         if (gymInfoData) {
           setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
+          console.log(`loadUserGymInfo`)
+          console.log(JSON.stringify(gymInfoData))
         }
       }
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
   }
+ */
+  async function loadCachedUserPersonalTrainer(userId: string) {
+    const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
 
-  async function loadCachedUserPersonalContract(userId: string) {
+    try {
+      const storedCachedEquipamentsString = await AsyncStorage.getItem(
+        storageEquipamentsKey,
+      )
+
+      if (storedCachedEquipamentsString) {
+        const personalTrainerData = JSON.parse(
+          storedCachedEquipamentsString,
+        ) as IUserPersonalTrainerContract
+
+        setUserPersonalTrainerContract(personalTrainerData)
+      } else {
+        setUserPersonalTrainerContract(null)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar o histórico de exercícios:', error)
+    }
+  }
+  /*  async function loadFromFirebaseFirstThenCachedUserPersonalTrainer(
+    userId: string,
+  ) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
 
     try {
@@ -2776,18 +2852,19 @@ function AuthProvider({ children }: AuthProviderProps) {
         const response = await loadUserPersonalTrainerContract()
         if (response) {
           saveUserPersonalTrainerContract(response)
+          setUserPersonalTrainerContract(response)
         }
       }
 
       if (storedCachedEquipamentsString) {
         const equipamentsData = JSON.parse(storedCachedEquipamentsString)
 
-        setUserEquipaments(equipamentsData) // Atualiza o estado com os dados carregados
+        setUserPersonalTrainerContract(equipamentsData) // Atualiza o estado com os dados carregados
       }
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
-  }
+  } */
   async function checkIfActiveWorkoutHasExpired(getMyWorkout: IMyWorkouts) {
     // console.log(JSON.stringify(myWorkoutDataArray?.data.map((v) => v.data)))
     console.log(
@@ -2838,10 +2915,32 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Error updating workout data:', error)
     }
   }
-
   async function loadCachedUserEquipaments(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
 
+    try {
+      const storedCachedEquipamentsString = await AsyncStorage.getItem(
+        storageEquipamentsKey,
+      )
+
+      if (storedCachedEquipamentsString) {
+        const equipamentData = JSON.parse(
+          storedCachedEquipamentsString,
+        ) as IUserEquipamentData
+
+        setUserEquipaments(equipamentData)
+      } else {
+        setUserEquipaments(null)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar o histórico de exercícios:', error)
+    }
+  }
+  /*   async function loadFromFirebaseFirstThenCachedUserEquipaments(
+    userId: string,
+  ) {
+    const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
+    console.log(storageEquipamentsKey)
     try {
       const storedCachedEquipamentsString = await AsyncStorage.getItem(
         storageEquipamentsKey,
@@ -2851,6 +2950,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         const response = await loadUserEquipments()
         if (response) {
           saveUserEquipments(response)
+          setUserEquipaments(response)
         }
       }
 
@@ -2862,7 +2962,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
-  }
+  } */
   // setCachedUserWorkoutsLog
   async function updateCachedVideoTable(
     cachedLocalPathVideo: string,
@@ -4095,12 +4195,16 @@ function AuthProvider({ children }: AuthProviderProps) {
       await checkIfActiveWorkoutHasExpired(v)
     })
 
+    // analisar dps
     await loadGraphicsAndStatistics(userId)
 
+    // only cached
     await loadCachedVideoTable(userId)
+
+    // firebase First
+    await loadCachedUserPersonalTrainer(userId)
     await loadCachedUserGymInfo(userId)
     await loadCachedUserEquipaments(userId)
-    await loadCachedUserPersonalContract(userId)
   }
 
   useEffect(() => {
@@ -4209,10 +4313,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         deleteFriend,
         fetchReceivedRequestsList,
 
-        loadUserGymInfo,
-        saveUserGymInfo,
-        loadUserEquipments,
-        saveUserEquipments,
+        loadAndSaveUserGymInfo,
+        loadAndSaveUserEquipaments,
 
         user,
         userEquipaments,

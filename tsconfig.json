@@ -1,6 +1,7 @@
  {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    
     "types": ["node", "jest", "express"],
     "strict": true,
     "baseUrl": "./",
@@ -28,7 +29,10 @@
       ],
       "@src/*": [
         "./src/*"
-      ]
+      ],
+      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
+
     }
-  }
+  } 
+
 }

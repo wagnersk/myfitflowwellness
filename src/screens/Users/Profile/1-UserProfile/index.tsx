@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import { Alert, ImageBackground, ScrollView, View } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
@@ -35,8 +35,6 @@ import {
   EditProfileButton,
   EditProfileButtonWraper,
 } from './styles'
-import { getTranslatedFiltersOfWorkout } from '@utils/getTranslatedFiltersOfWorkout'
-import { IEquipamentsFilters, IptBrUs } from '@hooks/authTypes'
 import { diffInAge } from '@utils/diffInAge'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
 
@@ -45,12 +43,12 @@ export function UserProfile() {
     user,
     userGymInfo,
     userEquipaments,
-    userPersonalTrainerContract,
     updateUserSelectedLanguage,
     updateLocalCacheAnonymousUserSelectedLanguage,
-    firebaseSignOut,
+    loadAndSaveUserEquipaments,
+    loadAndSaveUserGymInfo,
   } = useAuth()
-
+  /* saveUserGymInfo */
   const navigation = useNavigation()
 
   const [selectedLanguage, setSelectedLanguage] = useState(
@@ -80,6 +78,12 @@ export function UserProfile() {
       ],
     )
   }
+  function handleParQ() {
+    navigation.navigate('parQ')
+  }
+  function handleAnamnese() {
+    navigation.navigate('anamnese')
+  }
 
   function handleEditProfileNextStep() {
     navigation.navigate('userFormEditProfile')
@@ -87,11 +91,15 @@ export function UserProfile() {
   function handleMyPlanNextStep() {
     navigation.navigate('userPlan')
   }
-  function handlePersonalTrainerNextStep() {
-    navigation.navigate('userPersonalTrainer')
-  }
   function handleMyWorkoutsNextStep() {
     navigation.navigate('userWorkouts')
+  }
+  function handleSuporteNextStep() {
+    navigation.navigate('userSupport')
+  }
+
+  function handlePersonalTrainerNextStep() {
+    navigation.navigate('userPersonalTrainer')
   }
   function handleChallengesNextStep() {
     navigation.navigate('userChallenges')
@@ -106,9 +114,6 @@ export function UserProfile() {
     navigation.navigate('userPrefferences')
   }
 
-  function handleSuporteNextStep() {
-    navigation.navigate('userSupport')
-  }
   const userAge = diffInAge(user?.birthdate)
   const experienceTime = diffInAge(userGymInfo?.whenStartedAtGym)
 
@@ -129,93 +134,19 @@ export function UserProfile() {
       setStatusBarStyle('dark')
     }, []),
   )
-
-  let equipmentFilters: IEquipamentsFilters | undefined
-
-  if (
-    userEquipaments &&
-    userEquipaments.freeData &&
-    userEquipaments.freeData.data &&
-    userEquipaments.freeData.data.barSelectData &&
-    userEquipaments.pulleyData &&
-    userEquipaments.pulleyData.data &&
-    userEquipaments.machineData &&
-    userEquipaments.machineData.data
-  ) {
-    equipmentFilters = {
-      bar: userEquipaments.freeData.data.barSelectData.map(
-        (item) => item.bar_insensitive,
-      ),
-      bench: userEquipaments.freeData.data.benchSelectData.map(
-        (item) => item.bench_insensitive,
-      ),
-      machine: userEquipaments.machineData.data.machineSelectData.map(
-        (item) => item.machine_insensitive,
-      ),
-      other: userEquipaments.freeData.data.otherSelectData.map(
-        (item) => item.other_insensitive,
-      ),
-      pulley: userEquipaments.pulleyData.data.pulleySelectData.map(
-        (item) => item.pulley_insensitive,
-      ),
-      pulleyHandles:
-        userEquipaments.pulleyData.data.pulleyHandlerSelectData.map(
-          (item) => item.pulleyHandler_insensitive,
-        ),
-      weight: userEquipaments.freeData.data.weightSelectData.map(
-        (item) => item.weight_insensitive,
-      ),
+  useEffect(() => {
+    async function start() {
+      if (!userGymInfo) {
+        await loadAndSaveUserGymInfo()
+        console.log(`atualizando userGymInfo`)
+      }
+      if (!userEquipaments) {
+        await loadAndSaveUserEquipaments()
+        console.log(`atualizando userEquipaments`)
+      }
     }
-  }
-  const auxDataUnicFiltersText =
-    user && selectedLanguage
-      ? getTranslatedFiltersOfWorkout(equipmentFilters, selectedLanguage)
-      : []
-
-  const formattedMuscleFocus =
-    userGymInfo &&
-    selectedLanguage &&
-    userGymInfo.muscleFocus &&
-    userGymInfo.muscleFocus.muscleSelectedData &&
-    userGymInfo.muscleFocus.muscleSelectedData.reduce(
-      (acc: string, curr: IptBrUs, index: number) => {
-        const muscleUs = curr?.[selectedLanguage] // Acessando diretamente o SELECTEDLANGUAGE
-        return muscleUs ? acc + (index > 0 ? ', ' : '') + muscleUs : acc
-      },
-      '',
-    )
-
-  const formattedGoal =
-    userGymInfo &&
-    selectedLanguage &&
-    userGymInfo.goal &&
-    userGymInfo.goal.goalSelectedData &&
-    userGymInfo.goal.goalSelectedData[selectedLanguage]
-      ? userGymInfo.goal.goalSelectedData[selectedLanguage]
-          .charAt(0)
-          .toUpperCase() +
-        userGymInfo.goal.goalSelectedData[selectedLanguage].slice(1)
-      : ''
-
-  const formattedFrequencyByWeek =
-    userGymInfo &&
-    selectedLanguage &&
-    userGymInfo.sessionsByWeek &&
-    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData &&
-    userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
-      ? userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
-      : ''
-
-  const formattedTimeBySession =
-    userGymInfo &&
-    selectedLanguage &&
-    userGymInfo.timeBySession &&
-    userGymInfo.timeBySession.timeBySessionSelectedData &&
-    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage] &&
-    userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
-      ? userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
-      : ''
-
+    start()
+  }, [])
   return (
     <Container>
       <StatusBar
@@ -315,14 +246,44 @@ export function UserProfile() {
                     bordertype="none"
                     iconStyle="plan"
                   />
+
                   <WhiteButton
-                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
                     }
                     onPress={handleSuporteNextStep}
                     bordertype="down"
                     iconStyle="support"
+                  />
+                </Body>
+                <Body>
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br' ? 'ParQ' : 'ParQ'
+                    }
+                    onPress={handleParQ}
+                    bordertype="up"
+                    iconStyle="anamnese"
+                  />
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Anamnese'
+                        : 'Anamnesis'
+                    }
+                    onPress={handleAnamnese}
+                    bordertype="none"
+                    iconStyle="anamnese"
+                  />
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Preferencias'
+                        : 'Preferences'
+                    }
+                    onPress={handlePreferencesStep}
+                    bordertype="down"
+                    iconStyle="settings"
                   />
                 </Body>
                 {/* 
@@ -360,7 +321,6 @@ export function UserProfile() {
                     iconStyle="camera"
                   />
                   */}
-
                 {/*        <Body>   <WhiteButton
                     betaMode
                     tittle={
@@ -394,7 +354,6 @@ export function UserProfile() {
                     bordertype="down"
                     iconStyle="boxing-glove"
                   />    </Body> */}
-
                 <Body>
                   <BodyText>
                     {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}

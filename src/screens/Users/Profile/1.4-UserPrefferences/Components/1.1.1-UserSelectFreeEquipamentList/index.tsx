@@ -380,156 +380,126 @@ export function UserSelectFreeEquipamentList() {
     fetchSelectOptionsData()
 
     async function fetchSelectOptionsData() {
-      if (!userEquipaments) return
-      const { freeData } = userEquipaments
-
+      // 1. Fetch all possible options from the server
       const freeDefaultSelectData = await fetchFreeOptionData()
-      if (!freeDefaultSelectData) return
-      const { data } = freeDefaultSelectData
+      if (!freeDefaultSelectData?.data) return
 
+      // 2. Get user's saved preferences from context
+      const userSelectedfreeDataOption = userEquipaments?.freeData
+
+      // Define the "all" option for reuse
       const allFreeData = {
         allFree_insensitive: {
           'pt-br': `todos`,
           us: `all`,
         },
       }
+      // Destructure all possible options for clarity
+      const {
+        barSelectData,
+        benchSelectData,
+        weightSelectData,
+        otherSelectData,
+      } = freeDefaultSelectData.data
 
-      const userBarData =
-        freeData && freeData.data && freeData.data.barSelectData
-      const userBenchData =
-        freeData && freeData.data && freeData.data.benchSelectData
-      const userWeightData =
-        freeData && freeData.data && freeData.data.weightSelectData
-      const userOtherData =
-        freeData && freeData.data && freeData.data.otherSelectData
+      let formattedAllFreeData: IAllFreeDataSelect
+      let formattedBarData: IBarDataSelect[]
+      let formattedBenchData: IBenchDataSelect[]
+      let formattedWeightData: IWeightDataSelect[]
+      let formattedOtherData: IOtherDataSelect[]
 
-      let formattedAllFreeData = {} as IAllFreeDataSelect // Ajustado para ser uma lista
+      if (!userSelectedfreeDataOption?.data) {
+        // CASE 1: User has no saved preferences. Initialize everything to false.
+        formattedAllFreeData = { ...allFreeData, index: 0, selected: false }
 
-      let formattedBarData: IBarDataSelect[] = []
-      let formattedBenchData: IBenchDataSelect[] = []
-      let formattedWeightData: IWeightDataSelect[] = []
-      let formattedOtherData: IOtherDataSelect[] = []
+        formattedBarData = barSelectData.map((v, index) => ({
+          bar_insensitive: v.bar_insensitive,
+          index,
+          selected: false,
+        }))
 
-      if (data) {
-        if (!userBarData) return
-        const findFree = userBarData.find(
-          (val) =>
-            selectedLanguage &&
-            val.bar_insensitive[selectedLanguage] ===
-              allFreeData.allFree_insensitive[selectedLanguage],
+        formattedBenchData = benchSelectData.map((v, index) => ({
+          bench_insensitive: v.bench_insensitive,
+          index,
+          selected: false,
+        }))
+
+        formattedWeightData = weightSelectData.map((v, index) => ({
+          weight_insensitive: v.weight_insensitive,
+          index,
+          selected: false,
+        }))
+
+        formattedOtherData = otherSelectData.map((v, index) => ({
+          other_insensitive: v.other_insensitive,
+          index,
+          selected: false,
+        }))
+      } else {
+        // CASE 2: User has saved preferences. Compare with the full list.
+        const userSelection = userSelectedfreeDataOption.data
+
+        // Check if "all" is selected
+        const isAllSelected = userSelection.barSelectData?.some(
+          (val) => val.bar_insensitive['pt-br'] === 'todos',
+        )
+        formattedAllFreeData = {
+          ...allFreeData,
+          index: 0,
+          selected: !!isAllSelected,
+        }
+
+        // Create sets for efficient lookup
+        const selectedBarSet = new Set(
+          userSelection.barSelectData?.map(
+            (item) => item.bar_insensitive[selectedLanguage!],
+          ),
+        )
+        const selectedBenchSet = new Set(
+          userSelection.benchSelectData?.map(
+            (item) => item.bench_insensitive[selectedLanguage!],
+          ),
+        )
+        const selectedWeightSet = new Set(
+          userSelection.weightSelectData?.map(
+            (item) => item.weight_insensitive[selectedLanguage!],
+          ),
+        )
+        const selectedOtherSet = new Set(
+          userSelection.otherSelectData?.map(
+            (item) => item.other_insensitive[selectedLanguage!],
+          ),
         )
 
-        formattedAllFreeData = findFree
-          ? {
-              allFree_insensitive: allFreeData.allFree_insensitive,
-              index: 0,
-              selected: true,
-            }
-          : {
-              allFree_insensitive: allFreeData.allFree_insensitive,
-              index: 0,
-              selected: false,
-            }
+        formattedBarData = barSelectData.map((v, index) => ({
+          bar_insensitive: v.bar_insensitive,
+          index,
+          selected: selectedBarSet.has(v.bar_insensitive[selectedLanguage!]),
+        }))
 
-        formattedBarData = data.barSelectData.map((v, index) => {
-          let findIt
-          if (userBarData && selectedLanguage) {
-            findIt = userBarData.find(
-              (val) =>
-                val.bar_insensitive[selectedLanguage] ===
-                v.bar_insensitive[selectedLanguage],
-            )
-          }
+        formattedBenchData = benchSelectData.map((v, index) => ({
+          bench_insensitive: v.bench_insensitive,
+          index,
+          selected: selectedBenchSet.has(
+            v.bench_insensitive[selectedLanguage!],
+          ),
+        }))
 
-          if (findIt) {
-            return {
-              bar_insensitive: v.bar_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              bar_insensitive: v.bar_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
+        formattedWeightData = weightSelectData.map((v, index) => ({
+          weight_insensitive: v.weight_insensitive,
+          index,
+          selected: selectedWeightSet.has(
+            v.weight_insensitive[selectedLanguage!],
+          ),
+        }))
 
-        formattedBenchData = data.benchSelectData.map((v, index) => {
-          let findIt
-          if (userBenchData && selectedLanguage) {
-            findIt = userBenchData.find(
-              (val) =>
-                val.bench_insensitive[selectedLanguage] ===
-                v.bench_insensitive[selectedLanguage],
-            )
-          }
-
-          if (findIt) {
-            return {
-              bench_insensitive: v.bench_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              bench_insensitive: v.bench_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
-
-        formattedWeightData = data.weightSelectData.map((v, index) => {
-          let findIt
-          if (userWeightData && selectedLanguage) {
-            findIt = userWeightData.find(
-              (val) =>
-                val.weight_insensitive[selectedLanguage] ===
-                v.weight_insensitive[selectedLanguage],
-            )
-          }
-
-          if (findIt) {
-            return {
-              weight_insensitive: v.weight_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              weight_insensitive: v.weight_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
-
-        formattedOtherData = data.otherSelectData.map((v, index) => {
-          let findIt
-          if (userOtherData && selectedLanguage) {
-            findIt = userOtherData.find(
-              (val) =>
-                val.other_insensitive[selectedLanguage] ===
-                v.other_insensitive[selectedLanguage],
-            )
-          }
-
-          if (findIt) {
-            return {
-              other_insensitive: v.other_insensitive,
-              index,
-              selected: true,
-            }
-          } else {
-            return {
-              other_insensitive: v.other_insensitive,
-              index,
-              selected: false,
-            }
-          }
-        })
+        formattedOtherData = otherSelectData.map((v, index) => ({
+          other_insensitive: v.other_insensitive,
+          index,
+          selected: selectedOtherSet.has(
+            v.other_insensitive[selectedLanguage!],
+          ),
+        }))
       }
 
       setSelectedAllFreeData(formattedAllFreeData)
@@ -539,6 +509,7 @@ export function UserSelectFreeEquipamentList() {
       setSelectedWeight(formattedWeightData)
       setSelectedOther(formattedOtherData)
     }
+
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'none' } })
 
     BackHandler.addEventListener('hardwareBackPress', () => {

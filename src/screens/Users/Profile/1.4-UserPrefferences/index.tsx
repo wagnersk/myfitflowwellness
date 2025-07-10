@@ -26,11 +26,10 @@ import {
   Header,
 } from './styles'
 import { setStatusBarStyle } from 'expo-status-bar'
-import { SelectFilterButton } from '@components/Buttons/SelectFilterButton'
 import {
+  IUserPrefferencesSelectListNavigation,
   IUserSelectFreeEquipamentListNavigation,
   IUserSelectPulleyEquipamentListNavigation,
-  IUserPrefferencesSelectListNavigation,
   IUserSelectMachineEquipamentListNavigation,
 } from '@src/@types/navigation'
 
@@ -174,7 +173,6 @@ export function UserPrefferences() {
     })
   }, [])
 
-  console.log('userGymInfo', userGymInfo)
   /*   userEquipaments,
     userGymInfo, */
   const formattedLevel =
@@ -188,8 +186,8 @@ export function UserPrefferences() {
           .toUpperCase() +
         userGymInfo.level.levelSelectedData[selectedLanguage].slice(1)
       : selectedLanguage === 'pt-br'
-        ? 'Selecione seu nível'
-        : 'Select a level'
+        ? 'nível'
+        : 'level'
 
   const formattedGoal =
     selectedLanguage &&
@@ -202,8 +200,8 @@ export function UserPrefferences() {
           .toUpperCase() +
         userGymInfo.goal.goalSelectedData[selectedLanguage].slice(1)
       : selectedLanguage === 'pt-br'
-        ? 'Selecione um objetivo'
-        : 'Select a goal'
+        ? 'objetivo'
+        : 'goal'
 
   const formattedFrequencyByWeek =
     userGymInfo &&
@@ -213,8 +211,8 @@ export function UserPrefferences() {
     userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
       ? userGymInfo.sessionsByWeek.sessionsByWeekSelectedData[selectedLanguage]
       : selectedLanguage === 'pt-br'
-        ? 'Selecione quantos dias por semana'
-        : 'Select how many days per week'
+        ? 'dias por semana'
+        : 'how many days per '
 
   const formattedTimeBySession =
     userGymInfo &&
@@ -225,8 +223,8 @@ export function UserPrefferences() {
     userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
       ? userGymInfo.timeBySession.timeBySessionSelectedData[selectedLanguage]
       : selectedLanguage === 'pt-br'
-        ? 'Selecione quanto tempo por treino'
-        : 'Select how long per session'
+        ? 'tempo por treino'
+        : 'how long per session'
 
   const formattedMuscleFocus =
     userGymInfo &&
@@ -240,7 +238,7 @@ export function UserPrefferences() {
           },
           '',
         )
-      : 'Selecione o foco muscular'
+      : 'foco muscular'
 
   return (
     <Container>

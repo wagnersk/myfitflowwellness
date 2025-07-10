@@ -19,6 +19,8 @@ import { UserPhotoTimeline } from '@screens/Users/Profile/1.4-UserPhotoTimeline'
 import { UserPrefferences } from '@screens/Users/Profile/1.4-UserPrefferences'
 import { UserPrefferencesSelectList } from '@screens/Users/Profile/1.4-UserPrefferences/Components/1.1.0-UserPrefferencesSelectList'
 import { UserPersonalTrainer } from '@screens/Users/Profile/1.5-UserPersonalTrainer'
+import ParQ from '@screens/Users/Profile/1.1-ParQ'
+import AnamnesisForm from '@screens/Users/Profile/1.1-AnamnesisQuestion'
 
 const { Navigator, Screen } = createStackNavigator()
 
@@ -39,6 +41,9 @@ export function AppStackUserProfileRoutes() {
 
       <Screen name="userPlan" component={UserPlan} />
       <Screen name="userSupport" component={UserSupport} />
+
+      <Screen name="parQ" component={ParQ} />
+      <Screen name="anamnese" component={AnamnesisForm} />
 
       <Screen name="userPrefferences" component={UserPrefferences} />
       <Screen name="userPersonalTrainer" component={UserPersonalTrainer} />

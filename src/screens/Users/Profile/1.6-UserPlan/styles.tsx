@@ -1,88 +1,35 @@
-import styled, { css } from 'styled-components/native'
+import styled from 'styled-components/native'
 import { RFValue } from '@utils/RFValue'
-import { ReactNode } from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-interface Props {
-  children: ReactNode
-  loading?: boolean
-}
+import { TouchableOpacity } from 'react-native'
 
 export const Container = styled.View`
   flex: 1;
 `
 
-export const Body = styled.View`
-  /* justify-content: space-between;
-  align-items: center; */
-  width: 100%;
-  height: 100%;
-  flex: 1;
-  gap: 32px;
-`
-
-export const ListWrapper = styled.View`
-  padding-top: 32px;
-  gap: 16px;
-  flex: 1;
-`
-
 export const BodyImageWrapper = styled.View`
   flex: 1;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
   background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
 `
 
 export const ImageBackgroundContainer = styled.View`
-  align-items: center;
-  padding: 32px;
   flex: 1;
-`
-
-export const SettingsWrapper = styled.View`
-  align-items: flex-start;
-  width: 100%;
-  position: absolute;
+  align-items: center;
+  padding: 0 32px 32px 32px; /* Ajustado para dar espaço ao Header */
 `
 
 export const Header = styled.View`
-  align-items: center;
-  justify-content: center;
   width: 100%;
-`
-export const ContainerWrapper = styled.View`
-  width: 100%;
-  gap: 16px;
-`
-export const ButtonContainer = styled.View<{ type: 'positive' | 'neutral' }>`
-  width: 100%;
-  height: 100%;
-  padding: 8px;
-  border-radius: 12px;
-  background-color: ${({ theme, type }) =>
-    type === 'positive'
-      ? theme.COLORS.AUX_GOOGLE_GREEN
-      : theme.COLORS.NEUTRA_LETTER_AND_STROKE};
-`
-export const CardsWrapper = styled.View`
-  width: 100%;
-  gap: 12px;
-`
-
-/*   width: 100%;
-  border: 2px ${({ theme }) => theme.COLORS.BLUE_STROKE}; */
-export const ButtonWrapper = styled(TouchableOpacity)<Props>`
+  padding-top: 32px; /* Espaço para o BackButton não sobrepor o conteúdo */
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  border-radius: 12px;
-  border: solid 1px ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  ${({ loading }) =>
-    loading &&
-    css`
-      opacity: 0.5;
-    `}
+  margin-bottom: 24px;
+`
 
-  height:120px;
+export const SettingsWrapper = styled.View`
+  position: absolute;
+  left: 0;
+  top: 32px; /* Alinha com o padding do Header */
 `
 
 export const UserName = styled.Text`
@@ -91,67 +38,101 @@ export const UserName = styled.Text`
   font-size: ${RFValue(26)}px;
 `
 
-export const ContainerTittleWrapper = styled.View`
-  left: 16px;
-`
-export const MonthYearACTMessage = styled.View`
-  justify-content: center;
-  align-items: center;
-`
-export const ContainerTittle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(16)}px;
-`
-export const CardSubTittle = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
-`
-export const MonthYearACTMessageText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BODY};
-  font-size: ${RFValue(12)}px;
-`
-export const ButtonTitleWrapper = styled.View`
-  position: absolute;
-  top: 4px;
+export const Body = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    flexGrow: 1,
+    justifyContent: 'space-between', // Empurra o CTA para o final
+  },
+  showsVerticalScrollIndicator: false,
+})`
+  width: 100%;
 `
 
-export const CardTitle = styled.Text`
+// --- Card do Plano Premium ---
+export const PremiumCard = styled.View`
+  width: 100%;
+  background-color: ${({ theme }) =>
+    theme.COLORS.NEUTRA_BACKGROUND}; /* Ou outra cor de destaque suave */
+  border-radius: 16px;
+  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  padding: 24px;
+  margin-top: 16px;
+`
+
+export const PlanTitle = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.SUBTITLE};
-  font-size: ${RFValue(18)}px;
+  font-size: ${RFValue(22)}px;
+  text-align: center;
+  margin-bottom: 24px;
 `
-export const ToggleButtonWrapper = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-`
-export const FakeBackgroundWrapper = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
 
+export const FeatureList = styled.View`
+  gap: 16px; /* Espaçamento entre os itens da lista */
+`
+
+export const FeatureItem = styled.View`
+  flex-direction: row;
+  align-items: center;
+  gap: 12px; /* Espaço entre o ícone e o texto */
+`
+
+export const FeatureText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  font-size: ${RFValue(14)}px;
+  flex-shrink: 1; /* Permite que o texto quebre a linha se necessário */
+`
+
+// --- Seção de Ações (Preço e Botões) ---
+export const ActionsWrapper = styled.View`
+  width: 100%;
+  padding-top: 24px; /* Espaço para não colar no card */
   gap: 16px;
-  border-radius: 24px;
-  border: 1px solid ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  background-color: white;
 `
 
-export const ToggleButton = styled.TouchableOpacity<{ selected: boolean }>`
-  padding: 10px 20px;
-  border-radius: 20px;
-  background-color: ${({ selected, theme }) =>
-    selected ? theme.COLORS.BLUE_STROKE : 'white'};
-  opacity: ${({ selected }) => (selected ? 1 : 0.7)};
+export const PricingWrapper = styled.View`
+  align-items: center;
+  gap: 4px;
 `
 
-export const ToggleButtonText = styled.Text<{ selected: boolean }>`
-  color: ${({ selected, theme }) =>
-    selected ? 'white' : theme.COLORS.BLUE_STROKE};
+export const PriceText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(28)}px;
+`
+
+export const DiscountText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  font-size: ${RFValue(14)}px;
+`
+
+export const CTAButton = styled(TouchableOpacity)`
+  width: 100%;
+  height: 56px;
+  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  border-radius: 28px;
+  justify-content: center;
+  align-items: center;
+  opacity: ${({ disabled }) => (disabled ? 0.7 : 1)};
+`
+
+export const CTAText = styled.Text`
+  color: #ffffff;
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(16)}px;
+`
+
+export const SecondaryAction = styled(TouchableOpacity)`
+  padding: 8px;
+  align-items: center;
+`
+
+export const SecondaryActionText = styled.Text`
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-family: ${({ theme }) => theme.FONTS.BODY};
+  font-size: ${RFValue(14)}px;
+  text-decoration: underline;
+  text-decoration-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
 `
