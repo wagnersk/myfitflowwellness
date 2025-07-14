@@ -11,7 +11,7 @@ import { useTheme } from 'styled-components/native'
 import { useAuth } from '@hooks/auth'
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 import { WorkoutBlueCardList } from '@components/Cards/WorkoutBlueCard/WorkoutBlueCardList'
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
@@ -233,6 +233,29 @@ export function UserHome() {
   }, [])
 
   useEffect(() => {
+    redirectToParQ()
+
+    function redirectToParQ() {
+      navigation.navigate('parQ', { initial: true })
+    }
+    // chamar tela onBoard para preencher para
+    /* 
+
+
+    1- carregar onboarding 
+    2- 
+    salvar ele no usuario
+    carregar aqui
+    se marcou sim em alguma chama alerta
+    se nao preencheu chama
+    se marcou nao ok 
+
+    la nele tentar criar uma forma de ver quando o cara aceitou
+    deixando brecha para assinatura c 
+    */
+  }, [])
+
+  useEffect(() => {
     if (user && user.anonymousUser) {
       renderAnonymousUserFakeData()
     }
@@ -318,30 +341,6 @@ export function UserHome() {
         return
       }
 
-      //  console.log(`cache servidor:`, serverLastupdated)
-      // console.log(`cache armazenado:`, cachedUserWorkoutsLog.updatedAt)
-      /*       console.log(
-        `myWorkout.activeData`,
-        JSON.stringify(myWorkout?.activeData, null, 2),
-      )
-      console.log(
-        `cachedUserWorkoutsLog.workoutsLog.length`,
-        cachedUserWorkoutsLog.workoutsLog.length,
-      )
-      console.log(
-        `cache armazenado:`,
-        JSON.stringify(cachedUserWorkoutsLog, null, 2),
-      ) */
-
-      // console.log(`myWorkoutDataArray created:`, myWorkoutDataArray)
-
-      /* 
-      cachedUserWorkoutsLog -> ja ta feito , preciso ver
-      como ele ta sendo montado , onde eu mexo nesse data 
-      aqui eu so vou enviarele compactado, a manipulacao eh feita
-      antes
-      */
-
       if (serverLastupdated === null) return
 
       // BUSCA DO SERVIDOR
@@ -365,6 +364,12 @@ export function UserHome() {
 
   return (
     <Container>
+      <StatusBar
+        backgroundColor="transparent"
+        style="light"
+        translucent
+        animated
+      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BioInfo>
@@ -380,7 +385,6 @@ export function UserHome() {
           <LogoutButton style={{ paddingTop: 32 }} onPress={handleSignOut} />
         </BioInfoWrapper>
       </HeaderImageBackground>
-
       <BodyImageContainer>
         <BodyImageBackground />
         <BodyImageBackgroundContainerSpaceBetween>

@@ -37,7 +37,7 @@ import {
   RightContent,
 } from './styles'
 
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Search from '@assets/Search.svg'
@@ -323,6 +323,12 @@ export function UserFriendList() {
             style={{ flex: 1 }}
             resizeMode="cover"
           >
+            <StatusBar
+              backgroundColor="transparent"
+              style="dark"
+              translucent
+              animated
+            />
             <ImageBackgroundContainer>
               <SafeAreaProvider style={{ width: `100%` }}>
                 <SafeAreaView style={{ flex: 1, gap: 16 }}>

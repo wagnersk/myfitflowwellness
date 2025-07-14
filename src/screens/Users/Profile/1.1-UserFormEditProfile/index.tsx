@@ -43,7 +43,7 @@ import {
   SaveButtonText,
 } from './styles'
 
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 import { WhatsappInput } from '@components/Forms/Inputs/WhatsappInput'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { CalendarInput } from '@components/Forms/Inputs/CalendarInput'
@@ -369,6 +369,12 @@ export function UserFormEditProfile() {
             style={{ flex: 1 }}
             resizeMode="cover"
           >
+            <StatusBar
+              backgroundColor="transparent"
+              style="dark"
+              translucent
+              animated
+            />
             <ImageBackgroundContainer>
               <SafeAreaProvider style={{ width: `100%` }}>
                 <SafeAreaView style={{ flex: 1 }}>

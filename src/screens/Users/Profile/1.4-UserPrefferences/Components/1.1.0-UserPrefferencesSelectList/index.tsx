@@ -66,8 +66,6 @@ export function UserPrefferencesSelectList() {
     fetchLevelOptionData,
   } = useAuth()
 
-  console.log('userGymInfo -> ', userGymInfo)
-
   const theme = useTheme()
   const navigation = useNavigation()
   const route = useRoute()

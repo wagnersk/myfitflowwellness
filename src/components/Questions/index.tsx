@@ -1,5 +1,5 @@
 // components/QuestionStep.tsx
-import React, { useState } from 'react'
+import React from 'react'
 import {
   Container,
   OptionsContainer,
@@ -7,16 +7,13 @@ import {
   OptionText,
   QuestionText,
 } from './styles'
-
-interface Question {
-  id: number
-  'pt-br': string
-  us: string
-}
+import { QuestionData } from '@screens/Users/Profile/1.1-ParQ'
 
 interface Props {
-  question: Question
+  question: QuestionData
   language: 'pt-br' | 'us'
+  handleSelectParQ: (index: number, value: boolean) => void
+  index: number
 }
 
 const translations = {
@@ -30,26 +27,38 @@ const translations = {
   },
 }
 
-const QuestionStep = ({ question, language }: Props) => {
-  const [answer, setAnswer] = useState<string | null>(null)
+const QuestionStep = ({
+  question,
+  language,
+  handleSelectParQ,
+  index,
+}: Props) => {
   const t = translations[language]
-  const options = [t.yes, t.no]
+  const options = [
+    { label: t.yes, value: true },
+    { label: t.no, value: false },
+  ]
 
   return (
     <Container>
       <QuestionText>
-        {question.id}. {question[language]}
+        {question.id}. {question.data[language]}
       </QuestionText>
       <OptionsContainer>
-        {options.map((option) => (
-          <OptionButton
-            key={option}
-            onPress={() => setAnswer(option)}
-            isSelected={answer === option}
-          >
-            <OptionText isSelected={answer === option}>{option}</OptionText>
-          </OptionButton>
-        ))}
+        {options.map((option) => {
+          const isSelected = question.isChecked === null ? false : option.value
+          return (
+            <OptionButton
+              key={option.label}
+              onPress={() => handleSelectParQ(index, option.value)}
+              isSelected={!!isSelected === question.isChecked}
+            >
+              <OptionText isSelected={!!isSelected === question.isChecked}>
+                {option.label}
+              </OptionText>
+            </OptionButton>
+          )
+        })}
       </OptionsContainer>
     </Container>
   )

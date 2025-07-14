@@ -87,6 +87,7 @@ import {
   IFreeSelectItem,
   ILevelSelectData,
   IMachineSelectItem,
+  IParQStatus,
   IptBrUs,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
@@ -109,6 +110,9 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [userEquipaments, setUserEquipaments] =
     useState<IUserEquipamentData | null>(null)
   const [userGymInfo, setUserGymInfo] = useState<IUserGymInfo | null>(null)
+  const [userParQStatus, setUserParQStatus] = useState<IParQStatus[] | null>(
+    null,
+  )
   const [userPersonalTrainerContract, setUserPersonalTrainerContract] =
     useState<IUserPersonalTrainerContract | null>(null)
 
@@ -2014,6 +2018,78 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function updateUserFirebaseParQStatus(data: IParQStatus) {
+    if (!user) return
+
+    setIsWaitingApiResponse(true)
+
+    const userRef = doc(db, 'users', user.id, 'parQData', 'parQStatus')
+    const servertimestamp = serverTimestamp()
+
+    try {
+      await updateDoc(userRef, {
+        data,
+        updatedAt: servertimestamp,
+      })
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'ParQ atualizado com sucesso!'
+          : 'ParQ updated successfully!',
+      )
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
+  }
+
+  async function loadUserParQ(userId: string): Promise<IParQStatus[] | null> {
+    const userRef = doc(db, 'users', userId, 'parQData', 'parQStatus')
+    setIsWaitingApiResponse(true)
+    const userParQSnap = await getDoc(userRef)
+
+    if (!userParQSnap.exists()) {
+      console.error('Informações da academia não encontradas.')
+      setIsWaitingApiResponse(false)
+      return null
+    }
+
+    const userParQ = userParQSnap.data() as IParQStatus[]
+    setIsWaitingApiResponse(false)
+    return userParQ
+  }
+
+  async function loadAndSaveUserParQ() {
+    const userId = user?.id
+    if (!userId) return null
+
+    try {
+      const response = await loadUserParQ(userId)
+      if (response) {
+        saveUserParQ(response)
+      }
+    } catch (error) {
+      console.log(`error`, error)
+      return null
+    }
+  }
+
+  async function saveUserParQ(userParQStatus: IParQStatus[]) {
+    const userId = user?.id
+    if (!userId) return
+
+    const USER_PARQ_COLLECTION = `@myfitflow:userlocaldata-userParQStatus-${userId}`
+
+    if (userParQStatus) {
+      setUserParQStatus(userParQStatus)
+      await AsyncStorage.setItem(
+        USER_PARQ_COLLECTION,
+        JSON.stringify(userParQStatus),
+      )
+    }
+  }
+
   async function saveUserGymInfo(gymInfo: IUserGymInfo) {
     if (!gymInfo) return
     const userId = user?.id
@@ -2029,6 +2105,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       )
     }
   }
+
   async function loadAndSaveUserEquipaments() {
     const userId = user?.id
     if (!userId) return null
@@ -2768,8 +2845,6 @@ function AuthProvider({ children }: AuthProviderProps) {
   } */
 
   // fazer se inspirando no notes
-  console.log(`userGymInfo`)
-  console.log(userGymInfo)
   async function loadCachedUserGymInfo(userId: string) {
     const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
 
@@ -4294,6 +4369,9 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         fetchCachedWorkoutsExercises,
         cachedWorkoutsExercises,
+
+        saveUserParQ,
+        userParQStatus,
 
         saveGraphicsValues, // premium version
         loadGraphicsValues,

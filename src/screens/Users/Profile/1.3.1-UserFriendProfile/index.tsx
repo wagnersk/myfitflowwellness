@@ -44,7 +44,7 @@ import {
   NameAndEmailWrapper,
 } from './styles'
 
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { IUserFriendProfile } from '@src/@types/navigation'
@@ -275,6 +275,12 @@ export function UserFriendProfile() {
             style={{ flex: 1 }}
             resizeMode="cover"
           >
+            <StatusBar
+              backgroundColor="transparent"
+              style="dark"
+              translucent
+              animated
+            />
             <ImageBackgroundContainer>
               <SafeAreaProvider style={{ width: `100%` }}>
                 <SafeAreaView style={{ flex: 1 }}>

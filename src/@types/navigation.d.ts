@@ -243,6 +243,9 @@ type WorkoutDataWithSelectedWorkout = {
   letter: string
   cardIndex: number
 }
+type IPaqQ = {
+  initial?: boolean
+}
 
 export type NavigationUserWorkoutListProps = {
   activeWorkoutId: string
@@ -329,7 +332,7 @@ export declare global {
 
       termsAndConditions: undefined
       privacyPolicy: undefined
-      parQ: undefined
+      parQ: IPaqQ
       anamnese: undefined
 
       userFormEditProfile: undefined

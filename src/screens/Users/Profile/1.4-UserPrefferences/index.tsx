@@ -25,7 +25,7 @@ import {
   BodyWrapper,
   Header,
 } from './styles'
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 import {
   IUserPrefferencesSelectListNavigation,
   IUserSelectFreeEquipamentListNavigation,
@@ -244,7 +244,12 @@ export function UserPrefferences() {
     <Container>
       <BodyImageWrapper>
         <BodyImageBackground />
-
+        <StatusBar
+          backgroundColor="transparent"
+          style="dark"
+          translucent
+          animated
+        />
         <ImageBackgroundContainer>
           <SafeAreaProvider style={{ width: `100%` }}>
             <SafeAreaView style={{ flex: 1 }}>

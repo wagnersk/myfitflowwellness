@@ -4,6 +4,7 @@ import {
   IFreeSelectItem,
   ILevelSelectData,
   IMachineSelectItem,
+  IParQStatus,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
 import { IWorkoutCategory } from '@src/@types/navigation'
@@ -961,6 +962,9 @@ export interface AuthContextData {
   fetchMachineOptionData: () => Promise<IMachineSelectData | null>
   updateUserMachinePreffer: (data: IMachineSelectItem) => Promise<void>
 
+  updateUserFirebaseParQStatus: (data: IParQStatus) => Promise<void>
+  loadAndSaveUserParQ: () => Promise<void>
+
   fetchCachedWorkoutsExercises: () => Promise<void>
   saveGraphicsValues: (data: IGraphicsValues[] | null) => Promise<void>
   loadWeightProgression: (
@@ -997,6 +1001,7 @@ export interface AuthContextData {
   user: IUser | null
   userEquipaments: IUserEquipamentData | null
   userGymInfo: IUserGymInfo | null
+  userParQStatus: IParQStatus[] | null
   userPersonalTrainerContract: IUserPersonalTrainerContract | null
 
   personalsList: IPersonal[] | null

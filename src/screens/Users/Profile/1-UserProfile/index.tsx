@@ -43,10 +43,12 @@ export function UserProfile() {
     user,
     userGymInfo,
     userEquipaments,
+    userParQStatus,
     updateUserSelectedLanguage,
     updateLocalCacheAnonymousUserSelectedLanguage,
     loadAndSaveUserEquipaments,
     loadAndSaveUserGymInfo,
+    loadAndSaveUserParQ,
   } = useAuth()
   /* saveUserGymInfo */
   const navigation = useNavigation()
@@ -79,7 +81,8 @@ export function UserProfile() {
     )
   }
   function handleParQ() {
-    navigation.navigate('parQ')
+    const initial = false
+    navigation.navigate('parQ', { initial })
   }
   function handleAnamnese() {
     navigation.navigate('anamnese')
@@ -135,7 +138,7 @@ export function UserProfile() {
     }, []),
   )
   useEffect(() => {
-    async function start() {
+    async function startPreferencesOptions() {
       if (!userGymInfo) {
         await loadAndSaveUserGymInfo()
         console.log(`atualizando userGymInfo`)
@@ -144,8 +147,12 @@ export function UserProfile() {
         await loadAndSaveUserEquipaments()
         console.log(`atualizando userEquipaments`)
       }
+      if (!userParQStatus) {
+        await loadAndSaveUserParQ()
+        console.log(`atualizando userParQ`)
+      }
     }
-    start()
+    // startPreferencesOptions()
   }, [])
   return (
     <Container>
@@ -246,7 +253,14 @@ export function UserProfile() {
                     bordertype="none"
                     iconStyle="plan"
                   />
-
+                  <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br' ? 'ParQ' : 'ParQ'
+                    }
+                    onPress={handleParQ}
+                    bordertype="none"
+                    iconStyle="anamnese"
+                  />
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
@@ -257,15 +271,7 @@ export function UserProfile() {
                   />
                 </Body>
                 <Body>
-                  <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br' ? 'ParQ' : 'ParQ'
-                    }
-                    onPress={handleParQ}
-                    bordertype="up"
-                    iconStyle="anamnese"
-                  />
-                  <WhiteButton
+                  {/*    <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Anamnese'
@@ -274,8 +280,8 @@ export function UserProfile() {
                     onPress={handleAnamnese}
                     bordertype="none"
                     iconStyle="anamnese"
-                  />
-                  <WhiteButton
+                  /> */}
+                  {/*     <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Preferencias'
@@ -284,7 +290,7 @@ export function UserProfile() {
                     onPress={handlePreferencesStep}
                     bordertype="down"
                     iconStyle="settings"
-                  />
+                  /> */}
                 </Body>
                 {/* 
                   <WhiteButton

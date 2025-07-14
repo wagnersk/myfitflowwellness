@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useRoute, useFocusEffect } from '@react-navigation/native'
 
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 import { BackCircleButton } from '@components/Buttons/BackCircleButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -158,6 +158,12 @@ export function MarketPlaceWorkoutDetail() {
 
   return (
     <Container>
+      <StatusBar
+        backgroundColor="transparent"
+        style="light"
+        translucent
+        animated
+      />
       <SafeAreaProvider style={{ width: `100%` }}>
         <SafeAreaView style={{ flex: 1 }}>
           <ScrollView>

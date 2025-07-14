@@ -5,6 +5,7 @@ import { UserHome } from '@screens/Users/Home/1-UserHome'
 import { UserWorkoutList } from '@screens/Users/Home/2-UserWorkoutList'
 import { UserWorkout } from '@screens/Users/Home/3-UserWorkout'
 import { Camera } from '@screens/Users/Home/1.1-CameraComponent/Camera'
+import ParQ from '@screens/Users/Profile/1.1-ParQ'
 
 /*
 import { UserWorkoutInfoList } from '@screens/Users/1.2-UserWorkoutInfoList' */
@@ -26,6 +27,14 @@ export function AppStackUserHomeRoutes() {
       />
 
       <Screen name="userWorkoutList" component={UserWorkoutList} />
+
+      <Screen
+        name="parQ"
+        component={ParQ}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
 
       <Screen name="userWorkout" component={UserWorkout} />
 

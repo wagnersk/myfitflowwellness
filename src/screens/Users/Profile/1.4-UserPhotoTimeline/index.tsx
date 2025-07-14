@@ -25,7 +25,7 @@ import {
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 export function UserPhotoTimeline() {
   const { user, isWaitingApiResponse } = useAuth()
@@ -88,6 +88,12 @@ export function UserPhotoTimeline() {
           style={{ flex: 1 }}
           resizeMode="cover"
         >
+          <StatusBar
+            backgroundColor="transparent"
+            style="dark"
+            translucent
+            animated
+          />
           <ImageBackgroundContainer>
             <SafeAreaProvider style={{ width: `100%` }}>
               <SafeAreaView style={{ flex: 1 }}>

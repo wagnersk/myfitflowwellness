@@ -33,7 +33,7 @@ import {
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { BackButton } from '@components/Buttons/BackButton'
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 export function UserPersonalTrainer() {
   const { user } = useAuth()
@@ -134,7 +134,12 @@ export function UserPersonalTrainer() {
     <Container>
       <BodyImageWrapper>
         <BodyImageBackground />
-
+        <StatusBar
+          backgroundColor="transparent"
+          style="dark"
+          translucent
+          animated
+        />
         <ImageBackgroundContainer>
           <SafeAreaProvider style={{ width: `100%` }}>
             <SafeAreaView style={{ flex: 1 }}>

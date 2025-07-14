@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native'
 import { useTheme } from 'styled-components/native'
 import { useAuth } from '@hooks/auth'
 
-import { setStatusBarStyle } from 'expo-status-bar'
+import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
 
 import { useNavigation } from '@react-navigation/core'
 import { useFocusEffect, useRoute } from '@react-navigation/native'
@@ -98,6 +98,12 @@ export function UserWorkoutList() {
 
   return (
     <Container>
+      <StatusBar
+        backgroundColor="transparent"
+        style="light"
+        translucent
+        animated
+      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BackButton
