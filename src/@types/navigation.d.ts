@@ -246,7 +246,16 @@ type WorkoutDataWithSelectedWorkout = {
 type IPaqQ = {
   initial?: boolean
 }
-
+interface QuestionData {
+  id: number
+  data: Question
+  isChecked: null | boolean
+}
+interface IParQStatus {
+  data: QuestionData[]
+  createdAt: FieldValue
+  updatedAt: FieldValue
+}
 export type NavigationUserWorkoutListProps = {
   activeWorkoutId: string
   activeWorkoutCreatedAt: number
@@ -332,8 +341,14 @@ export declare global {
 
       termsAndConditions: undefined
       privacyPolicy: undefined
+
+      questionnaires: undefined
+
       parQ: IPaqQ
+      viewParQ: IParQStatus
+
       anamnese: undefined
+      viewAnamnese: undefined
 
       userFormEditProfile: undefined
       userWorkouts: undefined

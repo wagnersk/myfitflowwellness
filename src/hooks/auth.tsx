@@ -81,13 +81,16 @@ import {
   IUserPersonalTrainerContract,
   IUserLevel,
   IUserPhotoProps,
+  IParQStatus,
+  IAnamnesisStatus,
+  IAnamnesisAnswer,
 } from './authTypes'
 
 import {
   IFreeSelectItem,
   ILevelSelectData,
   IMachineSelectItem,
-  IParQStatus,
+  QuestionData,
   IptBrUs,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
@@ -110,9 +113,9 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [userEquipaments, setUserEquipaments] =
     useState<IUserEquipamentData | null>(null)
   const [userGymInfo, setUserGymInfo] = useState<IUserGymInfo | null>(null)
-  const [userParQStatus, setUserParQStatus] = useState<IParQStatus[] | null>(
-    null,
-  )
+  const [userParQStatus, setUserParQStatus] = useState<IParQStatus | null>(null)
+  const [userAnamnesisStatus, setUserAnamnesisStatus] =
+    useState<IAnamnesisStatus | null>(null)
   const [userPersonalTrainerContract, setUserPersonalTrainerContract] =
     useState<IUserPersonalTrainerContract | null>(null)
 
@@ -2018,25 +2021,130 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function updateUserFirebaseParQStatus(data: IParQStatus) {
+  async function updateUserFirebaseParQStatus(data: QuestionData[]) {
     if (!user) return
+    const userId = user.id
+
+    const userRef = doc(db, 'users', userId, 'parQData', 'parQStatus')
+
+    const timeNow = new Date().getTime()
 
     setIsWaitingApiResponse(true)
-
-    const userRef = doc(db, 'users', user.id, 'parQData', 'parQStatus')
-    const servertimestamp = serverTimestamp()
-
     try {
-      await updateDoc(userRef, {
-        data,
-        updatedAt: servertimestamp,
-      })
+      const docSnap = await getDoc(userRef)
+
+      if (!docSnap.exists()) {
+        await setDoc(userRef, {
+          data,
+          createdAt: timeNow,
+          updatedAt: timeNow,
+        })
+      } else {
+        await updateDoc(userRef, {
+          data,
+          updatedAt: timeNow,
+        })
+      }
 
       Alert.alert(
         user?.selectedLanguage === 'pt-br'
           ? 'ParQ atualizado com sucesso!'
           : 'ParQ updated successfully!',
       )
+
+      setUserParQStatus({
+        data,
+        createdAt: timeNow,
+        updatedAt: timeNow,
+      } as IParQStatus)
+
+      return true
+    } catch (err) {
+      console.error(err)
+      return false
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
+  }
+
+  async function loadUserParQ(userId: string): Promise<IParQStatus | null> {
+    const userRef = doc(db, 'users', userId, 'parQData', 'parQStatus')
+    setIsWaitingApiResponse(true)
+    const userParQSnap = await getDoc(userRef)
+
+    if (!userParQSnap.exists()) {
+      setIsWaitingApiResponse(false)
+      return null
+    }
+
+    const userParQ = userParQSnap.data() as IParQStatus
+    setIsWaitingApiResponse(false)
+    return userParQ
+  }
+
+  async function deleteUserFirebaseParQStatus() {
+    if (!user) return
+    const userId = user.id
+    const userRef = doc(db, 'users', userId, 'parQData', 'parQStatus')
+    const USER_PARQ_COLLECTION = `@myfitflow:userlocaldata-userParQStatus-${userId}`
+
+    setIsWaitingApiResponse(true)
+    try {
+      await deleteDoc(userRef)
+      await AsyncStorage.removeItem(USER_PARQ_COLLECTION)
+      setUserParQStatus(null)
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Sucesso' : 'Success',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Questionário PAR-Q apagado.'
+          : 'PAR-Q questionnaire deleted.',
+      )
+    } catch (err) {
+      console.error(err)
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Não foi possível apagar o questionário.'
+          : 'Could not delete the questionnaire.',
+      )
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
+  }
+
+  async function updateUserFirebaseAnamnesisStatus(data: IAnamnesisAnswer) {
+    if (!user) return
+    const userId = user.id
+
+    const userRef = doc(db, 'users', userId, 'anamnesisData', 'anamnesisStatus')
+
+    const servertimestamp = serverTimestamp()
+
+    setIsWaitingApiResponse(true)
+    try {
+      const docSnap = await getDoc(userRef)
+      const anamnesisPayload = {
+        data,
+        createdAt: servertimestamp,
+        updatedAt: servertimestamp,
+      }
+
+      if (!docSnap.exists()) {
+        await setDoc(userRef, anamnesisPayload)
+      } else {
+        await updateDoc(userRef, {
+          data,
+          updatedAt: servertimestamp,
+        })
+      }
+
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br'
+          ? 'Anamnese atualizada com sucesso!'
+          : 'Anamnesis updated successfully!',
+      )
+
+      setUserAnamnesisStatus({ ...anamnesisPayload } as IAnamnesisStatus)
     } catch (err) {
       console.error(err)
     } finally {
@@ -2044,30 +2152,73 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function loadUserParQ(userId: string): Promise<IParQStatus[] | null> {
-    const userRef = doc(db, 'users', userId, 'parQData', 'parQStatus')
-    setIsWaitingApiResponse(true)
-    const userParQSnap = await getDoc(userRef)
+  async function loadUserAnamnesisStatus(
+    userId: string,
+  ): Promise<IAnamnesisStatus | null> {
+    const userRef = doc(db, 'users', userId, 'anamnesisData', 'anamnesisStatus')
+    const userAnamnesisSnap = await getDoc(userRef)
 
-    if (!userParQSnap.exists()) {
-      console.error('Informações da academia não encontradas.')
-      setIsWaitingApiResponse(false)
+    if (!userAnamnesisSnap.exists()) {
       return null
     }
-
-    const userParQ = userParQSnap.data() as IParQStatus[]
-    setIsWaitingApiResponse(false)
-    return userParQ
+    return userAnamnesisSnap.data() as IAnamnesisStatus
   }
 
-  async function loadAndSaveUserParQ() {
-    const userId = user?.id
-    if (!userId) return null
+  async function saveUserAnamnesisStatus(
+    anamnesisStatus: IAnamnesisStatus,
+    userId: string,
+  ) {
+    const USER_ANAMNESIS_COLLECTION = `@myfitflow:userlocaldata-userAnamnesisStatus-${userId}`
+    setUserAnamnesisStatus(anamnesisStatus)
+    await AsyncStorage.setItem(
+      USER_ANAMNESIS_COLLECTION,
+      JSON.stringify(anamnesisStatus),
+    )
+  }
 
+  async function loadAndSaveUserAnamnesisStatus(userId: string) {
+    const response = await loadUserAnamnesisStatus(userId)
+    if (response) {
+      saveUserAnamnesisStatus(response, userId)
+    }
+  }
+
+  async function deleteUserFirebaseAnamnesisStatus() {
+    if (!user) return
+    const userId = user.id
+    const userRef = doc(db, 'users', userId, 'anamnesisData', 'anamnesisStatus')
+    const USER_ANAMNESIS_COLLECTION = `@myfitflow:userlocaldata-userAnamnesisStatus-${userId}`
+
+    setIsWaitingApiResponse(true)
+    try {
+      await deleteDoc(userRef)
+      await AsyncStorage.removeItem(USER_ANAMNESIS_COLLECTION)
+      setUserAnamnesisStatus(null)
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Sucesso' : 'Success',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Questionário de Anamnese apagado.'
+          : 'Anamnesis questionnaire deleted.',
+      )
+    } catch (err) {
+      console.error(err)
+      Alert.alert(
+        user?.selectedLanguage === 'pt-br' ? 'Erro' : 'Error',
+        user?.selectedLanguage === 'pt-br'
+          ? 'Não foi possível apagar o questionário.'
+          : 'Could not delete the questionnaire.',
+      )
+    } finally {
+      setIsWaitingApiResponse(false)
+    }
+  }
+
+  async function loadAndSaveUserParQ(userId: string) {
+    if (!userId) return null
     try {
       const response = await loadUserParQ(userId)
       if (response) {
-        saveUserParQ(response)
+        saveUserParQ(response, userId)
       }
     } catch (error) {
       console.log(`error`, error)
@@ -2075,12 +2226,10 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  async function saveUserParQ(userParQStatus: IParQStatus[]) {
-    const userId = user?.id
+  async function saveUserParQ(userParQStatus: IParQStatus, userId: string) {
     if (!userId) return
 
     const USER_PARQ_COLLECTION = `@myfitflow:userlocaldata-userParQStatus-${userId}`
-
     if (userParQStatus) {
       setUserParQStatus(userParQStatus)
       await AsyncStorage.setItem(
@@ -2471,9 +2620,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (!data) {
       return console.log(`recebendo data null`)
     }
-    console.log(
-      `falta enviar esses dados para o servidor caso o usuario seja mentorado por personal OU pagar conta premium`,
-    )
 
     if (!user) {
       return
@@ -2844,7 +2990,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
   } */
 
-  // fazer se inspirando no notes
   async function loadCachedUserGymInfo(userId: string) {
     const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
 
@@ -2892,6 +3037,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
  */
+
   async function loadCachedUserPersonalTrainer(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
 
@@ -2913,6 +3059,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
+
   /*  async function loadFromFirebaseFirstThenCachedUserPersonalTrainer(
     userId: string,
   ) {
@@ -2940,6 +3087,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
   } */
+
   async function checkIfActiveWorkoutHasExpired(getMyWorkout: IMyWorkouts) {
     // console.log(JSON.stringify(myWorkoutDataArray?.data.map((v) => v.data)))
     console.log(
@@ -2990,6 +3138,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Error updating workout data:', error)
     }
   }
+
   async function loadCachedUserEquipaments(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
 
@@ -3038,6 +3187,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       // console.error('Erro ao carregar as informações de resumo:', error)
     }
   } */
+
   // setCachedUserWorkoutsLog
   async function updateCachedVideoTable(
     cachedLocalPathVideo: string,
@@ -3340,23 +3490,18 @@ function AuthProvider({ children }: AuthProviderProps) {
       'myWorkoutData',
     )
     setIsWaitingApiResponse(true)
-    console.log(`->>                - saveFirebaseMyWorkout`)
 
     try {
       const docSnap = await getDoc(workoutDataCacheDoc)
-      console.log(`->>         00       - saveFirebaseMyWorkout`)
 
       const getDateFromTimeStamp = new Date(_updatedAt)
-      console.log(`->>         01       - saveFirebaseMyWorkout`)
 
       if (!docSnap.exists()) {
-        console.log(`->>              1  - saveFirebaseMyWorkout - 1`)
         await setDoc(workoutDataCacheDoc, {
           createdAt: getDateFromTimeStamp,
           updatedAt: getDateFromTimeStamp,
         })
       } else {
-        console.log(`->>              1  - saveFirebaseMyWorkout - 2`)
         await updateDoc(workoutDataCacheDoc, {
           updatedAt: getDateFromTimeStamp,
         })
@@ -4269,6 +4414,10 @@ function AuthProvider({ children }: AuthProviderProps) {
       // de registros do dia
       await checkIfActiveWorkoutHasExpired(v)
     })
+    await loadAndSaveUserParQ(userId)
+    await loadAndSaveUserAnamnesisStatus(userId)
+
+    // loadParQ
 
     // analisar dps
     await loadGraphicsAndStatistics(userId)
@@ -4370,8 +4519,13 @@ function AuthProvider({ children }: AuthProviderProps) {
         fetchCachedWorkoutsExercises,
         cachedWorkoutsExercises,
 
+        updateUserFirebaseParQStatus,
         saveUserParQ,
         userParQStatus,
+        deleteUserFirebaseParQStatus,
+        updateUserFirebaseAnamnesisStatus,
+        loadAndSaveUserAnamnesisStatus,
+        deleteUserFirebaseAnamnesisStatus,
 
         saveGraphicsValues, // premium version
         loadGraphicsValues,
@@ -4397,6 +4551,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         user,
         userEquipaments,
         userGymInfo,
+        userAnamnesisStatus,
         userPersonalTrainerContract,
         premiumUserContract,
 

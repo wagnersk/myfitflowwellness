@@ -7,13 +7,14 @@ import {
   OptionText,
   QuestionText,
 } from './styles'
-import { QuestionData } from '@screens/Users/Profile/1.1-ParQ'
+import { QuestionData } from '@hooks/selectOptionsDataFirebaseTypes'
 
 interface Props {
   question: QuestionData
   language: 'pt-br' | 'us'
   handleSelectParQ: (index: number, value: boolean) => void
   index: number
+  viewOnly?: boolean
 }
 
 const translations = {
@@ -32,6 +33,7 @@ const QuestionStep = ({
   language,
   handleSelectParQ,
   index,
+  viewOnly,
 }: Props) => {
   const t = translations[language]
   const options = [
@@ -49,6 +51,7 @@ const QuestionStep = ({
           const isSelected = question.isChecked === null ? false : option.value
           return (
             <OptionButton
+              disabled={viewOnly}
               key={option.label}
               onPress={() => handleSelectParQ(index, option.value)}
               isSelected={!!isSelected === question.isChecked}

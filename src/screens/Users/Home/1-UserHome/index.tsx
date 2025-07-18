@@ -41,6 +41,7 @@ import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
 import SmileySad from '@assets/SmileySad.svg'
 import { fakeMyWorkout } from './mock/fakeMyWorkout'
 import { fakeMyWorkoutDataArray } from './mock/fakeMyWorkoutDataArray'
+import ParQ from '@screens/Users/Profile/1.1-Questionnaires/screens/ParQ'
 
 export function UserHome() {
   const navigation = useNavigation()
@@ -63,6 +64,7 @@ export function UserHome() {
     saveCachedUserWorkoutsLog,
     cachedUserWorkoutsLog,
     fetchworkoutDataCache,
+    userParQStatus,
   } = useAuth()
 
   // console.log(`myWorkout`, JSON.stringify(myWorkout)) // hardcodded usuario anomimo
@@ -233,29 +235,6 @@ export function UserHome() {
   }, [])
 
   useEffect(() => {
-    redirectToParQ()
-
-    function redirectToParQ() {
-      navigation.navigate('parQ', { initial: true })
-    }
-    // chamar tela onBoard para preencher para
-    /* 
-
-
-    1- carregar onboarding 
-    2- 
-    salvar ele no usuario
-    carregar aqui
-    se marcou sim em alguma chama alerta
-    se nao preencheu chama
-    se marcou nao ok 
-
-    la nele tentar criar uma forma de ver quando o cara aceitou
-    deixando brecha para assinatura c 
-    */
-  }, [])
-
-  useEffect(() => {
     if (user && user.anonymousUser) {
       renderAnonymousUserFakeData()
     }
@@ -308,20 +287,17 @@ export function UserHome() {
 
   useFocusEffect(
     useCallback(() => {
-      navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
-      setStatusBarStyle('light')
-    }, []),
+      navigation.getParent()!.setOptions({
+        tabBarStyle: { display: userParQStatus?.data ? 'flex' : 'none' },
+      })
+      setStatusBarStyle(userParQStatus?.data ? 'light' : 'dark')
+    }, [userParQStatus?.data]),
   )
 
   const svgColor = theme.COLORS.BLUE_STROKE
 
   useEffect(() => {
     start()
-
-    /* 
-    agora q ta sincronizandi com o servidor
-    ver a outra conta , adicionmar como amigo. copiar serie e renderiar em copiados
-    */
 
     async function start() {
       const serverLastupdated = await getLastUpdatedAtUserWorkoutCache()
@@ -361,6 +337,10 @@ export function UserHome() {
       }
     }
   }, [cachedUserWorkoutsLog])
+
+  if (!userParQStatus?.data) {
+    return <ParQ />
+  }
 
   return (
     <Container>

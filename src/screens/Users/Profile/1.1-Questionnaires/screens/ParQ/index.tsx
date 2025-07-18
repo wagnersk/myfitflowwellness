@@ -1,14 +1,8 @@
 // screens/Questionnaire/index.tsx
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  Alert,
-  BackHandler,
-  FlatList,
-  ImageBackground,
-  SafeAreaView,
-} from 'react-native'
+import { Alert, FlatList, ImageBackground, SafeAreaView } from 'react-native'
 
-import { questions } from './questions'
+import { questions } from '../../questions'
 import QuestionStep from '@components/Questions'
 import {
   Container,
@@ -29,15 +23,11 @@ import {
 } from './styles'
 import { useAuth } from '@hooks/auth'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import backgroundImg from '../../../../../assets/back.png'
+import backgroundImg from '../../../../../../../assets/back.png'
 import { BackButton } from '@components/Buttons/BackButton'
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native'
-import { IPaqQ } from '@src/@types/navigation'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { QuestionData } from '@hooks/selectOptionsDataFirebaseTypes'
 
 const ITEMS_PER_PAGE = 4
 
@@ -61,24 +51,21 @@ const translations = {
     finishMessage: 'Finish questionnaire',
   },
 }
-export interface Question {
-  'pt-br': string
-  us: string
-}
-export interface QuestionData {
-  id: number
-  data: Question
-  isChecked: null | boolean
-}
+
 export default function ParQ() {
-  const route = useRoute()
-  const { initial } = route.params as IPaqQ
+  const {
+    userParQStatus,
+    user,
+    isWaitingApiResponse,
+    updateUserFirebaseParQStatus,
+  } = useAuth()
+
+  const initial = !userParQStatus
 
   const [page, setPage] = useState(1)
   const [questionsData, setQuestionsData] = useState<QuestionData[] | null>(
     null,
   )
-  const { user, isWaitingApiResponse, updateUserFirebaseParQStatus } = useAuth()
 
   const language = user?.selectedLanguage || 'us'
 
@@ -115,10 +102,7 @@ export default function ParQ() {
       }
       return question
     })
-    console.log(
-      `formattedCurrentQuestions.isChecked`,
-      formattedCurrentQuestions.map((v) => v.isChecked),
-    )
+
     setQuestionsData(formattedCurrentQuestions)
   }
 
@@ -140,8 +124,11 @@ export default function ParQ() {
     }
 
     if (isAllCheckedNegative) {
-      console.log(`tudo certo!`)
-      // await updateUserFirebaseParQStatus(questionsData)
+      console.log(questionsData)
+
+      updateUserFirebaseParQStatus(questionsData).then(() => {
+        navigation.goBack()
+      })
     }
   }
 
@@ -214,15 +201,7 @@ export default function ParQ() {
                         style={{ width: `${progressPercentage}%` }}
                       />
                     </ProgressBarWrapper>
-                    {/* 
 
-pagina 1 
-total itens per page = 4
-
-marquei o index 0   
-
-
-*/}
                     <QuestionList>
                       <FlatList
                         data={currentQuestions}
@@ -245,7 +224,10 @@ marquei o index 0
                           <NavButtonText>{t.back}</NavButtonText>
                         </NavButton>
                       )}
-                      <NavButton onPress={handleNext}>
+                      <NavButton
+                        onPress={handleNext}
+                        disabled={isWaitingApiResponse}
+                      >
                         <NavButtonText>
                           {page === totalPages ? t.finish : t.next}
                         </NavButtonText>

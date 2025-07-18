@@ -4,10 +4,26 @@ import {
   IFreeSelectItem,
   ILevelSelectData,
   IMachineSelectItem,
-  IParQStatus,
+  QuestionData,
   IPulleySelectItem,
 } from './selectOptionsDataFirebaseTypes'
 import { IWorkoutCategory } from '@src/@types/navigation'
+
+export interface IAnamnesisAnswer {
+  [key: string]: string
+}
+
+export interface IAnamnesisStatus {
+  data: IAnamnesisAnswer
+  createdAt: number
+  updatedAt: number
+}
+
+export interface IParQStatus {
+  data: QuestionData[]
+  createdAt: number
+  updatedAt: number
+}
 
 export type ServerTimestamp = Timestamp | ReturnType<typeof serverTimestamp>
 export interface IptBrUs {
@@ -962,8 +978,14 @@ export interface AuthContextData {
   fetchMachineOptionData: () => Promise<IMachineSelectData | null>
   updateUserMachinePreffer: (data: IMachineSelectItem) => Promise<void>
 
-  updateUserFirebaseParQStatus: (data: IParQStatus) => Promise<void>
-  loadAndSaveUserParQ: () => Promise<void>
+  updateUserFirebaseParQStatus: (
+    data: QuestionData[],
+  ) => Promise<boolean | undefined>
+  loadAndSaveUserParQ: (userId: string) => Promise<void>
+  deleteUserFirebaseParQStatus: () => Promise<void>
+  updateUserFirebaseAnamnesisStatus: (data: IAnamnesisAnswer) => Promise<void>
+  loadAndSaveUserAnamnesisStatus: (userId: string) => Promise<void>
+  deleteUserFirebaseAnamnesisStatus: () => Promise<void>
 
   fetchCachedWorkoutsExercises: () => Promise<void>
   saveGraphicsValues: (data: IGraphicsValues[] | null) => Promise<void>
@@ -1001,7 +1023,8 @@ export interface AuthContextData {
   user: IUser | null
   userEquipaments: IUserEquipamentData | null
   userGymInfo: IUserGymInfo | null
-  userParQStatus: IParQStatus[] | null
+  userParQStatus: IParQStatus | null
+  userAnamnesisStatus: IAnamnesisStatus | null
   userPersonalTrainerContract: IUserPersonalTrainerContract | null
 
   personalsList: IPersonal[] | null

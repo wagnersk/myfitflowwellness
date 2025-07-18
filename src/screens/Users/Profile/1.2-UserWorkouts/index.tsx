@@ -539,7 +539,6 @@ export function UserWorkouts() {
                 )
             }
 
-            copyWorkouts
             saveFirebaseMyWorkout(copyWorkouts, timeNow)
             closeModal()
           },

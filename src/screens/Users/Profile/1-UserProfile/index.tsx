@@ -8,7 +8,6 @@ import { Photo } from '@components/Photo'
 import backgroundImg from '../../../../../assets/back.png'
 import { useAuth } from '@hooks/auth'
 import PencilLine from '@assets/Pencil-line.svg'
-
 import {
   Container,
   BodyImageWrapper,
@@ -81,8 +80,7 @@ export function UserProfile() {
     )
   }
   function handleParQ() {
-    const initial = false
-    navigation.navigate('parQ', { initial })
+    navigation.navigate('questionnaires')
   }
   function handleAnamnese() {
     navigation.navigate('anamnese')
@@ -255,7 +253,9 @@ export function UserProfile() {
                   />
                   <WhiteButton
                     tittle={
-                      user?.selectedLanguage === 'pt-br' ? 'ParQ' : 'ParQ'
+                      user?.selectedLanguage === 'pt-br'
+                        ? 'Questionário de Saúde'
+                        : 'Health Questionnaire'
                     }
                     onPress={handleParQ}
                     bordertype="none"

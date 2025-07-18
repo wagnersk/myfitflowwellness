@@ -19,9 +19,14 @@ import { UserPhotoTimeline } from '@screens/Users/Profile/1.4-UserPhotoTimeline'
 import { UserPrefferences } from '@screens/Users/Profile/1.4-UserPrefferences'
 import { UserPrefferencesSelectList } from '@screens/Users/Profile/1.4-UserPrefferences/Components/1.1.0-UserPrefferencesSelectList'
 import { UserPersonalTrainer } from '@screens/Users/Profile/1.5-UserPersonalTrainer'
-import ParQ from '@screens/Users/Profile/1.1-ParQ'
-import AnamnesisForm from '@screens/Users/Profile/1.1-AnamnesisQuestion'
 
+import Questionnaires from '@screens/Users/Profile/1.1-Questionnaires'
+import ViewParQ from '@screens/Users/Profile/1.1-Questionnaires/screens/ViewParQ'
+import ParQ from '@screens/Users/Profile/1.1-Questionnaires/screens/ParQ'
+
+/* import ViewAnamnesisForm from '@screens/Users/Profile/1.1-Questionnaires/screens/ViewAnamnesis'
+import AnamnesisForm from '@screens/Users/Profile/1.1-Questionnaires/screens/AnamnesisForm'
+ */
 const { Navigator, Screen } = createStackNavigator()
 
 export function AppStackUserProfileRoutes() {
@@ -42,9 +47,14 @@ export function AppStackUserProfileRoutes() {
       <Screen name="userPlan" component={UserPlan} />
       <Screen name="userSupport" component={UserSupport} />
 
+      <Screen name="questionnaires" component={Questionnaires} />
       <Screen name="parQ" component={ParQ} />
-      <Screen name="anamnese" component={AnamnesisForm} />
 
+      <Screen name="viewParQ" component={ViewParQ} />
+
+      {/*       <Screen name="anamneseForm" component={AnamnesisForm} />
+      <Screen name="viewAnamneseForm" component={ViewAnamnesisForm} />
+ */}
       <Screen name="userPrefferences" component={UserPrefferences} />
       <Screen name="userPersonalTrainer" component={UserPersonalTrainer} />
       <Screen

@@ -38,10 +38,15 @@ export type IPulleySelectItem = {
 export type IPulleySelectData = {
   data: IPulleySelectItem
 }
-export interface IParQStatus {
-  id: number
+
+export interface Question {
   'pt-br': string
   us: string
+}
+export interface QuestionData {
+  id: number
+  data: Question
+  isChecked: null | boolean
 }
 
 export interface IMachineSelectItem {
