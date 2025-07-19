@@ -16,6 +16,7 @@ import { AuthProvider } from '@hooks/auth'
 import { Routes } from './src/routes'
 //
 import theme from './src/theme'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 SplashScreen.preventAutoHideAsync()
 export default function App() {
@@ -54,7 +55,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <ThemeProvider theme={theme}>
-        <StatusBar style="light" translucent backgroundColor="transparent" />
+        <StatusBar style="light" translucent />
         <AuthProvider>
           <Routes />
         </AuthProvider>

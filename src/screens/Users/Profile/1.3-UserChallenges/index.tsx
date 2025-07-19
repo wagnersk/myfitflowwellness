@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import {
   ImageBackground,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   View,
@@ -24,8 +23,8 @@ import {
   Header,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 export function UserChallenges() {
   const { user, isWaitingApiResponse } = useAuth()
@@ -129,188 +128,180 @@ export function UserChallenges() {
           style={{ flex: 1 }}
           resizeMode="cover"
         >
-          <StatusBar
-            backgroundColor="transparent"
-            style="dark"
-            translucent
-            animated
-          />
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <UserName>
-                    {user?.selectedLanguage === 'pt-br'
-                      ? `Desafios`
-                      : `Challenges`}
-                  </UserName>
-                </Header>
-                <Body>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                    <ListWrapper>
-                      {challenges.map((challenge) => (
-                        <View
-                          key={challenge.id}
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? `Desafios`
+                    : `Challenges`}
+                </UserName>
+              </Header>
+              <Body>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <ListWrapper>
+                    {challenges.map((challenge) => (
+                      <View
+                        key={challenge.id}
+                        style={{
+                          backgroundColor: '#fff',
+                          borderRadius: 10,
+                          marginBottom: 20,
+                          padding: 15,
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 4,
+                          elevation: 5,
+                        }}
+                      >
+                        <Image
+                          alt="Challenge Image"
+                          // Placeholder padrão
+                          source={{
+                            uri: challenge.image,
+                          }}
                           style={{
-                            backgroundColor: '#fff',
+                            width: '100%',
+                            height: 150,
                             borderRadius: 10,
-                            marginBottom: 20,
-                            padding: 15,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.2,
-                            shadowRadius: 4,
-                            elevation: 5,
+                            marginBottom: 10,
+                          }}
+                        />
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            marginBottom: 5,
                           }}
                         >
-                          <Image
-                            alt="Challenge Image"
-                            // Placeholder padrão
-                            source={{
-                              uri: challenge.image,
-                            }}
+                          {challenge.title}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: '#666',
+                            marginBottom: 10,
+                          }}
+                        >
+                          {challenge.description}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: '#999',
+                            marginBottom: 10,
+                          }}
+                        >
+                          {user?.selectedLanguage === 'pt-br'
+                            ? `Criado por: ${challenge.createdBy}`
+                            : `Created by: ${challenge.createdBy}`}
+                        </Text>
+                        <ProgressBarAndroid
+                          styleAttr="Horizontal"
+                          indeterminate={false}
+                          progress={challenge.progress / 100}
+                          color="#4caf50"
+                        />
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: '#4caf50',
+                            marginTop: 5,
+                          }}
+                        >
+                          {challenge.progress}%{' '}
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Concluído'
+                            : 'Completed'}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            marginTop: 15,
+                          }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => handleJoinChallenge(challenge.id)}
                             style={{
-                              width: '100%',
-                              height: 150,
-                              borderRadius: 10,
-                              marginBottom: 10,
-                            }}
-                          />
-                          <Text
-                            style={{
-                              fontSize: 18,
-                              fontWeight: 'bold',
-                              marginBottom: 5,
+                              backgroundColor: '#4caf50',
+                              padding: 10,
+                              borderRadius: 5,
+                              flex: 1,
+                              marginRight: 5,
                             }}
                           >
-                            {challenge.title}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              color: '#666',
-                              marginBottom: 10,
-                            }}
-                          >
-                            {challenge.description}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: '#999',
-                              marginBottom: 10,
-                            }}
-                          >
-                            {user?.selectedLanguage === 'pt-br'
-                              ? `Criado por: ${challenge.createdBy}`
-                              : `Created by: ${challenge.createdBy}`}
-                          </Text>
-                          <ProgressBarAndroid
-                            styleAttr="Horizontal"
-                            indeterminate={false}
-                            progress={challenge.progress / 100}
-                            color="#4caf50"
-                          />
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: '#4caf50',
-                              marginTop: 5,
-                            }}
-                          >
-                            {challenge.progress}%{' '}
-                            {user?.selectedLanguage === 'pt-br'
-                              ? 'Concluído'
-                              : 'Completed'}
-                          </Text>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              justifyContent: 'space-between',
-                              marginTop: 15,
-                            }}
-                          >
-                            <TouchableOpacity
-                              onPress={() => handleJoinChallenge(challenge.id)}
+                            <Text
                               style={{
-                                backgroundColor: '#4caf50',
-                                padding: 10,
-                                borderRadius: 5,
-                                flex: 1,
-                                marginRight: 5,
+                                color: '#fff',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
                               }}
                             >
-                              <Text
-                                style={{
-                                  color: '#fff',
-                                  textAlign: 'center',
-                                  fontWeight: 'bold',
-                                }}
-                              >
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Participar'
-                                  : 'Join'}
-                              </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={() => handleViewDetails(challenge.id)}
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Participar'
+                                : 'Join'}
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => handleViewDetails(challenge.id)}
+                            style={{
+                              backgroundColor: '#2196f3',
+                              padding: 10,
+                              borderRadius: 5,
+                              flex: 1,
+                              marginLeft: 5,
+                            }}
+                          >
+                            <Text
                               style={{
-                                backgroundColor: '#2196f3',
-                                padding: 10,
-                                borderRadius: 5,
-                                flex: 1,
-                                marginLeft: 5,
+                                color: '#fff',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
                               }}
                             >
-                              <Text
-                                style={{
-                                  color: '#fff',
-                                  textAlign: 'center',
-                                  fontWeight: 'bold',
-                                }}
-                              >
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Detalhes'
-                                  : 'Details'}
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Detalhes'
+                                : 'Details'}
+                            </Text>
+                          </TouchableOpacity>
                         </View>
-                      ))}
-                    </ListWrapper>
-                  </ScrollView>
-                  <TouchableOpacity
-                    onPress={handleCreateChallenge}
+                      </View>
+                    ))}
+                  </ListWrapper>
+                </ScrollView>
+                <TouchableOpacity
+                  onPress={handleCreateChallenge}
+                  style={{
+                    backgroundColor: '#ff5722',
+                    padding: 15,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    marginTop: 20,
+                  }}
+                >
+                  <Text
                     style={{
-                      backgroundColor: '#ff5722',
-                      padding: 15,
-                      borderRadius: 10,
-                      alignItems: 'center',
-                      marginTop: 20,
+                      color: '#fff',
+                      fontSize: 16,
+                      fontWeight: 'bold',
                     }}
                   >
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {user?.selectedLanguage === 'pt-br'
-                        ? 'Criar Novo Desafio'
-                        : 'Create New Challenge'}
-                    </Text>
-                  </TouchableOpacity>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Criar Novo Desafio'
+                      : 'Create New Challenge'}
+                  </Text>
+                </TouchableOpacity>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

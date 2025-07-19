@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import { ImageBackground, BackHandler } from 'react-native'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
@@ -7,7 +7,7 @@ import { BackButton } from '@components/Buttons/BackButton'
 import { useAuth } from '@hooks/auth'
 import backgroundImg from '../../../../../../../assets/back.png'
 import Check from '@assets/Check.svg'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import {
   Container,
@@ -263,102 +263,100 @@ export function UserSelectMachineEquipamentList() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <ListName>{dataType}</ListName>
-                </Header>
-                <Body>
-                  <ScrollView
-                    contentContainerStyle={{ gap: 64 }}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <ListWrapper>
-                      <ListSubTitle>Marque aqui caso tenha todas</ListSubTitle>
-                      {selectedAllMachines && (
-                        <ButtonWrapper
-                          key={selectedAllMachines.index}
-                          onPress={() => handleSetAllMachineChecked()}
-                        >
-                          <ContentWrapper>
-                            <ItemTitle>
-                              {selectedAllMachines &&
-                                selectedLanguage &&
-                                selectedAllMachines.allMachine_insensitive &&
-                                selectedAllMachines.allMachine_insensitive[
-                                  selectedLanguage
-                                ]}
-                            </ItemTitle>
-
-                            <IconWrapper>
-                              {selectedAllMachines.selected && (
-                                <Check
-                                  width={32}
-                                  height={32}
-                                  stroke={theme.COLORS.BLUE_STROKE}
-                                  strokeWidth={2}
-                                />
-                              )}
-                            </IconWrapper>
-                          </ContentWrapper>
-                        </ButtonWrapper>
-                      )}
-                    </ListWrapper>
-                    <ListWrapper>
-                      {selectedMachines && (
-                        <ListSubTitle>Ou selecione quais você tem</ListSubTitle>
-                      )}
-
-                      {selectedMachines &&
-                        selectedMachines.map((v) => {
-                          return (
-                            <ButtonWrapper
-                              key={v.index}
-                              onPress={() => handleSetMachineChecked(v.index)}
-                            >
-                              <ContentWrapper>
-                                <ItemTitle>
-                                  {v &&
-                                    selectedLanguage &&
-                                    v.machine_insensitive &&
-                                    v.machine_insensitive[selectedLanguage]}
-                                </ItemTitle>
-
-                                <IconWrapper>
-                                  {v.selected && (
-                                    <Check
-                                      width={32}
-                                      height={32}
-                                      stroke={theme.COLORS.BLUE_STROKE}
-                                      strokeWidth={2}
-                                    />
-                                  )}
-                                </IconWrapper>
-                              </ContentWrapper>
-                            </ButtonWrapper>
-                          )
-                        })}
-                    </ListWrapper>
-                  </ScrollView>
-
-                  <CTAButton
-                    style={{ marginBottom: 54 }}
-                    onPress={handleUpdateInfo}
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
                     changeColor
-                    title="Salvar"
-                    loading={isWaitingApiResponse}
-                    enabled={!isWaitingApiResponse}
+                    disabled={isWaitingApiResponse}
                   />
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                </SettingsWrapper>
+                <ListName>{dataType}</ListName>
+              </Header>
+              <Body>
+                <ScrollView
+                  contentContainerStyle={{ gap: 64 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <ListWrapper>
+                    <ListSubTitle>Marque aqui caso tenha todas</ListSubTitle>
+                    {selectedAllMachines && (
+                      <ButtonWrapper
+                        key={selectedAllMachines.index}
+                        onPress={() => handleSetAllMachineChecked()}
+                      >
+                        <ContentWrapper>
+                          <ItemTitle>
+                            {selectedAllMachines &&
+                              selectedLanguage &&
+                              selectedAllMachines.allMachine_insensitive &&
+                              selectedAllMachines.allMachine_insensitive[
+                                selectedLanguage
+                              ]}
+                          </ItemTitle>
+
+                          <IconWrapper>
+                            {selectedAllMachines.selected && (
+                              <Check
+                                width={32}
+                                height={32}
+                                stroke={theme.COLORS.BLUE_STROKE}
+                                strokeWidth={2}
+                              />
+                            )}
+                          </IconWrapper>
+                        </ContentWrapper>
+                      </ButtonWrapper>
+                    )}
+                  </ListWrapper>
+                  <ListWrapper>
+                    {selectedMachines && (
+                      <ListSubTitle>Ou selecione quais você tem</ListSubTitle>
+                    )}
+
+                    {selectedMachines &&
+                      selectedMachines.map((v) => {
+                        return (
+                          <ButtonWrapper
+                            key={v.index}
+                            onPress={() => handleSetMachineChecked(v.index)}
+                          >
+                            <ContentWrapper>
+                              <ItemTitle>
+                                {v &&
+                                  selectedLanguage &&
+                                  v.machine_insensitive &&
+                                  v.machine_insensitive[selectedLanguage]}
+                              </ItemTitle>
+
+                              <IconWrapper>
+                                {v.selected && (
+                                  <Check
+                                    width={32}
+                                    height={32}
+                                    stroke={theme.COLORS.BLUE_STROKE}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </IconWrapper>
+                            </ContentWrapper>
+                          </ButtonWrapper>
+                        )
+                      })}
+                  </ListWrapper>
+                </ScrollView>
+
+                <CTAButton
+                  style={{ marginBottom: 54 }}
+                  onPress={handleUpdateInfo}
+                  changeColor
+                  title="Salvar"
+                  loading={isWaitingApiResponse}
+                  enabled={!isWaitingApiResponse}
+                />
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

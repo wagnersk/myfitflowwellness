@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import {
   ImageBackground,
   BackHandler,
-  SafeAreaView,
   Alert,
   Modal,
   Dimensions,
@@ -44,7 +43,7 @@ import {
   IptBrUs,
 } from '@hooks/authTypes'
 
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -1093,106 +1092,102 @@ export function UserWorkouts() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Body>
-                  <ContainerTittleWrapper>
-                    <SettingsWrapper>
-                      <BackButton
-                        onPress={handleGoBack}
-                        changeColor
-                        disabled={isWaitingApiResponse}
-                      />
-                    </SettingsWrapper>
-                    <TittleWrapper>
-                      <ContainerTittle>
-                        {user?.selectedLanguage === 'pt-br'
-                          ? 'Treinos'
-                          : 'Workouts'}
-                      </ContainerTittle>
-                    </TittleWrapper>
-                    <IconWrapper></IconWrapper>
-                  </ContainerTittleWrapper>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                    <ListWrapper>
-                      <SelectScreenWrapper>
-                        <RowWrapper>
-                          {TABS.map((tab) => (
-                            <SelectScreenButton
-                              key={tab}
-                              onPress={() => handlePress(tab)}
+            <SafeAreaView style={{ flex: 1, width: '100%' }}>
+              <Body>
+                <ContainerTittleWrapper>
+                  <SettingsWrapper>
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={isWaitingApiResponse}
+                    />
+                  </SettingsWrapper>
+                  <TittleWrapper>
+                    <ContainerTittle>
+                      {user?.selectedLanguage === 'pt-br'
+                        ? 'Treinos'
+                        : 'Workouts'}
+                    </ContainerTittle>
+                  </TittleWrapper>
+                  <IconWrapper></IconWrapper>
+                </ContainerTittleWrapper>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <ListWrapper>
+                    <SelectScreenWrapper>
+                      <RowWrapper>
+                        {TABS.map((tab) => (
+                          <SelectScreenButton
+                            key={tab}
+                            onPress={() => handlePress(tab)}
+                          >
+                            <SelectScreenButtonText
+                              isSelected={showScreen === tab}
                             >
-                              <SelectScreenButtonText
-                                isSelected={showScreen === tab}
-                              >
-                                {tab}
-                              </SelectScreenButtonText>
-                            </SelectScreenButton>
-                          ))}
-                        </RowWrapper>
-                        <Underline
-                          tabWidth={TAB_WIDTH}
-                          style={animatedStyles}
-                        />
-                      </SelectScreenWrapper>
+                              {tab}
+                            </SelectScreenButtonText>
+                          </SelectScreenButton>
+                        ))}
+                      </RowWrapper>
+                      <Underline tabWidth={TAB_WIDTH} style={animatedStyles} />
+                    </SelectScreenWrapper>
 
-                      {(showScreen === 'Em uso' || showScreen === 'In Use') &&
-                        workouts && (
-                          <>
-                            <SelectScreenWrapper2>
-                              <Underline2
-                                tabWidth={screenWidth / 3}
-                                style={animatedStyles2}
-                              />
-                              <RowWrapper2>
-                                {TABS2.map((tab) => (
-                                  <SelectScreenButton2
-                                    tabWidth={screenWidth / 3}
-                                    key={tab}
-                                    onPress={() => handlePress2(tab)}
-                                  >
-                                    <SelectScreenButtonText2
-                                      isSelected={showScreen2 === tab}
-                                    >
-                                      {tab}
-                                    </SelectScreenButtonText2>
-                                  </SelectScreenButton2>
-                                ))}
-                              </RowWrapper2>
-                            </SelectScreenWrapper2>
-
-                            <InUseWorkoutContainer
-                              activeData={workouts.activeData}
-                              expiredData={workouts.expiredData}
-                              activeworkouts={activeworkouts}
-                              expiredworkouts={expiredworkouts}
-                              showScreen2={showScreen2}
-                              user={user}
-                              isOpenSettingsMode={isOpenSettingsMode}
-                              handleOnPressExpiredInUseWorkout={(id) =>
-                                handleOnPressWorkout(id, 'expiredWorkout')
-                              }
-                              handleOnPressActiveInUseWorkout={(id) =>
-                                handleOnPressWorkout(id, 'activeWorkout')
-                              }
-                              handleMoveUp={handleMoveUp}
-                              handleMoveDown={handleMoveDown}
+                    {(showScreen === 'Em uso' || showScreen === 'In Use') &&
+                      workouts && (
+                        <>
+                          <SelectScreenWrapper2>
+                            <Underline2
+                              tabWidth={screenWidth / 3}
+                              style={animatedStyles2}
                             />
-                          </>
-                        )}
+                            <RowWrapper2>
+                              {TABS2.map((tab) => (
+                                <SelectScreenButton2
+                                  tabWidth={screenWidth / 3}
+                                  key={tab}
+                                  onPress={() => handlePress2(tab)}
+                                >
+                                  <SelectScreenButtonText2
+                                    isSelected={showScreen2 === tab}
+                                  >
+                                    {tab}
+                                  </SelectScreenButtonText2>
+                                </SelectScreenButton2>
+                              ))}
+                            </RowWrapper2>
+                          </SelectScreenWrapper2>
 
-                      {(showScreen === 'Meus treinos' ||
-                        showScreen === 'My Workouts') &&
-                        workouts && (
-                          <TotalWorkoutContainer
-                            myTotalWorkouts={myTotalWorkouts}
+                          <InUseWorkoutContainer
+                            activeData={workouts.activeData}
+                            expiredData={workouts.expiredData}
+                            activeworkouts={activeworkouts}
+                            expiredworkouts={expiredworkouts}
+                            showScreen2={showScreen2}
                             user={user}
-                            handleOnPressTotalWorkout={(id) =>
-                              handleOnPressWorkout(id, 'totalWorkout')
+                            isOpenSettingsMode={isOpenSettingsMode}
+                            handleOnPressExpiredInUseWorkout={(id) =>
+                              handleOnPressWorkout(id, 'expiredWorkout')
                             }
+                            handleOnPressActiveInUseWorkout={(id) =>
+                              handleOnPressWorkout(id, 'activeWorkout')
+                            }
+                            handleMoveUp={handleMoveUp}
+                            handleMoveDown={handleMoveDown}
                           />
-                        )}
-                      {/*    {(showScreen === 'Compartilhado' ||
+                        </>
+                      )}
+
+                    {(showScreen === 'Meus treinos' ||
+                      showScreen === 'My Workouts') &&
+                      workouts && (
+                        <TotalWorkoutContainer
+                          myTotalWorkouts={myTotalWorkouts}
+                          user={user}
+                          handleOnPressTotalWorkout={(id) =>
+                            handleOnPressWorkout(id, 'totalWorkout')
+                          }
+                        />
+                      )}
+                    {/*    {(showScreen === 'Compartilhado' ||
                         showScreen === 'Shared') &&
                         workouts && (
                           <SharedWorkoutContainer
@@ -1204,22 +1199,21 @@ export function UserWorkouts() {
                             }
                           />
                         )} */}
-                    </ListWrapper>
-                  </ScrollView>
+                  </ListWrapper>
+                </ScrollView>
 
-                  {isOpenSettingsMode && isDataOrderChanged && (
-                    <CTAButton
-                      style={{ marginBottom: 54 }}
-                      onPress={saveNewOrderModal}
-                      changeColor
-                      title={'Salvar nova ordem'}
-                      loading={false}
-                      enabled={!false}
-                    />
-                  )}
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                {isOpenSettingsMode && isDataOrderChanged && (
+                  <CTAButton
+                    style={{ marginBottom: 54 }}
+                    onPress={saveNewOrderModal}
+                    changeColor
+                    title={'Salvar nova ordem'}
+                    loading={false}
+                    enabled={!false}
+                  />
+                )}
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

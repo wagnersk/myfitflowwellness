@@ -11,7 +11,7 @@ import { useTheme } from 'styled-components/native'
 import { useAuth } from '@hooks/auth'
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { WorkoutBlueCardList } from '@components/Cards/WorkoutBlueCard/WorkoutBlueCardList'
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
@@ -344,12 +344,6 @@ export function UserHome() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BioInfo>

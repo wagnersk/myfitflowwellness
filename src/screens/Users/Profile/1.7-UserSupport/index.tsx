@@ -1,11 +1,6 @@
 import React, { useEffect } from 'react'
-import {
-  ImageBackground,
-  BackHandler,
-  SafeAreaView,
-  Linking,
-  Alert,
-} from 'react-native'
+import { ImageBackground, BackHandler, Linking, Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useNavigation } from '@react-navigation/native'
 import { BackButton } from '@components/Buttons/BackButton'
@@ -28,7 +23,6 @@ import {
 import { ScrollView } from 'react-native-gesture-handler'
 import { IptBrUs } from '@hooks/authTypes'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export interface IUserSelect {
   id: number
@@ -64,7 +58,7 @@ export function UserSupport() {
     )
   }
   function handleFrequentQuestions() {
-    navigation.navigate('frequentQuestions')
+    // navigation.navigate('frequentQuestions')
   }
 
   function handlePrivacyPolicy() {
@@ -114,53 +108,52 @@ export function UserSupport() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <UserName>
-                    {user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'}
-                  </UserName>
-                </Header>
-                <Body>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                    <ListWrapper>
-                      <ContainerWrapper>
-                        <ContainerTittleWrapper>
-                          <ContainerTittle>
-                            {user?.selectedLanguage === 'pt-br'
-                              ? 'Dúvidas'
-                              : 'Questions'}
-                          </ContainerTittle>
-                        </ContainerTittleWrapper>
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Envie-nos um E-mail'
-                              : 'Send us an E-mail'
-                          }
-                          onPress={handleEmailPress}
-                          bordertype="up"
-                          iconStyle="email"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Perguntas Frequentes'
-                              : 'FAQ'
-                          }
-                          onPress={handleFrequentQuestions}
-                          bordertype="down"
-                          iconStyle="question"
-                        />
-                      </ContainerWrapper>
-                      {/*       <ContainerWrapper>
+            <SafeAreaView style={{ flex: 1, width: '100%' }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>
+                  {user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'}
+                </UserName>
+              </Header>
+              <Body>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <ListWrapper>
+                    <ContainerWrapper>
+                      <ContainerTittleWrapper>
+                        <ContainerTittle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Dúvidas'
+                            : 'Questions'}
+                        </ContainerTittle>
+                      </ContainerTittleWrapper>
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Envie-nos um E-mail'
+                            : 'Send us an E-mail'
+                        }
+                        onPress={handleEmailPress}
+                        bordertype="up"
+                        iconStyle="email"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Perguntas Frequentes'
+                            : 'FAQ'
+                        }
+                        onPress={handleFrequentQuestions}
+                        bordertype="down"
+                        iconStyle="question"
+                      />
+                    </ContainerWrapper>
+                    {/*       <ContainerWrapper>
                         <ContainerTittleWrapper>
                           <ContainerTittle>
                             {user?.selectedLanguage === 'pt-br'
@@ -181,69 +174,68 @@ export function UserSupport() {
                         />
                       </ContainerWrapper> */}
 
-                      <ContainerWrapper>
-                        <ContainerTittleWrapper>
-                          <ContainerTittle>
-                            {user?.selectedLanguage === 'pt-br'
-                              ? 'Legal'
-                              : 'Legal'}
-                          </ContainerTittle>
-                        </ContainerTittleWrapper>
+                    <ContainerWrapper>
+                      <ContainerTittleWrapper>
+                        <ContainerTittle>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? 'Legal'
+                            : 'Legal'}
+                        </ContainerTittle>
+                      </ContainerTittleWrapper>
 
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Política de Privacidade'
-                              : 'Privacy Policy'
-                          }
-                          onPress={handlePrivacyPolicy}
-                          bordertype="up"
-                          iconStyle="terms"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Termos e Condições'
-                              : 'Terms and Conditions'
-                          }
-                          onPress={handleTermsAndConditions}
-                          bordertype="none"
-                          iconStyle="terms"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Política de Reembolso'
-                              : 'Refund Policy'
-                          }
-                          onPress={handleRefund}
-                          bordertype="none"
-                          iconStyle="terms"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Contrato de Lic de Usuário F.'
-                              : 'End User License Agreement'
-                          }
-                          onPress={handleDisclaimer}
-                          bordertype="none"
-                          iconStyle="terms"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br' ? 'EULA' : 'EULA'
-                          }
-                          onPress={handleEULA}
-                          bordertype="down"
-                          iconStyle="terms"
-                        />
-                      </ContainerWrapper>
-                    </ListWrapper>
-                  </ScrollView>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Política de Privacidade'
+                            : 'Privacy Policy'
+                        }
+                        onPress={handlePrivacyPolicy}
+                        bordertype="up"
+                        iconStyle="terms"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Termos e Condições'
+                            : 'Terms and Conditions'
+                        }
+                        onPress={handleTermsAndConditions}
+                        bordertype="none"
+                        iconStyle="terms"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Política de Reembolso'
+                            : 'Refund Policy'
+                        }
+                        onPress={handleRefund}
+                        bordertype="none"
+                        iconStyle="terms"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Contrato de Lic de Usuário F.'
+                            : 'End User License Agreement'
+                        }
+                        onPress={handleDisclaimer}
+                        bordertype="none"
+                        iconStyle="terms"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br' ? 'EULA' : 'EULA'
+                        }
+                        onPress={handleEULA}
+                        bordertype="down"
+                        iconStyle="terms"
+                      />
+                    </ContainerWrapper>
+                  </ListWrapper>
+                </ScrollView>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

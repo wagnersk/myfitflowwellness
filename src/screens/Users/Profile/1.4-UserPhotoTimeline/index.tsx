@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import {
   ImageBackground,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   View,
@@ -24,8 +23,8 @@ import {
   ListWrapper,
 } from './styles'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 export function UserPhotoTimeline() {
   const { user, isWaitingApiResponse } = useAuth()
@@ -88,126 +87,116 @@ export function UserPhotoTimeline() {
           style={{ flex: 1 }}
           resizeMode="cover"
         >
-          <StatusBar
-            backgroundColor="transparent"
-            style="dark"
-            translucent
-            animated
-          />
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <UserName>
-                    {user?.selectedLanguage === 'pt-br'
-                      ? `Linha do Tempo`
-                      : `Timeline`}
-                  </UserName>
-                </Header>
-                <Body>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                    <ListWrapper>
-                      {months.map((month) => (
-                        <View key={month} style={styles.monthCard}>
-                          <Text style={styles.monthTitle}>{month}</Text>
-                          <View style={styles.photoRow}>
-                            {/* Profile Photo */}
-                            <TouchableOpacity
-                              onPress={() =>
-                                handleUploadPhoto(month, 'profile')
-                              }
-                              style={styles.photoContainer}
-                            >
-                              {photos[month]?.profile ? (
-                                <Image
-                                  alt=""
-                                  source={{ uri: photos[month].profile }}
-                                  style={styles.photo}
-                                />
-                              ) : (
-                                <View style={styles.placeholder}>
-                                  <Text style={styles.placeholderText}>
-                                    {user?.selectedLanguage === 'pt-br'
-                                      ? 'Perfil'
-                                      : 'Profile'}
-                                  </Text>
-                                </View>
-                              )}
-                              <Text style={styles.photoLabel}>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Foto de Perfil'
-                                  : 'Profile Photo'}
-                              </Text>
-                            </TouchableOpacity>
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>
+                  {user?.selectedLanguage === 'pt-br'
+                    ? `Linha do Tempo`
+                    : `Timeline`}
+                </UserName>
+              </Header>
+              <Body>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  <ListWrapper>
+                    {months.map((month) => (
+                      <View key={month} style={styles.monthCard}>
+                        <Text style={styles.monthTitle}>{month}</Text>
+                        <View style={styles.photoRow}>
+                          {/* Profile Photo */}
+                          <TouchableOpacity
+                            onPress={() => handleUploadPhoto(month, 'profile')}
+                            style={styles.photoContainer}
+                          >
+                            {photos[month]?.profile ? (
+                              <Image
+                                alt=""
+                                source={{ uri: photos[month].profile }}
+                                style={styles.photo}
+                              />
+                            ) : (
+                              <View style={styles.placeholder}>
+                                <Text style={styles.placeholderText}>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Perfil'
+                                    : 'Profile'}
+                                </Text>
+                              </View>
+                            )}
+                            <Text style={styles.photoLabel}>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Foto de Perfil'
+                                : 'Profile Photo'}
+                            </Text>
+                          </TouchableOpacity>
 
-                            {/* Side Photo */}
-                            <TouchableOpacity
-                              onPress={() => handleUploadPhoto(month, 'side')}
-                              style={styles.photoContainer}
-                            >
-                              {photos[month]?.side ? (
-                                <Image
-                                  alt=""
-                                  source={{ uri: photos[month].side }}
-                                  style={styles.photo}
-                                />
-                              ) : (
-                                <View style={styles.placeholder}>
-                                  <Text style={styles.placeholderText}>
-                                    {user?.selectedLanguage === 'pt-br'
-                                      ? 'Lado'
-                                      : 'Side'}
-                                  </Text>
-                                </View>
-                              )}
-                              <Text style={styles.photoLabel}>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Foto de Lado'
-                                  : 'Side Photo'}
-                              </Text>
-                            </TouchableOpacity>
+                          {/* Side Photo */}
+                          <TouchableOpacity
+                            onPress={() => handleUploadPhoto(month, 'side')}
+                            style={styles.photoContainer}
+                          >
+                            {photos[month]?.side ? (
+                              <Image
+                                alt=""
+                                source={{ uri: photos[month].side }}
+                                style={styles.photo}
+                              />
+                            ) : (
+                              <View style={styles.placeholder}>
+                                <Text style={styles.placeholderText}>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Lado'
+                                    : 'Side'}
+                                </Text>
+                              </View>
+                            )}
+                            <Text style={styles.photoLabel}>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Foto de Lado'
+                                : 'Side Photo'}
+                            </Text>
+                          </TouchableOpacity>
 
-                            {/* Gym Photo */}
-                            <TouchableOpacity
-                              onPress={() => handleUploadPhoto(month, 'gym')}
-                              style={styles.photoContainer}
-                            >
-                              {photos[month]?.gym ? (
-                                <Image
-                                  alt=""
-                                  source={{ uri: photos[month].gym }}
-                                  style={styles.photo}
-                                />
-                              ) : (
-                                <View style={styles.placeholder}>
-                                  <Text style={styles.placeholderText}>
-                                    {user?.selectedLanguage === 'pt-br'
-                                      ? 'Academia'
-                                      : 'Gym'}
-                                  </Text>
-                                </View>
-                              )}
-                              <Text style={styles.photoLabel}>
-                                {user?.selectedLanguage === 'pt-br'
-                                  ? 'Foto na Academia'
-                                  : 'Gym Photo'}
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
+                          {/* Gym Photo */}
+                          <TouchableOpacity
+                            onPress={() => handleUploadPhoto(month, 'gym')}
+                            style={styles.photoContainer}
+                          >
+                            {photos[month]?.gym ? (
+                              <Image
+                                alt=""
+                                source={{ uri: photos[month].gym }}
+                                style={styles.photo}
+                              />
+                            ) : (
+                              <View style={styles.placeholder}>
+                                <Text style={styles.placeholderText}>
+                                  {user?.selectedLanguage === 'pt-br'
+                                    ? 'Academia'
+                                    : 'Gym'}
+                                </Text>
+                              </View>
+                            )}
+                            <Text style={styles.photoLabel}>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? 'Foto na Academia'
+                                : 'Gym Photo'}
+                            </Text>
+                          </TouchableOpacity>
                         </View>
-                      ))}
-                    </ListWrapper>
-                  </ScrollView>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                      </View>
+                    ))}
+                  </ListWrapper>
+                </ScrollView>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useRoute, useFocusEffect } from '@react-navigation/native'
 
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { BackCircleButton } from '@components/Buttons/BackCircleButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -196,12 +196,6 @@ export function MarketPlacePersonalsDetail() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="dark"
-        translucent
-        animated
-      />
       <ScrollView>
         <BodyImageContainer>
           <BodyImageBackground />

@@ -3,7 +3,7 @@ import { BackHandler } from 'react-native'
 
 import { useFocusEffect, useRoute } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { FlatList } from 'react-native-gesture-handler'
 
 import { BackButton } from '@components/Buttons/BackButton'
@@ -71,12 +71,6 @@ export function MarketPlaceWorkoutList() {
     : []
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BackButton

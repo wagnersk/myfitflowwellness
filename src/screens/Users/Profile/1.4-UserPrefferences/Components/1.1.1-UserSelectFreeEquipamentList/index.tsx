@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import { ImageBackground, BackHandler } from 'react-native'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useTheme } from 'styled-components/native'
@@ -36,7 +36,7 @@ import {
   IOtherDataSelect,
   IWeightDataSelect,
 } from '@hooks/selectOptionsTypes'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export type IAllFreeDataSelect = {
   allFree_insensitive: IptBrUs
@@ -526,208 +526,206 @@ export function UserSelectFreeEquipamentList() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <ListName>{dataType}</ListName>
-                </Header>
-                <Body>
-                  <ScrollView
-                    contentContainerStyle={{ gap: 64 }}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <ListWrapper>
-                      <ListSubTitle>Marque aqui caso tenha todas</ListSubTitle>
-
-                      {selectedAllFreeData && (
-                        <ButtonWrapper
-                          key={selectedAllFreeData.index}
-                          onPress={() => handleSetAllFreeChecked()}
-                        >
-                          <ContentWrapper>
-                            <ItemTitle>
-                              {selectedAllFreeData &&
-                                selectedLanguage &&
-                                selectedAllFreeData.allFree_insensitive &&
-                                selectedAllFreeData.allFree_insensitive[
-                                  selectedLanguage
-                                ]}
-                            </ItemTitle>
-
-                            <IconWrapper>
-                              {selectedAllFreeData.selected && (
-                                <Check
-                                  width={32}
-                                  height={32}
-                                  stroke={theme.COLORS.BLUE_STROKE}
-                                  strokeWidth={2}
-                                />
-                              )}
-                            </IconWrapper>
-                          </ContentWrapper>
-                        </ButtonWrapper>
-                      )}
-                    </ListWrapper>
-                    <ListWrapper>
-                      {selectedBench && (
-                        <ListSubTitle>Ou selecione quais você tem</ListSubTitle>
-                      )}
-                      {selectedBench &&
-                        selectedBench.map((v) => {
-                          return (
-                            <ButtonWrapper
-                              key={v.index}
-                              onPress={() => handleSetBenchChecked(v.index)}
-                            >
-                              <ContentWrapper>
-                                <ItemTitle>
-                                  {v &&
-                                    selectedLanguage &&
-                                    v.bench_insensitive &&
-                                    v.bench_insensitive[selectedLanguage]}
-                                </ItemTitle>
-
-                                <IconWrapper>
-                                  {v.selected && (
-                                    <Check
-                                      width={32}
-                                      height={32}
-                                      stroke={theme.COLORS.BLUE_STROKE}
-                                      strokeWidth={2}
-                                    />
-                                  )}
-                                </IconWrapper>
-                              </ContentWrapper>
-                            </ButtonWrapper>
-                          )
-                        })}
-                    </ListWrapper>
-
-                    <ListWrapper>
-                      {selectedBar && (
-                        <ListSubTitle>Barras Disponíveis</ListSubTitle>
-                      )}
-                      {selectedBar &&
-                        selectedBar.map((va) => {
-                          return (
-                            <ButtonWrapper
-                              key={va.index}
-                              onPress={() => handleSetBarChecked(va.index)}
-                            >
-                              <ContentWrapper>
-                                <ItemTitle>
-                                  {va &&
-                                    selectedLanguage &&
-                                    va.bar_insensitive &&
-                                    va.bar_insensitive[selectedLanguage]}
-                                </ItemTitle>
-
-                                <IconWrapper>
-                                  {va.selected && (
-                                    <Check
-                                      width={32}
-                                      height={32}
-                                      stroke={theme.COLORS.BLUE_STROKE}
-                                      strokeWidth={2}
-                                    />
-                                  )}
-                                </IconWrapper>
-                              </ContentWrapper>
-                            </ButtonWrapper>
-                          )
-                        })}
-                    </ListWrapper>
-
-                    <ListWrapper>
-                      {selectedWeight && (
-                        <ListSubTitle>Pesos Disponíveis</ListSubTitle>
-                      )}
-                      {selectedWeight &&
-                        selectedWeight.map((va) => {
-                          return (
-                            <ButtonWrapper
-                              key={va.index}
-                              onPress={() => handleSetWeightChecked(va.index)}
-                            >
-                              <ContentWrapper>
-                                <ItemTitle>
-                                  {va &&
-                                    selectedLanguage &&
-                                    va.weight_insensitive &&
-                                    va.weight_insensitive[selectedLanguage]}
-                                </ItemTitle>
-
-                                <IconWrapper>
-                                  {va.selected && (
-                                    <Check
-                                      width={32}
-                                      height={32}
-                                      stroke={theme.COLORS.BLUE_STROKE}
-                                      strokeWidth={2}
-                                    />
-                                  )}
-                                </IconWrapper>
-                              </ContentWrapper>
-                            </ButtonWrapper>
-                          )
-                        })}
-                    </ListWrapper>
-
-                    <ListWrapper>
-                      {selectedOther && (
-                        <ListSubTitle>Outros Disponíveis</ListSubTitle>
-                      )}
-
-                      {selectedOther &&
-                        selectedOther.map((va) => {
-                          return (
-                            <ButtonWrapper
-                              key={va.index}
-                              onPress={() => handleSetOtherChecked(va.index)}
-                            >
-                              <ContentWrapper>
-                                <ItemTitle>
-                                  {va &&
-                                    selectedLanguage &&
-                                    va.other_insensitive &&
-                                    va.other_insensitive[selectedLanguage]}
-                                </ItemTitle>
-
-                                <IconWrapper>
-                                  {va.selected && (
-                                    <Check
-                                      width={32}
-                                      height={32}
-                                      stroke={theme.COLORS.BLUE_STROKE}
-                                      strokeWidth={2}
-                                    />
-                                  )}
-                                </IconWrapper>
-                              </ContentWrapper>
-                            </ButtonWrapper>
-                          )
-                        })}
-                    </ListWrapper>
-                  </ScrollView>
-
-                  <CTAButton
-                    style={{ marginBottom: 54 }}
-                    onPress={handleUpdateInfo}
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
                     changeColor
-                    title="Salvar"
-                    loading={isWaitingApiResponse}
-                    enabled={!isWaitingApiResponse}
+                    disabled={isWaitingApiResponse}
                   />
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                </SettingsWrapper>
+                <ListName>{dataType}</ListName>
+              </Header>
+              <Body>
+                <ScrollView
+                  contentContainerStyle={{ gap: 64 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <ListWrapper>
+                    <ListSubTitle>Marque aqui caso tenha todas</ListSubTitle>
+
+                    {selectedAllFreeData && (
+                      <ButtonWrapper
+                        key={selectedAllFreeData.index}
+                        onPress={() => handleSetAllFreeChecked()}
+                      >
+                        <ContentWrapper>
+                          <ItemTitle>
+                            {selectedAllFreeData &&
+                              selectedLanguage &&
+                              selectedAllFreeData.allFree_insensitive &&
+                              selectedAllFreeData.allFree_insensitive[
+                                selectedLanguage
+                              ]}
+                          </ItemTitle>
+
+                          <IconWrapper>
+                            {selectedAllFreeData.selected && (
+                              <Check
+                                width={32}
+                                height={32}
+                                stroke={theme.COLORS.BLUE_STROKE}
+                                strokeWidth={2}
+                              />
+                            )}
+                          </IconWrapper>
+                        </ContentWrapper>
+                      </ButtonWrapper>
+                    )}
+                  </ListWrapper>
+                  <ListWrapper>
+                    {selectedBench && (
+                      <ListSubTitle>Ou selecione quais você tem</ListSubTitle>
+                    )}
+                    {selectedBench &&
+                      selectedBench.map((v) => {
+                        return (
+                          <ButtonWrapper
+                            key={v.index}
+                            onPress={() => handleSetBenchChecked(v.index)}
+                          >
+                            <ContentWrapper>
+                              <ItemTitle>
+                                {v &&
+                                  selectedLanguage &&
+                                  v.bench_insensitive &&
+                                  v.bench_insensitive[selectedLanguage]}
+                              </ItemTitle>
+
+                              <IconWrapper>
+                                {v.selected && (
+                                  <Check
+                                    width={32}
+                                    height={32}
+                                    stroke={theme.COLORS.BLUE_STROKE}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </IconWrapper>
+                            </ContentWrapper>
+                          </ButtonWrapper>
+                        )
+                      })}
+                  </ListWrapper>
+
+                  <ListWrapper>
+                    {selectedBar && (
+                      <ListSubTitle>Barras Disponíveis</ListSubTitle>
+                    )}
+                    {selectedBar &&
+                      selectedBar.map((va) => {
+                        return (
+                          <ButtonWrapper
+                            key={va.index}
+                            onPress={() => handleSetBarChecked(va.index)}
+                          >
+                            <ContentWrapper>
+                              <ItemTitle>
+                                {va &&
+                                  selectedLanguage &&
+                                  va.bar_insensitive &&
+                                  va.bar_insensitive[selectedLanguage]}
+                              </ItemTitle>
+
+                              <IconWrapper>
+                                {va.selected && (
+                                  <Check
+                                    width={32}
+                                    height={32}
+                                    stroke={theme.COLORS.BLUE_STROKE}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </IconWrapper>
+                            </ContentWrapper>
+                          </ButtonWrapper>
+                        )
+                      })}
+                  </ListWrapper>
+
+                  <ListWrapper>
+                    {selectedWeight && (
+                      <ListSubTitle>Pesos Disponíveis</ListSubTitle>
+                    )}
+                    {selectedWeight &&
+                      selectedWeight.map((va) => {
+                        return (
+                          <ButtonWrapper
+                            key={va.index}
+                            onPress={() => handleSetWeightChecked(va.index)}
+                          >
+                            <ContentWrapper>
+                              <ItemTitle>
+                                {va &&
+                                  selectedLanguage &&
+                                  va.weight_insensitive &&
+                                  va.weight_insensitive[selectedLanguage]}
+                              </ItemTitle>
+
+                              <IconWrapper>
+                                {va.selected && (
+                                  <Check
+                                    width={32}
+                                    height={32}
+                                    stroke={theme.COLORS.BLUE_STROKE}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </IconWrapper>
+                            </ContentWrapper>
+                          </ButtonWrapper>
+                        )
+                      })}
+                  </ListWrapper>
+
+                  <ListWrapper>
+                    {selectedOther && (
+                      <ListSubTitle>Outros Disponíveis</ListSubTitle>
+                    )}
+
+                    {selectedOther &&
+                      selectedOther.map((va) => {
+                        return (
+                          <ButtonWrapper
+                            key={va.index}
+                            onPress={() => handleSetOtherChecked(va.index)}
+                          >
+                            <ContentWrapper>
+                              <ItemTitle>
+                                {va &&
+                                  selectedLanguage &&
+                                  va.other_insensitive &&
+                                  va.other_insensitive[selectedLanguage]}
+                              </ItemTitle>
+
+                              <IconWrapper>
+                                {va.selected && (
+                                  <Check
+                                    width={32}
+                                    height={32}
+                                    stroke={theme.COLORS.BLUE_STROKE}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </IconWrapper>
+                            </ContentWrapper>
+                          </ButtonWrapper>
+                        )
+                      })}
+                  </ListWrapper>
+                </ScrollView>
+
+                <CTAButton
+                  style={{ marginBottom: 54 }}
+                  onPress={handleUpdateInfo}
+                  changeColor
+                  title="Salvar"
+                  loading={isWaitingApiResponse}
+                  enabled={!isWaitingApiResponse}
+                />
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

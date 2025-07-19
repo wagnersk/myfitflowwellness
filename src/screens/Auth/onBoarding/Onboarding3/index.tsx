@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { TouchableWithoutFeedback, Keyboard, BackHandler } from 'react-native'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useNavigation, useRoute } from '@react-navigation/core'
 
@@ -53,83 +53,81 @@ export function OnBoarding3() {
   return (
     <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <SafeAreaProvider style={{ width: `100%` }}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <BodyWrapper>
-                <OnBoardingHeader
-                  paginationItems={[
-                    { isLine: false },
-                    { isLine: false },
-                    { isLine: true },
-                    { isLine: false },
-                  ]}
-                  handleSkip={() => {}}
-                  skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
-                />
-                <BodyTop>
-                  <ToggleButtonWrapper>
-                    <TittleWrapper>
-                      <Tittle>
+        <SafeAreaView style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <BodyWrapper>
+              <OnBoardingHeader
+                paginationItems={[
+                  { isLine: false },
+                  { isLine: false },
+                  { isLine: true },
+                  { isLine: false },
+                ]}
+                handleSkip={() => {}}
+                skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
+              />
+              <BodyTop>
+                <ToggleButtonWrapper>
+                  <TittleWrapper>
+                    <Tittle>
+                      {selectedLanguage === 'pt-br'
+                        ? 'Acompanhe seu progresso'
+                        : 'Track Your Progress'}
+                    </Tittle>
+                  </TittleWrapper>
+                  <ChartLineUp
+                    width={120}
+                    height={120}
+                    fill={`white`}
+                    strokeWidth={2}
+                  />
+                  <DescriptionWrapper>
+                    <BulletPointWrapper>
+                      <BulletPoint>•</BulletPoint>
+                      <Description>
                         {selectedLanguage === 'pt-br'
-                          ? 'Acompanhe seu progresso'
-                          : 'Track Your Progress'}
-                      </Tittle>
-                    </TittleWrapper>
-                    <ChartLineUp
-                      width={120}
-                      height={120}
+                          ? 'Registre os pesos de cada série.'
+                          : 'Log the weights for each set.'}
+                      </Description>
+                    </BulletPointWrapper>
+
+                    <BulletPointWrapper>
+                      <BulletPoint>•</BulletPoint>
+                      <Description>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Faça anotações sobre seus treinos.'
+                          : 'Make notes about your workouts.'}
+                      </Description>
+                    </BulletPointWrapper>
+                  </DescriptionWrapper>
+                </ToggleButtonWrapper>
+              </BodyTop>
+              <Footer>
+                <PreviousButton onPress={handlePreviousScreen}>
+                  <IconContainer>
+                    <ArrowLeft
+                      width={40}
+                      height={40}
+                      fill={`white`}
+                      strokeWidth={2}
+                      opacity={0.7}
+                    />
+                  </IconContainer>
+                </PreviousButton>
+                <NextScreenButton onPress={handleNextScreen}>
+                  <IconContainer>
+                    <ArrowRight
+                      width={40}
+                      height={40}
                       fill={`white`}
                       strokeWidth={2}
                     />
-                    <DescriptionWrapper>
-                      <BulletPointWrapper>
-                        <BulletPoint>•</BulletPoint>
-                        <Description>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Registre os pesos de cada série.'
-                            : 'Log the weights for each set.'}
-                        </Description>
-                      </BulletPointWrapper>
-
-                      <BulletPointWrapper>
-                        <BulletPoint>•</BulletPoint>
-                        <Description>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Faça anotações sobre seus treinos.'
-                            : 'Make notes about your workouts.'}
-                        </Description>
-                      </BulletPointWrapper>
-                    </DescriptionWrapper>
-                  </ToggleButtonWrapper>
-                </BodyTop>
-                <Footer>
-                  <PreviousButton onPress={handlePreviousScreen}>
-                    <IconContainer>
-                      <ArrowLeft
-                        width={40}
-                        height={40}
-                        fill={`white`}
-                        strokeWidth={2}
-                        opacity={0.7}
-                      />
-                    </IconContainer>
-                  </PreviousButton>
-                  <NextScreenButton onPress={handleNextScreen}>
-                    <IconContainer>
-                      <ArrowRight
-                        width={40}
-                        height={40}
-                        fill={`white`}
-                        strokeWidth={2}
-                      />
-                    </IconContainer>
-                  </NextScreenButton>
-                </Footer>
-              </BodyWrapper>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </SafeAreaProvider>
+                  </IconContainer>
+                </NextScreenButton>
+              </Footer>
+            </BodyWrapper>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
       </LinearGradientContainer>
     </Container>
   )

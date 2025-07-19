@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { BackHandler, SafeAreaView } from 'react-native'
+import { BackHandler } from 'react-native'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
 
@@ -36,7 +36,7 @@ import {
   IUserSessionsByWeek,
   IUserTimeBySession,
 } from '@hooks/authTypes'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 
 export interface IUserSelect {
@@ -543,104 +543,102 @@ export function UserPrefferencesSelectList() {
         <BodyImageBackground />
 
         <ImageBackgroundContainer>
-          <SafeAreaProvider style={{ width: `100%` }}>
-            <SafeAreaView style={{ flex: 1 }}>
-              <Header>
-                <SettingsWrapper>
-                  <BackButton
-                    onPress={handleGoBack}
-                    changeColor
-                    disabled={isWaitingApiResponse}
-                  />
-                </SettingsWrapper>
-                <UserName>{dataType}</UserName>
-              </Header>
-              <Body>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <ListWrapper>
-                    {dataType === 'Foco em' && (
-                      <ListTitle>Quero focar no corpo todo</ListTitle>
-                    )}
-
-                    {selectedBalData && (
-                      <ButtonWrapper
-                        key={selectedBalData.id}
-                        onPress={() =>
-                          dataType === 'Foco em' && handleSetBalancedChecked()
-                        }
-                      >
-                        <ContentWrapper>
-                          <ItemTitle>
-                            {selectedBalData &&
-                              selectedBalData.tittle &&
-                              selectedLanguage &&
-                              selectedBalData.tittle[selectedLanguage]}
-                          </ItemTitle>
-
-                          <IconWrapper>
-                            {selectedBalData.selected && (
-                              <Check
-                                width={32}
-                                height={32}
-                                stroke={theme.COLORS.BLUE_STROKE}
-                                strokeWidth={2}
-                              />
-                            )}
-                          </IconWrapper>
-                        </ContentWrapper>
-                      </ButtonWrapper>
-                    )}
-                  </ListWrapper>
-                  <ListWrapper>
-                    {dataType === 'Foco em' && (
-                      <ListTitle>Quero focar mais em</ListTitle>
-                    )}
-                    {selectedData &&
-                      selectedData.map((v) => {
-                        return (
-                          <ButtonWrapper
-                            key={v.id}
-                            onPress={() =>
-                              dataType === 'Foco em'
-                                ? handleSetMusclefocusChecked(v.id)
-                                : handleSelect(v.id)
-                            }
-                          >
-                            <ContentWrapper>
-                              <ItemTitle>
-                                {v &&
-                                  v.tittle &&
-                                  selectedLanguage &&
-                                  v.tittle[selectedLanguage]}
-                              </ItemTitle>
-
-                              <IconWrapper>
-                                {v.selected && (
-                                  <Check
-                                    width={32}
-                                    height={32}
-                                    stroke={theme.COLORS.BLUE_STROKE}
-                                    strokeWidth={2}
-                                  />
-                                )}
-                              </IconWrapper>
-                            </ContentWrapper>
-                          </ButtonWrapper>
-                        )
-                      })}
-                  </ListWrapper>
-                </ScrollView>
-                <CTAButton
-                  style={{ marginBottom: 54 }}
-                  onPress={handleUpdateInfo}
+          <SafeAreaView style={{ flex: 1 }}>
+            <Header>
+              <SettingsWrapper>
+                <BackButton
+                  onPress={handleGoBack}
                   changeColor
-                  title="Salvar"
-                  loading={isWaitingApiResponse}
-                  enabled={!isWaitingApiResponse}
+                  disabled={isWaitingApiResponse}
                 />
-              </Body>
-            </SafeAreaView>
-          </SafeAreaProvider>
+              </SettingsWrapper>
+              <UserName>{dataType}</UserName>
+            </Header>
+            <Body>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <ListWrapper>
+                  {dataType === 'Foco em' && (
+                    <ListTitle>Quero focar no corpo todo</ListTitle>
+                  )}
+
+                  {selectedBalData && (
+                    <ButtonWrapper
+                      key={selectedBalData.id}
+                      onPress={() =>
+                        dataType === 'Foco em' && handleSetBalancedChecked()
+                      }
+                    >
+                      <ContentWrapper>
+                        <ItemTitle>
+                          {selectedBalData &&
+                            selectedBalData.tittle &&
+                            selectedLanguage &&
+                            selectedBalData.tittle[selectedLanguage]}
+                        </ItemTitle>
+
+                        <IconWrapper>
+                          {selectedBalData.selected && (
+                            <Check
+                              width={32}
+                              height={32}
+                              stroke={theme.COLORS.BLUE_STROKE}
+                              strokeWidth={2}
+                            />
+                          )}
+                        </IconWrapper>
+                      </ContentWrapper>
+                    </ButtonWrapper>
+                  )}
+                </ListWrapper>
+                <ListWrapper>
+                  {dataType === 'Foco em' && (
+                    <ListTitle>Quero focar mais em</ListTitle>
+                  )}
+                  {selectedData &&
+                    selectedData.map((v) => {
+                      return (
+                        <ButtonWrapper
+                          key={v.id}
+                          onPress={() =>
+                            dataType === 'Foco em'
+                              ? handleSetMusclefocusChecked(v.id)
+                              : handleSelect(v.id)
+                          }
+                        >
+                          <ContentWrapper>
+                            <ItemTitle>
+                              {v &&
+                                v.tittle &&
+                                selectedLanguage &&
+                                v.tittle[selectedLanguage]}
+                            </ItemTitle>
+
+                            <IconWrapper>
+                              {v.selected && (
+                                <Check
+                                  width={32}
+                                  height={32}
+                                  stroke={theme.COLORS.BLUE_STROKE}
+                                  strokeWidth={2}
+                                />
+                              )}
+                            </IconWrapper>
+                          </ContentWrapper>
+                        </ButtonWrapper>
+                      )
+                    })}
+                </ListWrapper>
+              </ScrollView>
+              <CTAButton
+                style={{ marginBottom: 54 }}
+                onPress={handleUpdateInfo}
+                changeColor
+                title="Salvar"
+                loading={isWaitingApiResponse}
+                enabled={!isWaitingApiResponse}
+              />
+            </Body>
+          </SafeAreaView>
         </ImageBackgroundContainer>
       </BodyImageWrapper>
     </Container>

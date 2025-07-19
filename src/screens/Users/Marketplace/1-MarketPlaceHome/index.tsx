@@ -3,7 +3,7 @@ import { Alert, BackHandler, View, Text, TouchableOpacity } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -222,12 +222,6 @@ export function MarketPlaceHome() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BioInfo>

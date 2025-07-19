@@ -7,7 +7,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuth } from '@hooks/auth'
 import { useTheme } from 'styled-components/native'
 
@@ -213,129 +213,127 @@ export function Login() {
   return (
     <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <SafeAreaProvider style={{ width: `100%` }}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <BodyWrapper>
-                <ToggleButtonWrapper>
-                  <ToggleButton
-                    onPress={() =>
-                      handleLanguageChange(
-                        selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
-                      )
-                    }
-                  >
-                    <ToggleButtonText>
-                      {selectedLanguage === 'pt-br' ? '🇧🇷' : '🇺🇸'}
-                    </ToggleButtonText>
-                  </ToggleButton>
-                </ToggleButtonWrapper>
-                <KeyboardAvoidingView
-                  style={{ width: '100%', flex: 1 }}
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        <SafeAreaView style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <BodyWrapper>
+              <ToggleButtonWrapper>
+                <ToggleButton
+                  onPress={() =>
+                    handleLanguageChange(
+                      selectedLanguage === 'pt-br' ? 'us' : 'pt-br',
+                    )
+                  }
                 >
-                  <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <Header>
-                      <MyFitFlowLogoComponent width={250} height={250} />
-                    </Header>
+                  <ToggleButtonText>
+                    {selectedLanguage === 'pt-br' ? '🇧🇷' : '🇺🇸'}
+                  </ToggleButtonText>
+                </ToggleButton>
+              </ToggleButtonWrapper>
+              <KeyboardAvoidingView
+                style={{ width: '100%', flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              >
+                <ScrollView
+                  contentContainerStyle={{ flexGrow: 1 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Header>
+                    <MyFitFlowLogoComponent width={250} height={250} />
+                  </Header>
 
-                    <BodyTop>
-                      <FormWrapper>
-                        <EmailInput
-                          placeholder={
-                            selectedLanguage === 'pt-br' ? 'Email' : 'Email'
-                          }
-                          handleChangeEmail={handleChangeEmail}
-                          value={userForm.email.value}
-                          errorBoolean={userForm.email.errorBoolean}
-                          onFocus={() => {}}
-                          type="transparent"
-                          borderDesign="up"
-                          order="top"
-                          topPosition={2}
-                          editable={!isLogging}
-                        />
-                        <PasswordInput
-                          placeholder={
-                            selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
-                          }
-                          handleChangePassword={handleChangePassword}
-                          value={userForm.password.value}
-                          errorBoolean={userForm.password.errorBoolean}
-                          onFocus={() => {}}
-                          type="transparent"
-                          borderDesign="down"
-                          order="bottom"
-                          editable={!isLogging}
-                        />
-                      </FormWrapper>
-                      <ForgotPasswordWrapper>
-                        <ForgotPasswordButtonWrapper
-                          onPress={handleForgotPassword}
-                          disabled={isLogging}
-                        >
-                          <ForgotPasswordText>
-                            {selectedLanguage === 'pt-br'
-                              ? 'Esqueci minha senha'
-                              : 'Forgot my password'}
-                          </ForgotPasswordText>
-                        </ForgotPasswordButtonWrapper>
-                      </ForgotPasswordWrapper>
+                  <BodyTop>
+                    <FormWrapper>
+                      <EmailInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'Email' : 'Email'
+                        }
+                        handleChangeEmail={handleChangeEmail}
+                        value={userForm.email.value}
+                        errorBoolean={userForm.email.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="up"
+                        order="top"
+                        topPosition={2}
+                        editable={!isLogging}
+                      />
+                      <PasswordInput
+                        placeholder={
+                          selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
+                        }
+                        handleChangePassword={handleChangePassword}
+                        value={userForm.password.value}
+                        errorBoolean={userForm.password.errorBoolean}
+                        onFocus={() => {}}
+                        type="transparent"
+                        borderDesign="down"
+                        order="bottom"
+                        editable={!isLogging}
+                      />
+                    </FormWrapper>
+                    <ForgotPasswordWrapper>
+                      <ForgotPasswordButtonWrapper
+                        onPress={handleForgotPassword}
+                        disabled={isLogging}
+                      >
+                        <ForgotPasswordText>
+                          {selectedLanguage === 'pt-br'
+                            ? 'Esqueci minha senha'
+                            : 'Forgot my password'}
+                        </ForgotPasswordText>
+                      </ForgotPasswordButtonWrapper>
+                    </ForgotPasswordWrapper>
 
-                      <ButtonWithIcon>
-                        <CTAButton
-                          disabled={isLogging}
-                          loading={isLogging}
-                          title={
-                            selectedLanguage === 'pt-br' ? 'Entrar' : 'Sign In'
-                          }
-                          onPress={handleSignIn}
-                        />
-                        <ViewWithLineAndIcon />
-                      </ButtonWithIcon>
-                    </BodyTop>
-                  </ScrollView>
-                </KeyboardAvoidingView>
-                <Footer>
-                  <CreateGuestAccountButton
-                    onPress={handleSignUpAsGuest}
-                    disabled={isLogging}
-                  >
-                    <FooterTopWrapper>
-                      <FooterText>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Entrar como Convidado'
-                          : 'Enter as Guest'}
-                      </FooterText>
-                    </FooterTopWrapper>
-                  </CreateGuestAccountButton>
-                  <CreateAccountButton
-                    onPress={handleSignUp}
-                    disabled={isLogging}
-                  >
+                    <ButtonWithIcon>
+                      <CTAButton
+                        disabled={isLogging}
+                        loading={isLogging}
+                        title={
+                          selectedLanguage === 'pt-br' ? 'Entrar' : 'Sign In'
+                        }
+                        onPress={handleSignIn}
+                      />
+                      <ViewWithLineAndIcon />
+                    </ButtonWithIcon>
+                  </BodyTop>
+                </ScrollView>
+              </KeyboardAvoidingView>
+              <Footer>
+                <CreateGuestAccountButton
+                  onPress={handleSignUpAsGuest}
+                  disabled={isLogging}
+                >
+                  <FooterTopWrapper>
                     <FooterText>
                       {selectedLanguage === 'pt-br'
-                        ? 'Criar uma conta'
-                        : 'Sign up'}
+                        ? 'Entrar como Convidado'
+                        : 'Enter as Guest'}
                     </FooterText>
-                    <IconContainer>
-                      <Forward
-                        width={40}
-                        height={40}
-                        stroke={theme.COLORS.TEXT_LIGHT}
-                        style={{ top: 2 }}
-                        strokeWidth={2}
-                      />
-                    </IconContainer>
-                  </CreateAccountButton>
-                </Footer>
-              </BodyWrapper>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </SafeAreaProvider>
+                  </FooterTopWrapper>
+                </CreateGuestAccountButton>
+                <CreateAccountButton
+                  onPress={handleSignUp}
+                  disabled={isLogging}
+                >
+                  <FooterText>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Criar uma conta'
+                      : 'Sign up'}
+                  </FooterText>
+                  <IconContainer>
+                    <Forward
+                      width={40}
+                      height={40}
+                      stroke={theme.COLORS.TEXT_LIGHT}
+                      style={{ top: 2 }}
+                      strokeWidth={2}
+                    />
+                  </IconContainer>
+                </CreateAccountButton>
+              </Footer>
+            </BodyWrapper>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
       </LinearGradientContainer>
     </Container>
   )

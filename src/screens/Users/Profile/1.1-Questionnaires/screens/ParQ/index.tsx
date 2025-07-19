@@ -1,6 +1,6 @@
 // screens/Questionnaire/index.tsx
 import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, FlatList, ImageBackground, SafeAreaView } from 'react-native'
+import { Alert, FlatList, ImageBackground } from 'react-native'
 
 import { questions } from '../../questions'
 import QuestionStep from '@components/Questions'
@@ -22,11 +22,11 @@ import {
   UserName,
 } from './styles'
 import { useAuth } from '@hooks/auth'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import backgroundImg from '../../../../../../../assets/back.png'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { QuestionData } from '@hooks/selectOptionsDataFirebaseTypes'
 
 const ITEMS_PER_PAGE = 4
@@ -169,74 +169,66 @@ export default function ParQ() {
           style={{ flex: 1 }}
           resizeMode="cover"
         >
-          <StatusBar
-            backgroundColor="transparent"
-            style="dark"
-            translucent
-            animated
-          />
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    {!initial && (
-                      <BackButton
-                        onPress={handleGoBack}
-                        changeColor
-                        disabled={initial || isWaitingApiResponse}
-                      />
-                    )}
-                  </SettingsWrapper>
-                  <UserName>{t.title} </UserName>
-                </Header>
-                <Body>
-                  <ListWrapper>
-                    <Subtitle>
-                      {t.step} {page} {t.of} {totalPages} {initial}
-                    </Subtitle>
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  {!initial && (
+                    <BackButton
+                      onPress={handleGoBack}
+                      changeColor
+                      disabled={initial || isWaitingApiResponse}
+                    />
+                  )}
+                </SettingsWrapper>
+                <UserName>{t.title} </UserName>
+              </Header>
+              <Body>
+                <ListWrapper>
+                  <Subtitle>
+                    {t.step} {page} {t.of} {totalPages} {initial}
+                  </Subtitle>
 
-                    <ProgressBarWrapper>
-                      <ProgressBarFill
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    </ProgressBarWrapper>
+                  <ProgressBarWrapper>
+                    <ProgressBarFill
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </ProgressBarWrapper>
 
-                    <QuestionList>
-                      <FlatList
-                        data={currentQuestions}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item, index }) => (
-                          <QuestionStep
-                            question={item}
-                            language={language}
-                            index={(page - 1) * ITEMS_PER_PAGE + index}
-                            handleSelectParQ={handleSelectParQ}
-                          />
-                        )}
-                        contentContainerStyle={{ gap: 20 }}
-                      />
-                    </QuestionList>
-
-                    <Navigation singleButton={page <= 1}>
-                      {page > 1 && (
-                        <NavButton onPress={handleBack}>
-                          <NavButtonText>{t.back}</NavButtonText>
-                        </NavButton>
+                  <QuestionList>
+                    <FlatList
+                      data={currentQuestions}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item, index }) => (
+                        <QuestionStep
+                          question={item}
+                          language={language}
+                          index={(page - 1) * ITEMS_PER_PAGE + index}
+                          handleSelectParQ={handleSelectParQ}
+                        />
                       )}
-                      <NavButton
-                        onPress={handleNext}
-                        disabled={isWaitingApiResponse}
-                      >
-                        <NavButtonText>
-                          {page === totalPages ? t.finish : t.next}
-                        </NavButtonText>
+                      contentContainerStyle={{ gap: 20 }}
+                    />
+                  </QuestionList>
+
+                  <Navigation singleButton={page <= 1}>
+                    {page > 1 && (
+                      <NavButton onPress={handleBack}>
+                        <NavButtonText>{t.back}</NavButtonText>
                       </NavButton>
-                    </Navigation>
-                  </ListWrapper>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                    )}
+                    <NavButton
+                      onPress={handleNext}
+                      disabled={isWaitingApiResponse}
+                    >
+                      <NavButtonText>
+                        {page === totalPages ? t.finish : t.next}
+                      </NavButtonText>
+                    </NavButton>
+                  </Navigation>
+                </ListWrapper>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

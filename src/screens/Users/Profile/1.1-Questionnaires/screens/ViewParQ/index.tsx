@@ -1,6 +1,6 @@
 // screens/Questionnaire/index.tsx
 import React, { useCallback, useState } from 'react'
-import { FlatList, ImageBackground, SafeAreaView } from 'react-native'
+import { FlatList, ImageBackground } from 'react-native'
 
 import { questions } from '../../questions'
 import QuestionStep from '@components/Questions'
@@ -22,7 +22,7 @@ import {
   UserName,
 } from './styles'
 import { useAuth } from '@hooks/auth'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import backgroundImg from '../../../../../../../assets/back.png'
 import { BackButton } from '@components/Buttons/BackButton'
 import {
@@ -30,7 +30,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { QuestionData } from '@hooks/selectOptionsDataFirebaseTypes'
 import { IParQStatus } from '@hooks/authTypes'
 
@@ -132,70 +132,62 @@ export default function ViewParQ() {
           style={{ flex: 1 }}
           resizeMode="cover"
         >
-          <StatusBar
-            backgroundColor="transparent"
-            style="dark"
-            translucent
-            animated
-          />
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>{t.title} </UserName>
+              </Header>
+              <Body>
+                <ListWrapper>
+                  <Subtitle>
+                    {t.step} {page} {t.of} {totalPages}
+                  </Subtitle>
+
+                  <ProgressBarWrapper>
+                    <ProgressBarFill
+                      style={{ width: `${progressPercentage}%` }}
                     />
-                  </SettingsWrapper>
-                  <UserName>{t.title} </UserName>
-                </Header>
-                <Body>
-                  <ListWrapper>
-                    <Subtitle>
-                      {t.step} {page} {t.of} {totalPages}
-                    </Subtitle>
+                  </ProgressBarWrapper>
 
-                    <ProgressBarWrapper>
-                      <ProgressBarFill
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    </ProgressBarWrapper>
-
-                    <QuestionList>
-                      <FlatList
-                        data={currentQuestions}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item, index }) => (
-                          <QuestionStep
-                            question={item}
-                            language={language}
-                            index={(page - 1) * ITEMS_PER_PAGE + index}
-                            handleSelectParQ={handleSelectParQ}
-                            viewOnly={true}
-                          />
-                        )}
-                        contentContainerStyle={{ gap: 20 }}
-                      />
-                    </QuestionList>
-
-                    <Navigation singleButton={page <= 1}>
-                      {page > 1 && (
-                        <NavButton onPress={handleBack}>
-                          <NavButtonText>{t.back}</NavButtonText>
-                        </NavButton>
+                  <QuestionList>
+                    <FlatList
+                      data={currentQuestions}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item, index }) => (
+                        <QuestionStep
+                          question={item}
+                          language={language}
+                          index={(page - 1) * ITEMS_PER_PAGE + index}
+                          handleSelectParQ={handleSelectParQ}
+                          viewOnly={true}
+                        />
                       )}
-                      <NavButton onPress={handleNext}>
-                        <NavButtonText>
-                          {page === totalPages ? t.finish : t.next}
-                        </NavButtonText>
+                      contentContainerStyle={{ gap: 20 }}
+                    />
+                  </QuestionList>
+
+                  <Navigation singleButton={page <= 1}>
+                    {page > 1 && (
+                      <NavButton onPress={handleBack}>
+                        <NavButtonText>{t.back}</NavButtonText>
                       </NavButton>
-                    </Navigation>
-                  </ListWrapper>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                    )}
+                    <NavButton onPress={handleNext}>
+                      <NavButtonText>
+                        {page === totalPages ? t.finish : t.next}
+                      </NavButtonText>
+                    </NavButton>
+                  </Navigation>
+                </ListWrapper>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

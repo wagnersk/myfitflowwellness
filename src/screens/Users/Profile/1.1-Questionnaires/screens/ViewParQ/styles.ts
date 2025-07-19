@@ -52,11 +52,8 @@ export const NavButtonText = styled.Text`
 `
 
 export const Body = styled.View`
-  width: 100%;
-  height: 100%;
+  padding: 24px;
   flex: 1;
-  gap: 32px;
-  padding-top: 16px;
 `
 export const ListWrapper = styled.View`
   padding-top: 32px;
@@ -72,15 +69,12 @@ export const BodyImageWrapper = styled.View`
 `
 
 export const ImageBackgroundContainer = styled.View`
-  align-items: center;
-  padding: 32px;
   flex: 1;
 `
 
 export const SettingsWrapper = styled.View`
-  align-items: flex-start;
-  width: 100%;
   position: absolute;
+  left: 24px;
 `
 export const Header = styled.View`
   align-items: center;

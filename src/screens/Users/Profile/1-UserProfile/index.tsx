@@ -146,7 +146,8 @@ export function UserProfile() {
         console.log(`atualizando userEquipaments`)
       }
       if (!userParQStatus) {
-        await loadAndSaveUserParQ()
+        if (!user?.id) return
+        await loadAndSaveUserParQ(user.id)
         console.log(`atualizando userParQ`)
       }
     }
@@ -154,13 +155,6 @@ export function UserProfile() {
   }, [])
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="dark"
-        translucent
-        animated
-      />
-
       <BodyImageWrapper>
         <ImageBackground
           source={backgroundImg}
@@ -241,7 +235,6 @@ export function UserProfile() {
                     iconStyle="barbell"
                   />
                   <WhiteButton
-                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Meu Plano'

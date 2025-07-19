@@ -5,7 +5,7 @@ import {
   BackHandler,
   Dimensions,
 } from 'react-native'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useNavigation, useRoute } from '@react-navigation/core'
 
@@ -53,66 +53,64 @@ export function OnBoarding2() {
   return (
     <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <SafeAreaProvider style={{ width: `100%` }}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <BodyWrapper>
-                <OnBoardingHeader
-                  paginationItems={[
-                    { isLine: false },
-                    { isLine: true },
-                    { isLine: false },
-                    { isLine: false },
-                  ]}
-                  handleSkip={handleSkipScreen}
-                  skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
-                />
-                <BodyTop>
-                  <ToggleButtonWrapper>
-                    <TittleWrapper>
-                      <Tittle>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Bem-vindo ao MyFitFlow'
-                          : 'Welcome to MyFitFlow'}
-                      </Tittle>
-                    </TittleWrapper>
-                    <LoadAnimation width={svgSize} height={svgSize} />
-                    <DescriptionWrapper>
-                      <Description>
-                        {selectedLanguage === 'pt-br'
-                          ? 'Treinos personalizados para você atingir seus objetivos!'
-                          : 'Personalized workouts to help you reach your goals!'}
-                      </Description>
-                    </DescriptionWrapper>
-                  </ToggleButtonWrapper>
-                </BodyTop>
-                <Footer>
-                  <PreviousButton onPress={handlePreviousScreen}>
-                    <IconContainer>
-                      <ArrowLeft
-                        width={40}
-                        height={40}
-                        fill={`white`}
-                        strokeWidth={2}
-                        opacity={0.7}
-                      />
-                    </IconContainer>
-                  </PreviousButton>
-                  <NextScreenButton onPress={handleNextScreen}>
-                    <IconContainer>
-                      <ArrowRight
-                        width={40}
-                        height={40}
-                        fill={`white`}
-                        strokeWidth={2}
-                      />
-                    </IconContainer>
-                  </NextScreenButton>
-                </Footer>
-              </BodyWrapper>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </SafeAreaProvider>
+        <SafeAreaView style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <BodyWrapper>
+              <OnBoardingHeader
+                paginationItems={[
+                  { isLine: false },
+                  { isLine: true },
+                  { isLine: false },
+                  { isLine: false },
+                ]}
+                handleSkip={handleSkipScreen}
+                skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
+              />
+              <BodyTop>
+                <ToggleButtonWrapper>
+                  <TittleWrapper>
+                    <Tittle>
+                      {selectedLanguage === 'pt-br'
+                        ? 'Bem-vindo ao MyFitFlow'
+                        : 'Welcome to MyFitFlow'}
+                    </Tittle>
+                  </TittleWrapper>
+                  <LoadAnimation width={svgSize} height={svgSize} />
+                  <DescriptionWrapper>
+                    <Description>
+                      {selectedLanguage === 'pt-br'
+                        ? 'Treinos personalizados para você atingir seus objetivos!'
+                        : 'Personalized workouts to help you reach your goals!'}
+                    </Description>
+                  </DescriptionWrapper>
+                </ToggleButtonWrapper>
+              </BodyTop>
+              <Footer>
+                <PreviousButton onPress={handlePreviousScreen}>
+                  <IconContainer>
+                    <ArrowLeft
+                      width={40}
+                      height={40}
+                      fill={`white`}
+                      strokeWidth={2}
+                      opacity={0.7}
+                    />
+                  </IconContainer>
+                </PreviousButton>
+                <NextScreenButton onPress={handleNextScreen}>
+                  <IconContainer>
+                    <ArrowRight
+                      width={40}
+                      height={40}
+                      fill={`white`}
+                      strokeWidth={2}
+                    />
+                  </IconContainer>
+                </NextScreenButton>
+              </Footer>
+            </BodyWrapper>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
       </LinearGradientContainer>
     </Container>
   )

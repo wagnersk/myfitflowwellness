@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
-import { Alert, ImageBackground, SafeAreaView, ScrollView } from 'react-native'
+import { Alert, ImageBackground, ScrollView } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { useAuth } from '@hooks/auth'
 
@@ -26,7 +26,7 @@ import {
   ButtonsWrapper,
 } from './styles'
 import { getFormattedDate } from '@utils/getFormattedDate'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const translations = {
   'pt-br': {
@@ -137,13 +137,6 @@ export default function Questionnaires() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="dark"
-        translucent
-        animated
-      />
-
       <BodyImageWrapper>
         <ImageBackground
           source={backgroundImg}
@@ -151,56 +144,55 @@ export default function Questionnaires() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <UserName>{t.title}</UserName>
-                </Header>
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                  <Body>
-                    {/* PAR-Q Card */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>{t.parqTitle}</CardTitle>
-                      </CardHeader>
-                      <CardStatus>{parqLastFilledDate}</CardStatus>
-                      <CardButtons>
-                        {isParqFilled ? (
-                          <ButtonsWrapper>
-                            <Button
-                              onPress={() => handleDelete('parq')}
-                              variant="danger"
-                            >
-                              <ButtonText variant="danger">
-                                {t.deleteButton}
-                              </ButtonText>
-                            </Button>
-                            <Button
-                              onPress={handleOpenViewParQ}
-                              variant="secondary"
-                            >
-                              <ButtonText variant="secondary">
-                                {t.viewButton}
-                              </ButtonText>
-                            </Button>
-                          </ButtonsWrapper>
-                        ) : (
-                          <Button onPress={handleOpenParQ}>
-                            <ButtonText>{t.fillButton}</ButtonText>
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>{t.title}</UserName>
+              </Header>
+              <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <Body>
+                  {/* PAR-Q Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t.parqTitle}</CardTitle>
+                    </CardHeader>
+                    <CardStatus>{parqLastFilledDate}</CardStatus>
+                    <CardButtons>
+                      {isParqFilled ? (
+                        <ButtonsWrapper>
+                          <Button
+                            onPress={() => handleDelete('parq')}
+                            variant="danger"
+                          >
+                            <ButtonText variant="danger">
+                              {t.deleteButton}
+                            </ButtonText>
                           </Button>
-                        )}
-                      </CardButtons>
-                    </Card>
+                          <Button
+                            onPress={handleOpenViewParQ}
+                            variant="secondary"
+                          >
+                            <ButtonText variant="secondary">
+                              {t.viewButton}
+                            </ButtonText>
+                          </Button>
+                        </ButtonsWrapper>
+                      ) : (
+                        <Button onPress={handleOpenParQ}>
+                          <ButtonText>{t.fillButton}</ButtonText>
+                        </Button>
+                      )}
+                    </CardButtons>
+                  </Card>
 
-                    {/* Anamnesis Card */}
-                    {/*  <Card>
+                  {/* Anamnesis Card */}
+                  {/*  <Card>
                     <CardHeader>
                       <CardTitle>{t.anamnesisTitle}</CardTitle>
                     </CardHeader>
@@ -243,10 +235,9 @@ export default function Questionnaires() {
                       )}
                     </CardButtons>
                   </Card> */}
-                  </Body>
-                </ScrollView>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                </Body>
+              </ScrollView>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

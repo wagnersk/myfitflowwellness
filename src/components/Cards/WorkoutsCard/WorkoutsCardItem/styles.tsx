@@ -35,7 +35,7 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
   font-size: ${RFValue(16)}px;
-  padding-bottom: 6px;
+  margin-bottom: 2px;
 `
 
 export const SubTitle = styled.Text`

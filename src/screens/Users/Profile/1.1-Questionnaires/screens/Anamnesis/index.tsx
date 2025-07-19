@@ -1,11 +1,6 @@
 // screens/Anamnesis/index.tsx
 import React, { useEffect, useState } from 'react'
-import {
-  BackHandler,
-  FlatList,
-  ImageBackground,
-  SafeAreaView,
-} from 'react-native'
+import { BackHandler, FlatList, ImageBackground } from 'react-native'
 import { anamnesisQuestions } from './anamnesisQuestion' // Importar as novas perguntas
 import {
   Container,
@@ -27,7 +22,7 @@ import {
   AnamnesisInput, // Adicionar AnamnesisInput
 } from './styles' // Manter as estilizações existentes e adicionar as novas
 import { useAuth } from '@hooks/auth'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import backgroundImg from '../../../../../assets/back.png'
 import { BackButton } from '@components/Buttons/BackButton'
 import { useNavigation } from '@react-navigation/native'
@@ -126,70 +121,68 @@ export default function AnamnesisForm() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaProvider style={{ width: `100%` }}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
+            <SafeAreaView style={{ flex: 1 }}>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <UserName>{t.title}</UserName>
+              </Header>
+              <Body>
+                <ListWrapper>
+                  <Subtitle>
+                    {t.step} {page} {t.of} {totalPages}
+                  </Subtitle>
+
+                  <ProgressBarWrapper>
+                    <ProgressBarFill
+                      style={{ width: `${progressPercentage}%` }}
                     />
-                  </SettingsWrapper>
-                  <UserName>{t.title}</UserName>
-                </Header>
-                <Body>
-                  <ListWrapper>
-                    <Subtitle>
-                      {t.step} {page} {t.of} {totalPages}
-                    </Subtitle>
+                  </ProgressBarWrapper>
 
-                    <ProgressBarWrapper>
-                      <ProgressBarFill
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    </ProgressBarWrapper>
-
-                    <QuestionList>
-                      <FlatList
-                        data={currentQuestions}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => (
-                          <>
-                            <QuestionText>
-                              {item.id}. {item[language].question}
-                            </QuestionText>
-                            <AnamnesisInput
-                              placeholder={item[language].placeholder}
-                              multiline={true} // Permite múltiplas linhas para respostas mais longas
-                              numberOfLines={4} // Número inicial de linhas visíveis
-                              value={answers[item.id] || ''}
-                              onChangeText={(text) =>
-                                handleAnswerChange(item.id, text)
-                              }
-                            />
-                          </>
-                        )}
-                        contentContainerStyle={{ gap: 20 }}
-                      />
-                    </QuestionList>
-
-                    <Navigation singleButton={page <= 1}>
-                      {page > 1 && (
-                        <NavButton onPress={handleBack}>
-                          <NavButtonText>{t.back}</NavButtonText>
-                        </NavButton>
+                  <QuestionList>
+                    <FlatList
+                      data={currentQuestions}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                        <>
+                          <QuestionText>
+                            {item.id}. {item[language].question}
+                          </QuestionText>
+                          <AnamnesisInput
+                            placeholder={item[language].placeholder}
+                            multiline={true} // Permite múltiplas linhas para respostas mais longas
+                            numberOfLines={4} // Número inicial de linhas visíveis
+                            value={answers[item.id] || ''}
+                            onChangeText={(text) =>
+                              handleAnswerChange(item.id, text)
+                            }
+                          />
+                        </>
                       )}
-                      <NavButton onPress={handleNext}>
-                        <NavButtonText>
-                          {page === totalPages ? t.finish : t.next}
-                        </NavButtonText>
+                      contentContainerStyle={{ gap: 20 }}
+                    />
+                  </QuestionList>
+
+                  <Navigation singleButton={page <= 1}>
+                    {page > 1 && (
+                      <NavButton onPress={handleBack}>
+                        <NavButtonText>{t.back}</NavButtonText>
                       </NavButton>
-                    </Navigation>
-                  </ListWrapper>
-                </Body>
-              </SafeAreaView>
-            </SafeAreaProvider>
+                    )}
+                    <NavButton onPress={handleNext}>
+                      <NavButtonText>
+                        {page === totalPages ? t.finish : t.next}
+                      </NavButtonText>
+                    </NavButton>
+                  </Navigation>
+                </ListWrapper>
+              </Body>
+            </SafeAreaView>
           </ImageBackgroundContainer>
         </ImageBackground>
       </BodyImageWrapper>

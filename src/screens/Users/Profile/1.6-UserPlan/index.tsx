@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import { ImageBackground, BackHandler, SafeAreaView } from 'react-native'
+import { ImageBackground, BackHandler } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { Feather } from '@expo/vector-icons' // Exemplo: usando Expo Icons. Adapte para sua biblioteca.
 
@@ -29,7 +29,8 @@ import {
   SecondaryAction,
   SecondaryActionText,
 } from './styles'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 // Criei este item para listar as vantagens do plano.
 // O ícone de check pode vir da sua biblioteca de preferência.
@@ -79,12 +80,6 @@ export function UserPlan() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="dark"
-        translucent
-        animated
-      />
       <BodyImageWrapper>
         <ImageBackground
           source={backgroundImg}

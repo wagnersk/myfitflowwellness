@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react'
-import { Alert, SafeAreaView } from 'react-native'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { useRoute, useFocusEffect } from '@react-navigation/native'
 
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { BackCircleButton } from '@components/Buttons/BackCircleButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -158,156 +158,146 @@ export function MarketPlaceWorkoutDetail() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
-      <SafeAreaProvider style={{ width: `100%` }}>
-        <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView>
-            <BodyImageContainer>
-              <BodyImageBackground />
-              <PhotoImageWrapper>
-                {dataParam.data.workoutCardPhoto && (
-                  <Image
-                    source={{
-                      uri: dataParam.data.workoutCardPhoto.photoFilePath,
-                    }}
-                    alt=""
-                    contentFit="cover"
-                    style={{
-                      width: '100%',
-                      height: 340,
-                      borderRadius: 8,
-                      backgroundColor: `gray`,
-                    }}
-                    cachePolicy={'memory-disk'}
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView>
+          <BodyImageContainer>
+            <BodyImageBackground />
+            <PhotoImageWrapper>
+              {dataParam.data.workoutCardPhoto && (
+                <Image
+                  source={{
+                    uri: dataParam.data.workoutCardPhoto.photoFilePath,
+                  }}
+                  alt=""
+                  contentFit="cover"
+                  style={{
+                    width: '100%',
+                    height: 340,
+                    borderRadius: 8,
+                    backgroundColor: `gray`,
+                  }}
+                  cachePolicy={'memory-disk'}
+                />
+              )}
+
+              <LockIconWrapper>
+                <Plan size={48} level={dataParam.data.workoutPlanType} />
+              </LockIconWrapper>
+            </PhotoImageWrapper>
+
+            <Wrapper>
+              <TitleWrapper>
+                <TitleWorkout>
+                  {dataParam.data.workoutName &&
+                    selectedLanguage &&
+                    dataParam.data.workoutName[selectedLanguage]}
+                </TitleWorkout>
+              </TitleWrapper>
+
+              <TitleWrapper>
+                <TitleDivision>
+                  ( {dataParam.data.workoutDivision.division} )
+                </TitleDivision>
+              </TitleWrapper>
+            </Wrapper>
+
+            <BodyInfo>
+              {selectedLanguage && (
+                <WorkoutBoxInfoWrapper>
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon('calendar-dots')}
+                    description={`${dataParam.data.workoutPeriod.period_insensitive[selectedLanguage]}`}
                   />
-                )}
-
-                <LockIconWrapper>
-                  <Plan size={48} level={dataParam.data.workoutPlanType} />
-                </LockIconWrapper>
-              </PhotoImageWrapper>
-
-              <Wrapper>
-                <TitleWrapper>
-                  <TitleWorkout>
-                    {dataParam.data.workoutName &&
-                      selectedLanguage &&
-                      dataParam.data.workoutName[selectedLanguage]}
-                  </TitleWorkout>
-                </TitleWrapper>
-
-                <TitleWrapper>
-                  <TitleDivision>
-                    ( {dataParam.data.workoutDivision.division} )
-                  </TitleDivision>
-                </TitleWrapper>
-              </Wrapper>
-
-              <BodyInfo>
-                {selectedLanguage && (
-                  <WorkoutBoxInfoWrapper>
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon('calendar-dots')}
-                      description={`${dataParam.data.workoutPeriod.period_insensitive[selectedLanguage]}`}
-                    />
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon('check-circle')}
-                      description={`${dataParam.data.workoutByWeek.sessionsByWeek_insensitive[selectedLanguage]}`}
-                    />
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon('clock')}
-                      description={`${dataParam.data.workoutTime.timeBySession_insensitive[selectedLanguage]}`}
-                    />
-                  </WorkoutBoxInfoWrapper>
-                )}
-                {selectedLanguage && (
-                  <WorkoutBoxInfoWrapper>
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon('crosshair')}
-                      description={dataParam.data.workoutGoal[selectedLanguage]}
-                    />
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon(
-                        getGenderIcon(
-                          dataParam.data.workoutGender[selectedLanguage],
-                        ),
-                      )}
-                      description={`${dataParam.data.workoutGender[selectedLanguage]}`}
-                    />
-                    <WorkoutBoxInfo
-                      size={36}
-                      icon={getIcon('steps')}
-                      description={
-                        dataParam.data.workoutLevel[selectedLanguage]
-                      }
-                    />
-                  </WorkoutBoxInfoWrapper>
-                )}
-                {selectedLanguage && (
-                  <InfoDescriptionWrapper>
-                    <SubTitle>
-                      {dataParam.data.workoutDescription &&
-                        dataParam.data.workoutDescription[selectedLanguage]}
-                    </SubTitle>
-                  </InfoDescriptionWrapper>
-                )}
-                {/* uasr isso na web */}
-                <InfoBoxesWrapper>
-                  <EquipamentsInfo
-                    data={dataParam.data.workoutsUniquesFilters}
-                    selectedLanguage={user?.selectedLanguage}
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon('check-circle')}
+                    description={`${dataParam.data.workoutByWeek.sessionsByWeek_insensitive[selectedLanguage]}`}
                   />
-                  <WorkoutMuscleComponent
-                    data={dataParam.data.workoutsUniquesMuscles}
-                    selectedLanguage={user?.selectedLanguage}
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon('clock')}
+                    description={`${dataParam.data.workoutTime.timeBySession_insensitive[selectedLanguage]}`}
                   />
-                </InfoBoxesWrapper>
-              </BodyInfo>
-            </BodyImageContainer>
-          </ScrollView>
-          <BackButtonWrapper>
-            <BackCircleButton onPress={handleGoBack} changeColor />
-          </BackButtonWrapper>
-          <BodyBottomWrapper>
-            <BlurViewWrapper
-              intensity={30}
-              tint="light"
+                </WorkoutBoxInfoWrapper>
+              )}
+              {selectedLanguage && (
+                <WorkoutBoxInfoWrapper>
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon('crosshair')}
+                    description={dataParam.data.workoutGoal[selectedLanguage]}
+                  />
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon(
+                      getGenderIcon(
+                        dataParam.data.workoutGender[selectedLanguage],
+                      ),
+                    )}
+                    description={`${dataParam.data.workoutGender[selectedLanguage]}`}
+                  />
+                  <WorkoutBoxInfo
+                    size={36}
+                    icon={getIcon('steps')}
+                    description={dataParam.data.workoutLevel[selectedLanguage]}
+                  />
+                </WorkoutBoxInfoWrapper>
+              )}
+              {selectedLanguage && (
+                <InfoDescriptionWrapper>
+                  <SubTitle>
+                    {dataParam.data.workoutDescription &&
+                      dataParam.data.workoutDescription[selectedLanguage]}
+                  </SubTitle>
+                </InfoDescriptionWrapper>
+              )}
+              {/* uasr isso na web */}
+              <InfoBoxesWrapper>
+                <EquipamentsInfo
+                  data={dataParam.data.workoutsUniquesFilters}
+                  selectedLanguage={user?.selectedLanguage}
+                />
+                <WorkoutMuscleComponent
+                  data={dataParam.data.workoutsUniquesMuscles}
+                  selectedLanguage={user?.selectedLanguage}
+                />
+              </InfoBoxesWrapper>
+            </BodyInfo>
+          </BodyImageContainer>
+        </ScrollView>
+        <BackButtonWrapper>
+          <BackCircleButton onPress={handleGoBack} changeColor />
+        </BackButtonWrapper>
+        <BodyBottomWrapper>
+          <BlurViewWrapper
+            intensity={30}
+            tint="light"
+            style={{
+              paddingLeft: 32,
+              paddingRight: 32,
+            }}
+          >
+            <CTAButton
+              enabled={!isWaitingApiResponse}
+              loading={isWaitingApiResponse}
+              workoutAlreadySelected={!!cachedWorkout}
               style={{
-                paddingLeft: 32,
-                paddingRight: 32,
+                marginBottom: 52,
+                width: '100%',
               }}
-            >
-              <CTAButton
-                enabled={!isWaitingApiResponse}
-                loading={isWaitingApiResponse}
-                workoutAlreadySelected={!!cachedWorkout}
-                style={{
-                  marginBottom: 52,
-                  width: '100%',
-                }}
-                onPress={() => {
-                  cachedWorkout
-                    ? handleDeleteWorkout(dataParam.data.workoutId)
-                    : handleChoose()
-                }}
-                /* bigSize={true} */
-                changeColor
-                title={tittle}
-              />
-            </BlurViewWrapper>
-          </BodyBottomWrapper>
-        </SafeAreaView>
-      </SafeAreaProvider>
+              onPress={() => {
+                cachedWorkout
+                  ? handleDeleteWorkout(dataParam.data.workoutId)
+                  : handleChoose()
+              }}
+              /* bigSize={true} */
+              changeColor
+              title={tittle}
+            />
+          </BlurViewWrapper>
+        </BodyBottomWrapper>
+      </SafeAreaView>
     </Container>
   )
 }

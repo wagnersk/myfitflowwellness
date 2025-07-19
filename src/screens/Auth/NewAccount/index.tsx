@@ -8,7 +8,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useTheme } from 'styled-components/native'
 import { useNavigation, useRoute } from '@react-navigation/core'
@@ -282,128 +282,124 @@ export function NewAccount() {
   return (
     <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <SafeAreaProvider style={{ width: `100%` }}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <BodyWrapper>
-                <KeyboardAvoidingView
-                  style={{ width: '100%', flex: 1 }}
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                >
-                  <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                    <Header>
-                      <MyFitFlowLogoComponent width={500} height={500} />
-                    </Header>
-                    <BodyTop>
-                      <UserNameInput
-                        placeholder={
-                          selectedLanguage === 'pt-br' ? 'Nome' : 'Name'
-                        }
-                        handleChangeUserName={handleChangeUserName}
-                        value={userForm.name.value}
-                        errorBoolean={userForm.name.errorBoolean}
-                        onFocus={() => {}}
-                        type="transparent"
-                        borderDesign="up"
-                        order="top"
-                        editable={!isLogging}
-                        topPosition={4}
-                      />
-                      <EmailInput
-                        placeholder={
-                          selectedLanguage === 'pt-br' ? 'E-mail' : 'Email'
-                        }
-                        handleChangeEmail={handleChangeEmail}
-                        value={userForm.email.value}
-                        errorBoolean={userForm.email.errorBoolean}
-                        onFocus={() => {}}
-                        type="transparent"
-                        borderDesign="up"
-                        order="middle"
-                        editable={!isLogging}
-                        topPosition={2}
-                      />
-                      <PasswordInput
-                        placeholder={
-                          selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
-                        }
-                        handleChangePassword={handleChangePassword}
-                        value={userForm.password.value}
-                        errorBoolean={userForm.password.errorBoolean}
-                        onFocus={() => {}}
-                        type="transparent"
-                        borderDesign="down"
-                        order="bottom"
-                        editable={!isLogging}
-                        topPosition={2}
-                      />
-                      <SpaceBetweenInput />
-                      <AuxTextWrapper>
-                        <AuxText>
-                          {selectedLanguage === 'pt-br'
-                            ? 'Apenas maiores de 18 anos.'
-                            : 'Only for those over 18 years old.'}
-                        </AuxText>
-                      </AuxTextWrapper>
+        <SafeAreaView style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <BodyWrapper>
+              <KeyboardAvoidingView
+                style={{ width: '100%', flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              >
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                  <Header>
+                    <MyFitFlowLogoComponent width={500} height={500} />
+                  </Header>
+                  <BodyTop>
+                    <UserNameInput
+                      placeholder={
+                        selectedLanguage === 'pt-br' ? 'Nome' : 'Name'
+                      }
+                      handleChangeUserName={handleChangeUserName}
+                      value={userForm.name.value}
+                      errorBoolean={userForm.name.errorBoolean}
+                      onFocus={() => {}}
+                      type="transparent"
+                      borderDesign="up"
+                      order="top"
+                      editable={!isLogging}
+                      topPosition={4}
+                    />
+                    <EmailInput
+                      placeholder={
+                        selectedLanguage === 'pt-br' ? 'E-mail' : 'Email'
+                      }
+                      handleChangeEmail={handleChangeEmail}
+                      value={userForm.email.value}
+                      errorBoolean={userForm.email.errorBoolean}
+                      onFocus={() => {}}
+                      type="transparent"
+                      borderDesign="up"
+                      order="middle"
+                      editable={!isLogging}
+                      topPosition={2}
+                    />
+                    <PasswordInput
+                      placeholder={
+                        selectedLanguage === 'pt-br' ? 'Senha' : 'Password'
+                      }
+                      handleChangePassword={handleChangePassword}
+                      value={userForm.password.value}
+                      errorBoolean={userForm.password.errorBoolean}
+                      onFocus={() => {}}
+                      type="transparent"
+                      borderDesign="down"
+                      order="bottom"
+                      editable={!isLogging}
+                      topPosition={2}
+                    />
+                    <SpaceBetweenInput />
+                    <AuxTextWrapper>
+                      <AuxText>
+                        {selectedLanguage === 'pt-br'
+                          ? 'Apenas maiores de 18 anos.'
+                          : 'Only for those over 18 years old.'}
+                      </AuxText>
+                    </AuxTextWrapper>
 
-                      <CalendarInput
-                        placeholder={
-                          selectedLanguage === 'pt-br'
-                            ? 'Data de nascimento'
-                            : 'Date of Birth'
-                        }
-                        handleChangeBirthday={handleChangeBirthdate}
-                        value={userForm.birthdate.value}
-                        errorBoolean={userForm.birthdate.errorBoolean}
-                        onFocus={() => {}}
-                        type="transparent"
-                        borderDesign="up-down"
-                        order="alone"
-                        editable={!isLogging}
-                      />
+                    <CalendarInput
+                      placeholder={
+                        selectedLanguage === 'pt-br'
+                          ? 'Data de nascimento'
+                          : 'Date of Birth'
+                      }
+                      handleChangeBirthday={handleChangeBirthdate}
+                      value={userForm.birthdate.value}
+                      errorBoolean={userForm.birthdate.errorBoolean}
+                      onFocus={() => {}}
+                      type="transparent"
+                      borderDesign="up-down"
+                      order="alone"
+                      editable={!isLogging}
+                    />
 
-                      <SpaceBetweenFormAndButton />
-                      <SpaceBetweenFormAndButton />
-                      <ViewWithLineAndIcon />
-                      <SpaceBetweenFormAndButton />
-                      <SpaceBetweenFormAndButton />
-                      <CTAButton
-                        onPress={handleSignUp}
-                        title={
-                          selectedLanguage === 'pt-br'
-                            ? 'Cadastrar'
-                            : 'Register'
-                        }
-                        loading={isWaitingApiResponse}
-                      />
-                    </BodyTop>
-                  </ScrollView>
-                </KeyboardAvoidingView>
+                    <SpaceBetweenFormAndButton />
+                    <SpaceBetweenFormAndButton />
+                    <ViewWithLineAndIcon />
+                    <SpaceBetweenFormAndButton />
+                    <SpaceBetweenFormAndButton />
+                    <CTAButton
+                      onPress={handleSignUp}
+                      title={
+                        selectedLanguage === 'pt-br' ? 'Cadastrar' : 'Register'
+                      }
+                      loading={isWaitingApiResponse}
+                    />
+                  </BodyTop>
+                </ScrollView>
+              </KeyboardAvoidingView>
 
-                <Footer>
-                  <FooterWrapper onPress={handleGoBack}>
-                    <IconContainer>
-                      <Back
-                        width={40}
-                        height={40}
-                        stroke={theme.COLORS.TEXT_LIGHT}
-                        style={{ top: 2 }}
-                        strokeWidth={2}
-                      />
-                    </IconContainer>
-                    <FooterText>
-                      {selectedLanguage === 'pt-br'
-                        ? 'Voltar para o login'
-                        : 'Back to login'}
-                    </FooterText>
+              <Footer>
+                <FooterWrapper onPress={handleGoBack}>
+                  <IconContainer>
+                    <Back
+                      width={40}
+                      height={40}
+                      stroke={theme.COLORS.TEXT_LIGHT}
+                      style={{ top: 2 }}
+                      strokeWidth={2}
+                    />
+                  </IconContainer>
+                  <FooterText>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Voltar para o login'
+                      : 'Back to login'}
+                  </FooterText>
 
-                    <IconContainer style={{ width: 48 }}></IconContainer>
-                  </FooterWrapper>
-                </Footer>
-              </BodyWrapper>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </SafeAreaProvider>
+                  <IconContainer style={{ width: 48 }}></IconContainer>
+                </FooterWrapper>
+              </Footer>
+            </BodyWrapper>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
       </LinearGradientContainer>
     </Container>
   )

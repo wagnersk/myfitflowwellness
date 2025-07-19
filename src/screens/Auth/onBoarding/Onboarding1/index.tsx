@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { TouchableWithoutFeedback, Keyboard } from 'react-native'
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useNavigation } from '@react-navigation/core'
 
@@ -54,74 +54,72 @@ export function OnBoarding1() {
   return (
     <Container>
       <LinearGradientContainer colors={['#000000', '#FFFFFF']}>
-        <SafeAreaProvider style={{ width: `100%` }}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <BodyWrapper>
-                <OnBoardingHeader
-                  paginationItems={[
-                    { isLine: true },
-                    { isLine: false },
-                    { isLine: false },
-                    { isLine: false },
-                  ]}
-                  handleSkip={handleSkipScreen}
-                  skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
-                />
+        <SafeAreaView style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <BodyWrapper>
+              <OnBoardingHeader
+                paginationItems={[
+                  { isLine: true },
+                  { isLine: false },
+                  { isLine: false },
+                  { isLine: false },
+                ]}
+                handleSkip={handleSkipScreen}
+                skipText={selectedLanguage === 'pt-br' ? 'Pular' : 'Skip'}
+              />
 
-                <BodyTop>
-                  <ToggleButtonWrapper>
-                    <Tittle>
-                      {selectedLanguage === 'pt-br'
-                        ? 'Escolha seu idioma'
-                        : 'Choose your language'}
-                    </Tittle>
+              <BodyTop>
+                <ToggleButtonWrapper>
+                  <Tittle>
+                    {selectedLanguage === 'pt-br'
+                      ? 'Escolha seu idioma'
+                      : 'Choose your language'}
+                  </Tittle>
 
-                    <SelectLanguageWrapper>
-                      <ToggleButton
-                        onPress={() => handleLanguageChange('pt-br')}
-                        selected={selectedLanguage === 'pt-br'}
+                  <SelectLanguageWrapper>
+                    <ToggleButton
+                      onPress={() => handleLanguageChange('pt-br')}
+                      selected={selectedLanguage === 'pt-br'}
+                    >
+                      <ButtonText
+                        style={{
+                          opacity: selectedLanguage === 'pt-br' ? 1 : 0.5,
+                        }}
                       >
-                        <ButtonText
-                          style={{
-                            opacity: selectedLanguage === 'pt-br' ? 1 : 0.5,
-                          }}
-                        >
-                          🇧🇷
-                        </ButtonText>
-                      </ToggleButton>
-                      <ToggleButton
-                        selected={selectedLanguage === 'us'}
-                        onPress={() => handleLanguageChange('us')}
+                        🇧🇷
+                      </ButtonText>
+                    </ToggleButton>
+                    <ToggleButton
+                      selected={selectedLanguage === 'us'}
+                      onPress={() => handleLanguageChange('us')}
+                    >
+                      <ButtonText
+                        style={{
+                          opacity: selectedLanguage === 'us' ? 1 : 0.5,
+                        }}
                       >
-                        <ButtonText
-                          style={{
-                            opacity: selectedLanguage === 'us' ? 1 : 0.5,
-                          }}
-                        >
-                          🇺🇸
-                        </ButtonText>
-                      </ToggleButton>
-                    </SelectLanguageWrapper>
-                  </ToggleButtonWrapper>
-                </BodyTop>
-                <Footer>
-                  <IconContainer></IconContainer>
-                  <NextScreenButton onPress={handleNextScreen}>
-                    <IconContainer>
-                      <ArrowRight
-                        width={40}
-                        height={40}
-                        fill={`white`}
-                        strokeWidth={2}
-                      />
-                    </IconContainer>
-                  </NextScreenButton>
-                </Footer>
-              </BodyWrapper>
-            </TouchableWithoutFeedback>
-          </SafeAreaView>
-        </SafeAreaProvider>
+                        🇺🇸
+                      </ButtonText>
+                    </ToggleButton>
+                  </SelectLanguageWrapper>
+                </ToggleButtonWrapper>
+              </BodyTop>
+              <Footer>
+                <IconContainer></IconContainer>
+                <NextScreenButton onPress={handleNextScreen}>
+                  <IconContainer>
+                    <ArrowRight
+                      width={40}
+                      height={40}
+                      fill={`white`}
+                      strokeWidth={2}
+                    />
+                  </IconContainer>
+                </NextScreenButton>
+              </Footer>
+            </BodyWrapper>
+          </TouchableWithoutFeedback>
+        </SafeAreaView>
       </LinearGradientContainer>
     </Container>
   )

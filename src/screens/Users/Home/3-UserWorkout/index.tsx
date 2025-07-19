@@ -22,7 +22,7 @@ import {
   FlatListWrapper,
 } from './styles'
 
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { WorkoutDataWithSelectedWorkout } from '@src/@types/navigation'
 import { getTrimmedName } from '@utils/getTrimmedName'
 import { useAuth } from '@hooks/auth'
@@ -137,12 +137,6 @@ export function UserWorkout() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BackButton

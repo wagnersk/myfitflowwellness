@@ -4,7 +4,6 @@ import {
   ImageBackground,
   TouchableWithoutFeedback,
   Keyboard,
-  SafeAreaView,
 } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -43,7 +42,7 @@ import {
   SaveButtonText,
 } from './styles'
 
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { WhatsappInput } from '@components/Forms/Inputs/WhatsappInput'
 import { EmailInput } from '@components/Forms/Inputs/EmailInput'
 import { CalendarInput } from '@components/Forms/Inputs/CalendarInput'
@@ -52,7 +51,7 @@ import { UserNameInput } from '@components/Forms/Inputs/UserNameInput'
 import { ScrollView } from 'react-native-gesture-handler'
 import { emailRegex } from '@utils/emailRegex'
 import { checkBirthdayDate } from '@utils/checkBirthdayDate'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export function UserFormEditProfile() {
   const {
@@ -369,120 +368,110 @@ export function UserFormEditProfile() {
             style={{ flex: 1 }}
             resizeMode="cover"
           >
-            <StatusBar
-              backgroundColor="transparent"
-              style="dark"
-              translucent
-              animated
-            />
             <ImageBackgroundContainer>
-              <SafeAreaProvider style={{ width: `100%` }}>
-                <SafeAreaView style={{ flex: 1 }}>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
+              <SafeAreaView style={{ flex: 1, width: '100%' }}>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <ProfileWrapper>
+                  <PhotoBorderWrapper>
+                    <Photo
+                      defaultText={
+                        user?.selectedLanguage === 'pt-br'
+                          ? `Não há foto`
+                          : `No Photo`
+                      }
+                      photo={user && user.photo}
+                      newDefaultPhoto={imageInfo?.uri}
                     />
-                  </SettingsWrapper>
-                  <ProfileWrapper>
-                    <PhotoBorderWrapper>
-                      <Photo
-                        defaultText={
-                          user?.selectedLanguage === 'pt-br'
-                            ? `Não há foto`
-                            : `No Photo`
-                        }
-                        photo={user && user.photo}
-                        newDefaultPhoto={imageInfo?.uri}
-                      />
-                      <PhotoButton onPress={handlePickImage} />
-                    </PhotoBorderWrapper>
-                  </ProfileWrapper>
-                  <Body>
-                    <ScrollView
-                      keyboardShouldPersistTaps="handled"
-                      contentContainerStyle={{
-                        width: '100%',
-                        gap: 16,
-                      }}
-                    >
-                      {!imageInfo && (
-                        <FormWrapper>
-                          <EmailInput
-                            handleChangeEmail={handleChangeEmail}
-                            value={userForm.email.value}
-                            errorBoolean={false}
-                            editable={false}
-                            onFocus={() => {
-                              return false
-                            }}
+                    <PhotoButton onPress={handlePickImage} />
+                  </PhotoBorderWrapper>
+                </ProfileWrapper>
+                <Body>
+                  <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{
+                      width: '100%',
+                      gap: 16,
+                    }}
+                  >
+                    {!imageInfo && (
+                      <FormWrapper>
+                        <EmailInput
+                          handleChangeEmail={handleChangeEmail}
+                          value={userForm.email.value}
+                          errorBoolean={false}
+                          editable={false}
+                          onFocus={() => {
+                            return false
+                          }}
+                          type="blue"
+                          borderDesign="up-down"
+                          order="alone"
+                          topPosition={2}
+                        />
+
+                        <InputWrapper>
+                          <UserNameInput
+                            handleChangeUserName={handleChangeUserName}
+                            value={userForm.name.value}
+                            errorBoolean={userForm.name.errorBoolean}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
                             type="blue"
-                            borderDesign="up-down"
-                            order="alone"
+                            borderDesign="up"
+                            order="top"
+                            topPosition={4}
+                          />
+                          <CalendarInput
+                            handleChangeBirthday={handleChangeBirthday}
+                            value={userForm.birthdate.value}
+                            errorBoolean={userForm.birthdate.errorBoolean}
+                            editable={!isWaitingApiResponse}
+                            onFocus={() => {}}
+                            type="blue"
+                            borderDesign="down"
+                            order="bottom"
                             topPosition={2}
                           />
-
-                          <InputWrapper>
-                            <UserNameInput
-                              handleChangeUserName={handleChangeUserName}
-                              value={userForm.name.value}
-                              errorBoolean={userForm.name.errorBoolean}
-                              editable={!isWaitingApiResponse}
-                              onFocus={() => {}}
-                              type="blue"
-                              borderDesign="up"
-                              order="top"
-                              topPosition={4}
-                            />
-                            <CalendarInput
-                              handleChangeBirthday={handleChangeBirthday}
-                              value={userForm.birthdate.value}
-                              errorBoolean={userForm.birthdate.errorBoolean}
+                          {false && (
+                            <WhatsappInput
+                              mask={
+                                user?.selectedLanguage === 'pt-br'
+                                  ? '(99) 99999-9999'
+                                  : '(999) 99999-9999'
+                              }
+                              handleChangeWhatsapp={handleChangeWhatsappNumber}
+                              value={userForm.whatsappNumber.value}
+                              errorBoolean={
+                                userForm.whatsappNumber.errorBoolean
+                              }
                               editable={!isWaitingApiResponse}
                               onFocus={() => {}}
                               type="blue"
                               borderDesign="down"
                               order="bottom"
-                              topPosition={2}
                             />
-                            {false && (
-                              <WhatsappInput
-                                mask={
-                                  user?.selectedLanguage === 'pt-br'
-                                    ? '(99) 99999-9999'
-                                    : '(999) 99999-9999'
-                                }
-                                handleChangeWhatsapp={
-                                  handleChangeWhatsappNumber
-                                }
-                                value={userForm.whatsappNumber.value}
-                                errorBoolean={
-                                  userForm.whatsappNumber.errorBoolean
-                                }
-                                editable={!isWaitingApiResponse}
-                                onFocus={() => {}}
-                                type="blue"
-                                borderDesign="down"
-                                order="bottom"
-                              />
-                            )}
-                          </InputWrapper>
-                        </FormWrapper>
-                      )}
-                    </ScrollView>
-                  </Body>
-                  <CTAButton
-                    onPress={() =>
-                      userPhoto ? handleUpdatePhoto() : handleUpdateInfo()
-                    }
-                    changeColor
-                    title={imageInfo ? 'Atualizar foto' : 'Salvar'}
-                    loading={isLoading}
-                    enabled={!isLoading}
-                  />
-                </SafeAreaView>
-              </SafeAreaProvider>
+                          )}
+                        </InputWrapper>
+                      </FormWrapper>
+                    )}
+                  </ScrollView>
+                </Body>
+                <CTAButton
+                  onPress={() =>
+                    userPhoto ? handleUpdatePhoto() : handleUpdateInfo()
+                  }
+                  changeColor
+                  title={imageInfo ? 'Atualizar foto' : 'Salvar'}
+                  loading={isLoading}
+                  enabled={!isLoading}
+                />
+              </SafeAreaView>
             </ImageBackgroundContainer>
           </ImageBackground>
         </BodyImageWrapper>

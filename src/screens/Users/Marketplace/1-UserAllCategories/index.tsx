@@ -3,7 +3,7 @@ import { Alert, BackHandler, View } from 'react-native'
 
 import { useFocusEffect } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/core'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { HeaderImageBackground } from '@components/ImageBackgrounds/HeaderImageBackground'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -170,12 +170,6 @@ export function UserAllCategories() {
 
   return (
     <Container>
-      <StatusBar
-        backgroundColor="transparent"
-        style="light"
-        translucent
-        animated
-      />
       <HeaderImageBackground>
         <BioInfoWrapper>
           <BackButton

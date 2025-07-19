@@ -25,7 +25,6 @@ import { WorkoutBoxInfo } from '@components/WorkoutBoxInfo'
 import { getIcon } from '@utils/getIcon'
 import { IMyfitflowWorkoutInUse } from '@hooks/authTypes'
 import { useAuth } from '@hooks/auth'
-import { formatTimestampToDate } from '@utils/formatTimestampToDate'
 
 interface Props extends TouchableOpacityProps {
   data: IMyfitflowWorkoutInUse | null
@@ -33,13 +32,8 @@ interface Props extends TouchableOpacityProps {
   index?: number
 }
 
-export function WorkoutsCardItem({
-  data,
-  handleNextStep,
-  index,
-  ...rest
-}: Props) {
-  const size = 100
+export function WorkoutsCardItem({ data, handleNextStep, ...rest }: Props) {
+  const size = 102
 
   const { user, myWorkout } = useAuth()
   const selectedLanguage = user?.selectedLanguage

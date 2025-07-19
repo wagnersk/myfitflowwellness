@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import React, { useCallback, useEffect, useState } from 'react'
-import { BackHandler, SafeAreaView, ScrollView } from 'react-native'
+import { BackHandler, ScrollView } from 'react-native'
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
@@ -25,7 +25,7 @@ import {
   BodyWrapper,
   Header,
 } from './styles'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import {
   IUserPrefferencesSelectListNavigation,
   IUserSelectFreeEquipamentListNavigation,
@@ -39,7 +39,7 @@ import {
   IExerciseItemType,
   IMuscleGroups,
 } from '@hooks/authTypes'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { WhiteButton } from '@components/Buttons/WhiteButton'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
 import { TittleWrapper } from '../1.3-UserFriendList/styles'
@@ -244,169 +244,155 @@ export function UserPrefferences() {
     <Container>
       <BodyImageWrapper>
         <BodyImageBackground />
-        <StatusBar
-          backgroundColor="transparent"
-          style="dark"
-          translucent
-          animated
-        />
         <ImageBackgroundContainer>
-          <SafeAreaProvider style={{ width: `100%` }}>
-            <SafeAreaView style={{ flex: 1 }}>
-              <BodyWrapper>
-                <Header>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
-                    />
-                  </SettingsWrapper>
-                  <TittleWrapper>
-                    <Title>
-                      {user?.selectedLanguage === 'pt-br'
-                        ? 'Preferências:'
-                        : 'Preferences:'}
-                    </Title>
-                  </TittleWrapper>
-                </Header>
-                <Body>
-                  <ScrollView
-                    contentContainerStyle={{ gap: 16 }}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <SelectWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Nivel '
-                            : 'Level '}
-                        </ButtonTitle>
-                        <WhiteButton
-                          tittle={formattedLevel}
-                          onPress={() => handleOpenList({ dataType: 'Level' })}
-                          bordertype="up-down"
-                          iconStyle="crosshair"
-                        />
-                      </ButtonWrapper>
-                    </SelectWrapper>
+          <SafeAreaView style={{ flex: 1 }}>
+            <BodyWrapper>
+              <Header>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <TittleWrapper>
+                  <Title>
+                    {user?.selectedLanguage === 'pt-br'
+                      ? 'Preferências:'
+                      : 'Preferences:'}
+                  </Title>
+                </TittleWrapper>
+              </Header>
+              <Body>
+                <ScrollView
+                  contentContainerStyle={{ gap: 16 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <SelectWrapper>
+                    <ButtonWrapper>
+                      <ButtonTitle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Nivel '
+                          : 'Level '}
+                      </ButtonTitle>
+                      <WhiteButton
+                        tittle={formattedLevel}
+                        onPress={() => handleOpenList({ dataType: 'Level' })}
+                        bordertype="up-down"
+                        iconStyle="crosshair"
+                      />
+                    </ButtonWrapper>
+                  </SelectWrapper>
 
-                    <SelectWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Objetivo '
-                            : 'Goal '}
-                        </ButtonTitle>
-                        <WhiteButton
-                          tittle={formattedGoal}
-                          onPress={() =>
-                            handleOpenList({ dataType: 'Objetivo' })
-                          }
-                          bordertype="up"
-                          iconStyle="crosshair"
-                        />
-                        <WhiteButton
-                          tittle={formattedMuscleFocus}
-                          onPress={() =>
-                            handleOpenList({ dataType: 'Foco em' })
-                          }
-                          bordertype="down"
-                          iconStyle="person-simple"
-                        />
-                        <ButtonTitle>Foco em: </ButtonTitle>
-                      </ButtonWrapper>
-                    </SelectWrapper>
+                  <SelectWrapper>
+                    <ButtonWrapper>
+                      <ButtonTitle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Objetivo '
+                          : 'Goal '}
+                      </ButtonTitle>
+                      <WhiteButton
+                        tittle={formattedGoal}
+                        onPress={() => handleOpenList({ dataType: 'Objetivo' })}
+                        bordertype="up"
+                        iconStyle="crosshair"
+                      />
+                      <WhiteButton
+                        tittle={formattedMuscleFocus}
+                        onPress={() => handleOpenList({ dataType: 'Foco em' })}
+                        bordertype="down"
+                        iconStyle="person-simple"
+                      />
+                      <ButtonTitle>Foco em: </ButtonTitle>
+                    </ButtonWrapper>
+                  </SelectWrapper>
 
-                    <SelectWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Treinos por semana: '
-                            : 'Workouts per week: '}
-                        </ButtonTitle>
-                        <WhiteButton
-                          tittle={formattedFrequencyByWeek}
-                          onPress={() =>
-                            handleOpenList({ dataType: 'Treinos por semana' })
-                          }
-                          bordertype="up"
-                          iconStyle="checkcicle"
-                        />
-                        <WhiteButton
-                          tittle={formattedTimeBySession}
-                          onPress={() =>
-                            handleOpenList({
-                              dataType: 'Tempo de cada treino',
-                            })
-                          }
-                          bordertype="down"
-                          iconStyle="clock"
-                        />
-                        <ButtonTitle>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Tempo de cada treino:  '
-                            : 'Time of each workout: '}
-                        </ButtonTitle>
-                      </ButtonWrapper>
-                    </SelectWrapper>
+                  <SelectWrapper>
+                    <ButtonWrapper>
+                      <ButtonTitle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Treinos por semana: '
+                          : 'Workouts per week: '}
+                      </ButtonTitle>
+                      <WhiteButton
+                        tittle={formattedFrequencyByWeek}
+                        onPress={() =>
+                          handleOpenList({ dataType: 'Treinos por semana' })
+                        }
+                        bordertype="up"
+                        iconStyle="checkcicle"
+                      />
+                      <WhiteButton
+                        tittle={formattedTimeBySession}
+                        onPress={() =>
+                          handleOpenList({
+                            dataType: 'Tempo de cada treino',
+                          })
+                        }
+                        bordertype="down"
+                        iconStyle="clock"
+                      />
+                      <ButtonTitle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Tempo de cada treino:  '
+                          : 'Time of each workout: '}
+                      </ButtonTitle>
+                    </ButtonWrapper>
+                  </SelectWrapper>
 
-                    <SelectWrapper>
-                      <ButtonWrapper>
-                        <ButtonTitle>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? 'Equipamentos disponíveis '
-                            : 'Available equipment: '}
-                        </ButtonTitle>
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Livre'
-                              : 'Free'
-                          }
-                          onPress={() =>
-                            handleOpenFilterEquipamentList({
-                              dataType: 'Livre',
-                            })
-                          }
-                          bordertype="up"
-                          iconStyle="checkcicle"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Polia'
-                              : 'Pulley'
-                          }
-                          onPress={() =>
-                            handleOpenFilterEquipamentList({
-                              dataType: 'Polia',
-                            })
-                          }
-                          bordertype="none"
-                          iconStyle="clock"
-                        />
-                        <WhiteButton
-                          tittle={
-                            user?.selectedLanguage === 'pt-br'
-                              ? 'Máquina'
-                              : 'Machine'
-                          }
-                          onPress={() =>
-                            handleOpenFilterEquipamentList({
-                              dataType: 'Máquina',
-                            })
-                          }
-                          bordertype="down"
-                          iconStyle="clock"
-                        />
-                      </ButtonWrapper>
-                    </SelectWrapper>
-                  </ScrollView>
-                </Body>
-              </BodyWrapper>
-            </SafeAreaView>
-          </SafeAreaProvider>
+                  <SelectWrapper>
+                    <ButtonWrapper>
+                      <ButtonTitle>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? 'Equipamentos disponíveis '
+                          : 'Available equipment: '}
+                      </ButtonTitle>
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br' ? 'Livre' : 'Free'
+                        }
+                        onPress={() =>
+                          handleOpenFilterEquipamentList({
+                            dataType: 'Livre',
+                          })
+                        }
+                        bordertype="up"
+                        iconStyle="checkcicle"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Polia'
+                            : 'Pulley'
+                        }
+                        onPress={() =>
+                          handleOpenFilterEquipamentList({
+                            dataType: 'Polia',
+                          })
+                        }
+                        bordertype="none"
+                        iconStyle="clock"
+                      />
+                      <WhiteButton
+                        tittle={
+                          user?.selectedLanguage === 'pt-br'
+                            ? 'Máquina'
+                            : 'Machine'
+                        }
+                        onPress={() =>
+                          handleOpenFilterEquipamentList({
+                            dataType: 'Máquina',
+                          })
+                        }
+                        bordertype="down"
+                        iconStyle="clock"
+                      />
+                    </ButtonWrapper>
+                  </SelectWrapper>
+                </ScrollView>
+              </Body>
+            </BodyWrapper>
+          </SafeAreaView>
         </ImageBackgroundContainer>
       </BodyImageWrapper>
     </Container>

@@ -3,7 +3,6 @@ import {
   ImageBackground,
   TouchableWithoutFeedback,
   Keyboard,
-  SafeAreaView,
   Alert,
 } from 'react-native'
 
@@ -44,12 +43,11 @@ import {
   NameAndEmailWrapper,
 } from './styles'
 
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 import { ScrollView } from 'react-native-gesture-handler'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { IUserFriendProfile } from '@src/@types/navigation'
 import { diffInAge } from '@utils/diffInAge'
-import { set } from 'date-fns'
 
 export function UserFriendProfile() {
   const {
@@ -275,129 +273,121 @@ export function UserFriendProfile() {
             style={{ flex: 1 }}
             resizeMode="cover"
           >
-            <StatusBar
-              backgroundColor="transparent"
-              style="dark"
-              translucent
-              animated
-            />
             <ImageBackgroundContainer>
-              <SafeAreaProvider style={{ width: `100%` }}>
-                <SafeAreaView style={{ flex: 1 }}>
-                  <SettingsWrapper>
-                    <BackButton
-                      onPress={handleGoBack}
-                      changeColor
-                      disabled={isWaitingApiResponse}
+              <SafeAreaView style={{ flex: 1 }}>
+                <SettingsWrapper>
+                  <BackButton
+                    onPress={handleGoBack}
+                    changeColor
+                    disabled={isWaitingApiResponse}
+                  />
+                </SettingsWrapper>
+                <ProfileWrapper>
+                  <PhotoBorderWrapper>
+                    <Photo
+                      defaultText={
+                        user?.selectedLanguage === 'pt-br'
+                          ? `Não há foto`
+                          : `No Photo`
+                      }
+                      photo={dataParams.friend?.photo}
                     />
-                  </SettingsWrapper>
-                  <ProfileWrapper>
-                    <PhotoBorderWrapper>
-                      <Photo
-                        defaultText={
-                          user?.selectedLanguage === 'pt-br'
-                            ? `Não há foto`
-                            : `No Photo`
-                        }
-                        photo={dataParams.friend?.photo}
-                      />
-                    </PhotoBorderWrapper>
+                  </PhotoBorderWrapper>
 
-                    <UserFriendNameAndEmailAndButtonWrapper>
-                      <UserFriendNameAndEmailWrapper>
-                        <NameAndEmailWrapper>
-                          <UserFriendName>
-                            {dataParams.friend.name},{' '}
-                            {diffInAge(dataParams.friend.birthdate)}
-                          </UserFriendName>
-                          <UserFriendEmail>
-                            {dataParams.friend.email}
-                          </UserFriendEmail>
-                        </NameAndEmailWrapper>
+                  <UserFriendNameAndEmailAndButtonWrapper>
+                    <UserFriendNameAndEmailWrapper>
+                      <NameAndEmailWrapper>
+                        <UserFriendName>
+                          {dataParams.friend.name},{' '}
+                          {diffInAge(dataParams.friend.birthdate)}
+                        </UserFriendName>
+                        <UserFriendEmail>
+                          {dataParams.friend.email}
+                        </UserFriendEmail>
+                      </NameAndEmailWrapper>
 
-                        {isAlreadyFriend && (
-                          <AddButton onPress={handleDeleteFriend}>
-                            <UserCheck
-                              width={38}
-                              height={38}
-                              fill={theme.COLORS.BLUE_STROKE}
-                            />
-                          </AddButton>
-                        )}
-                        {isPendingRequest && (
-                          <AddButton onPress={handleCancelFriendRequest}>
-                            <UserMinus
-                              width={38}
-                              height={38}
-                              fill={theme.COLORS.AUX_GOOGLE_RED}
-                            />
-                          </AddButton>
-                        )}
-                        {!isAlreadyFriend && !isPendingRequest && (
-                          <AddButton onPress={handleSendFriendRequest}>
-                            <UserPlus
-                              width={38}
-                              height={38}
-                              fill={theme.COLORS.AUX_GOOGLE_GREEN}
-                            />
-                          </AddButton>
-                        )}
-                      </UserFriendNameAndEmailWrapper>
-
-                      {isPendingRequest && (
-                        <UserFriendRequestText>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? `Solicitação pendente`
-                            : `Pending request`}
-                        </UserFriendRequestText>
+                      {isAlreadyFriend && (
+                        <AddButton onPress={handleDeleteFriend}>
+                          <UserCheck
+                            width={38}
+                            height={38}
+                            fill={theme.COLORS.BLUE_STROKE}
+                          />
+                        </AddButton>
                       )}
-                    </UserFriendNameAndEmailAndButtonWrapper>
-                  </ProfileWrapper>
+                      {isPendingRequest && (
+                        <AddButton onPress={handleCancelFriendRequest}>
+                          <UserMinus
+                            width={38}
+                            height={38}
+                            fill={theme.COLORS.AUX_GOOGLE_RED}
+                          />
+                        </AddButton>
+                      )}
+                      {!isAlreadyFriend && !isPendingRequest && (
+                        <AddButton onPress={handleSendFriendRequest}>
+                          <UserPlus
+                            width={38}
+                            height={38}
+                            fill={theme.COLORS.AUX_GOOGLE_GREEN}
+                          />
+                        </AddButton>
+                      )}
+                    </UserFriendNameAndEmailWrapper>
 
-                  {isAlreadyFriend && (
-                    <Body>
-                      <ScrollView
-                        keyboardShouldPersistTaps="handled"
-                        contentContainerStyle={{
-                          width: '100%',
-                          gap: 16,
-                        }}
-                      >
-                        <InputWrapper>
-                          <CopyWorkoutButton>
-                            <ButtonText>
-                              {user?.selectedLanguage === 'pt-br'
-                                ? 'Copiar treinos Personalizados'
-                                : 'Copy Custom Workouts'}
-                            </ButtonText>
-                          </CopyWorkoutButton>
-                          <CopyWorkoutButton>
-                            <ButtonText>
-                              {user?.selectedLanguage === 'pt-br'
-                                ? 'Frequência'
-                                : 'Frequency'}
-                            </ButtonText>
-                          </CopyWorkoutButton>
-                          <CopyWorkoutButton>
-                            <ButtonText>
-                              {user?.selectedLanguage === 'pt-br'
-                                ? 'Fotos'
-                                : 'Photos'}
-                            </ButtonText>
-                          </CopyWorkoutButton>
-                          <CopyWorkoutButton>
-                            <ButtonText>
-                              {user?.selectedLanguage === 'pt-br'
-                                ? 'Criar Desafio'
-                                : 'Create Challenge'}
-                            </ButtonText>
-                          </CopyWorkoutButton>
-                        </InputWrapper>
-                      </ScrollView>
-                    </Body>
-                  )}
-                </SafeAreaView>
-              </SafeAreaProvider>
+                    {isPendingRequest && (
+                      <UserFriendRequestText>
+                        {user?.selectedLanguage === 'pt-br'
+                          ? `Solicitação pendente`
+                          : `Pending request`}
+                      </UserFriendRequestText>
+                    )}
+                  </UserFriendNameAndEmailAndButtonWrapper>
+                </ProfileWrapper>
+
+                {isAlreadyFriend && (
+                  <Body>
+                    <ScrollView
+                      keyboardShouldPersistTaps="handled"
+                      contentContainerStyle={{
+                        width: '100%',
+                        gap: 16,
+                      }}
+                    >
+                      <InputWrapper>
+                        <CopyWorkoutButton>
+                          <ButtonText>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Copiar treinos Personalizados'
+                              : 'Copy Custom Workouts'}
+                          </ButtonText>
+                        </CopyWorkoutButton>
+                        <CopyWorkoutButton>
+                          <ButtonText>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Frequência'
+                              : 'Frequency'}
+                          </ButtonText>
+                        </CopyWorkoutButton>
+                        <CopyWorkoutButton>
+                          <ButtonText>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Fotos'
+                              : 'Photos'}
+                          </ButtonText>
+                        </CopyWorkoutButton>
+                        <CopyWorkoutButton>
+                          <ButtonText>
+                            {user?.selectedLanguage === 'pt-br'
+                              ? 'Criar Desafio'
+                              : 'Create Challenge'}
+                          </ButtonText>
+                        </CopyWorkoutButton>
+                      </InputWrapper>
+                    </ScrollView>
+                  </Body>
+                )}
+              </SafeAreaView>
             </ImageBackgroundContainer>
           </ImageBackground>
         </BodyImageWrapper>

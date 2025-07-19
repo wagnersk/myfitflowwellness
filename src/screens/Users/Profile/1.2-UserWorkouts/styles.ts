@@ -8,6 +8,12 @@ export const Container = styled.View`
   flex: 1;
 `
 
+export const BodyImageWrapper = styled.View`
+  flex: 1;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
+`
 export const Body = styled.View`
   /* justify-content: space-between;
   align-items: center; */
@@ -19,13 +25,6 @@ export const Body = styled.View`
 export const ListWrapper = styled.View`
   gap: 16px;
   flex: 1;
-`
-
-export const BodyImageWrapper = styled.View`
-  flex: 1;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background-color: ${({ theme }) => theme.COLORS.NEUTRA_BACKGROUND};
 `
 
 export const ImageBackgroundContainer = styled.View`
