@@ -314,8 +314,8 @@ function AuthProvider({ children }: AuthProviderProps) {
             updatedAt,
             trainingLevel,
             trainingStartDate,
+            deleteStatus,
           } = docSnap.data() as IUser
-
           const userData: IUser = {
             id,
             name,
@@ -332,6 +332,24 @@ function AuthProvider({ children }: AuthProviderProps) {
             updatedAt,
             trainingStartDate, // Add appropriate value or keep null
             trainingLevel, // Add appropriate value or keep null
+            deleteStatus,
+          }
+          if (deleteStatus.pendingDelete) {
+            const updatedAt = serverTimestamp()
+            const deleteStatus = {
+              deleteSince: updatedAt,
+              pendingDelete: false,
+            }
+            userData.deleteStatus = deleteStatus
+            await updateDoc(userDocRef, {
+              deleteStatus,
+              updatedAt,
+            })
+            Alert.alert(
+              user?.selectedLanguage === 'pt-br'
+                ? 'Conta ativada com sucesso!'
+                : 'Account activated successfully!',
+            )
           }
 
           await AsyncStorage.setItem(
@@ -416,6 +434,7 @@ function AuthProvider({ children }: AuthProviderProps) {
         setIsLogging(false)
       })
   }
+
   //* parei aqui , ta criando ja os dados como quero , agora ver o fluxo do app ver como ta o app */
   async function firebaseSignUpWithUserAndPopulateDatabase(
     accountUserUid: string,
@@ -682,6 +701,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       .catch((err) => {
         setIsWaitingApiResponse(false)
         console.error(err)
+        return null
       })
     return responsePhotoUrlDownload
   }
@@ -709,6 +729,57 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function deleteUserAccount() {
+    setIsWaitingApiResponse(true)
+    const userRef = collection(db, 'users')
+    if (!user) return
+    const userId = user.id
+
+    // criar uma condicao no comeco , que se envviar o path da antiga foto , apagar do storage ela
+    const updatedAt = serverTimestamp()
+
+    const deleteStatus = {
+      deleteSince: updatedAt,
+      pendingDelete: true,
+    }
+
+    await updateDoc(doc(userRef, userId), {
+      deleteStatus,
+      updatedAt,
+    })
+      .catch((err) => {
+        console.error(err)
+      })
+      .then(async () => {
+        if (!user) {
+          return
+        }
+
+        const updatedUser = {
+          ...user,
+          deleteStatus,
+          updatedAt,
+        }
+
+        if (updatedUser) {
+          await AsyncStorage.setItem(
+            USER_SIGNIN_COLLECTION,
+            JSON.stringify(updatedUser),
+          ).then(() => {
+            setUser(updatedUser)
+          })
+        }
+        firebaseSignOut()
+      })
+      .finally(() => {
+        setIsWaitingApiResponse(false)
+        Alert.alert(
+          user?.selectedLanguage === 'pt-br'
+            ? 'Conta desativada com sucesso!'
+            : 'Account deactivated successfully!',
+        )
+      })
+  }
   async function updateUserForm(data: IUserFormProps) {
     setIsWaitingApiResponse(true)
     const userRef = collection(db, 'users')
@@ -2214,7 +2285,7 @@ function AuthProvider({ children }: AuthProviderProps) {
   }
 
   async function loadAndSaveUserParQ(userId: string) {
-    if (!userId) return null
+    if (!userId) return
     try {
       const response = await loadUserParQ(userId)
       if (response) {
@@ -2222,7 +2293,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.log(`error`, error)
-      return null
     }
   }
 
@@ -2515,7 +2585,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       `carregar personal trainer data, falta fazer , carregar os dados do personal trainer`,
     )
 
-    return
+    return null
     const personalTrainerId = user.personalTrainerId
     if (!personalTrainerId) return null
     //    setIsWaitingApiResponse(true)
@@ -2935,8 +3005,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     updatedCache: IUserWorkoutsLog,
   ): Promise<void> {
     const userId = getUserId()
-    console.log(`saveCachedUserWorkoutsLog`)
-
     const storageKey = `@myfitflow:userlocal-cachedweightdone-${userId}`
     await saveToStorage(storageKey, updatedCache)
     setCachedUserWorkoutsLog(updatedCache)
@@ -2985,11 +3053,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  /// apagarCached()
-  /* async function apagarCached() {
-    AsyncStorage.getAllKeys().then((keys) => AsyncStorage.multiRemove(keys))
-  } */
-
   async function loadCachedUserGymInfo(userId: string) {
     const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
 
@@ -3008,35 +3071,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
-  /*  async function loadFromFirebaseFirstThenCachedUserGymInfo(userId: string) {
-    const storageGymInfoKey = `@myfitflow:userlocaldata-gyminfo-${userId}`
-
-    try {
-      const storedCachedGymInfoString =
-        await AsyncStorage.getItem(storageGymInfoKey)
-
-      if (!storedCachedGymInfoString) {
-        const response = await loadUserGymInfo()
-        if (response) {
-          saveUserGymInfo(response)
-          setUserGymInfo(response)
-        }
-      }
-
-      if (storedCachedGymInfoString) {
-        const gymInfoData = JSON.parse(storedCachedGymInfoString)
-
-        if (gymInfoData) {
-          setUserGymInfo(gymInfoData) // Atualiza o estado com os dados carregados
-          console.log(`loadUserGymInfo`)
-          console.log(JSON.stringify(gymInfoData))
-        }
-      }
-    } catch (error) {
-      // console.error('Erro ao carregar as informações de resumo:', error)
-    }
-  }
- */
 
   async function loadCachedUserPersonalTrainer(userId: string) {
     const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
@@ -3059,34 +3093,6 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
-
-  /*  async function loadFromFirebaseFirstThenCachedUserPersonalTrainer(
-    userId: string,
-  ) {
-    const storageEquipamentsKey = `@myfitflow:userlocaldata-personaltrainercontract-${userId}`
-
-    try {
-      const storedCachedEquipamentsString = await AsyncStorage.getItem(
-        storageEquipamentsKey,
-      )
-
-      if (!storedCachedEquipamentsString) {
-        const response = await loadUserPersonalTrainerContract()
-        if (response) {
-          saveUserPersonalTrainerContract(response)
-          setUserPersonalTrainerContract(response)
-        }
-      }
-
-      if (storedCachedEquipamentsString) {
-        const equipamentsData = JSON.parse(storedCachedEquipamentsString)
-
-        setUserPersonalTrainerContract(equipamentsData) // Atualiza o estado com os dados carregados
-      }
-    } catch (error) {
-      // console.error('Erro ao carregar as informações de resumo:', error)
-    }
-  } */
 
   async function checkIfActiveWorkoutHasExpired(getMyWorkout: IMyWorkouts) {
     // console.log(JSON.stringify(myWorkoutDataArray?.data.map((v) => v.data)))
@@ -3160,35 +3166,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.error('Erro ao carregar o histórico de exercícios:', error)
     }
   }
-  /*   async function loadFromFirebaseFirstThenCachedUserEquipaments(
-    userId: string,
-  ) {
-    const storageEquipamentsKey = `@myfitflow:userlocaldata-equipaments-${userId}`
-    console.log(storageEquipamentsKey)
-    try {
-      const storedCachedEquipamentsString = await AsyncStorage.getItem(
-        storageEquipamentsKey,
-      )
 
-      if (!storedCachedEquipamentsString) {
-        const response = await loadUserEquipments()
-        if (response) {
-          saveUserEquipments(response)
-          setUserEquipaments(response)
-        }
-      }
-
-      if (storedCachedEquipamentsString) {
-        const equipamentsData = JSON.parse(storedCachedEquipamentsString)
-
-        setUserEquipaments(equipamentsData) // Atualiza o estado com os dados carregados
-      }
-    } catch (error) {
-      // console.error('Erro ao carregar as informações de resumo:', error)
-    }
-  } */
-
-  // setCachedUserWorkoutsLog
   async function updateCachedVideoTable(
     cachedLocalPathVideo: string,
     _exerciseId: string,
@@ -3565,7 +3543,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       console.log(error)
     }
   }
-  // TODO
+
   async function getLastUpdatedAtUserWorkoutCache() {
     if (!user) return 0
 
@@ -4042,7 +4020,6 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  // TODO nemto iusando
   async function premiumUserUpdateProfileUpdatedAt(workoutId: string) {
     if (!workoutId || !user || !user.id) {
       return
@@ -4473,6 +4450,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         updateCachedUserWorkoutsLog,
         saveCachedUserWorkoutsLog,
+        removeCachedUserWorkoutsLog,
         loadCachedVideoTable,
         updateCachedVideoTable,
 
@@ -4494,6 +4472,8 @@ function AuthProvider({ children }: AuthProviderProps) {
         updateUserGoalFocusMusclePreffer,
         updateUserFrequencyByWeekPreffer,
         updateUserTimeBySessionPreffer,
+
+        deleteUserAccount,
 
         getLastUpdatedAtUserWorkoutCache,
 
@@ -4520,7 +4500,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         cachedWorkoutsExercises,
 
         updateUserFirebaseParQStatus,
-        saveUserParQ,
         userParQStatus,
         deleteUserFirebaseParQStatus,
         updateUserFirebaseAnamnesisStatus,
@@ -4547,6 +4526,8 @@ function AuthProvider({ children }: AuthProviderProps) {
 
         loadAndSaveUserGymInfo,
         loadAndSaveUserEquipaments,
+
+        loadAndSaveUserParQ,
 
         user,
         userEquipaments,

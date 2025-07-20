@@ -97,36 +97,6 @@ export const UserEmail = styled.Text`
   opacity: 0.5;
 `
 
-export const ProfileInfoWrapper = styled.ScrollView`
-  width: 100%;
-  margin-bottom: 12px;
-  flex: 1;
-`
-
-export const Title = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  opacity: 0.5;
-  margin-top: 4px;
-
-  margin-bottom: 8px;
-`
-
-export const ProfileInfoText = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  margin-bottom: 4px;
-`
-
-export const ProfileInfoDivisor = styled.View`
-  width: 100%;
-  height: 1px;
-  background-color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  opacity: 0.5;
-`
-
 export const PhotoBorderWrapper = styled.View`
   width: 184px;
   height: 184px;
@@ -142,17 +112,7 @@ export const EditProfileButtonWraper = styled.View`
   bottom: 0px;
   right: 4px;
 `
-export const LabelWrapper = styled.View`
-  display: flex;
-  padding: 2px;
-`
 
-export const Label = styled.Text`
-  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
-  font-family: ${({ theme }) => theme.FONTS.BUTTON};
-  font-size: ${RFValue(14)}px;
-  margin-bottom: 12px;
-`
 export const ToggleButton = styled.TouchableOpacity`
   flex-direction: row;
   align-items: center;

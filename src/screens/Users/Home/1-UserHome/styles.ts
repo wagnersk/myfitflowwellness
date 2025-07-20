@@ -52,16 +52,26 @@ export const BodyTopWrapper = styled.View`
   width: 100%;
 `
 export const NoWorkoutFoundWrapper = styled.View`
-  width: 100%;
+  flex: 1;
 `
 
 export const Warning = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BODY};
   font-size: ${RFValue(14)}px;
 `
+export const WelcomeText = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  color: ${({ theme }) => theme.COLORS.BLUE_STROKE};
+  font-size: ${RFValue(32)}px;
+`
 
 export const WarningGreetings = styled.Text`
   font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  font-size: ${RFValue(14)}px;
+`
+export const TextButton = styled.Text`
+  font-family: ${({ theme }) => theme.FONTS.BUTTON};
+  color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   font-size: ${RFValue(14)}px;
 `
 

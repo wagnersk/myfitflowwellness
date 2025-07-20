@@ -181,8 +181,7 @@ export type IUser2 = {
 
   createdAt: ServerTimestamp
   updatedAt: ServerTimestamp
-} /*       trainingStartDate: '', // formato: 'YYYY-MM-DD' ou timestamp
-trainingLevel: '', // 'iniciante' | 'intermediario' | 'avancado' */
+}
 export type IUser = {
   id: string
   name: string | null
@@ -194,6 +193,11 @@ export type IUser = {
   photo: string | null
   trainingStartDate: string | null
   trainingLevel: string | null
+
+  deleteStatus: {
+    deleteSince: FieldValue
+    pendingDelete: boolean
+  }
 
   isNewUser: boolean
   anonymousUser: boolean
@@ -901,6 +905,8 @@ export interface AuthContextData {
   ) => Promise<void>
 
   saveCachedUserWorkoutsLog: (updatedCache: IUserWorkoutsLog) => Promise<void>
+  removeCachedUserWorkoutsLog: (workoutId: string) => Promise<void>
+  deleteUserAccount: () => Promise<void>
 
   updateCachedUserWorkoutsLog: (
     newExercise: ICachedCardExerciseData,

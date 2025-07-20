@@ -1,6 +1,6 @@
 import React from 'react'
 import { Image } from 'react-native'
-import backgroundImg from '../../../../assets/back.png'
+import backgroundImg from '@assetsApp/back.png'
 
 import { Container } from './styles'
 

@@ -52,8 +52,7 @@ export function MarketPlaceWorkoutDetail() {
     myWorkout,
     loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises,
     deleteMyWorkoutAndmyWorkoutDataArray,
-    saveCachedUserWorkoutsLog,
-    cachedUserWorkoutsLog,
+    removeCachedUserWorkoutsLog,
   } = useAuth()
   const selectedLanguage = user?.selectedLanguage
   const navigation = useNavigation()
@@ -106,27 +105,18 @@ export function MarketPlaceWorkoutDetail() {
   }
 
   async function handleChoose() {
+    const counter = myWorkout ? myWorkout.data.length - 1 : 0
+    if (counter >= 2) return
     const response = await loadMyWorkoutAndmyWorkoutDataArrayAndReturnExercises(
       dataParam.data,
     )
 
     if (!response) return
-    navigation.navigate('marketPlaceHome')
+    /* tiro isso?  */
+    navigation.goBack()
   }
 
   async function handleDeleteWorkout(workoutId?: string) {
-    // TODO RECEBER  outra coisa par ter o creatredAt
-    // cachedUserWorkoutsLog
-
-    if (!cachedUserWorkoutsLog) return
-
-    const filteredCachedUserWorkoutsLog = {
-      ...cachedUserWorkoutsLog,
-      workoutsLog: cachedUserWorkoutsLog.workoutsLog.filter(
-        (v) => v.workoutId !== workoutId,
-      ),
-    }
-
     if (!workoutId) return
     Alert.alert(
       user?.selectedLanguage === 'pt-br'
@@ -142,19 +132,14 @@ export function MarketPlaceWorkoutDetail() {
           text: user?.selectedLanguage === 'pt-br' ? 'Sim' : 'Yes',
           onPress: async () => {
             await deleteMyWorkoutAndmyWorkoutDataArray(workoutId)
-
-            await saveCachedUserWorkoutsLog(filteredCachedUserWorkoutsLog)
-            navigation.navigate('marketPlaceHome')
+            await removeCachedUserWorkoutsLog(workoutId)
+            navigation.goBack()
           },
         },
       ],
       { cancelable: false },
     )
   }
-
-  /*   function shareWorkout() {
-    Alert.alert('Share ')
-  } */
 
   return (
     <Container>

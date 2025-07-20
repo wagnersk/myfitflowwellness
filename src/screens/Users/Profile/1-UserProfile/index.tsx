@@ -1,11 +1,11 @@
 import React, { useCallback, useState, useEffect } from 'react'
-import { Alert, ImageBackground, ScrollView, View } from 'react-native'
+import { Alert, ImageBackground, ScrollView } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { setStatusBarStyle, StatusBar } from 'expo-status-bar'
+import { setStatusBarStyle } from 'expo-status-bar'
 
 import { Photo } from '@components/Photo'
 
-import backgroundImg from '../../../../../assets/back.png'
+import backgroundImg from '@assetsApp/back.png'
 import { useAuth } from '@hooks/auth'
 import PencilLine from '@assets/Pencil-line.svg'
 import {
@@ -16,13 +16,7 @@ import {
   ProfileWrapper,
   UserNameWrapper,
   UserName,
-  ProfileInfoWrapper,
-  Title,
-  ProfileInfoText,
-  ProfileInfoDivisor,
   PhotoBorderWrapper,
-  LabelWrapper,
-  Label,
   ToggleButton,
   ToggleButtonText,
   BodyText,
@@ -48,15 +42,17 @@ export function UserProfile() {
     loadAndSaveUserEquipaments,
     loadAndSaveUserGymInfo,
     loadAndSaveUserParQ,
+    deleteUserAccount,
   } = useAuth()
+
   /* saveUserGymInfo */
+
   const navigation = useNavigation()
 
   const [selectedLanguage, setSelectedLanguage] = useState(
     user?.selectedLanguage || 'us',
   )
   async function handleDeleteAccountTimer() {
-    console.log(`Configurar para deletar conta em 7 dias e abrir contagem`)
     if (!user) return
     Alert.alert(
       user.selectedLanguage === 'pt-br' ? 'Tem certeza?' : 'Are you sure?',
@@ -72,7 +68,7 @@ export function UserProfile() {
         {
           text: user.selectedLanguage === 'pt-br' ? 'Confirmar' : 'Confirm',
           onPress: () => {
-            console.log('Conta marcada para exclusão em 7 dias')
+            deleteUserAccount()
             // Aqui você pode adicionar a lógica para marcar a conta para exclusão
           },
         },
@@ -81,9 +77,6 @@ export function UserProfile() {
   }
   function handleParQ() {
     navigation.navigate('questionnaires')
-  }
-  function handleAnamnese() {
-    navigation.navigate('anamnese')
   }
 
   function handleEditProfileNextStep() {
@@ -263,29 +256,7 @@ export function UserProfile() {
                     iconStyle="support"
                   />
                 </Body>
-                <Body>
-                  {/*    <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Anamnese'
-                        : 'Anamnesis'
-                    }
-                    onPress={handleAnamnese}
-                    bordertype="none"
-                    iconStyle="anamnese"
-                  /> */}
-                  {/*     <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Preferencias'
-                        : 'Preferences'
-                    }
-                    onPress={handlePreferencesStep}
-                    bordertype="down"
-                    iconStyle="settings"
-                  /> */}
-                </Body>
-                {/* 
+                {/*   <Body>
                   <WhiteButton
                     betaMode
                     tittle={
@@ -294,9 +265,9 @@ export function UserProfile() {
                         : 'My Challenges'
                     }
                     onPress={handleChallengesNextStep}
-                    bordertype="none"
+                    bordertype="up"
                     iconStyle="trophy"
-                  /> 
+                  />
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -319,9 +290,9 @@ export function UserProfile() {
                     bordertype="down"
                     iconStyle="camera"
                   />
-                  */}
-                {/*        <Body>   <WhiteButton
-                    betaMode
+                </Body>
+                <Body>
+                  <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Preferencias'
@@ -330,19 +301,8 @@ export function UserProfile() {
                     onPress={handlePreferencesStep}
                     bordertype="up"
                     iconStyle="settings"
-                  /> */}
-                {/*  'Informações Pessoais' = GymInfo 
-                  testar se ta tudo funfando
-                  inclusive form do aluno
-                  criar conceito de add foto
-                  renderizar isso quando cahama o amigo
-                  
-                  por foto padrao
-                  por activit indicator no loading dos alunos
-                  fazer build 
-                  
-                  e seguranca das fotos */}
-                {/*      <WhiteButton
+                  />
+                  <WhiteButton
                     betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -352,16 +312,14 @@ export function UserProfile() {
                     onPress={handlePersonalTrainerNextStep}
                     bordertype="down"
                     iconStyle="boxing-glove"
-                  />    </Body> */}
+                  />
+                </Body> */}
                 <Body>
                   <BodyText>
                     {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}
                   </BodyText>
 
-                  {/* so por botao logout facil */}
-
                   <WhiteButton
-                    betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
                         ? 'Deletar conta'

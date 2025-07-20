@@ -8,7 +8,7 @@ import {
   LinearGradientButton,
   CTAButtonPressable,
 } from './styles'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
 
 interface Props extends TouchableHighlightProps {
   title: string

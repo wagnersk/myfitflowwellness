@@ -34,14 +34,16 @@ import {
   LinearGradientButton,
   NoWorkoutFoundWrapper,
   CameraBorder,
+  TextButton,
+  WelcomeText,
 } from './styles'
 
 import { LogoutButton } from '@components/Buttons/LogoutButton'
 import { IWorkoutInfo, IWorkoutsData } from '@hooks/authTypes'
-import SmileySad from '@assets/SmileySad.svg'
+import PersonUpArm from '@assets/PersonUpArm.svg'
 import { fakeMyWorkout } from './mock/fakeMyWorkout'
 import { fakeMyWorkoutDataArray } from './mock/fakeMyWorkoutDataArray'
-import ParQ from '@screens/Users/Profile/1.1-Questionnaires/screens/ParQ'
+import { ParQ } from '@screens/Users/Profile/1-UserProfile/screens/3-Questionnaires/screens/ParQ'
 
 export function UserHome() {
   const navigation = useNavigation()
@@ -66,7 +68,8 @@ export function UserHome() {
     fetchworkoutDataCache,
     userParQStatus,
   } = useAuth()
-
+  console.log(`myWorkout`, JSON.stringify(myWorkout))
+  console.log(`myWorkoutDataArray`, JSON.stringify(myWorkoutDataArray))
   // console.log(`myWorkout`, JSON.stringify(myWorkout)) // hardcodded usuario anomimo
   // console.log(`myWorkoutDataArray`, JSON.stringify(myWorkoutDataArray)) // hardcodded
 
@@ -242,17 +245,14 @@ export function UserHome() {
       renderUserData()
     }
     function renderAnonymousUserFakeData() {
-      if (
-        user &&
-        user.anonymousUser &&
-        fakeMyWorkout &&
-        fakeMyWorkoutDataArray &&
-        fakeMyWorkoutDataArray.data &&
-        fakeMyWorkout.data &&
-        fakeMyWorkout.activeData &&
-        fakeMyWorkout.data[0] &&
-        fakeMyWorkout.activeData[0]
-      ) {
+      if (user && user.anonymousUser) {
+        if (
+          fakeMyWorkoutDataArray &&
+          fakeMyWorkoutDataArray.data.length === 0
+        ) {
+          setGetWorkoutArrayData(null)
+        }
+
         const fakeWorkoutData = fakeMyWorkoutDataArray.data.find(
           (v) => v.id === fakeMyWorkout.activeData[0].id,
         )
@@ -263,27 +263,28 @@ export function UserHome() {
     }
 
     function renderUserData() {
-      if (
-        user &&
-        !user.anonymousUser &&
-        myWorkout &&
-        myWorkoutDataArray &&
-        myWorkoutDataArray.data &&
-        myWorkout.data &&
-        myWorkout.activeData &&
-        myWorkout.data[0] &&
-        myWorkout.activeData[0]
-      ) {
-        const workoutData = myWorkoutDataArray.data.find(
-          (v) => v.id === myWorkout.activeData[0].id,
-        )
+      if (user && !user.anonymousUser) {
+        if (myWorkoutDataArray && myWorkoutDataArray.data.length === 0) {
+          setGetWorkoutArrayData(null)
+        }
 
-        if (workoutData) {
-          setGetWorkoutArrayData(workoutData.data)
+        if (myWorkout && myWorkout.data && myWorkout.activeData.length > 0) {
+          const workoutData = myWorkoutDataArray?.data.find(
+            (v) => v.id === myWorkout?.activeData[0].id,
+          )
+          if (workoutData) {
+            setGetWorkoutArrayData(workoutData.data)
+          }
         }
       }
     }
-  }, [myWorkoutDataArray, myWorkout, user])
+  }, [
+    myWorkoutDataArray,
+    myWorkout,
+    user,
+    myWorkoutDataArray?.data,
+    myWorkout?.data,
+  ])
 
   useFocusEffect(
     useCallback(() => {
@@ -305,12 +306,10 @@ export function UserHome() {
         const updatedCache = await fetchworkoutDataCache() // busca noivo
         if (updatedCache) {
           // TODO criar fetch
-          console.log(`updated do servidor ta mais atual asd`, updatedCache)
           // esse ta funcionando
 
           updatedCache.updatedAt = serverLastupdated
           saveCachedUserWorkoutsLog(updatedCache)
-          console.log(`asd`, cachedUserWorkoutsLog)
 
           // salvar no cache
         }
@@ -336,11 +335,24 @@ export function UserHome() {
         updateUserFirebaseWorkoutCache(cachedUserWorkoutsLog)
       }
     }
-  }, [cachedUserWorkoutsLog])
+  }, [
+    cachedUserWorkoutsLog,
+    myWorkoutDataArray,
+    myWorkoutDataArray?.data,
+    myWorkout,
+    myWorkout?.data,
+  ])
 
   if (!userParQStatus?.data) {
     return <ParQ />
   }
+
+  const empty =
+    (user &&
+      !user.anonymousUser &&
+      myWorkoutDataArray &&
+      myWorkoutDataArray.data.length === 0) ||
+    (user && !user.anonymousUser && myWorkoutDataArray === null)
 
   return (
     <Container>
@@ -382,44 +394,63 @@ export function UserHome() {
               )}
           </BodyTopWrapper>
 
-          {user && !user.anonymousUser && !myWorkoutDataArray && (
+          {empty && (
             <View
               style={{
                 flex: 1,
                 alignItems: 'center',
                 justifyContent: 'center',
-                top: -20,
+                width: '100%',
+                padding: 32,
+                gap: 8,
               }}
             >
-              <TouchableOpacity
-                onPress={handleOpenAllCategories}
+              <View
                 style={{
-                  padding: 40,
-                  borderRadius: 5,
-                  borderWidth: 1,
-                  borderColor: theme.COLORS.BLUE_STROKE,
-                  borderStyle: 'dashed', // Define a borda como tracejada
+                  width: '100%',
                 }}
               >
-                <SmileySad width={180} height={180} fill={svgColor} />
+                <WelcomeText>Olá, {firstName && firstName[0]}!</WelcomeText>
+              </View>
 
+              <View
+                style={{
+                  flexDirection: 'row',
+                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <NoWorkoutFoundWrapper>
                   <Warning>
                     {user?.selectedLanguage === 'pt-br'
-                      ? 'Ops! Nenhum treino encontrado.'
-                      : 'Oops! No workout found.'}
+                      ? 'Parece que você ainda não tem um treino selecionado.'
+                      : 'It looks like you don’t have a workout selected yet.'}
                   </Warning>
                   <WarningGreetings>
                     {user?.selectedLanguage === 'pt-br'
-                      ? 'Que tal escolher um treino?'
-                      : 'How about choosing a workout?'}
+                      ? 'Vamos encontrar o ideal para você?'
+                      : 'Let’s find the perfect one for you?'}
                   </WarningGreetings>
                 </NoWorkoutFoundWrapper>
+                <PersonUpArm width={100} height={100} fill={svgColor} />
+              </View>
+
+              <TouchableOpacity
+                onPress={handleOpenAllCategories}
+                style={{
+                  padding: 16,
+                  borderRadius: 5,
+                  backgroundColor: theme.COLORS.BLUE_STROKE,
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+              >
+                <TextButton>ESCOLHER MEU PRIMEIRO TREINO</TextButton>
               </TouchableOpacity>
             </View>
           )}
-          {/*         {console.log(`JSON.stringify(findWorkoutDataLog)`)}
-          {console.log(JSON.stringify(findWorkoutDataLog))} */}
+
           {isLoadingUserStorageData ? (
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
