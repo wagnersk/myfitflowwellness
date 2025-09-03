@@ -30,18 +30,41 @@
 
 ## 📸 Screenshots
 
-### 🏠 Tela inicial  
-<img width="300" alt="Tela inicial" src="https://github.com/user-attachments/assets/ad4b357a-cc39-42a6-a3ed-ad5c5c63f466" />
+### 📸 Telas do App
 
-### ✍️ Criação de meta  
-<img width="300" alt="Criação de meta" src="https://github.com/user-attachments/assets/11eab16f-39ca-4361-9704-2e818c23f644" />
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
 
-### 📊 Detalhes da meta  
-<img width="300" alt="Detalhes da meta" src="https://github.com/user-attachments/assets/1af5d9e9-5342-4690-8aa5-7c5f432b44ce" />
+  <div style="flex: 1; min-width: 300px;">
+    <p>🏠 Tela Login</p>
+    <img src="https://github.com/user-attachments/assets/75198778-4590-4ca1-b481-ed4f37e14e81" width="300">
+  </div>
 
-### 📈 Dashboard  
-<img width="300" alt="Dashboard" src="https://github.com/user-attachments/assets/5ea54abf-e562-4250-b8f5-dfa945d0083d" />
+  <div style="flex: 1; min-width: 300px;">
+    <p>🏠 Tela Inicial</p>
+    <img src="https://github.com/user-attachments/assets/f9b1ea7e-c5b8-4aa7-979f-c57adb9fd998" width="300">
+  </div>
 
+  <div style="flex: 1; min-width: 300px;">
+    <p>✍️ Tela de Treino (Lista)</p>
+    <img src="https://github.com/user-attachments/assets/3b66db34-0e70-4657-b443-b97fb5dfab06" width="300">
+  </div>
+
+  <div style="flex: 1; min-width: 300px;">
+    <p>📊 Tela de Detalhes do Treino</p>
+    <img src="https://github.com/user-attachments/assets/7e55925c-fd23-4065-a602-b4bb582e9556" width="300">
+  </div>
+
+  <div style="flex: 1; min-width: 300px;">
+    <p>📈 Preferências 1</p>
+    <img src="https://github.com/user-attachments/assets/0518dfa5-dc34-4514-96ff-d51c0356121a" width="300">
+  </div>
+
+  <div style="flex: 1; min-width: 300px;">
+    <p>📈 Preferências 2</p>
+    <img src="https://github.com/user-attachments/assets/61c99734-4f1e-4087-b4aa-d8cf5deeb04d" width="300">
+  </div>
+
+</div>
 
 ---
 
