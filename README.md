@@ -11,7 +11,6 @@
 - **Firebase 11.10** (Auth, Firestore)
 - **React Navigation** (stack, bottom-tabs)
 - **Context API** (gerenciamento de estado)
-- **Victory Native + Skia** para dashboards gráficos
 - **Lottie** para animações
 - **React Hook Form** para formulários
 - **Styled Components 6.1** para estilos
