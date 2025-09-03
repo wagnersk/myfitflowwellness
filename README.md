@@ -44,9 +44,6 @@
 |-----------------|----------------------------|------------------|
 | ![Detalhes Treino](https://github.com/user-attachments/assets/7e55925c-fd23-4065-a602-b4bb582e9556) | ![Treino Principal](https://github.com/user-attachments/assets/31fb44b5-3d4c-4f0f-a4d1-f913ea72cf5c) | ![Preferências 1](https://github.com/user-attachments/assets/0518dfa5-dc34-4514-96ff-d51c0356121a) |
 
-| 📈 Preferências 2 |
-|------------------|
-| ![Preferências 2](https://github.com/user-attachments/assets/61c99734-4f1e-4087-b4aa-d8cf5deeb04d) |
 
 ---
 
