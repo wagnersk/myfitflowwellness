@@ -32,44 +32,21 @@
 
 ### 📸 Telas do App
 
-<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+## 📸 Screenshots
 
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>🏠 Tela Login</p>
-    <img src="https://github.com/user-attachments/assets/75198778-4590-4ca1-b481-ed4f37e14e81" width="300">
-  </div>
+### 📸 Telas do App
 
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>🏠 Tela Inicial</p>
-    <img src="https://github.com/user-attachments/assets/f9b1ea7e-c5b8-4aa7-979f-c57adb9fd998" width="300">
-  </div>
+| 🏠 Tela Login | 🏠 Tela Inicial | ✍️ Tela de Treino (Lista) |
+|---------------|----------------|--------------------------|
+| ![Tela Login](https://github.com/user-attachments/assets/75198778-4590-4ca1-b481-ed4f37e14e81) | ![Tela Inicial](https://github.com/user-attachments/assets/f9b1ea7e-c5b8-4aa7-979f-c57adb9fd998) | ![Treino Lista](https://github.com/user-attachments/assets/3b66db34-0e70-4657-b443-b97fb5dfab06) |
 
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>✍️ Tela de Treino (Lista)</p>
-    <img src="https://github.com/user-attachments/assets/3b66db34-0e70-4657-b443-b97fb5dfab06" width="300">
-  </div>
+| 📊 Tela Detalhes | 📊 Tela do Treino Principal | 📈 Preferências 1 |
+|-----------------|----------------------------|------------------|
+| ![Detalhes Treino](https://github.com/user-attachments/assets/7e55925c-fd23-4065-a602-b4bb582e9556) | ![Treino Principal](https://github.com/user-attachments/assets/31fb44b5-3d4c-4f0f-a4d1-f913ea72cf5c) | ![Preferências 1](https://github.com/user-attachments/assets/0518dfa5-dc34-4514-96ff-d51c0356121a) |
 
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>📊 Tela de Detalhes do Treino</p>
-    <img src="https://github.com/user-attachments/assets/7e55925c-fd23-4065-a602-b4bb582e9556" width="300">
-  </div>
-
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>📊 Tela do Treino Principal</p>
-    <img src="https://github.com/user-attachments/assets/31fb44b5-3d4c-4f0f-a4d1-f913ea72cf5c" width="300">
-  </div>
-
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>📈 Preferências 1</p>
-    <img src="https://github.com/user-attachments/assets/0518dfa5-dc34-4514-96ff-d51c0356121a" width="300">
-  </div>
-
-  <div style="flex: 1; min-width: 300px; max-width: 300px;">
-    <p>📈 Preferências 2</p>
-    <img src="https://github.com/user-attachments/assets/61c99734-4f1e-4087-b4aa-d8cf5deeb04d" width="300">
-  </div>
-
-</div>
+| 📈 Preferências 2 |
+|------------------|
+| ![Preferências 2](https://github.com/user-attachments/assets/61c99734-4f1e-4087-b4aa-d8cf5deeb04d) |
 
 ---
 
