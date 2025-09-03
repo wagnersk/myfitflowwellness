@@ -1,6 +1,6 @@
 # MyFitFlowWellness – Aplicativo de Bem-Estar e Saúde Integral
 
-**MyFitFlowWellness** é um aplicativo mobile desenvolvido em **React Native** com **Expo** e **TypeScript**, projetado para acompanhamento de **hábitos saudáveis, treinos físicos e métricas de bem-estar**. O app está disponível em **Português** e **Inglês**, o objetivo é oferecer uma experiência completa de **monitoramento de saúde** e servir como **projeto de portfólio**.
+**MyFitFlowWellness** é um aplicativo mobile desenvolvido em **React Native** com **Expo** e **TypeScript**, projetado para acompanhamento de **métricas de treinos físicos**. O app está disponível em **Português** e **Inglês**, o objetivo é oferecer uma experiência completa de **monitoramento de saúde** e servir como **projeto de portfólio**.
 
 ---
 
