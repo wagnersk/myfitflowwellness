@@ -50,17 +50,16 @@
 ## 📂 Estrutura do Projeto
 
 /myfitflowwellness
-┣ 📂 src/              # Hooks, components, screens, services, store
-┣ 📂 assets/           # Imagens, fonts
-┣ 📂 android/ios/      # Configurações nativas
-┣ 📜 App.tsx
-┣ 📜 firebase-config.ts
-┣ 📜 package.json
-┣ 📜 tsconfig.json
-┣ 📜 babel.config.js
-┣ 📜 app.json
-┗ 📜 README.md
-
+├── src/              # Hooks, components, screens, services, store
+├── assets/           # Imagens, fonts
+├── android/ios/      # Configurações nativas
+├── App.tsx
+├── firebase-config.ts
+├── package.json
+├── tsconfig.json
+├── babel.config.js
+├── app.json
+└── README.md
 
 ---
 
