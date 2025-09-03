@@ -10,7 +10,7 @@
 - **TypeScript 5.8**
 - **Firebase 11.10** (Auth, Firestore)
 - **React Navigation** (stack, bottom-tabs)
-- **Zustand / Redux** (gerenciamento de estado, opcional)
+- **Context API** (gerenciamento de estado)
 - **Victory Native + Skia** para dashboards gráficos
 - **Lottie** para animações
 - **React Hook Form** para formulários
