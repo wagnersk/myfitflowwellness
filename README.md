@@ -27,13 +27,6 @@
 - 🎨 **UI moderna** com animações, gradientes e gráficos interativos  
 
 
-
-## 📸 Screenshots
-
-### 📸 Telas do App
-
-## 📸 Screenshots
-
 ### 📸 Telas do App
 
 | 🏠 Tela Login | 🏠 Tela Inicial | ✍️ Tela de Treino (Lista) |
@@ -44,33 +37,18 @@
 |-----------------|----------------------------|------------------|
 | ![Detalhes Treino](https://github.com/user-attachments/assets/7e55925c-fd23-4065-a602-b4bb582e9556) | ![Treino Principal](https://github.com/user-attachments/assets/31fb44b5-3d4c-4f0f-a4d1-f913ea72cf5c) | ![Preferências 1](https://github.com/user-attachments/assets/0518dfa5-dc34-4514-96ff-d51c0356121a) |
 
-
----
-
-## 📂 Estrutura do Projeto
-
-/myfitflowwellness
-├── src/              # Hooks, components, screens, services, store
-├── assets/           # Imagens, fonts
-├── android/ios/      # Configurações nativas
-├── App.tsx
-├── firebase-config.ts
-├── package.json
-├── tsconfig.json
-├── babel.config.js
-├── app.json
-└── README.md
-
 ---
 
 ## ▶️ Como Executar o Projeto
 
 ### 1. Clonar o repositório
+
 ```bash
 git clone https://github.com/wagnersk/myfitflowwellness.git
 cd myfitflowwellness
 npm install
 npx expo start
+```
 
 ## 🧹 Boas Práticas e Qualidade
 
