@@ -23,7 +23,9 @@
 - 📋 **Cadastro e autenticação de usuários** (Firebase Auth)  
 - 🏃 **Monitoramento de atividades físicas**
 - 🌐 **Suporte multiplataforma** (iOS / Android)  
-- 🎨 **UI moderna** com animações, gradientes e gráficos interativos  
+- 🎨 **UI moderna** com animações, gradientes e gráficos interativos
+- 📩 **Envio de convite de amizade**
+- 🙂 **Gerenciamento de fila de treino**
 
 
 ### 📸 Telas do App
