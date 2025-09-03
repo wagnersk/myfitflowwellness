@@ -11,19 +11,25 @@ export const BodyWrapper = styled.View`
 `
 
 export const Body = styled.View`
-  /* justify-content: space-between;
-  align-items: center; */
   width: 100%;
-  height: 100%;
   flex: 1;
-  gap: 32px;
-  padding-top: 32px;
+  padding-top: 24px;
 `
 export const PersonalTrainerCard = styled.View`
   background-color: white;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+  elevation: 3;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+`
+export const CardTopContent = styled.View`
   flex-direction: row;
   align-items: center;
   width: 100%;
@@ -31,6 +37,15 @@ export const PersonalTrainerCard = styled.View`
 
 export const TrainerInfo = styled.View`
   flex: 1;
+  margin-left: 16px;
+  justify-content: center;
+  align-items: flex-start;
+`
+
+export const TrainerTextInfo = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
 `
 
 export const SelectContentWrapper = styled.View`
@@ -62,19 +77,19 @@ export const BodyImageWrapper = styled.View`
 export const ImageBackgroundContainer = styled.View`
   align-items: center;
   padding: 32px;
-  gap: 32px;
   flex: 1;
 `
 
 export const Header = styled.View`
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
+  margin-bottom: 24px;
 `
 export const SettingsWrapper = styled.View`
-  align-items: flex-start;
-  width: 100%;
   position: absolute;
+  left: 0;
 `
 export const FooterWrapper = styled.View`
   flex-direction: row;
@@ -145,16 +160,19 @@ export const ListTitle = styled.Text`
 export const SelectButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_BLUE};
   padding: 10px;
+  width: 100%;
   border-radius: 5px;
+  align-items: center;
 `
 export const ManagePlanButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.COLORS.AUX_GOOGLE_GREEN};
   padding: 10px;
+  width: 100%;
   border-radius: 5px;
+  align-items: center;
 `
 export const TrainerImage = styled.Image`
   height: 80px;
   width: 80px;
   border-radius: 40px;
-  margin-right: 15px;
 `

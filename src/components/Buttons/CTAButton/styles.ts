@@ -19,14 +19,8 @@ export const CTAButtonPressable = styled(TouchableOpacity)<Props>`
   justify-content: center;
   align-items: center;
   border-radius: 12px;
-  border-color: ${({ theme }) => theme.COLORS.NEUTRA_LETTER_AND_STROKE};
   height: 48px;
   width: 100%;
-  ${({ loading, workoutAlreadySelected }) =>
-    (loading || workoutAlreadySelected) &&
-    css`
-      opacity: 0.5;
-    `}
 `
 
 export const Title = styled.Text`

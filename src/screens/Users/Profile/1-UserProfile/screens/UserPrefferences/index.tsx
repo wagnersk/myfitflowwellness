@@ -245,7 +245,7 @@ export function UserPrefferences() {
       <BodyImageWrapper>
         <BodyImageBackground />
         <ImageBackgroundContainer>
-          <SafeAreaView style={{ flex: 1 }}>
+          <SafeAreaView style={{ flex: 1, width: '100%' }}>
             <BodyWrapper>
               <Header>
                 <SettingsWrapper>

@@ -40,14 +40,15 @@ export const ImageBackgroundContainer = styled.View`
 `
 
 export const Header = styled.View`
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   width: 100%;
+  margin-bottom: 16px;
 `
 export const SettingsWrapper = styled.View`
-  align-items: flex-start;
-  width: 100%;
   position: absolute;
+  left: 0;
 `
 
 /*   width: 100%;

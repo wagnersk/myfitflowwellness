@@ -256,7 +256,7 @@ export function UserProfile() {
                     iconStyle="support"
                   />
                 </Body>
-                {/*   <Body>
+                <Body>
                   <WhiteButton
                     betaMode
                     tittle={
@@ -313,7 +313,7 @@ export function UserProfile() {
                     bordertype="down"
                     iconStyle="boxing-glove"
                   />
-                </Body> */}
+                </Body>
                 <Body>
                   <BodyText>
                     {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}

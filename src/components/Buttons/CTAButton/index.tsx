@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { TouchableHighlightProps, ActivityIndicator } from 'react-native'
+import { TouchableOpacityProps, ActivityIndicator } from 'react-native'
 
 import {
   Container,
@@ -10,7 +10,7 @@ import {
 } from './styles'
 import { useTheme } from 'styled-components/native'
 
-interface Props extends TouchableHighlightProps {
+interface Props extends TouchableOpacityProps {
   title: string
   changeColor?: boolean
   onPress?: () => void
@@ -31,18 +31,12 @@ export function CTAButton({
   return (
     <Container>
       <CTAButtonPressable
-        disabled={!enabled}
+        disabled={!enabled || loading || workoutAlreadySelected}
         loading={loading}
         workoutAlreadySelected={workoutAlreadySelected}
         {...rest}
       >
-        <LinearGradientButton
-          changeColor={changeColor}
-          workoutAlreadySelected={workoutAlreadySelected || false}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          colors={['#000000', '#000000']}
-        >
+        <LinearGradientButton changeColor={changeColor}>
           {loading ? (
             <ActivityIndicator color={theme.COLORS.NEUTRA_LETTER_AND_STROKE} />
           ) : (

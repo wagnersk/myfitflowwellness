@@ -629,16 +629,16 @@ export function UserPrefferencesSelectList() {
                     })}
                 </ListWrapper>
               </ScrollView>
-              <CTAButton
-                style={{ marginBottom: 54 }}
-                onPress={handleUpdateInfo}
-                changeColor
-                title="Salvar"
-                loading={isWaitingApiResponse}
-                enabled={!isWaitingApiResponse}
-              />
             </Body>
           </SafeAreaView>
+          <CTAButton
+            style={{ marginBottom: 54 }}
+            onPress={handleUpdateInfo}
+            changeColor
+            title="Salvar"
+            loading={isWaitingApiResponse}
+            enabled={!isWaitingApiResponse}
+          />
         </ImageBackgroundContainer>
       </BodyImageWrapper>
     </Container>

@@ -13,28 +13,21 @@ const { Navigator, Screen } = createStackNavigator()
 
 export function AuthRoutes() {
   return (
-    <Navigator screenOptions={{ headerShown: false }} initialRouteName="splash">
+    <Navigator
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: false,
+        headerLeft: () => null,
+      }}
+      initialRouteName="splash"
+    >
       <Screen name="splash" component={Splash} />
-      <Screen
-        name="onBoarding1"
-        component={OnBoarding1}
-        options={{
-          gestureEnabled: false,
-          headerLeft: () => null,
-        }}
-      />
+      <Screen name="onBoarding1" component={OnBoarding1} />
       <Screen name="onBoarding2" component={OnBoarding2} />
       <Screen name="onBoarding3" component={OnBoarding3} />
       <Screen name="onBoarding4" component={OnBoarding4} />
 
-      <Screen
-        name="login"
-        component={Login}
-        options={{
-          gestureEnabled: false,
-          headerLeft: () => null,
-        }}
-      />
+      <Screen name="login" component={Login} />
 
       <Screen name="newAccount" component={NewAccount} />
     </Navigator>

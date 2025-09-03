@@ -13,16 +13,10 @@ const { Navigator, Screen } = createStackNavigator()
 export function AppStackMarketPlaceHomeRoutes() {
   return (
     <Navigator
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, gestureEnabled: false }}
       initialRouteName="marketPlaceHome"
     >
-      <Screen
-        name="marketPlaceHome"
-        component={MarketPlaceHome}
-        options={{
-          gestureEnabled: false,
-        }}
-      />
+      <Screen name="marketPlaceHome" component={MarketPlaceHome} />
       <Screen
         name="marketPlaceWorkoutList"
         component={MarketPlaceWorkoutList}

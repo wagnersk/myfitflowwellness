@@ -88,7 +88,7 @@ export function UserPhotoTimeline() {
           resizeMode="cover"
         >
           <ImageBackgroundContainer>
-            <SafeAreaView style={{ flex: 1 }}>
+            <SafeAreaView style={{ flex: 1, width: '100%' }}>
               <Header>
                 <SettingsWrapper>
                   <BackButton

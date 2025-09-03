@@ -20,6 +20,7 @@ import {
   ManagePlanButton,
   ManagePlanButtonText,
   PersonalTrainerCard,
+  CardTopContent,
   SelectButton,
   SettingsWrapper,
   Title,
@@ -27,6 +28,7 @@ import {
   TrainerName,
   TrainerRating,
   TrainerSpecialty,
+  TrainerTextInfo,
   TrainerImage,
 } from './styles'
 import { BodyImageBackground } from '@components/ImageBackgrounds/BodyImageBackground'
@@ -136,7 +138,7 @@ export function UserPersonalTrainer() {
         <BodyImageBackground />
 
         <ImageBackgroundContainer>
-          <SafeAreaView style={{ flex: 1 }}>
+          <SafeAreaView style={{ flex: 1, width: '100%' }}>
             <BodyWrapper>
               <Header>
                 <SettingsWrapper>
@@ -154,21 +156,25 @@ export function UserPersonalTrainer() {
               </Header>
               <Body>
                 <PersonalTrainerCard>
-                  <TrainerImage
-                    alt=""
-                    source={{ uri: selectedTrainer.image }}
-                  />
-                  <TrainerInfo>
-                    <TrainerName>{selectedTrainer.name}</TrainerName>
-                    <TrainerSpecialty>
-                      {selectedTrainer.specialty}
-                    </TrainerSpecialty>
-                    <TrainerRating>
-                      {user?.selectedLanguage === 'pt-br'
-                        ? `Avaliação: ${selectedTrainer.rating}`
-                        : `Rating: ${selectedTrainer.rating}`}
-                    </TrainerRating>
-                  </TrainerInfo>
+                  <CardTopContent>
+                    <TrainerImage
+                      alt=""
+                      source={{ uri: selectedTrainer.image }}
+                    />
+                    <TrainerInfo>
+                      <TrainerTextInfo>
+                        <TrainerName>{selectedTrainer.name}</TrainerName>
+                        <TrainerSpecialty>
+                          {selectedTrainer.specialty}
+                        </TrainerSpecialty>
+                        <TrainerRating>
+                          {user?.selectedLanguage === 'pt-br'
+                            ? `Avaliação: ${selectedTrainer.rating}`
+                            : `Rating: ${selectedTrainer.rating}`}
+                        </TrainerRating>
+                      </TrainerTextInfo>
+                    </TrainerInfo>
+                  </CardTopContent>
                   <ManagePlanButton onPress={handleManagePlan}>
                     <ManagePlanButtonText>
                       {user?.selectedLanguage === 'pt-br'
@@ -189,16 +195,22 @@ export function UserPersonalTrainer() {
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => (
                     <PersonalTrainerCard>
-                      <TrainerImage alt="" source={{ uri: item.image }} />
-                      <TrainerInfo>
-                        <TrainerName>{item.name}</TrainerName>
-                        <TrainerSpecialty>{item.specialty}</TrainerSpecialty>
-                        <TrainerRating>
-                          {user?.selectedLanguage === 'pt-br'
-                            ? `Avaliação: ${item.rating}`
-                            : `Rating: ${item.rating}`}
-                        </TrainerRating>
-                      </TrainerInfo>
+                      <CardTopContent>
+                        <TrainerImage alt="" source={{ uri: item.image }} />
+                        <TrainerInfo>
+                          <TrainerTextInfo>
+                            <TrainerName>{item.name}</TrainerName>
+                            <TrainerSpecialty>
+                              {item.specialty}
+                            </TrainerSpecialty>
+                            <TrainerRating>
+                              {user?.selectedLanguage === 'pt-br'
+                                ? `Avaliação: ${item.rating}`
+                                : `Rating: ${item.rating}`}
+                            </TrainerRating>
+                          </TrainerTextInfo>
+                        </TrainerInfo>
+                      </CardTopContent>
                       <SelectButton
                         onPress={() => handleSelectTrainer(item.id)}
                       >
