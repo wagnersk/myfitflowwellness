@@ -203,7 +203,7 @@ export function UserSupport() {
                         bordertype="none"
                         iconStyle="terms"
                       />
-                      <WhiteButton
+                      {/*          <WhiteButton
                         tittle={
                           user?.selectedLanguage === 'pt-br'
                             ? 'Política de Reembolso'
@@ -212,7 +212,7 @@ export function UserSupport() {
                         onPress={handleRefund}
                         bordertype="none"
                         iconStyle="terms"
-                      />
+                      /> */}
                       <WhiteButton
                         tittle={
                           user?.selectedLanguage === 'pt-br'

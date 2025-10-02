@@ -230,13 +230,23 @@ export function UserProfile() {
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
+                        ? 'Meus Amigos'
+                        : 'My Friends'
+                    }
+                    onPress={handleMyFriendListNextStep}
+                    bordertype="none"
+                    iconStyle="friendlist"
+                  />
+                  {/*        <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'
                         ? 'Meu Plano'
                         : 'My Plan'
                     }
                     onPress={handleMyPlanNextStep}
                     bordertype="none"
                     iconStyle="plan"
-                  />
+                  /> */}
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -247,6 +257,16 @@ export function UserProfile() {
                     bordertype="none"
                     iconStyle="anamnese"
                   />
+                  {/*       <WhiteButton
+                    tittle={
+                      user?.selectedLanguage === 'pt-br'r
+                        ? 'Preferencias'
+                        : 'Preferences'
+                    }
+                    onPress={handlePreferencesStep}
+                    bordertype="none"
+                    iconStyle="settings"
+                  /> */}
                   <WhiteButton
                     tittle={
                       user?.selectedLanguage === 'pt-br' ? 'Suporte' : 'Support'
@@ -256,8 +276,8 @@ export function UserProfile() {
                     iconStyle="support"
                   />
                 </Body>
-                <Body>
-                  <WhiteButton
+                {/* <Body>
+                      <WhiteButton
                     betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -267,18 +287,9 @@ export function UserProfile() {
                     onPress={handleChallengesNextStep}
                     bordertype="up"
                     iconStyle="trophy"
-                  />
-                  <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Meus Amigos'
-                        : 'My Friends'
-                    }
-                    onPress={handleMyFriendListNextStep}
-                    bordertype="none"
-                    iconStyle="friendlist"
-                  />
+                  /> */}
 
+                {/* 
                   <WhiteButton
                     betaMode
                     tittle={
@@ -289,20 +300,8 @@ export function UserProfile() {
                     onPress={handleMyPhotosNextStep}
                     bordertype="down"
                     iconStyle="camera"
-                  />
-                </Body>
-                <Body>
-                  <WhiteButton
-                    tittle={
-                      user?.selectedLanguage === 'pt-br'
-                        ? 'Preferencias'
-                        : 'Preferences'
-                    }
-                    onPress={handlePreferencesStep}
-                    bordertype="up"
-                    iconStyle="settings"
-                  />
-                  <WhiteButton
+                  /> */}
+                {/*    <WhiteButton
                     betaMode
                     tittle={
                       user?.selectedLanguage === 'pt-br'
@@ -312,8 +311,8 @@ export function UserProfile() {
                     onPress={handlePersonalTrainerNextStep}
                     bordertype="down"
                     iconStyle="boxing-glove"
-                  />
-                </Body>
+                  /> 
+                </Body> */}
                 <Body>
                   <BodyText>
                     {selectedLanguage === 'pt-br' ? 'Conta' : 'Preferences'}

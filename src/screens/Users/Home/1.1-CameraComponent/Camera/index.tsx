@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Dimensions } from 'react-native'
+import { Dimensions, Alert, Linking } from 'react-native'
 
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
 import {
@@ -138,29 +138,50 @@ export function Camera() {
     }, []),
   )
 
+  useEffect(() => {
+    if (permission && !permission.granted) {
+      const title =
+        user?.selectedLanguage === 'pt-br'
+          ? 'Permissão da Câmera'
+          : 'Camera Permission'
+      const message =
+        user?.selectedLanguage === 'pt-br'
+          ? 'Precisamos da sua permissão para acessar a câmera e tirar fotos.'
+          : 'We need your permission to access the camera and take photos.'
+
+      if (permission.canAskAgain) {
+        Alert.alert(title, message, [
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Recusar' : 'Deny',
+            style: 'cancel',
+            onPress: handleGoBack,
+          },
+          {
+            text: user?.selectedLanguage === 'pt-br' ? 'Continuar' : 'Continue',
+            onPress: requestPermission,
+          },
+        ])
+      } else {
+        Alert.alert(
+          title,
+          user?.selectedLanguage === 'pt-br'
+            ? 'Você negou a permissão da câmera. Para usar este recurso, por favor, habilite a permissão nas configurações do seu dispositivo.'
+            : 'You have denied camera permission. To use this feature, please enable it in your device settings.',
+          [
+            { text: 'Cancelar', style: 'cancel', onPress: handleGoBack },
+            {
+              text: 'Abrir Configurações',
+              onPress: () => Linking.openSettings(),
+            },
+          ],
+        )
+      }
+    }
+  }, [permission, user, requestPermission, handleGoBack])
+
   if (!permission) {
     // Camera permissions are still loading.
-    return
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
-    return (
-      <Container>
-        <ShareButton onPress={requestPermission}>
-          <Message>
-            {user?.selectedLanguage === 'pt-br'
-              ? 'Precisamos da sua permissão para acessar a câmera'
-              : 'We need your permission to show the camera'}
-          </Message>
-          <Message>
-            {user?.selectedLanguage === 'pt-br'
-              ? 'Conceder Permissão'
-              : 'Grant Permission'}
-          </Message>
-        </ShareButton>
-      </Container>
-    )
+    return <Container />
   }
 
   function toggleCameraFacing() {
@@ -306,6 +327,10 @@ export function Camera() {
   function handleGoBack() {
     navigation.getParent()!.setOptions({ tabBarStyle: { display: 'flex' } })
     navigation.goBack()
+  }
+
+  if (!permission.granted) {
+    return <Container />
   }
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
