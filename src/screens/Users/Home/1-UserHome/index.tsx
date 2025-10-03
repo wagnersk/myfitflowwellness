@@ -268,7 +268,12 @@ export function UserHome() {
           setGetWorkoutArrayData(null)
         }
 
-        if (myWorkout && myWorkout.data && myWorkout.activeData.length > 0) {
+        if (
+          myWorkout &&
+          myWorkout.data &&
+          myWorkout.activeData &&
+          myWorkout.activeData.length > 0
+        ) {
           const workoutData = myWorkoutDataArray?.data.find(
             (v) => v.id === myWorkout?.activeData[0].id,
           )
