@@ -453,7 +453,9 @@ export function UserHome() {
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
             user &&
-            getWorkoutArrayData?.workoutsData?.length > 0 && (
+            getWorkoutArrayData &&
+            getWorkoutArrayData.workoutsData &&
+            getWorkoutArrayData.workoutsData.length > 0 && (
               <WorkoutBlueCardList
                 data={getWorkoutArrayData}
                 handleNextStep={(data: IWorkoutsData, cardIndex: number) => {
