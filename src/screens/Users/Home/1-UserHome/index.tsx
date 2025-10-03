@@ -264,7 +264,7 @@ export function UserHome() {
 
     function renderUserData() {
       if (user && !user.anonymousUser) {
-        if (myWorkoutDataArray && myWorkoutDataArray.data.length === 0) {
+        if (!myWorkoutDataArray?.data?.length) {
           setGetWorkoutArrayData(null)
         }
 
@@ -348,11 +348,9 @@ export function UserHome() {
   }
 
   const empty =
-    (user &&
-      !user.anonymousUser &&
-      myWorkoutDataArray &&
-      myWorkoutDataArray.data.length === 0) ||
-    (user && !user.anonymousUser && myWorkoutDataArray === null)
+    user &&
+    !user.anonymousUser &&
+    (!myWorkoutDataArray?.data || myWorkoutDataArray.data.length === 0)
 
   return (
     <Container>
@@ -455,9 +453,7 @@ export function UserHome() {
             <ActivityIndicator color={theme.COLORS.BLUE_STROKE} />
           ) : (
             user &&
-            getWorkoutArrayData &&
-            getWorkoutArrayData.workoutsData &&
-            getWorkoutArrayData.workoutsData.length > 0 && (
+            getWorkoutArrayData?.workoutsData?.length > 0 && (
               <WorkoutBlueCardList
                 data={getWorkoutArrayData}
                 handleNextStep={(data: IWorkoutsData, cardIndex: number) => {
